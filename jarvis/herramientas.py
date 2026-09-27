@@ -136,8 +136,8 @@ def cotizacion(simbolos: list[str]) -> str:
 @beta_tool
 @_safe
 def crear_alerta_mercado(simbolo: str, condicion: str, precio: float) -> str:
-    """Crea una alerta de precio. Con el modo vigilancia activo, Jarvis llamará al usuario
-    y le enviará un WhatsApp cuando se cumpla.
+    """Crea una alerta de precio. Con el modo vigilancia activo, Jarvis avisará al usuario
+    por Telegram cuando se cumpla.
 
     Args:
         simbolo: Símbolo de Yahoo Finance (p. ej. AAPL, BTC-USD, ^IBEX).
@@ -205,25 +205,14 @@ def enviar_correo(para: str, asunto: str, cuerpo: str) -> str:
 
 @beta_tool
 @_safe
-def llamarme(mensaje: str) -> str:
-    """Llama por teléfono al usuario y le lee un mensaje en voz alta.
-    Úsalo solo si el usuario lo pide expresamente.
-
-    Args:
-        mensaje: Lo que Jarvis dirá en la llamada, breve y en español.
-    """
-    return f"Llamada iniciada ({avisos.llamar(mensaje)})."
-
-
-@beta_tool
-@_safe
-def enviarme_whatsapp(mensaje: str) -> str:
-    """Envía un WhatsApp al móvil del usuario (p. ej. un recordatorio o un resumen).
+def enviarme_telegram(mensaje: str) -> str:
+    """Envía un mensaje al móvil del usuario por Telegram (p. ej. un recordatorio o un resumen).
 
     Args:
         mensaje: Texto del mensaje.
     """
-    return f"WhatsApp enviado ({avisos.whatsapp(mensaje)})."
+    avisos.telegram(mensaje)
+    return "Mensaje de Telegram enviado."
 
 
 TOOLS = [
@@ -239,7 +228,6 @@ TOOLS = [
     borrar_alerta_mercado,
     leer_correos,
     enviar_correo,
-    llamarme,
-    enviarme_whatsapp,
+    enviarme_telegram,
     {"type": "web_search_20260209", "name": "web_search", "max_uses": 5},
 ]

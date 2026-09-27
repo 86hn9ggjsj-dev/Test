@@ -1,42 +1,45 @@
-"""Avisos al usuario por llamada telefónica y WhatsApp, a través de Twilio."""
+"""Avisos al móvil del usuario mediante un bot de Telegram (gratis)."""
 
 from __future__ import annotations
 
-from xml.sax.saxutils import escape
+import json
+import urllib.error
+import urllib.request
 
-from .config import env, require
-
-
-def _client():
-    from twilio.rest import Client
-
-    return Client(env("TWILIO_ACCOUNT_SID"), env("TWILIO_AUTH_TOKEN"))
+from .config import require
 
 
-def llamar(mensaje: str) -> str:
-    """Llama al teléfono del usuario y le lee el mensaje en voz alta (dos veces)."""
-    _, _, origen, destino = require(
-        "TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_NUMERO", "MI_TELEFONO"
+def _api(metodo: str, datos: dict | None = None) -> dict:
+    (token,) = require("TELEGRAM_TOKEN")
+    req = urllib.request.Request(
+        f"https://api.telegram.org/bot{token}/{metodo}",
+        data=json.dumps(datos or {}).encode(),
+        headers={"Content-Type": "application/json"},
     )
-    texto = escape(mensaje)
-    twiml = (
-        "<Response>"
-        f'<Say language="es-ES" voice="Polly.Lucia">Hola, soy Jarvis. {texto}</Say>'
-        '<Pause length="1"/>'
-        f'<Say language="es-ES" voice="Polly.Lucia">Repito. {texto}</Say>'
-        "</Response>"
-    )
-    call = _client().calls.create(twiml=twiml, to=destino, from_=origen)
-    return call.sid
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            respuesta = json.load(resp)
+    except urllib.error.HTTPError as e:
+        try:
+            respuesta = json.load(e)
+        except ValueError:
+            raise RuntimeError(f"Telegram respondió con error {e.code}") from e
+    if not respuesta.get("ok"):
+        raise RuntimeError(respuesta.get("description", "error de Telegram"))
+    return respuesta["result"]
 
 
-def whatsapp(mensaje: str) -> str:
-    """Envía un WhatsApp al usuario."""
-    *_, destino = require("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "MI_TELEFONO")
-    origen = env("TWILIO_WHATSAPP") or "+14155238886"  # número del sandbox de Twilio
-    msg = _client().messages.create(
-        from_=f"whatsapp:{origen.removeprefix('whatsapp:')}",
-        to=f"whatsapp:{destino}",
-        body=mensaje[:1500],
-    )
-    return msg.sid
+def telegram(mensaje: str) -> None:
+    """Envía un mensaje al usuario por Telegram."""
+    _, chat_id = require("TELEGRAM_TOKEN", "TELEGRAM_CHAT_ID")
+    _api("sendMessage", {"chat_id": chat_id, "text": mensaje[:4000]})
+
+
+def buscar_chat_id() -> list[tuple[int, str]]:
+    """Chats que han escrito recientemente al bot, para averiguar TELEGRAM_CHAT_ID."""
+    chats = {}
+    for update in _api("getUpdates"):
+        chat = (update.get("message") or {}).get("chat")
+        if chat:
+            chats[chat["id"]] = chat.get("first_name") or chat.get("title") or ""
+    return list(chats.items())

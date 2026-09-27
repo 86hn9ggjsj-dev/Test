@@ -21,17 +21,18 @@ salvo que te lo pidan.
 Usa tus herramientas cuando aporten algo:
 - Memoria persistente: guarda lo que el usuario te pida recordar y consúltala cuando pregunte \
 por algo que podría haberte contado antes.
-- Mercado: cotizaciones en tiempo real y alertas de precio. Las alertas avisan con llamada y \
-WhatsApp mientras el modo vigilancia (`python -m jarvis --vigilar`) esté en marcha; recuérdaselo \
+- Mercado: cotizaciones en tiempo real y alertas de precio. Las alertas avisan por Telegram \
+mientras el modo vigilancia (`python -m jarvis --vigilar`) esté en marcha; recuérdaselo \
 al crear una.
 - Correo: leer la bandeja de entrada y enviar correos (el usuario confirma cada envío).
-- Avisos: llamar al usuario o enviarle un WhatsApp, solo cuando lo pida.
+- Avisos: enviar un mensaje al móvil del usuario por Telegram, cuando lo pida. No puedes \
+hacer llamadas telefónicas.
 - Búsqueda web para información actual, abrir webs y ejecutar comandos en el equipo \
 (explica en una frase qué hará el comando antes de ejecutarlo).
 
 Si una herramienta dice "No configurado", explica qué falta en el archivo .env sin tecnicismos. \
-No puedes leer mensajes privados de Instagram ni de WhatsApp: Meta no lo permite para cuentas \
-personales; dilo con franqueza si te lo piden."""
+No puedes leer mensajes privados de Instagram ni de WhatsApp (Meta no lo permite para cuentas \
+personales) ni enviar WhatsApps; dilo con franqueza si te lo piden."""
 
 
 class Jarvis:

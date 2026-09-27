@@ -3,7 +3,8 @@
 Uso:
     python -m jarvis              # conversar por texto
     python -m jarvis --voz        # conversar por voz
-    python -m jarvis --vigilar    # vigilar mercado y correo, y avisar por llamada/WhatsApp
+    python -m jarvis --vigilar    # vigilar mercado y correo, y avisar por Telegram
+    python -m jarvis --telegram-id  # averiguar tu TELEGRAM_CHAT_ID
 """
 
 from __future__ import annotations
@@ -57,12 +58,26 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="jarvis", description="J.A.R.V.I.S. con Claude")
     parser.add_argument("--voz", action="store_true", help="conversar por voz")
     parser.add_argument("--vigilar", action="store_true",
-                        help="vigilar mercado y correo y avisar por llamada/WhatsApp")
+                        help="vigilar mercado y correo y avisar por Telegram")
+    parser.add_argument("--telegram-id", action="store_true",
+                        help="muestra el chat_id de quien haya escrito a tu bot de Telegram")
     parser.add_argument("--minutos", type=float, default=5,
                         help="intervalo de la vigilancia en minutos (por defecto 5)")
     args = parser.parse_args()
 
-    if args.vigilar:
+    if args.telegram_id:
+        from .avisos import buscar_chat_id
+        from .config import NotConfigured
+
+        try:
+            chats = buscar_chat_id()
+        except NotConfigured as e:
+            sys.exit(str(e))
+        if not chats:
+            print("No hay mensajes. Escribe cualquier cosa a tu bot en Telegram y vuelve a probar.")
+        for chat_id, nombre in chats:
+            print(f"TELEGRAM_CHAT_ID={chat_id}   ({nombre})")
+    elif args.vigilar:
         from .vigilante import vigilar
 
         try:
