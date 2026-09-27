@@ -5,6 +5,7 @@ Uso:
     python -m jarvis --voz        # conversar por voz
     python -m jarvis --vigilar    # vigilar mercado y correo, y avisar por Telegram
     python -m jarvis --telegram-id  # averiguar tu TELEGRAM_CHAT_ID
+    python -m jarvis --configurar   # asistente de configuración
 """
 
 from __future__ import annotations
@@ -61,9 +62,20 @@ def main() -> None:
                         help="vigilar mercado y correo y avisar por Telegram")
     parser.add_argument("--telegram-id", action="store_true",
                         help="muestra el chat_id de quien haya escrito a tu bot de Telegram")
+    parser.add_argument("--configurar", action="store_true",
+                        help="asistente paso a paso para configurar claves y cuentas")
     parser.add_argument("--minutos", type=float, default=5,
                         help="intervalo de la vigilancia en minutos (por defecto 5)")
     args = parser.parse_args()
+
+    from .config import env
+
+    if args.configurar or not env("ANTHROPIC_API_KEY"):
+        from .configurar import configurar
+
+        configurar()
+        if args.configurar or not env("ANTHROPIC_API_KEY"):
+            return
 
     if args.telegram_id:
         from .avisos import buscar_chat_id

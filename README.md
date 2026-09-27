@@ -38,11 +38,7 @@ revisa tus alertas de precio y tus correos nuevos. Si algo importa, te manda un 
 
 ### Modo vigilancia
 
-```bash
-python -m jarvis --vigilar
-```
-
-Cada 5 minutos (ajustable con `--minutos`):
+Arráncalo con `iniciar --vigilar`. Cada 5 minutos (ajustable con `--minutos`):
 
 - **Alertas de precio**: si se cumple una ("avísame si el Bitcoin baja de 80.000"), te llega un Telegram.
 - **Correo nuevo**: Claude lo lee y lo clasifica. Si es importante te llega un Telegram con el resumen;
@@ -56,30 +52,38 @@ Déjalo corriendo en un ordenador que esté siempre encendido.
 - **Leer tus chats de Instagram o WhatsApp**: Meta no lo permite para cuentas personales, y las
   herramientas no oficiales pueden hacer que te bloqueen la cuenta.
 
-## Instalación
+## Instalación (fácil)
+
+1. Instala **Python 3** desde https://www.python.org/downloads/
+   (en Windows, marca la casilla **"Add Python to PATH"**).
+2. Descarga este proyecto (botón verde **Code → Download ZIP** en GitHub) y descomprímelo.
+3. Ejecuta el instalador:
+   - **Windows**: doble clic en `instalar.bat`
+   - **Mac / Linux**: abre una terminal en la carpeta y escribe `bash instalar.sh`
+
+El instalador lo prepara todo y abre un **asistente** que te guía paso a paso: abre cada página
+que hace falta, te pide que pegues la clave, comprueba que funciona y la guarda. Solo la clave
+de Claude es obligatoria; el correo y Telegram puedes saltártelos y configurarlos más tarde con
+`iniciar --configurar`.
+
+<details>
+<summary>Instalación manual</summary>
 
 ```bash
-python -m venv .venv && source .venv/bin/activate   # opcional
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env                                # y rellénalo
+python -m jarvis --configurar      # o copia .env.example como .env y rellénalo a mano
 ```
-
-### Configuración (`.env`)
-
-1. **Anthropic** (obligatorio): crea una clave en https://console.anthropic.com y ponla en `ANTHROPIC_API_KEY`.
-2. **Correo (Gmail)**: activa la verificación en dos pasos y crea una contraseña de aplicación en
-   https://myaccount.google.com/apppasswords. Pon tu correo en `EMAIL_USUARIO` y esa contraseña en `EMAIL_PASSWORD`.
-3. **Telegram**:
-   - En Telegram, abre un chat con **@BotFather**, envía `/newbot` y sigue los pasos. Copia el token en `TELEGRAM_TOKEN`.
-   - Escribe cualquier cosa a tu nuevo bot y ejecuta `python -m jarvis --telegram-id`. Copia el número en `TELEGRAM_CHAT_ID`.
+</details>
 
 ## Uso
 
-```bash
-python -m jarvis              # conversar por texto
-python -m jarvis --voz        # conversar por voz
-python -m jarvis --vigilar    # modo vigilancia
-```
+| | Windows | Mac / Linux |
+|---|---|---|
+| Hablar con Jarvis | doble clic en `iniciar.bat` | `./iniciar.sh` |
+| Hablarle con la voz | `iniciar.bat --voz` | `./iniciar.sh --voz` |
+| Modo vigilancia | `iniciar.bat --vigilar` | `./iniciar.sh --vigilar` |
+| Cambiar la configuración | `iniciar.bat --configurar` | `./iniciar.sh --configurar` |
 
 Ejemplos de cosas que puedes pedirle:
 

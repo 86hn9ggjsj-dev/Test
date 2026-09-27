@@ -5,10 +5,13 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
+
 try:
     from dotenv import load_dotenv
 
-    load_dotenv()
+    load_dotenv(ENV_FILE)
+    load_dotenv()  # también un .env en la carpeta actual, si lo hay
 except ImportError:
     pass
 

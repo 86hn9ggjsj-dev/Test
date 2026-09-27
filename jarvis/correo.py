@@ -16,7 +16,7 @@ from .config import env, require
 
 def _imap() -> imaplib.IMAP4_SSL:
     user, password = require("EMAIL_USUARIO", "EMAIL_PASSWORD")
-    conn = imaplib.IMAP4_SSL(env("EMAIL_IMAP") or "imap.gmail.com")
+    conn = imaplib.IMAP4_SSL(env("EMAIL_IMAP") or "imap.gmail.com", timeout=30)
     conn.login(user, password)
     conn.select("INBOX", readonly=True)  # solo lectura: no marca nada como leído
     return conn
@@ -85,7 +85,7 @@ def enviar(para: str, asunto: str, cuerpo: str) -> None:
     msg = EmailMessage()
     msg["From"], msg["To"], msg["Subject"] = user, para, asunto
     msg.set_content(cuerpo)
-    with smtplib.SMTP_SSL(env("EMAIL_SMTP") or "smtp.gmail.com", 465) as smtp:
+    with smtplib.SMTP_SSL(env("EMAIL_SMTP") or "smtp.gmail.com", 465, timeout=30) as smtp:
         smtp.login(user, password)
         smtp.send_message(msg)
 
