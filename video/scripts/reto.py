@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 
-from sonido import SR, click, ding, env, hat, impacto, kick, lp, mezclar, nota, pad, pop, riser, whoosh
+from sonido import SR, click, ding, env, hat, kick, lp, mezclar, nota, pad, pop, riser, whoosh
 
 FF = sys.argv[1]
 RAIZ = Path(__file__).resolve().parent.parent
@@ -110,7 +110,8 @@ for k, (a, b) in enumerate(EDL):
 filtros.append(
     "".join(etiquetas) + f"concat=n={len(EDL)}:v=1:a=0,fps={FPS},"
     "scale=1080:1920:flags=lanczos:in_range=full:out_range=tv,"
-    "eq=contrast=1.08:saturation=1.12:brightness=0.01:gamma=1.03,"
+    "eq=contrast=1.06:saturation=1.04:brightness=0.005:gamma=1.02,"
+    "colorbalance=rs=-0.03:bs=0.03:rh=0.03:bh=-0.03,"
     "unsharp=5:5:0.55:5:5:0,format=yuv420p[v]"
 )
 subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(FUENTE), "-filter_complex", ";".join(filtros),
@@ -157,7 +158,6 @@ poner(pop(), ev["dos"] + 0.25, 0.8)
 poner(whoosh(0.35), ev["tablaPlano"] - 0.15, 0.6)
 poner(pop(), ev["tabla"], 0.8)
 poner(riser(0.6), ev["treintayuno"] - 0.6, 0.5)
-poner(impacto(0.8), ev["treintayuno"], 0.6)
 poner(ding(), ev["treintayuno"] + 0.05, 0.7)
 poner(whoosh(0.4), esc["cta"]["s"] - 0.2, 0.6)
 poner(pop(), ev["comentarios"], 0.9)

@@ -1,29 +1,30 @@
 import { AbsoluteFill, Audio, OffthreadVideo, staticFile, useCurrentFrame } from "remotion";
 import datos from "../gen/reto.json";
-import { Subtitulos } from "../Viral/Subtitulos";
-import { ANCHO, C, entra, FUENTE, golpeZoom, lerp, pop, sale, temblor, texto } from "../Viral/util";
+import { ORO, Subtitulos } from "../Viral/Subtitulos";
+import { ANCHO, C, entra, golpeZoom, lerp, sale, SANS, SERIF, suave } from "../Viral/util";
 
 export const RETO_FPS = datos.fps;
 export const RETO_FRAMES = Math.round(datos.duracion * datos.fps);
 
 const EV = datos.eventos;
 const esc = (id: string) => datos.escenas.find((e) => e.id === id)!;
+// Palabras clave: en el estilo premium van en serif cursiva dorada
 const CLAVES: Record<string, string> = {
-  "85%": C.verde,
-  "1": C.verde,
-  "4": C.verde,
-  dos: C.verde,
-  "31": C.verde,
-  reto: C.azul,
-  tabla: C.azul,
-  comentarios: C.azul,
+  "85%": ORO,
+  "1": ORO,
+  "4": ORO,
+  dos: ORO,
+  "31": ORO,
+  reto: ORO,
+  tabla: ORO,
+  comentarios: ORO,
 };
 
 type Tipo = "primer" | "medio" | "captura" | "tabla";
 const planoEn = (t: number) => (datos.planos.find((p) => t >= p.s && t < p.e) ?? datos.planos[datos.planos.length - 1]) as { s: number; e: number; tipo: Tipo; pieza: number };
 
 // Subtítulos: nunca sobre la cara ni sobre las capturas
-const Y_SUB: Record<Tipo, number> = { primer: 0.73, medio: 0.66, captura: 0.3, tabla: 0.17 };
+const Y_SUB: Record<Tipo, number> = { primer: 0.73, medio: 0.66, captura: 0.17, tabla: 0.17 };
 function Y_SUB_DE(tipo: string) {
   return Y_SUB[tipo as Tipo];
 }
@@ -44,11 +45,12 @@ const CORTES = [
 
 // Reencuadre en los jump cuts dentro del mismo plano (piezas 3 y 5)
 const ENCUADRE = [1, 1, 1, 1.1, 1, 1.1];
+// Punch-ins suaves en los momentos clave
 const GOLPES: [number, number][] = [
-  [EV.t85, 0.08],
-  [EV.dos, 0.07],
-  [EV.treintayuno, 0.1],
-  [EV.comentarios, 0.06],
+  [EV.t85, 0.05],
+  [EV.dos, 0.045],
+  [EV.treintayuno, 0.06],
+  [EV.comentarios, 0.04],
 ];
 
 export const Reto: React.FC = () => {
@@ -61,20 +63,13 @@ export const Reto: React.FC = () => {
     escala = lerp(t, plano.s, plano.e, 1, 1.06, (x) => x);
     origen = "50% 50%";
   }
-  const sh = [EV.treintayuno].reduce(
-    (a, t0) => {
-      const s = temblor(t, t0, 14);
-      return { x: a.x + s.x, y: a.y + s.y };
-    },
-    { x: 0, y: 0 },
-  );
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000", overflow: "hidden" }}>
       <Audio src={staticFile("gen/reto_mezcla.wav")} />
       <AbsoluteFill
         style={{
-          transform: `translate(${sh.x}px, ${sh.y}px) scale(${escala})`,
+          transform: `scale(${escala})`,
           transformOrigin: origen,
         }}
       >
@@ -82,6 +77,7 @@ export const Reto: React.FC = () => {
         {plano.tipo === "captura" && <NotasCaptura t={t} />}
         {plano.tipo === "tabla" && <NotasTabla t={t} />}
       </AbsoluteFill>
+      <AbsoluteFill style={{ background: "radial-gradient(ellipse 75% 65% at 50% 45%, transparent 55%, rgba(0,0,0,0.38) 100%)" }} />
 
       <Bienvenida t={t} />
       <Hoy t={t} />
@@ -96,57 +92,89 @@ export const Reto: React.FC = () => {
         claves={CLAVES}
         duracion={datos.duracion}
         y={ySubtitulo}
+        estilo="premium"
       />
       <Progreso t={t} />
     </AbsoluteFill>
   );
 };
 
-// ------------------------------------------------------------------ piezas gráficas
-const chip = (color: string, bg = "rgba(8,12,20,0.82)"): React.CSSProperties => ({
-  fontFamily: FUENTE,
-  fontWeight: 900,
-  fontSize: 46,
-  color,
-  background: bg,
-  border: `4px solid ${color}`,
-  borderRadius: 22,
-  padding: "12px 28px",
-  boxShadow: `0 0 36px ${color}66, 0 10px 30px rgba(0,0,0,0.5)`,
+// ------------------------------------------------------------------ piezas gráficas (estilo premium)
+const vidrio: React.CSSProperties = {
+  fontFamily: SANS,
+  fontWeight: 600,
+  fontSize: 40,
+  letterSpacing: "-0.01em",
+  color: C.blanco,
+  background: "rgba(14,14,16,0.45)",
+  backdropFilter: "blur(20px) saturate(140%)",
+  border: "1px solid rgba(255,255,255,0.22)",
+  borderRadius: 999,
+  padding: "14px 30px",
+  boxShadow: "0 10px 40px rgba(0,0,0,0.35)",
   whiteSpace: "nowrap",
-  display: "inline-block",
-});
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 14,
+};
 
-const Arriba: React.FC<{ top?: number; children: React.ReactNode; style?: React.CSSProperties }> = ({ top = 250, children, style }) => (
-  <div style={{ position: "absolute", top, width: ANCHO, display: "flex", justifyContent: "center", alignItems: "center", gap: 20, ...style }}>
+const etiqueta: React.CSSProperties = {
+  fontFamily: SANS,
+  fontWeight: 600,
+  fontSize: 24,
+  letterSpacing: "0.2em",
+  textTransform: "uppercase",
+  color: "rgba(255,255,255,0.75)",
+  textShadow: "0 2px 12px rgba(0,0,0,0.6)",
+};
+
+const Punto: React.FC<{ color?: string }> = ({ color = ORO }) => (
+  <span style={{ width: 12, height: 12, borderRadius: 6, background: color, boxShadow: `0 0 12px ${color}88`, display: "inline-block" }} />
+);
+
+// Entrada suave (subida + desenfoque) y salida
+const aparece = (t: number, t0: number, fin?: number, d = 0.3): React.CSSProperties => {
+  const a = Math.min(entra(t, t0, d), fin === undefined ? 1 : sale(t, fin, 0.2));
+  return { opacity: a, transform: `translateY(${(1 - a) * 14}px)`, filter: a < 0.99 ? `blur(${(1 - a) * 8}px)` : undefined };
+};
+
+const Arriba: React.FC<{ top?: number; children: React.ReactNode; style?: React.CSSProperties; columna?: boolean }> = ({ top = 250, children, style, columna }) => (
+  <div style={{ position: "absolute", top, width: ANCHO, display: "flex", flexDirection: columna ? "column" : "row", justifyContent: "center", alignItems: "center", gap: columna ? 10 : 16, ...style }}>
     {children}
   </div>
 );
 
 const Progreso: React.FC<{ t: number }> = ({ t }) => (
-  <div style={{ position: "absolute", top: 0, left: 0, height: 10, width: ANCHO, background: "rgba(255,255,255,0.15)" }}>
-    <div style={{ height: "100%", width: `${(t / datos.duracion) * 100}%`, background: `linear-gradient(90deg, ${C.verde}, ${C.amarillo})`, boxShadow: `0 0 16px ${C.verde}` }} />
+  <div style={{ position: "absolute", top: 0, left: 0, height: 4, width: ANCHO, background: "rgba(255,255,255,0.12)" }}>
+    <div style={{ height: "100%", width: `${(t / datos.duracion) * 100}%`, background: "rgba(255,255,255,0.85)" }} />
   </div>
 );
 
 const Bienvenida: React.FC<{ t: number }> = ({ t }) => {
   const fin = esc("hoy").s;
   if (t < EV.dia - 0.1 || t >= fin) return null;
-  const s = sale(t, fin);
   return (
     <Arriba top={260}>
-      <div style={{ ...chip(C.verde), transform: `scale(${Math.min(pop(t, EV.dia - 0.08), s)})` }}>📅 DÍA 1</div>
-      <div style={{ ...chip(C.azul), transform: `scale(${Math.min(pop(t, EV.segundo), s)})` }}>🔁 INTENTO #2</div>
+      <div style={{ ...vidrio, ...aparece(t, EV.dia - 0.1, fin) }}>
+        <Punto /> Día 1
+      </div>
+      <div style={{ ...vidrio, ...aparece(t, EV.segundo - 0.05, fin) }}>Segundo intento</div>
     </Arriba>
   );
 };
 
 const Hoy: React.FC<{ t: number }> = ({ t }) => {
-  const fin = esc("eso").s;
-  if (t < EV.t85 - 0.1 || t >= fin) return null;
+  // Se retira al entrar la captura: ahí arriba van los subtítulos
+  const fin = EV.captura;
+  if (t < EV.t85 - 0.15 || t >= fin) return null;
+  const n = Math.round(lerp(t, EV.t85 - 0.1, EV.t85 + 0.5, 0, 85));
   return (
-    <Arriba top={250}>
-      <div style={{ ...chip(C.verde), fontSize: 50, transform: `scale(${Math.min(pop(t, EV.t85 - 0.05), sale(t, fin))})` }}>+85% DE LA CUENTA 🚀</div>
+    <Arriba top={235} columna style={aparece(t, EV.t85 - 0.15, fin)}>
+      <div style={etiqueta}>Resultado de hoy</div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 18 }}>
+        <span style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 130, lineHeight: 1, color: ORO, textShadow: "0 6px 30px rgba(0,0,0,0.5)" }}>+{n}%</span>
+        <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 38, color: C.blanco, textShadow: "0 2px 14px rgba(0,0,0,0.6)" }}>de la cuenta</span>
+      </div>
     </Arriba>
   );
 };
@@ -154,34 +182,34 @@ const Hoy: React.FC<{ t: number }> = ({ t }) => {
 // Coordenadas medidas sobre el fotograma a 1080x1920
 const FILAS = [757, 872, 990, 1107];
 const GANA = [true, true, false, true];
+const ROJO_SOBRIO = "#e5484d";
 
 const NotasCaptura: React.FC<{ t: number }> = ({ t }) => {
-  const caja = lerp(t, EV.veis - 0.1, EV.veis + 0.2, 0, 1);
+  const caja = lerp(t, EV.veis - 0.1, EV.veis + 0.25, 0, 1);
   return (
     <AbsoluteFill>
       {FILAS.map((y, k) => {
-        const p = pop(t, EV.cuatro + 0.12 * k);
-        const col = GANA[k] ? C.verde : C.rojo;
+        const a = entra(t, EV.cuatro + 0.12 * k, 0.22);
         return (
           <div
             key={k}
             style={{
               position: "absolute",
-              left: 108 - 38,
-              top: y - 38,
-              width: 76,
-              height: 76,
-              borderRadius: 38,
-              background: col,
-              color: "#061008",
-              fontFamily: FUENTE,
-              fontWeight: 900,
-              fontSize: 42,
-              lineHeight: "76px",
+              left: 108 - 24,
+              top: y - 24,
+              width: 48,
+              height: 48,
+              borderRadius: 24,
+              background: GANA[k] ? C.blanco : ROJO_SOBRIO,
+              color: GANA[k] ? "#111" : C.blanco,
+              fontFamily: SANS,
+              fontWeight: 700,
+              fontSize: 26,
+              lineHeight: "48px",
               textAlign: "center",
-              transform: `scale(${p})`,
-              boxShadow: `0 0 24px ${col}`,
-              border: "4px solid #000",
+              opacity: a,
+              transform: `scale(${0.6 + 0.4 * a})`,
+              boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
             }}
           >
             {k + 1}
@@ -192,41 +220,46 @@ const NotasCaptura: React.FC<{ t: number }> = ({ t }) => {
         style={{
           position: "absolute",
           left: 112,
-          top: 1228,
-          height: 56,
-          width: 856 * caja,
-          border: `5px solid ${C.verde}`,
-          borderRadius: 14,
-          boxShadow: `0 0 30px ${C.verde}, inset 0 0 20px ${C.verde}55`,
+          top: 1230,
+          height: 52,
+          width: 856 * suave(caja),
+          border: `2px solid ${ORO}`,
+          borderRadius: 12,
+          background: "rgba(232,194,122,0.12)",
           opacity: caja > 0.01 ? 1 : 0,
         }}
       />
       <div style={{ position: "absolute", top: 1300, width: ANCHO, display: "flex", justifyContent: "center" }}>
-        <div style={{ ...chip(C.verde, "#06140c"), fontSize: 44, transform: `scale(${pop(t, EV.veis + 0.15)})` }}>+80,44 $ 💰</div>
+        <div style={{ ...vidrio, background: "rgba(10,10,12,0.72)", ...aparece(t, EV.veis + 0.15) }}>
+          <span style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: 52, color: ORO, lineHeight: 1 }}>+80,44 $</span>
+          <span style={{ ...etiqueta, fontSize: 20 }}>beneficio</span>
+        </div>
       </div>
     </AbsoluteFill>
   );
 };
 
 const NotasTabla: React.FC<{ t: number }> = ({ t }) => {
-  const caja = lerp(t, EV.tabla - 0.1, EV.tabla + 0.2, 0, 1);
+  const caja = lerp(t, EV.tabla - 0.1, EV.tabla + 0.25, 0, 1);
   return (
     <AbsoluteFill>
       <div
         style={{
           position: "absolute",
-          left: 170,
-          top: 1442,
-          height: 42,
-          width: 748 * caja,
-          border: `5px solid ${C.amarillo}`,
-          borderRadius: 10,
-          boxShadow: `0 0 30px ${C.amarillo}`,
+          left: 172,
+          top: 1444,
+          height: 38,
+          width: 744 * suave(caja),
+          border: `2px solid ${ORO}`,
+          borderRadius: 8,
+          background: "rgba(232,194,122,0.10)",
           opacity: caja > 0.01 ? 1 : 0,
         }}
       />
-      <div style={{ position: "absolute", top: 1345, width: ANCHO, display: "flex", justifyContent: "center" }}>
-        <div style={{ ...chip(C.amarillo), fontSize: 36, padding: "8px 22px", transform: `scale(${pop(t, EV.tabla + 0.1)})` }}>🎯 OBJETIVO: NIVEL 31 → 102.170 €</div>
+      <div style={{ position: "absolute", top: 1342, width: ANCHO, display: "flex", justifyContent: "center" }}>
+        <div style={{ ...vidrio, background: "rgba(10,10,12,0.8)", fontSize: 30, padding: "10px 24px", ...aparece(t, EV.tabla + 0.1) }}>
+          <Punto /> Objetivo: nivel 31 · 102.170 €
+        </div>
       </div>
     </AbsoluteFill>
   );
@@ -235,38 +268,35 @@ const NotasTabla: React.FC<{ t: number }> = ({ t }) => {
 const Pasos: React.FC<{ t: number }> = ({ t }) => {
   const e = esc("eso");
   if (t < e.s || t >= e.e) return null;
-  const a = Math.min(entra(t, e.s + 0.05), sale(t, e.e));
-  const paso = lerp(t, EV.dos, EV.dos + 0.2, 0, 1) + lerp(t, EV.dos + 0.25, EV.dos + 0.45, 0, 1);
+  const paso = lerp(t, EV.dos, EV.dos + 0.25, 0, 1) + lerp(t, EV.dos + 0.25, EV.dos + 0.5, 0, 1);
   const x0 = 150;
-  const dx = 780 / 30;
+  const largo = 780;
+  const dx = largo / 30;
   return (
-    <div style={{ position: "absolute", top: 250, left: 0, width: ANCHO, height: 190, opacity: a, transform: `translateY(${(1 - a) * -30}px)` }}>
-      <div style={{ position: "absolute", left: x0 - 30, top: 0, right: x0 - 30, display: "flex", justifyContent: "space-between", fontFamily: FUENTE, fontWeight: 900, fontSize: 40, color: "#fff", WebkitTextStroke: "8px #000", paintOrder: "stroke fill" }}>
-        <span>EL RETO</span>
-        <span style={{ color: C.verde, display: "inline-block", transform: `scale(${1 + golpeZoom(t, EV.dos, 0.25, 0.1, 0.35, 0.3)})` }}>
-          PASO {Math.round(paso)}/31
+    <div style={{ position: "absolute", top: 255, left: 0, width: ANCHO, height: 140, ...aparece(t, e.s + 0.05, e.e) }}>
+      <div style={{ position: "absolute", left: x0, right: ANCHO - x0 - largo, top: 0, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <span style={etiqueta}>El reto</span>
+        <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 34, color: C.blanco, textShadow: "0 2px 12px rgba(0,0,0,0.6)" }}>
+          Paso <span style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: 52, color: ORO }}>{Math.round(paso)}</span> / 31
         </span>
       </div>
-      <div style={{ position: "absolute", left: x0 - 30, right: x0 - 30, top: 90, height: 56, borderRadius: 28, background: "rgba(8,12,20,0.8)", border: "3px solid rgba(255,255,255,0.25)" }} />
-      {Array.from({ length: 31 }).map((_, i) => {
-        const hecho = i <= paso;
-        return (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: x0 + i * dx - 8,
-              top: 110,
-              width: 16,
-              height: 16,
-              borderRadius: 8,
-              background: i === 30 ? C.amarillo : hecho ? C.verde : "rgba(255,255,255,0.3)",
-              boxShadow: hecho ? `0 0 12px ${C.verde}` : undefined,
-            }}
-          />
-        );
-      })}
-      <div style={{ position: "absolute", left: x0 + paso * dx - 32, top: 70, fontSize: 64, transform: `translateY(${-10 * Math.abs(Math.sin(paso * Math.PI))}px)` }}>👣</div>
+      <div style={{ position: "absolute", left: x0, width: largo, top: 86, height: 2, background: "rgba(255,255,255,0.3)" }} />
+      <div style={{ position: "absolute", left: x0, width: paso * dx, top: 85, height: 4, borderRadius: 2, background: ORO }} />
+      {Array.from({ length: 31 }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            left: x0 + i * dx - 3,
+            top: 84,
+            width: 6,
+            height: 6,
+            borderRadius: 3,
+            background: i <= paso ? ORO : "rgba(255,255,255,0.55)",
+          }}
+        />
+      ))}
+      <div style={{ position: "absolute", left: x0 + paso * dx - 11, top: 76, width: 22, height: 22, borderRadius: 11, background: ORO, boxShadow: `0 0 0 8px rgba(232,194,122,0.22), 0 0 24px ${ORO}` }} />
     </div>
   );
 };
@@ -275,16 +305,12 @@ const Casilla: React.FC<{ t: number }> = ({ t }) => {
   const e = esc("casilla");
   if (t < EV.casilla - 0.15 || t >= e.e) return null;
   const n = Math.round(lerp(t, EV.casilla - 0.1, EV.treintayuno, 2, 31));
-  const golpe = pop(t, EV.treintayuno, 260);
-  const s = sale(t, e.e);
+  const asiento = 1 + 0.06 * (1 - suave(Math.min(Math.max((t - EV.treintayuno) / 0.4, 0), 1))) * (t >= EV.treintayuno ? 1 : 0);
   return (
-    <Arriba top={220} style={{ opacity: s }}>
-      <div style={{ fontSize: 150, transform: `scale(${pop(t, EV.casilla - 0.12)}) rotate(${-8 + 8 * golpe}deg)` }}>🎯</div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", transform: `scale(${pop(t, EV.casilla - 0.1)})` }}>
-        <div style={{ ...texto, fontSize: 44, color: C.amarillo }}>Casilla</div>
-        <div style={{ ...texto, fontSize: 170, lineHeight: 1, color: t >= EV.treintayuno ? C.verde : "#fff", transform: `scale(${1 + golpeZoom(t, EV.treintayuno, 0.25, 0.1, 0.3, 0.35)})`, textShadow: t >= EV.treintayuno ? `0 0 40px ${C.verde}` : undefined }}>
-          {n}
-        </div>
+    <Arriba top={215} columna style={aparece(t, EV.casilla - 0.15, e.e)}>
+      <div style={etiqueta}>Casilla</div>
+      <div style={{ fontFamily: SERIF, fontStyle: "italic", fontSize: 150, lineHeight: 0.9, color: t >= EV.treintayuno ? ORO : C.blanco, transform: `scale(${asiento})`, textShadow: "0 8px 40px rgba(0,0,0,0.5)" }}>
+        {n}
       </div>
     </Arriba>
   );
@@ -294,15 +320,11 @@ const Cta: React.FC<{ t: number }> = ({ t }) => {
   const e = esc("cta");
   if (t < e.s) return null;
   return (
-    <>
-      <Arriba top={240}>
-        <div style={{ ...chip(C.amarillo), fontSize: 48, transform: `scale(${pop(t, e.s + 0.03)})` }}>💬 ¿LLEGAREMOS A LA 31?</div>
-      </Arriba>
-      <Arriba top={365}>
-        <div style={{ ...chip(C.verde), fontSize: 44, transform: `scale(${pop(t, EV.comentarios - 0.1)})` }}>SÍ 👍</div>
-        <div style={{ ...chip(C.rojo), fontSize: 44, transform: `scale(${pop(t, EV.comentarios)})` }}>NO 👎</div>
-        <div style={{ fontSize: 70, transform: `translateY(${12 * Math.sin(t * 12)}px) scale(${pop(t, EV.comentarios + 0.1)})` }}>👇</div>
-      </Arriba>
-    </>
+    <Arriba top={250} columna>
+      <div style={{ ...vidrio, fontSize: 40, ...aparece(t, e.s + 0.03) }}>
+        ¿Llegaremos a la <span style={{ fontFamily: SERIF, fontStyle: "italic", fontWeight: 400, fontSize: 56, color: ORO, lineHeight: 1 }}>31</span>?
+      </div>
+      <div style={{ ...etiqueta, marginTop: 8, ...aparece(t, EV.comentarios - 0.1) }}>Te leo en comentarios ↓</div>
+    </Arriba>
   );
 };

@@ -21,12 +21,19 @@ export const C = {
 
 export const FUENTE = "Montserrat, sans-serif";
 
+export const SANS = "'Inter Tight', sans-serif";
+export const SERIF = "'Instrument Serif', serif";
+
+const FUENTES: [string, string, FontFaceDescriptors][] = [
+  ["Montserrat", "montserrat-latin-800-normal", { weight: "800" }],
+  ["Montserrat", "montserrat-latin-900-normal", { weight: "900" }],
+  ...[500, 600, 700, 800].map((w): [string, string, FontFaceDescriptors] => ["Inter Tight", `inter-tight-latin-${w}-normal`, { weight: String(w) }]),
+  ["Instrument Serif", "instrument-serif-latin-400-italic", { weight: "400", style: "italic" }],
+];
 const cargando = delayRender("fuentes");
 Promise.all(
-  [800, 900].map((w) =>
-    new FontFace("Montserrat", `url(${staticFile(`fonts/montserrat-latin-${w}-normal.woff2`)}) format('woff2')`, {
-      weight: String(w),
-    })
+  FUENTES.map(([familia, archivo, desc]) =>
+    new FontFace(familia, `url(${staticFile(`fonts/${archivo}.woff2`)}) format('woff2')`, desc)
       .load()
       .then((f) => document.fonts.add(f)),
   ),

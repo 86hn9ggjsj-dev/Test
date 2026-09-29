@@ -9,6 +9,8 @@
     "upgrade": "remotion upgrade"
   },
   "dependencies": {
+    "@fontsource/instrument-serif": "5.3.0",
+    "@fontsource/inter-tight": "5.3.0",
     "@fontsource/montserrat": "5.3.0",
     "@remotion/cli": "4.0.529",
     "react": "19.3.0",
