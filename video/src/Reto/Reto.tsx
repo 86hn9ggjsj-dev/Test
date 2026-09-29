@@ -1,6 +1,6 @@
 import { AbsoluteFill, Audio, OffthreadVideo, staticFile, useCurrentFrame } from "remotion";
 import datos from "../gen/reto.json";
-import { ORO, Subtitulos } from "../Viral/Subtitulos";
+import { ORO, SOMBRA_PREMIUM, Subtitulos } from "../Viral/Subtitulos";
 import { Easing } from "remotion";
 import { ANCHO, C, golpeZoom, lerp, SANS, SERIF, suave } from "../Viral/util";
 
@@ -80,7 +80,7 @@ export const Reto: React.FC = () => {
       </AbsoluteFill>
       <AbsoluteFill style={{ background: "radial-gradient(ellipse 75% 65% at 50% 45%, transparent 55%, rgba(0,0,0,0.38) 100%)" }} />
       {/* Degradado superior: da lectura al texto editorial sin usar cajas */}
-      <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.18) 20%, transparent 32%)" }} />
+      <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.42) 16%, rgba(0,0,0,0.15) 28%, transparent 38%)" }} />
 
       <Bienvenida t={t} />
       <Hoy t={t} />
@@ -120,17 +120,17 @@ const Revela: React.FC<{ t: number; t0: number; fin?: number; children: React.Re
 // Línea dorada fina que se dibuja desde el centro
 const Linea: React.FC<{ t: number; t0: number; fin?: number; ancho?: number }> = ({ t, t0, fin, ancho = 220 }) => {
   const k = lerp(t, t0, t0 + 0.6, 0, 1, salida) * (fin === undefined ? 1 : 1 - lerp(t, fin - 0.3, fin, 0, 1, recogida));
-  return <div style={{ width: ancho, height: 2, background: ORO, transform: `scaleX(${k})`, opacity: 0.9 }} />;
+  return <div style={{ width: ancho, height: 3, borderRadius: 2, background: ORO, transform: `scaleX(${k})`, boxShadow: "0 1px 6px rgba(0,0,0,0.6)" }} />;
 };
 
-const SOMBRA = "0 2px 6px rgba(0,0,0,0.45), 0 8px 34px rgba(0,0,0,0.5)";
+const SOMBRA = SOMBRA_PREMIUM;
 const etiqueta: React.CSSProperties = {
   fontFamily: SANS,
-  fontWeight: 600,
-  fontSize: 26,
-  letterSpacing: "0.24em",
+  fontWeight: 700,
+  fontSize: 30,
+  letterSpacing: "0.22em",
   textTransform: "uppercase",
-  color: "rgba(255,255,255,0.82)",
+  color: C.blanco,
   textShadow: SOMBRA,
 };
 const serif = (size: number, color: string = ORO): React.CSSProperties => ({
@@ -144,7 +144,7 @@ const serif = (size: number, color: string = ORO): React.CSSProperties => ({
 });
 const sans = (size: number): React.CSSProperties => ({
   fontFamily: SANS,
-  fontWeight: 600,
+  fontWeight: 700,
   fontSize: size,
   letterSpacing: "-0.015em",
   color: C.blanco,
@@ -255,7 +255,7 @@ const NotasCaptura: React.FC<{ t: number }> = ({ t }) => {
         <Revela t={t} t0={EV.veis + 0.15}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 16 }}>
             <span style={serif(60)}>+80,44 $</span>
-            <span style={{ ...etiqueta, fontSize: 22 }}>de beneficio</span>
+            <span style={{ ...etiqueta, fontSize: 26 }}>de beneficio</span>
           </div>
         </Revela>
       </div>
@@ -308,12 +308,12 @@ const Pasos: React.FC<{ t: number }> = ({ t }) => {
           <span style={etiqueta}>El reto</span>
         </Revela>
         <Revela t={t} t0={e.s + 0.12} fin={e.e}>
-          <span style={sans(34)}>
-            Paso <span style={serif(56)}>{Math.round(paso)}</span> / 31
+          <span style={sans(40)}>
+            Paso <span style={serif(66)}>{Math.round(paso)}</span> / 31
           </span>
         </Revela>
       </div>
-      <div style={{ position: "absolute", left: x0, width: largo, top: 90, height: 1.5, background: "rgba(255,255,255,0.45)", transform: `scaleX(${traza})`, transformOrigin: "left" }} />
+      <div style={{ position: "absolute", left: x0, width: largo, top: 90, height: 2, background: "rgba(255,255,255,0.7)", transform: `scaleX(${traza})`, transformOrigin: "left" }} />
       <div style={{ position: "absolute", left: x0, width: paso * dx, top: 89, height: 3.5, borderRadius: 2, background: ORO, opacity: traza }} />
       {Array.from({ length: 31 }).map((_, i) => (
         <div
@@ -362,14 +362,14 @@ const Cta: React.FC<{ t: number }> = ({ t }) => {
       </Revela>
       <Revela t={t} t0={e.s + 0.08}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-          <span style={sans(54)}>¿Llegaremos a la</span>
-          <span style={serif(84)}>31</span>
-          <span style={sans(54)}>?</span>
+          <span style={sans(60)}>¿Llegaremos a la</span>
+          <span style={serif(96)}>31</span>
+          <span style={sans(60)}>?</span>
         </div>
       </Revela>
       <Linea t={t} t0={e.s + 0.15} ancho={260} />
       <Revela t={t} t0={EV.comentarios - 0.1}>
-        <div style={{ ...etiqueta, fontSize: 22 }}>Te leo en comentarios</div>
+        <div style={{ ...etiqueta, fontSize: 26 }}>Te leo en comentarios</div>
       </Revela>
     </Arriba>
   );

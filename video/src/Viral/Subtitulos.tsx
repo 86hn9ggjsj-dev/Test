@@ -16,8 +16,9 @@ type Props = {
   estilo?: "impacto" | "premium";
 };
 
-export const ORO = "#e8c27a";
-const SOMBRA_PREMIUM = "0 2px 4px rgba(0,0,0,0.45), 0 6px 28px rgba(0,0,0,0.55)";
+export const ORO = "#f2c96b";
+// Sombra en capas: un contorno oscuro casi imperceptible + sombra media + halo amplio, para leerse sobre fondos claros
+export const SOMBRA_PREMIUM = "0 0 2px rgba(0,0,0,0.9), 0 2px 6px rgba(0,0,0,0.75), 0 8px 30px rgba(0,0,0,0.6)";
 
 export const limpia = (w: string) => w.toLowerCase().replace(/[.,¿?¡!]/g, "");
 
@@ -113,7 +114,7 @@ export const Subtitulos: React.FC<Props> = ({ t, palabras, cortes, claves, durac
 const BloquePremium: React.FC<{ t: number; b: Palabra[]; claves: Record<string, string>; top: number }> = ({ t, b, claves, top }) => {
   // Inter Tight 700 ≈ 0.5em por carácter; la serif cursiva va a 1.3x pero es más estrecha
   const ancho = b.reduce((a, w) => a + w.w.length * (claves[limpia(w.w)] ? 0.5 : 0.52), 0);
-  const size = Math.min(80, (ANCHO - 2 * SAFE.lados) / (ancho + 0.28 * (b.length - 1)));
+  const size = Math.min(94, (ANCHO - 2 * SAFE.lados) / (ancho + 0.28 * (b.length - 1)));
   const a = entra(t, b[0].s - 0.06, 0.2);
   return (
     <AbsoluteFill>
@@ -132,18 +133,27 @@ const BloquePremium: React.FC<{ t: number; b: Palabra[]; claves: Record<string, 
           whiteSpace: "nowrap",
         }}
       >
+        {/* Halo oscuro difuminado detrás del bloque: separa el texto del fondo sin usar una caja */}
+        <div
+          style={{
+            position: "absolute",
+            inset: `${-size * 0.7}px ${-size * 1.2}px`,
+            background: "radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 45%, transparent 72%)",
+            zIndex: -1,
+          }}
+        />
         {b.map((w, k) => {
           const clave = !!claves[limpia(w.w)];
           const dicha = t >= w.s - 0.02;
-          const brillo = 0.45 + 0.55 * suave(Math.min(Math.max((t - w.s + 0.02) / 0.12, 0), 1));
+          const brillo = 0.72 + 0.28 * suave(Math.min(Math.max((t - w.s + 0.02) / 0.12, 0), 1));
           return (
             <span
               key={k}
               style={{
                 fontFamily: clave ? SERIF : SANS,
                 fontStyle: clave ? "italic" : "normal",
-                fontWeight: clave ? 400 : 700,
-                fontSize: clave ? size * 1.3 : size,
+                fontWeight: clave ? 400 : 800,
+                fontSize: clave ? size * 1.35 : size,
                 letterSpacing: clave ? "0" : "-0.015em",
                 color: clave && dicha ? ORO : C.blanco,
                 opacity: brillo,
