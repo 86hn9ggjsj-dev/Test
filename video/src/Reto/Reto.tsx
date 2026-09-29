@@ -1,14 +1,13 @@
 import { AbsoluteFill, Audio, OffthreadVideo, staticFile, useCurrentFrame } from "remotion";
 import datos from "../gen/reto.json";
 import { Subtitulos } from "../Viral/Subtitulos";
-import { ANCHO, C, entra, FUENTE, golpeZoom, lerp, pop, sale, suave, temblor, texto } from "../Viral/util";
+import { ANCHO, C, entra, FUENTE, golpeZoom, lerp, pop, sale, temblor, texto } from "../Viral/util";
 
 export const RETO_FPS = datos.fps;
 export const RETO_FRAMES = Math.round(datos.duracion * datos.fps);
 
 const EV = datos.eventos;
 const esc = (id: string) => datos.escenas.find((e) => e.id === id)!;
-const T_CORTE = esc("bienvenida").s;
 const CLAVES: Record<string, string> = {
   "85%": C.verde,
   "1": C.verde,
@@ -28,17 +27,13 @@ const Y_SUB: Record<Tipo, number> = { primer: 0.73, medio: 0.66, captura: 0.3, t
 function Y_SUB_DE(tipo: string) {
   return Y_SUB[tipo as Tipo];
 }
-// Altura del plano en el que el bloque pasa más tiempo
+// Si el bloque coincide con una captura o la tabla, va en la posición de esa imagen (arriba nunca tapa la cara);
+// si no, en la del plano en el que pasa más tiempo
 const ySubtitulo = (ini: number, fin: number) => {
-  let mejor = datos.planos[0];
-  let max = -1;
-  for (const p of datos.planos) {
-    const solape = Math.min(fin, p.e) - Math.max(ini, p.s);
-    if (solape > max) {
-      max = solape;
-      mejor = p;
-    }
-  }
+  const solape = (p: { s: number; e: number }) => Math.min(fin, p.e) - Math.max(ini, p.s);
+  const imagen = datos.planos.find((p) => (p.tipo === "captura" || p.tipo === "tabla") && solape(p) > 0.12);
+  if (imagen) return Y_SUB_DE(imagen.tipo);
+  const mejor = datos.planos.reduce((a, p) => (solape(p) > solape(a) ? p : a));
   return Y_SUB_DE(mejor.tipo);
 };
 // Además de las escenas, los bloques se parten donde cambia la altura de los subtítulos
@@ -47,10 +42,9 @@ const CORTES = [
   ...datos.planos.filter((p, k) => k > 0 && Y_SUB_DE(p.tipo) !== Y_SUB_DE(datos.planos[k - 1].tipo)).map((p) => p.s),
 ];
 
-// Reencuadre en los jump cuts dentro del mismo plano (piezas 4 y 6)
-const ENCUADRE = [1, 1, 1, 1, 1.1, 1, 1.1];
+// Reencuadre en los jump cuts dentro del mismo plano (piezas 3 y 5)
+const ENCUADRE = [1, 1, 1, 1.1, 1, 1.1];
 const GOLPES: [number, number][] = [
-  [EV.t85teaser, 0.12],
   [EV.t85, 0.08],
   [EV.dos, 0.07],
   [EV.treintayuno, 0.1],
@@ -67,25 +61,13 @@ export const Reto: React.FC = () => {
     escala = lerp(t, plano.s, plano.e, 1, 1.06, (x) => x);
     origen = "50% 50%";
   }
-  // Transición teaser → historia: zoom blur + destello
-  let blur = 0;
-  if (t > T_CORTE - 0.15 && t < T_CORTE) {
-    const k = suave((t - (T_CORTE - 0.15)) / 0.15);
-    escala *= 1 + 0.25 * k;
-    blur = 18 * k;
-  } else if (t >= T_CORTE && t < T_CORTE + 0.2) {
-    const k = 1 - suave((t - T_CORTE) / 0.2);
-    escala *= 1 + 0.3 * k;
-    blur = 20 * k;
-  }
-  const sh = [0, EV.treintayuno].reduce(
+  const sh = [EV.treintayuno].reduce(
     (a, t0) => {
       const s = temblor(t, t0, 14);
       return { x: a.x + s.x, y: a.y + s.y };
     },
     { x: 0, y: 0 },
   );
-  const destello = t >= T_CORTE && t < T_CORTE + 0.2 ? 1 - (t - T_CORTE) / 0.2 : 0;
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000", overflow: "hidden" }}>
@@ -94,7 +76,6 @@ export const Reto: React.FC = () => {
         style={{
           transform: `translate(${sh.x}px, ${sh.y}px) scale(${escala})`,
           transformOrigin: origen,
-          filter: blur > 0.3 ? `blur(${blur}px)` : undefined,
         }}
       >
         <OffthreadVideo src={staticFile("gen/reto_base.mp4")} muted style={{ width: "100%", height: "100%" }} />
@@ -102,14 +83,12 @@ export const Reto: React.FC = () => {
         {plano.tipo === "tabla" && <NotasTabla t={t} />}
       </AbsoluteFill>
 
-      <Teaser t={t} />
       <Bienvenida t={t} />
       <Hoy t={t} />
       <Pasos t={t} />
       <Casilla t={t} />
       <Cta t={t} />
 
-      <AbsoluteFill style={{ backgroundColor: "#fff", opacity: destello * 0.6 }} />
       <Subtitulos
         t={t}
         palabras={datos.palabras}
@@ -149,28 +128,6 @@ const Progreso: React.FC<{ t: number }> = ({ t }) => (
     <div style={{ height: "100%", width: `${(t / datos.duracion) * 100}%`, background: `linear-gradient(90deg, ${C.verde}, ${C.amarillo})`, boxShadow: `0 0 16px ${C.verde}` }} />
   </div>
 );
-
-const Teaser: React.FC<{ t: number }> = ({ t }) => {
-  if (t >= T_CORTE) return null;
-  // El contador arranca en el fotograma 0 y llega a 85 justo cuando lo dice
-  const t0 = EV.t85teaser - 0.1;
-  const n = Math.round(lerp(t, 0.03, EV.t85teaser + 0.1, 0, 85));
-  const p = pop(t, 0.03, 220);
-  const captura = datos.planos.find((x) => x.tipo === "captura")!.s;
-  const s = sale(t, T_CORTE, 0.15);
-  return (
-    <>
-      <Arriba top={225} style={{ opacity: s }}>
-        <div style={{ ...texto, fontSize: 190, color: C.verde, transform: `scale(${p})`, textShadow: `0 0 40px ${C.verde}88, 0 10px 0 rgba(0,0,0,0.5)`, lineHeight: 1 }}>
-          +{n}%
-        </div>
-      </Arriba>
-      <Arriba top={430} style={{ opacity: s }}>
-        <div style={{ ...chip(C.amarillo), fontSize: 40, transform: `scale(${Math.min(pop(t, t0 + 0.35), sale(t, captura))})` }}>🔥 EN UN SOLO DÍA</div>
-      </Arriba>
-    </>
-  );
-};
 
 const Bienvenida: React.FC<{ t: number }> = ({ t }) => {
   const fin = esc("hoy").s;

@@ -133,8 +133,7 @@ npx remotion render Viral out/viral.mp4 --video-bitrate=10M --audio-codec=aac
 
 ### Editar un video grabado
 
-La composición `Reto` (1080x1920, 30 fps) edita un video a cámara: teaser con el mejor momento al
-inicio, jump cuts, grading, subtítulos que esquivan la cara y las capturas, anotaciones sobre
+La composición `Reto` (1080x1920, 30 fps) edita un video a cámara: jump cuts, grading, subtítulos que esquivan la cara y las capturas, anotaciones sobre
 las capturas y la tabla, música, SFX y CTA final.
 
 ```bash

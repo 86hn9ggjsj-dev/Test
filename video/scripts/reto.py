@@ -1,4 +1,4 @@
-"""Prepara el video "reto": EDL (teaser + jump cuts), grading, voz tratada, música/SFX y timeline.
+"""Prepara el video "reto": EDL (jump cuts), grading, voz tratada, música/SFX y timeline.
 
 Uso: python scripts/reto.py <ffmpeg>
 Entrada: input/reto.mp4, input/reto_palabras.json (Whisper, timestamps por palabra)
@@ -35,42 +35,38 @@ for p in crudo:
 
 # ---------------------------------------------------------------- EDL (tiempos del original)
 f = lambda t: round(t * FPS) / FPS  # todo ajustado a la rejilla de fotogramas
-TEASER = (f(3.167), f(5.333))
 TRAMOS = [(0.1, 3.0), (3.167, 6.933), (7.0, 9.5), (9.667, 11.933), (12.167, 14.467), (14.6, 15.867)]
-EDL = [TEASER] + [(f(a), f(b)) for a, b in TRAMOS]
+EDL = [(f(a), f(b)) for a, b in TRAMOS]
 
 # Planos del original: decide dónde van los subtítulos
 PLANOS = [(0, 3.133, "primer"), (3.133, 4.9, "medio"), (4.9, 6.967, "captura"), (6.967, 10.733, "medio"),
           (10.733, 12.3, "tabla"), (12.3, 99, "medio")]
 
 piezas, out = [], 0.0
-for k, (a, b) in enumerate(EDL):
-    piezas.append({"src": (a, b), "out": out, "teaser": k == 0})
+for a, b in EDL:
+    piezas.append({"src": (a, b), "out": out})
     out += b - a
 DUR = round(out, 4)
 
 
-def mapear(t, teaser=False):
+def mapear(t):
     for p in piezas:
         a, b = p["src"]
-        if p["teaser"] == teaser and a - 0.12 <= t <= b + 0.04:
+        if a - 0.12 <= t <= b + 0.04:
             return p["out"] + min(max(t - a, 0), b - a)
     return None
 
 
 pal_out = []
 for i, p in enumerate(palabras):
-    for teaser in (True, False):
-        s = mapear(p["s"], teaser)
-        if s is None or (teaser and not (TEASER[0] <= p["s"] < TEASER[1] - 0.05)):
-            continue
-        e = mapear(min(p["e"], TEASER[1]) if teaser else p["e"], teaser)
-        pal_out.append({"w": p["w"], "s": round(s, 3), "e": round(e, 3), "i": i, "hook": teaser})
+    s = mapear(p["s"])
+    if s is not None:
+        pal_out.append({"w": p["w"], "s": round(s, 3), "e": round(mapear(p["e"]), 3), "i": i, "hook": False})
 pal_out.sort(key=lambda p: p["s"])
 
 
-def t_pal(w, teaser=False, n=0):
-    return [p["s"] for p in pal_out if p["w"].strip("¿?.,") == w and p["hook"] == teaser][n]
+def t_pal(w, n=0):
+    return [p["s"] for p in pal_out if p["w"].strip("¿?.,") == w][n]
 
 
 planos = []
@@ -82,17 +78,15 @@ for p in piezas:
             planos.append({"s": round(p["out"] + ia - a, 3), "e": round(p["out"] + ib - a, 3), "tipo": tipo,
                            "pieza": piezas.index(p)})
 
-ESCENAS = [("teaser", 0.0), ("bienvenida", t_pal("Bienvenidos")), ("hoy", t_pal("Hoy")), ("eso", t_pal("Eso")),
+ESCENAS = [("bienvenida", t_pal("Bienvenidos")), ("hoy", t_pal("Hoy")), ("eso", t_pal("Eso")),
            ("tabla", t_pal("Estamos")), ("casilla", t_pal("Vosotros")), ("cta", t_pal("Dejádmelo"))]
 escenas = [{"id": n, "s": round(max(s - 0.05, 0), 3)} for n, s in ESCENAS]
-escenas[1]["s"] = round(piezas[1]["out"], 3)  # el corte del teaser manda
 for a, b in zip(escenas, escenas[1:]):
     a["e"] = b["s"]
 escenas[-1]["e"] = DUR
 esc = {e["id"]: e for e in escenas}
 
 ev = {
-    "t85teaser": t_pal("85%", True),
     "dia": t_pal("1"),
     "segundo": t_pal("segundo"),
     "t85": t_pal("85%"),
@@ -104,7 +98,7 @@ ev = {
     "casilla": t_pal("casilla"),
     "treintayuno": t_pal("31"),
     "comentarios": t_pal("comentarios"),
-    "captura": next(p["s"] for p in planos if p["tipo"] == "captura" and not piezas[p["pieza"]]["teaser"]),
+    "captura": next(p["s"] for p in planos if p["tipo"] == "captura"),
     "tablaPlano": next(p["s"] for p in planos if p["tipo"] == "tabla"),
 }
 
@@ -150,11 +144,6 @@ def poner(x, t, g=1.0, pista=sfx):
         pista[i:i + len(x)] += x[: len(pista) - i] * g
 
 
-poner(impacto(), 0.0, 0.8)
-poner(pop(), ev["t85teaser"], 0.9)
-poner(ding(), ev["t85teaser"] + 0.25, 0.6)
-poner(riser(0.7), esc["bienvenida"]["s"] - 0.7, 0.6)
-poner(whoosh(0.5), esc["bienvenida"]["s"] - 0.25, 0.9)
 poner(pop(), ev["dia"], 0.8)
 poner(pop(), ev["segundo"], 0.6)
 poner(pop(), ev["t85"], 0.8)
@@ -177,7 +166,7 @@ poner(pop(), ev["comentarios"], 0.9)
 musica = np.zeros(N)
 BEAT = 0.5
 ACORDES = [[48, 60, 64, 67], [43, 55, 59, 62], [45, 57, 60, 64], [41, 53, 57, 60]]  # C G Am F
-INT = {"teaser": (1, 0, 1, 0), "bienvenida": (1, 1, 1, 1), "hoy": (1, 1, 1, 1), "eso": (1, 1, 1, 1),
+INT = {"bienvenida": (1, 1, 1, 1), "hoy": (1, 1, 1, 1), "eso": (1, 1, 1, 1),
        "tabla": (1, 1, 1, 1), "casilla": (1, 0, 1, 1), "cta": (1, 1, 1, 1)}
 K, H = kick(), hat()
 for k, e in enumerate(escenas):
@@ -199,11 +188,11 @@ for k, e in enumerate(escenas):
         t += BEAT
 musica = lp(musica, 10000)
 
-mezclar(voz_ed, musica, sfx, DUR, GEN / "reto_mezcla.wav", FF, duck=-17, nivel_musica=0.5)
+mezclar(voz_ed, musica, sfx, DUR, GEN / "reto_mezcla.wav", FF, duck=-17, nivel_musica=0.5, nivel_sfx=0.28)
 
 json.dump({"duracion": DUR, "fps": FPS, "palabras": pal_out, "escenas": escenas, "planos": planos,
            "eventos": {k: round(v, 3) for k, v in ev.items()},
-           "piezas": [{"s": round(p["out"], 3), "teaser": p["teaser"]} for p in piezas]},
+           "piezas": [{"s": round(p["out"], 3)} for p in piezas]},
           open(GEN_SRC / "reto.json", "w"), ensure_ascii=False, indent=1)
 print(f"duración {DUR:.2f}s (original 16.13s), {len(EDL)} piezas")
 for e in escenas:
