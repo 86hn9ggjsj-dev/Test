@@ -64,10 +64,15 @@ const Rejilla: React.FC<{ t: number; opacidad: number }> = ({ t, opacidad }) => 
 
 const Contenido: React.FC<{ t: number; p: Tramo }> = ({ t, p }) => {
   // Cada pantalla entra con una leve escala y sale recogiéndose
-  const a = (p.s <= 0.01 ? 1 : v(t, p.s, 0.35)) * (p.e >= datos.duracion - 0.01 ? 1 : 1 - lerp(t, p.e - 0.22, p.e, 0, 1, recogida));
+  // Entrada con zoom + desenfoque (efecto "zoom blur") y salida empujando hacia la cámara
+  const a = p.s <= 0.01 ? 1 : v(t, p.s, 0.35);
+  const out = p.e >= datos.duracion - 0.01 ? 0 : lerp(t, p.e - 0.22, p.e, 0, 1, recogida);
+  const blur = (1 - a) * 16 + out * 14;
+  const destello = p.s > 0.01 ? Math.max(0, 1 - (t - p.s) / 0.14) : 0;
   const Pieza = { intro: Intro, reloj: Reloj, auto: Auto, noventa: Noventa, gestion: Gestion, prop: Prop, cta: Cta }[p.id]!;
   return (
-    <AbsoluteFill style={{ opacity: a, transform: `scale(${0.95 + 0.05 * a})` }}>
+    <AbsoluteFill style={{ opacity: a * (1 - out), transform: `scale(${1.18 - 0.18 * a + 0.2 * out})`, filter: blur > 0.3 ? `blur(${blur}px)` : undefined }}>
+      <AbsoluteFill style={{ background: "#fff", opacity: 0.35 * destello }} />
       <div style={{ position: "absolute", top: 300, left: 0, width: ANCHO, height: 900, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 26 }}>
         <Pieza t={t} s={p.s} e={p.e} />
       </div>

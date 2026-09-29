@@ -143,5 +143,15 @@ python scripts/reto.py <ruta-a-ffmpeg>
 npx remotion render Reto out/reto.mp4 --video-bitrate=12M --audio-codec=aac
 ```
 
+### Video "3 ventajas de un bot"
+
+```bash
+cd video
+python scripts/bot.py <ruta-a-ffmpeg>
+npx remotion render Bot out/bot_raw.mp4 --video-bitrate=12M --audio-codec=aac
+# Acelerar a 1,1x (imagen y voz) para más ritmo:
+ffmpeg -i out/bot_raw.mp4 -filter_complex "[0:v]setpts=PTS/1.1[v];[0:a]atempo=1.1[a]" -map "[v]" -map "[a]" out/bot.mp4
+```
+
 `scripts/sonido.py` reúne la síntesis de música y SFX y la mezcla con ducking y -14 LUFS que
 usan ambos pipelines.

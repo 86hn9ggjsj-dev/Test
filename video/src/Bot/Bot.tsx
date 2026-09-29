@@ -30,7 +30,8 @@ const ySubtitulo = (ini: number, fin: number) => {
 const CORTES = [...datos.escenas.map((e) => e.s), ...datos.planos.map((p) => p.s), ...PANTALLAS.map((p) => p.s), ...PANTALLAS.map((p) => p.e)];
 
 // Reencuadre alterno en cada jump cut de la toma continua
-const ENCUADRE = datos.piezas.map((_, k) => (k % 2 ? 1.08 : 1));
+const ENCUADRE = datos.piezas.map((_, k) => (k % 2 ? 1.04 : 1));
+const RITMO = 1.5;
 const GOLPES: [number, number][] = [
   [EV.tres, 0.05],
   [EV.libertad, 0.04],
@@ -42,7 +43,16 @@ const GOLPES: [number, number][] = [
 export const Bot: React.FC = () => {
   const t = useCurrentFrame() / BOT_FPS;
   const plano = planoEn(t);
-  let escala = ENCUADRE[plano.pieza] + GOLPES.reduce((a, [t0, amt]) => a + golpeZoom(t, t0, amt, 0.2, 0.3, 0.45), 0);
+  // Zoom de ritmo: dentro de cada pieza el encuadre salta entre dos tamaños cada ~1,5 s con un empuje rápido
+  const pieza = datos.piezas[plano.pieza];
+  const dentro = Math.max(t - pieza.s, 0);
+  const ventana = Math.floor(dentro / RITMO);
+  const nivel = (k: number) => (k % 2 ? 1.09 : 1);
+  const cambio = lerp(dentro - ventana * RITMO, 0, 0.14, 0, 1, suave);
+  const ritmo = ventana === 0 ? nivel(0) : nivel(ventana - 1) + (nivel(ventana) - nivel(ventana - 1)) * cambio;
+  let escala = ENCUADRE[plano.pieza] * ritmo + GOLPES.reduce((a, [t0, amt]) => a + golpeZoom(t, t0, amt, 0.2, 0.3, 0.45), 0);
+  // Movimiento de cámara al hombro, muy leve
+  const deriva = `translate(${6 * Math.sin(t * 0.7)}px, ${5 * Math.sin(t * 0.9 + 1)}px)`;
   let origen = "50% 40%";
   if (plano.tipo === "captura" || plano.tipo === "tabla") {
     escala = lerp(t, plano.s, plano.e, 1, 1.05, (x) => x);
@@ -52,7 +62,7 @@ export const Bot: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000", overflow: "hidden" }}>
       <Audio src={staticFile("gen/bot_mezcla.wav")} />
-      <AbsoluteFill style={{ transform: `scale(${escala})`, transformOrigin: origen }}>
+      <AbsoluteFill style={{ transform: `${deriva} scale(${escala})`, transformOrigin: origen }}>
         <OffthreadVideo src={staticFile("gen/bot_base.mp4")} muted style={{ width: "100%", height: "100%" }} />
         {plano.tipo === "captura" && <NotasCaptura t={t} />}
         {plano.tipo === "tabla" && <NotasTabla t={t} />}
@@ -68,7 +78,7 @@ export const Bot: React.FC = () => {
       </AbsoluteFill>
       <Pantallas t={t} />
 
-      <Subtitulos t={t} palabras={datos.palabras} cortes={CORTES} claves={CLAVES} duracion={datos.duracion} y={ySubtitulo} estilo="premium" />
+      <Subtitulos t={t} palabras={datos.palabras} cortes={CORTES} claves={CLAVES} duracion={datos.duracion} y={ySubtitulo} estilo="premium" dinamico />
       <Progreso t={t} duracion={datos.duracion} />
     </AbsoluteFill>
   );
