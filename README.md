@@ -97,6 +97,13 @@ Ejemplos de cosas que puedes pedirle:
 Para el modo voz: `pip install -r requirements-voz.txt`. En Linux puede que necesites antes
 `sudo apt install portaudio19-dev espeak`; en macOS, `brew install portaudio`.
 
+## Trading Floor
+
+En este repositorio también está el **Trading Floor**: minería de estrategias de trading, un
+embudo de pruebas de robustez, paper trading con precios reales y dinero ficticio, y una oficina
+isométrica animada para verlo todo. Se arranca con `trading.bat` (Windows) o `./trading.sh`
+(Mac/Linux). Detalles en [`trading_floor/README.md`](trading_floor/README.md).
+
 ## Notas
 
 - Tus datos (memoria, alertas, estado de la vigilancia) se guardan en `~/.jarvis/`.

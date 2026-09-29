@@ -1,0 +1,2096 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trading Floor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap">
+<style>
+:root{
+  --fondo:#05070b; --panel:rgba(10,13,19,.9); --panel2:rgba(255,255,255,.035); --borde:rgba(255,255,255,.09);
+  --texto:#e9edf3; --suave:#8a94a6; --neon:#d4ff3a; --verde:#2ee6a6; --rojo:#ff5a76; --ambar:#ffc24a; --azul:#5cc0ff; --lila:#b58cff;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--fondo);color:var(--texto);font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+canvas#lienzo{position:fixed;inset:0;width:100vw;height:100vh;display:block;cursor:grab;touch-action:none}
+canvas#lienzo.arrastrando{cursor:grabbing}
+canvas#lienzo.sobre{cursor:pointer}
+
+#barra{position:fixed;top:0;left:0;right:0;height:60px;display:flex;align-items:center;gap:14px;padding:0 16px;background:linear-gradient(180deg,rgba(5,7,11,.96),rgba(5,7,11,.78));border-bottom:1px solid var(--borde);backdrop-filter:blur(10px);z-index:6}
+.marca{display:flex;align-items:center;gap:10px;flex:none}
+.logo{width:32px;height:32px;border-radius:9px;background:var(--neon);color:#0a0d12;display:grid;place-items:center;font-weight:900;font-size:15px;box-shadow:0 0 22px rgba(212,255,58,.5)}
+.marca b{display:block;font-weight:900;letter-spacing:.16em;font-size:13px}
+.marca small{display:block;color:var(--suave);font-size:11px;letter-spacing:.02em}
+.kpis{display:flex;gap:2px;margin-left:6px;min-width:0;overflow:hidden}
+.kpi{padding:4px 14px;border-left:1px solid var(--borde);flex:none}
+.kpi small{display:block;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--suave)}
+.kpi b{font:800 15px var(--mono);white-space:nowrap;font-variant-numeric:tabular-nums}
+.pastillas{margin-left:auto;display:flex;gap:8px;align-items:center;flex:none}
+.pastilla{font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid var(--borde);background:var(--panel2);white-space:nowrap}
+.pastilla.papel{border-color:rgba(212,255,58,.5);color:var(--neon)}
+.pastilla.minando{border-color:rgba(255,194,74,.6);color:var(--ambar)}
+.pastilla.minando::before,.pastilla.vivo::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;margin-right:7px;vertical-align:1px;animation:latido 1s infinite}
+.pastilla.descanso{border-color:rgba(92,192,255,.5);color:var(--azul)}
+.pastilla.error{border-color:rgba(255,90,118,.6);color:var(--rojo)}
+.pastilla.reloj{font-family:var(--mono)}
+.pastilla.on{border-color:rgba(46,230,166,.6);color:var(--verde)}
+.pastilla.off{border-color:rgba(255,90,118,.6);color:var(--rojo)}
+.pastilla.neutral{color:var(--suave)}
+.macro-reg{border:1px solid var(--borde);border-radius:12px;padding:10px 12px;margin-bottom:12px;background:var(--panel2)}
+.macro-reg b{font:800 16px var(--mono)}
+.macro-reg p{margin:4px 0 0;font-size:12px;color:#c9d0db}
+.ind{display:grid;grid-template-columns:1fr auto auto;gap:10px;padding:7px 2px;border-bottom:1px solid var(--borde);font-size:12px;align-items:baseline}
+.ind b{font:700 13px var(--mono);text-align:right}
+.ind span:last-child{font:600 11px var(--mono);min-width:64px;text-align:right}
+@keyframes latido{50%{opacity:.2}}
+.sube{color:var(--verde)!important} .baja{color:var(--rojo)!important}
+
+#panel{position:fixed;top:72px;right:12px;bottom:46px;width:370px;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--borde);border-radius:16px;backdrop-filter:blur(12px);z-index:5;overflow:hidden;transition:transform .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+#panel.plegado{transform:translateX(calc(100% + 24px))}
+.pestanas{display:flex;border-bottom:1px solid var(--borde);flex:none}
+.pestanas button{flex:1;background:none;border:0;color:var(--suave);font-weight:600;font-size:12px;padding:12px 4px 10px;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s}
+.pestanas button:hover{color:var(--texto)}
+.pestanas button.activa{color:var(--texto);border-bottom-color:var(--neon)}
+.pestanas .num[hidden]{display:none}
+.pestanas .num{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:9px;background:var(--neon);color:#0a0d12;font-size:10px;font-weight:800}
+.pagina{display:none;flex:1;overflow:auto;padding:14px;scrollbar-width:thin}
+.pagina.activa{display:block}
+
+.msg{display:flex;gap:10px;margin-bottom:12px;animation:entra .3s ease-out}
+@keyframes entra{from{opacity:0;transform:translateY(6px)}}
+.av{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;color:#0a0d12;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.msg .cab{font-size:11px;color:var(--suave)}
+.msg .cab b{color:var(--texto);font-size:12px;margin-right:6px}
+.msg .txt{background:var(--panel2);border:1px solid var(--borde);padding:7px 11px;border-radius:4px 13px 13px 13px;margin-top:3px;font-size:13px}
+.msg.sistema .txt{border-style:dashed;color:var(--suave)}
+.msg.bueno .txt{border-color:rgba(46,230,166,.35)}
+.msg.malo .txt{border-color:rgba(255,90,118,.35)}
+.msg.oro .txt{border-color:rgba(255,207,90,.55);background:rgba(255,207,90,.07)}
+
+.etapa{margin-bottom:12px}
+.etapa .fila{display:flex;justify-content:space-between;gap:10px;font-size:13px}
+.etapa .fila b{font-family:var(--mono)}
+.etapa .expl{font-size:11px;color:var(--suave);margin-top:2px}
+.barrita{height:7px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden;margin-top:5px}
+.barrita i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--neon),var(--verde));transition:width .6s}
+.nota{font-size:12px;color:var(--suave);border-top:1px solid var(--borde);padding-top:10px;margin-top:14px}
+h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--suave);margin:4px 0 12px}
+
+.trader{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center;padding:8px;border-radius:10px;cursor:pointer;border:1px solid transparent}
+.trader:hover{background:var(--panel2);border-color:var(--borde)}
+.trader .n{font-weight:700;font-size:13px}
+.trader .d{font-size:11px;color:var(--suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trader .r{font:700 13px var(--mono);text-align:right}
+.trader .r small{display:block;font:500 10px Inter,sans-serif;color:var(--suave)}
+.vacio{color:var(--suave);font-size:13px;text-align:center;padding:30px 10px}
+.info p{margin:0 0 10px;font-size:13px;color:#c9d0db}
+.info b{color:var(--texto)}
+
+#plegar{position:fixed;top:72px;right:392px;z-index:6;width:34px;height:34px;border-radius:10px;border:1px solid var(--borde);background:var(--panel);cursor:pointer;transition:right .35s cubic-bezier(.2,.8,.2,1)}
+#plegar.fuera{right:12px}
+#controles{position:fixed;left:12px;top:72px;z-index:5;display:flex;flex-direction:column;gap:6px}
+#controles button{width:36px;height:36px;border-radius:10px;border:1px solid var(--borde);background:var(--panel);cursor:pointer;font-size:15px;backdrop-filter:blur(8px)}
+#controles button:hover{border-color:var(--neon)}
+#controles button.activo{border-color:var(--neon);color:var(--neon);box-shadow:0 0 14px rgba(212,255,58,.35)}
+#resultados{position:fixed;left:12px;bottom:46px;width:340px;z-index:5;border-radius:18px;padding:14px 16px 12px;
+  background:linear-gradient(160deg,rgba(18,24,34,.92),rgba(8,11,17,.92));border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(14px);
+  box-shadow:0 24px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06);transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s}
+#resultados::before{content:"";position:absolute;inset:-1px;border-radius:19px;padding:1px;background:linear-gradient(135deg,rgba(212,255,58,.55),rgba(46,230,166,.15) 40%,transparent 60%,rgba(92,192,255,.35));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+#resultados.plegado{transform:translateY(calc(100% - 44px))}
+#resultados .cab{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+#resultados .cab span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--suave);font-weight:700}
+#resultados .cab button{background:none;border:1px solid var(--borde);border-radius:8px;width:26px;height:26px;cursor:pointer;color:var(--suave)}
+.gordo{font:800 34px/1.05 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums;text-shadow:0 0 30px currentColor}
+.gordo small{font-size:15px;font-weight:700;margin-left:8px;text-shadow:none;opacity:.9}
+.fila-hoy{display:flex;gap:10px;align-items:center;margin:8px 0 10px}
+.chip{font:700 12px var(--mono);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--borde);white-space:nowrap}
+.chip em{font-style:normal;font-family:Inter,sans-serif;color:var(--suave);font-weight:700;letter-spacing:.1em;font-size:10px;margin-right:6px}
+.chip.sube{background:rgba(46,230,166,.1);border-color:rgba(46,230,166,.35)}
+.chip.baja{background:rgba(255,90,118,.1);border-color:rgba(255,90,118,.35)}
+.rangos{display:flex;gap:4px;margin-left:auto}
+.rangos button{background:none;border:1px solid var(--borde);border-radius:7px;padding:2px 7px;font:700 10px var(--mono);color:var(--suave);cursor:pointer}
+.rangos button.activo{color:#0a0d12;background:var(--neon);border-color:var(--neon)}
+canvas.grafica{display:block;width:100%}
+.pie-res{display:flex;justify-content:space-between;font-size:11px;color:var(--suave);margin-top:6px}
+.pie-res b{color:var(--texto);font-family:var(--mono)}
+.kpi b.sube,.kpi b.baja{text-shadow:0 0 18px currentColor}
+.kpi b small{display:inline;font-size:11px;letter-spacing:0;text-transform:none;color:inherit;margin-left:6px;opacity:.85}
+#ayuda{position:fixed;left:62px;right:0;bottom:52px;margin:auto;width:max-content;max-width:calc(100vw - 32px);font-size:12px;color:var(--suave);background:var(--panel);border:1px solid var(--borde);padding:6px 12px;border-radius:999px;z-index:4;pointer-events:none;transition:opacity 1s}
+
+#cinta{position:fixed;left:0;right:0;bottom:0;height:34px;background:rgba(5,7,11,.94);border-top:1px solid var(--borde);overflow:hidden;z-index:6;font:600 12px var(--mono)}
+#cintaInterior{display:inline-flex;white-space:nowrap;line-height:34px;animation:cinta 60s linear infinite;will-change:transform}
+#cintaInterior span{padding:0 22px;border-right:1px solid var(--borde)}
+#cintaInterior em{font-style:normal;color:var(--suave);margin-right:8px}
+@keyframes cinta{to{transform:translateX(-50%)}}
+
+#ficha{position:fixed;left:60px;top:76px;width:390px;max-width:calc(100vw - 32px);max-height:calc(100vh - 140px);overflow:auto;background:var(--panel);border:1px solid var(--borde);border-radius:16px;padding:16px 16px 12px;z-index:7;backdrop-filter:blur(12px);box-shadow:0 20px 60px rgba(0,0,0,.5);animation:entra .25s}
+#ficha[hidden]{display:none}
+#ficha .cerrar{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:8px;border:1px solid var(--borde);background:none;cursor:pointer}
+#ficha .quien{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+#ficha .quien .av{width:44px;height:44px;font-size:15px}
+#ficha h2{margin:0;font-size:17px}
+#ficha .puesto{color:var(--suave);font-size:12px}
+#ficha .desc{font-size:13px;background:var(--panel2);border:1px solid var(--borde);border-radius:10px;padding:9px 11px;margin:8px 0}
+#ficha table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0 10px}
+#ficha th{text-align:left;color:var(--suave);font-weight:600;padding:4px 0}
+#ficha td{padding:4px 0;border-top:1px solid var(--borde);font-family:var(--mono);text-align:right}
+#ficha td:first-child{text-align:left;font-family:Inter,sans-serif;color:#c9d0db}
+#ficha ul{margin:4px 0 8px;padding-left:18px;font-size:12px;color:#c9d0db}
+#ficha li{margin-bottom:3px}
+#ficha .aviso{font-size:11px;color:var(--suave)}
+
+#sinConexion{position:fixed;left:50%;top:76px;transform:translateX(-50%);z-index:8;background:rgba(255,90,118,.14);border:1px solid rgba(255,90,118,.5);color:#ffd3db;padding:8px 14px;border-radius:10px;font-size:13px}
+#sinConexion[hidden]{display:none}
+
+@media (max-width:1720px){.kpi.opc2,.pastilla.reloj{display:none}}
+@media (max-width:1250px){.kpi.opc{display:none}}
+@media (max-width:1000px){#pFng{display:none}}
+@media (max-width:760px){
+  #barra{height:54px;gap:8px;padding:0 10px}
+  .marca > div:not(.logo),.kpis .kpi:not(.principal),.pastillas{display:none}
+  .kpis{margin-left:0}
+  .kpi{padding:2px 8px}
+  #panel{top:auto;left:8px;right:8px;bottom:40px;width:auto;height:42vh;border-radius:14px}
+  #panel.plegado{transform:translateY(calc(100% + 50px))}
+  #plegar{top:auto;bottom:calc(42vh + 48px);right:12px}
+  #plegar.fuera{bottom:48px}
+  #controles{top:62px}
+  #resultados{display:none}
+  #ayuda{display:none}
+  #ficha{top:62px;left:8px;right:8px;width:auto;max-height:calc(58vh - 80px)}
+}
+</style>
+</head>
+<body>
+<canvas id="lienzo" aria-label="Oficina isométrica del Trading Floor"></canvas>
+
+<header id="barra">
+  <div class="marca">
+    <div class="logo">TF</div>
+    <div><b>TRADING FLOOR</b><small>minería de estrategias · paper trading</small></div>
+  </div>
+  <div class="kpis">
+    <div class="kpi principal"><small>Patrimonio</small><b id="kPatrimonio">—</b></div>
+    <div class="kpi principal"><small>Resultado total</small><b id="kResultado">—</b></div>
+    <div class="kpi"><small>Hoy</small><b id="kHoy">—</b></div>
+    <div class="kpi opc"><small>Posiciones</small><b id="kPosiciones">—</b></div>
+    <div class="kpi opc opc2"><small>Banco</small><b id="kBanco">—</b></div>
+  </div>
+  <div class="pastillas">
+    <span id="pRegimen" class="pastilla neutral" title="Régimen de mercado según la sala de macroeconomía">—</span>
+    <span id="pFng" class="pastilla" title="Índice Fear & Greed de cripto (alternative.me)">F&amp;G —</span>
+    <span id="pMineria" class="pastilla">Conectando…</span>
+    <span class="pastilla papel" title="Paper trading: precios reales, dinero ficticio. Nunca se opera dinero real.">PAPEL · dinero ficticio</span>
+    <span id="pReloj" class="pastilla reloj">--:--</span>
+  </div>
+</header>
+
+<aside id="panel">
+  <nav class="pestanas">
+    <button data-p="chat" class="activa">Chat<span class="num" id="nChat" hidden>0</span></button>
+    <button data-p="embudo">Embudo</button>
+    <button data-p="traders">Resultados</button>
+    <button data-p="macro">Macro</button>
+    <button data-p="info">¿Qué es?</button>
+  </nav>
+  <section class="pagina activa" id="p-chat"><div id="chat"></div></section>
+  <section class="pagina" id="p-embudo"><h3>Embudo de esta sesión</h3><div id="embudo"></div>
+    <p class="nota">Cada estrategia pasa las pruebas en orden y se descarta en la primera que falla. Por eso casi ninguna llega al final: si pruebas miles al azar, muchas parecen buenas por pura suerte.</p></section>
+  <section class="pagina" id="p-traders">
+    <div style="display:flex;align-items:center;margin-bottom:8px"><h3 style="margin:0">Resultado acumulado</h3>
+      <div class="rangos" data-grafica="panel"><button data-r="24">24H</button><button data-r="168" class="activo">7D</button><button data-r="720">30D</button></div></div>
+    <canvas class="grafica" id="gPanel" height="170"></canvas>
+    <h3 style="margin-top:14px">Resultado por día</h3>
+    <canvas class="grafica" id="gDias" height="96"></canvas>
+    <h3 style="margin-top:16px">Traders</h3><div id="traders"></div></section>
+  <section class="pagina" id="p-macro"><h3>Sala de macroeconomía</h3><div id="macro"></div>
+    <p class="nota">Datos diarios de Yahoo Finance y el índice Fear &amp; Greed de alternative.me. Es contexto para el comité: las estrategias minadas no usan estos datos para operar.</p></section>
+  <section class="pagina info" id="p-info">
+    <h3>Qué estás viendo</h3>
+    <p><b>Minería.</b> Genera estrategias sin parar: combina indicadores (RSI, medias, Bollinger…) al azar y con un algoritmo genético, y las prueba en el 70 % inicial de tres años de velas reales de Binance.</p>
+    <p><b>Laboratorio.</b> Las que parecen rentables viajan por la cinta. Cada puesto es una prueba de robustez; si la falla, a la trituradora.</p>
+    <p><b>Cámara.</b> Las que lo superan todo se guardan en el banco (cada lingote es una estrategia), salvo que se parezcan demasiado a otra que ya esté dentro.</p>
+    <p><b>Sala de trading.</b> Cada estrategia del banco es un trader con 1.000 $ ficticios que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
+    <p><b>Macroeconomía.</b> Cuatro analistas siguen la bolsa, el VIX, el dólar, el oro, el petróleo, los bonos y el sentimiento cripto, y deciden si el mercado está en modo RISK-ON (apetito por el riesgo) o RISK-OFF.</p>
+    <p><b>Comité, descanso y terraza.</b> De vez en cuando se reúnen para repasar el riesgo, y cuando no hay trabajo se van a por café.</p>
+    <p class="nota">Todo es <b>paper trading</b>: nunca se envía ninguna orden real. Los resultados de un backtest no garantizan nada sobre el futuro.</p>
+    <p class="nota">Arrastra para moverte, rueda o pellizca para hacer zoom y haz clic en cualquier persona para ver qué hace.</p>
+  </section>
+</aside>
+<button id="plegar" title="Mostrar u ocultar el panel">⟩</button>
+
+<div id="controles">
+  <button id="bCine" title="Modo cine: la cámara recorre la oficina">🎬</button>
+  <button id="zMas" title="Acercar">+</button>
+  <button id="zMenos" title="Alejar">−</button>
+  <button id="zVer" title="Ver toda la oficina">⤢</button>
+  <button id="bNoche" title="Día / noche / automático">◐</button>
+</div>
+<section id="resultados">
+  <div class="cab"><span>Resultado total · papel</span>
+    <div class="rangos" data-grafica="tarjeta"><button data-r="24">24H</button><button data-r="168" class="activo">7D</button><button data-r="720">30D</button></div>
+    <button id="plegarRes" title="Plegar" style="margin-left:6px">▾</button></div>
+  <div class="gordo" id="rTotal">—</div>
+  <div class="fila-hoy"><span class="chip" id="rHoy"><em>HOY</em>—</span><span class="chip" id="rPatr"><em>PATRIMONIO</em>—</span></div>
+  <canvas class="grafica" id="gTarjeta" height="110"></canvas>
+  <canvas class="grafica" id="gTarjetaDias" height="46" style="margin-top:6px"></canvas>
+  <div class="pie-res"><span><b id="rTraders">0</b> traders</span><span><b id="rAbiertas">0</b> posiciones abiertas</span><span>desde <b id="rDesde">—</b></span></div>
+</section>
+<div id="ayuda">Arrastra para moverte · rueda para zoom · clic en alguien para ver qué hace</div>
+<div id="ficha" hidden></div>
+<div id="sinConexion" hidden>Sin conexión con el Trading Floor. ¿Sigue en marcha el programa?</div>
+<footer id="cinta"><div id="cintaInterior"></div></footer>
+
+<script>
+"use strict";
+/* =====================================================================
+   Trading Floor — oficina isométrica dibujada a mano en un <canvas>.
+   Todo lo que pasa aquí sale del estado real (/api/estado): la minería,
+   el embudo de pruebas, el banco y el paper trading. Lo único "decorativo"
+   son los paseos, el café y las charlas de relleno.
+   ===================================================================== */
+
+// ---------------------------------------------------------- utilidades --
+const $ = s => document.querySelector(s);
+const TAU = Math.PI * 2;
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+function hash(s) { let h = 2166136261; for (const c of String(s)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+const nf = (d) => new Intl.NumberFormat("es-ES", {minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: "always"});
+const NF0 = nf(0), NF2 = nf(2);
+const fmt = {
+  n: x => NF0.format(x),
+  dinero: x => NF2.format(x) + " $",
+  pct: x => (x > 0 ? "+" : x < 0 ? "−" : "") + NF2.format(Math.abs(x)) + " %",
+  precio: x => (x >= 1000 ? NF0 : x >= 10 ? NF2 : nf(4)).format(x),
+  hora: d => d.toLocaleTimeString("es-ES", {hour: "2-digit", minute: "2-digit"}),
+};
+const moneda = s => (s || "").replace(/USDT$|USD$|EUR$/, "");
+const ladoTxt = d => d === "largo" ? "LARGO" : "CORTO";
+
+const tonos = new Map();
+function shade(hex, f) {
+  const k = hex + f;
+  let r = tonos.get(k);
+  if (r) return r;
+  const n = parseInt(hex.slice(1), 16);
+  let R = n >> 16, G = (n >> 8) & 255, B = n & 255;
+  if (f >= 1) { R += (255 - R) * (f - 1); G += (255 - G) * (f - 1); B += (255 - B) * (f - 1); }
+  else { R *= f; G *= f; B *= f; }
+  r = `rgb(${R | 0},${G | 0},${B | 0})`;
+  tonos.set(k, r);
+  return r;
+}
+function rgba(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; }
+
+// ------------------------------------------------ proyección isométrica --
+const TW = 64, TH = 32, ZH = 34;       // ancho y alto de una baldosa; píxeles por unidad de altura
+const W = 38, D = 24;                  // tamaño de la planta en baldosas
+const ALTO_MURO = 2.4;
+const iso = (x, y, z = 0) => [(x - y) * TW / 2, (x + y) * TH / 2 - z * ZH];
+
+const lienzo = $("#lienzo");
+let ctx = lienzo.getContext("2d");
+let dpr = 1, vw = 0, vh = 0;
+const cam = {x: 100, y: 420, zoom: .8, tocada: false};
+
+function transformarMundo() { ctx.setTransform(cam.zoom * dpr, 0, 0, cam.zoom * dpr, (vw / 2 - cam.x * cam.zoom) * dpr, (vh / 2 - cam.y * cam.zoom) * dpr); }
+function aPantalla(x, y, z = 0) { const [ix, iy] = iso(x, y, z); return [(ix - cam.x) * cam.zoom + vw / 2, (iy - cam.y) * cam.zoom + vh / 2]; }
+
+function cuad(a, b, c, d, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath(); ctx.fill();
+}
+/** Caja isométrica: solo se ven el techo y las caras que miran a +y (izquierda) y +x (derecha). */
+function caja(x, y, z, w, d, h, color, o) {
+  const a = iso(x, y + d, z), b = iso(x + w, y + d, z), c = iso(x + w, y, z);
+  const hz = h * ZH;
+  const at = [a[0], a[1] - hz], bt = [b[0], b[1] - hz], ct = [c[0], c[1] - hz], dt = iso(x, y, z + h);
+  cuad(a, b, bt, at, o && o.izq || shade(color, .8));
+  cuad(b, c, ct, bt, o && o.der || shade(color, .63));
+  cuad(dt, ct, bt, at, o && o.top || shade(color, 1.07));
+}
+/** Dibuja en la cara que mira a +y (plano y = cte). u → +x, v → hacia abajo desde zTop. 1 unidad = 1/100 de baldosa. */
+function caraY(x, y, zTop, fn) { ctx.save(); const [ox, oy] = iso(x, y, zTop); ctx.transform(TW / 200, TH / 200, 0, ZH / 100, ox, oy); fn(); ctx.restore(); }
+/** Dibuja en la cara que mira a +x (plano x = cte). u → hacia −y (a la derecha en pantalla), desde y. */
+function caraX(x, y, zTop, fn) { ctx.save(); const [ox, oy] = iso(x, y, zTop); ctx.transform(TW / 200, -TH / 200, 0, ZH / 100, ox, oy); fn(); ctx.restore(); }
+/** Dibuja sobre un plano horizontal a altura z. u → +x, v → +y. */
+function plano(x, y, z, fn) { ctx.save(); const [ox, oy] = iso(x, y, z); ctx.transform(TW / 200, TH / 200, -TW / 200, TH / 200, ox, oy); fn(); ctx.restore(); }
+
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
+function circulo(x, y, r, color) { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
+
+// Brillos (luces de pantallas, neones...) que se suman al final, más intensos de noche.
+let brillos = [];
+function brillo(x, y, z, r, color, a = .5) { brillos.push([x, y, z, r, color, a]); }
+
+// ------------------------------------------------------- estado global --
+let S = null;                  // último estado recibido del servidor
+let T = 0;                     // reloj de animación (s)
+let modoNoche = "auto";        // "auto" | "dia" | "noche"
+let noche = 0;
+const parametros = new URLSearchParams(location.search);
+
+// =================================================== CONSTRUCCIÓN =====
+const SALAS = [
+  {id: "mineria", nombre: "MINERÍA", x0: 0, y0: 0, x1: 10, y1: 9, a: "#1d2129", b: "#22262f", rotulo: "rgba(255,255,255,.06)"},
+  {id: "laboratorio", nombre: "LABORATORIO", x0: 10, y0: 0, x1: 21, y1: 9, a: "#e8edf3", b: "#dde4ec", rotulo: "rgba(20,40,70,.09)"},
+  {id: "banco", nombre: "CÁMARA", x0: 21, y0: 0, x1: 30, y1: 9, a: "#241f16", b: "#2b251a", rotulo: "rgba(255,207,90,.09)"},
+  {id: "macro", nombre: "MACRO", x0: 30, y0: 0, x1: 38, y1: 9, a: "#0f2230", b: "#122838", rotulo: "rgba(92,192,255,.1)"},
+  {id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 38, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
+  {id: "terraza", nombre: "TERRAZA", x0: 30, y0: 11, x1: 38, y1: 24, a: "#8a6a48", b: "#7f6141", rotulo: "rgba(40,20,0,.14)"},
+  {id: "trading", nombre: "SALA DE TRADING", x0: 0, y0: 11, x1: 18, y1: 24, a: "#eceee8", b: "#e2e5dd", rotulo: "rgba(0,0,0,.075)"},
+  {id: "comite", nombre: "COMITÉ", x0: 18, y0: 11, x1: 30, y1: 17, a: "#d8d0c2", b: "#cec5b5", rotulo: "rgba(60,30,0,.09)"},
+  {id: "descanso", nombre: "DESCANSO", x0: 18, y0: 17, x1: 30, y1: 24, a: "#b98f62", b: "#b28858", rotulo: "rgba(60,30,0,.12)"},
+];
+
+const bloqueado = Array.from({length: W}, () => new Uint8Array(D));
+const muros = new Set();
+const estaticos = [];
+const arista = (a, b, c, d) => (a < c || (a === c && b < d)) ? `${a},${b}|${c},${d}` : `${c},${d}|${a},${b}`;
+function bloquear(x0, y0, x1, y1) {
+  for (let x = Math.max(0, Math.floor(x0)); x < Math.min(W, Math.ceil(x1)); x++)
+    for (let y = Math.max(0, Math.floor(y0)); y < Math.min(D, Math.ceil(y1)); y++) {
+      const cx = x + .5, cy = y + .5;
+      if (cx > x0 && cx < x1 && cy > y0 && cy < y1) bloqueado[x][y] = 1;
+    }
+}
+const estatico = (k, f) => estaticos.push({k, f});
+
+// ---- tabiques de cristal (con huecos para puertas) ----
+function cristal(x, y, w, d, h, neon) {
+  caja(x, y, 0, w, d, .12, "#1a1e26");
+  caja(x, y, .12, w, d, h - .17, "#000000", {top: "rgba(255,255,255,.06)", izq: "rgba(160,205,255,.14)", der: "rgba(160,205,255,.1)"});
+  caja(x, y, h - .05, w, d, .05, neon);
+}
+function muroH(Y, x0, x1, huecos = [], alto = 1, neon = "#d4ff3a") {
+  for (let x = x0; x < x1; x++) {
+    if (huecos.some(([a, b]) => x >= a && x < b)) continue;
+    muros.add(arista(x, Y - 1, x, Y));
+    estatico(x + .5 + Y, () => cristal(x, Y - .05, 1, .1, alto, neon));
+  }
+}
+function muroV(X, y0, y1, huecos = [], alto = 1, neon = "#d4ff3a") {
+  for (let y = y0; y < y1; y++) {
+    if (huecos.some(([a, b]) => y >= a && y < b)) continue;
+    muros.add(arista(X - 1, y, X, y));
+    estatico(X + y + .5, () => cristal(X - .05, y, .1, 1, alto, neon));
+  }
+}
+
+// ---- sillas y puestos de trabajo ----
+function silla(x, y, mira, color = "#343a46") {
+  estatico(x + y - .06, () => { caja(x - .04, y - .04, 0, .08, .08, .16, "#222"); caja(x - .2, y - .19, .16, .4, .38, .07, color); });
+  if (mira === "n") estatico(x + y + .4, () => caja(x - .2, y + .15, .23, .4, .06, .34, color));
+  else if (mira === "s") estatico(x + y - .35, () => caja(x - .2, y - .21, .23, .4, .06, .34, color));
+  else if (mira === "o") estatico(x + y + .4, () => caja(x + .15, y - .2, .23, .06, .4, .34, color));
+  else estatico(x + y - .35, () => caja(x - .21, y - .2, .23, .06, .4, .34, color));
+}
+function monitor(mx, my, mw, pintar, i) {
+  caja(mx + mw / 2 - .04, my + .06, .42, .08, .06, .12, "#14171d");
+  caja(mx, my, .52, mw, .05, .33, "#101217");
+  caraY(mx + .025, my + .05 + .002, .83, () => {
+    const w = (mw - .05) * 100, h = 28;
+    ctx.fillStyle = "#06080c"; ctx.fillRect(0, 0, w, h);
+    pintar && pintar(w, h, i);
+  });
+}
+/** Mesa con 1 o 2 monitores cuya pantalla mira a +y; la persona se sienta delante (lado +y). */
+function puesto({x, y, w = 1.5, d = .7, color = "#2a2e37", monitores = 2, pintar = null, brilla = null, conSilla = true, colorSilla}) {
+  bloquear(x, y, x + w, y + d);
+  const asiento = {x: x + w / 2, y: y + d + .55, mira: "n"};
+  estatico(x + w / 2 + y + d / 2, () => {
+    caja(x, y, 0, w, d, .42, color, {top: shade(color, 1.25)});
+    const mw = monitores === 2 ? w * .37 : w * .5;
+    for (let i = 0; i < monitores; i++) {
+      const mx = monitores === 2 ? x + w / 2 - mw - .025 + i * (mw + .05) : x + w / 2 - mw / 2;
+      monitor(mx, y + .1, mw, pintar, i);
+    }
+    caja(x + w / 2 - .22, y + d - .26, .42, .44, .14, .02, "#15181e");   // teclado
+    const c = brilla && brilla();
+    if (c) brillo(x + w / 2, y + .2, .7, 55, c, .32);
+  });
+  if (conSilla) silla(asiento.x, asiento.y, "n", colorSilla);
+  return asiento;
+}
+function planta(x, y, grande = false) {
+  bloquear(x - .3, y - .3, x + .3, y + .3);
+  estatico(x + y, () => {
+    caja(x - .18, y - .18, 0, .36, .36, .32, "#c8b9a6");
+    const [px, py] = iso(x, y, .32);
+    const s = grande ? 1.35 : 1;
+    const hojas = [[0, -14, 9], [-8, -8, 7], [8, -9, 7], [-4, -19, 6], [5, -18, 6], [0, -24, 5]];
+    for (const [dx, dy, r] of hojas) circulo(px + dx * s, py + dy * s, r * s, dx < 0 ? "#2f8f5b" : dx > 0 ? "#237a4b" : "#3aa56a");
+  });
+}
+
+// ---- MINERÍA: racks, puestos, holograma y empaquetadora ----
+const RACKS = [];
+for (let i = 0; i < 9; i++) { const x = .4 + i * 1.05; RACKS.push(x); bloquear(x, .3, x + .9, 1.15); estatico(x + .45 + .72, () => rack(x, .3)); }
+function rack(x, y) {
+  caja(x, y, 0, .9, .8, 2.05, "#151920", {top: "#222834"});
+  const vel = S && S.mineria && S.mineria.estado === "minando" ? 9 : 1.5;
+  caraY(x + .07, y + .8 + .002, 1.98, () => {
+    ctx.fillStyle = "#0a0d12"; ctx.fillRect(0, 0, 76, 190);
+    for (let r = 0; r < 13; r++) {
+      const yy = 6 + r * 14;
+      ctx.fillStyle = "#1a2029"; ctx.fillRect(4, yy, 68, 11);
+      for (let l = 0; l < 7; l++) {
+        const s = x * 31 + r * 7.3 + l * 3.1;
+        const on = Math.sin(T * vel * (1 + (s % 1.7)) + s * 12.9) > .15;
+        ctx.fillStyle = on ? (l % 3 === 0 ? "#2ee6a6" : l % 3 === 1 ? "#5cc0ff" : "#ffc24a") : "#1e2733";
+        ctx.fillRect(8 + l * 8, yy + 3.5, 4, 4);
+      }
+    }
+  });
+  brillo(x + .45, y + .8, 1, 60, "#2ee6a6", S && S.mineria && S.mineria.estado === "minando" ? .22 : .08);
+}
+const PUESTOS_MINA = [];
+for (const [x, y] of [[.6, 3], [3, 3], [5.4, 3], [.6, 5.6], [3, 5.6], [5.4, 5.6]])
+  PUESTOS_MINA.push(puesto({x, y, w: 1.6, color: "#343a45", colorSilla: "#4a4f5a", pintar: pantallaMinero, brilla: () => S && S.mineria && S.mineria.estado === "minando" ? "#ffc24a" : null}));
+function pantallaMinero(w, h, i) {
+  const activa = S && S.mineria && S.mineria.estado === "minando";
+  ctx.fillStyle = activa ? "#1a1406" : "#0b0d11"; ctx.fillRect(0, 0, w, h);
+  ctx.font = "700 5px JetBrains Mono, monospace";
+  for (let r = 0; r < 5; r++) {
+    const s = Math.floor(T * (activa ? 6 : .5) + r * 3 + i * 11 + w);
+    ctx.fillStyle = activa ? (r % 2 ? "#ffc24a" : "#ffe7a3") : "#394252";
+    ctx.fillText(["E-", "RSI", "EMA", "BB", "ATR", "MACD"][s % 6] + (s * 7919 % 997), 3, 6 + r * 5.3);
+  }
+}
+bloquear(7.9, 5.9, 9.4, 7.2);
+estatico(8.65 + 6.55, () => {
+  caja(7.9, 5.9, 0, 1.5, 1.3, .85, "#2a303b", {top: "#39414f"});
+  caraY(8, 7.2 + .002, .8, () => {
+    ctx.fillStyle = "#0b0e13"; ctx.fillRect(0, 0, 130, 70);
+    ctx.fillStyle = "#ffc24a"; ctx.font = "800 13px Inter, sans-serif"; ctx.fillText("EMPAQUETADORA", 8, 20);
+    const act = S && S.mineria && S.mineria.estado === "minando";
+    for (let i = 0; i < 6; i++) { ctx.fillStyle = act && Math.sin(T * 8 + i) > 0 ? "#2ee6a6" : "#253040"; ctx.fillRect(10 + i * 18, 40, 12, 12); }
+  });
+});
+const HOLO = {x: 8.7, y: 3.3};
+bloquear(8.2, 2.8, 9.2, 3.8);
+
+// ---- LABORATORIO: seis puestos (uno por prueba), cinta y trituradoras ----
+const ETAPAS = ["Generadas", "Rentables en muestra", "Fuera de muestra", "Costes x2", "Consistencia", "Monte Carlo", "Estabilidad", "Test del mono", "Distinta a las del banco"];
+const PRUEBAS = ETAPAS.slice(2, 8);
+const EXPLICA = {
+  "Generadas": "Estrategias creadas por la minería.",
+  "Rentables en muestra": "Ganan en el 70 % inicial de los datos con suficientes operaciones.",
+  "Fuera de muestra": "Siguen ganando en el 30 % final, que la minería nunca vio.",
+  "Costes x2": "Aguantan el doble de comisiones y deslizamiento.",
+  "Consistencia": "Ganan en la mayoría de los 6 tramos del histórico.",
+  "Monte Carlo": "Barajando 1.000 veces sus operaciones, el peor 5 % sigue en positivo.",
+  "Estabilidad": "Con parámetros vecinos también ganan (no es sobreajuste).",
+  "Test del mono": "En datos no vistos ganan al 90 % de monos que entran al azar.",
+  "Distinta a las del banco": "No se parecen a otra que ya esté en el banco.",
+};
+const Y_CINTA = 6.3, X_CINTA0 = 9.4, X_CINTA1 = 20.6;
+const ESTACIONES = PRUEBAS.map((nombre, i) => {
+  const x = 10.7 + i * 1.66;
+  return {nombre, x, bx: x + .7, flash: null, asiento: null};
+});
+for (const e of ESTACIONES) {
+  e.asiento = puesto({x: e.x, y: 2.4, w: 1.4, color: "#cfd8e3", monitores: 1, colorSilla: "#6a7a90",
+    pintar: (w, h) => pantallaPrueba(e, w, h), brilla: () => e.flash && T < e.flash.hasta ? e.flash.color : null});
+  bloquear(e.bx - .28, 7.05, e.bx + .28, 7.55);
+  estatico(e.bx + 7.3, () => trituradora(e));
+  estatico(e.bx + Y_CINTA + .35, () => arco(e));
+}
+function pantallaPrueba(e, w, h) {
+  const f = e.flash && T < e.flash.hasta ? e.flash.color : null;
+  ctx.fillStyle = f ? rgba(f, .35) : "#0b1a2a"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#cfe8ff"; ctx.font = "700 5.2px Inter, sans-serif";
+  ctx.fillText(e.nombre.toUpperCase(), 3, 7);
+  ctx.strokeStyle = f || "#5cc0ff"; ctx.lineWidth = 1; ctx.beginPath();
+  for (let i = 0; i <= 20; i++) ctx.lineTo(3 + i * (w - 6) / 20, 20 - Math.sin(i * .9 + T * 2 + e.x) * 4 - Math.cos(i * .4 + e.x) * 3);
+  ctx.stroke();
+}
+function trituradora(e) {
+  caja(e.bx - .25, 7.08, 0, .5, .45, .42, "#3a3f4a", {top: "#1b1e24"});
+  caraY(e.bx - .2, 7.53 + .002, .36, () => { ctx.fillStyle = "#ff5a76"; ctx.fillRect(0, 6, 40, 5); ctx.fillStyle = "#fff"; ctx.font = "800 7px Inter"; ctx.fillText("✕", 16, 24); });
+}
+function arco(e) {
+  const c = e.flash && T < e.flash.hasta ? e.flash.color : "#5cc0ff";
+  caja(e.bx - .05, Y_CINTA - .12, 0, .1, .1, .95, "#8b97a8");
+  caja(e.bx - .05, Y_CINTA + .52, 0, .1, .1, .95, "#8b97a8");
+  caja(e.bx - .05, Y_CINTA - .12, .95, .1, .74, .09, c);
+  brillo(e.bx, Y_CINTA + .25, .95, 34, c, e.flash && T < e.flash.hasta ? .7 : .15);
+}
+bloquear(X_CINTA0, Y_CINTA, X_CINTA1, Y_CINTA + .5);
+for (let x = X_CINTA0; x < X_CINTA1; x += 1) {
+  const w = Math.min(1, X_CINTA1 - x);
+  estatico(x + w / 2 + Y_CINTA + .25, () => cinta(x, w));
+}
+function cinta(x, w) {
+  caja(x, Y_CINTA, 0, w, .5, .34, "#2d333d", {top: "#15181d"});
+  plano(x, Y_CINTA, .341, () => {
+    ctx.strokeStyle = "rgba(255,255,255,.08)"; ctx.lineWidth = 2;
+    const off = (T * 240) % 25;
+    for (let u = -25 + off; u < w * 100; u += 25) { if (u < 0) continue; ctx.beginPath(); ctx.moveTo(u, 4); ctx.lineTo(u, 46); ctx.stroke(); }
+    ctx.fillStyle = "rgba(212,255,58,.55)"; ctx.fillRect(0, 0, w * 100, 3); ctx.fillRect(0, 47, w * 100, 3);
+  });
+}
+// tubo neumático del laboratorio a la cámara
+const TUBO = {x0: 20.6, x1: 24.1, y: 6.35, z: .32};
+estatico(22.35 + 6.55, () => {
+  caja(TUBO.x0, TUBO.y, TUBO.z, TUBO.x1 - TUBO.x0, .4, .4, "#000000", {top: "rgba(200,235,255,.2)", izq: "rgba(180,220,255,.16)", der: "rgba(180,220,255,.12)"});
+  caja(TUBO.x0, TUBO.y, TUBO.z + .38, TUBO.x1 - TUBO.x0, .4, .03, "#ffcf5a");
+});
+
+// ---- CÁMARA DEL BANCO ----
+const VITRINA = {x: 24.8, y: 4.4, w: 4, d: 1.5};
+bloquear(VITRINA.x, VITRINA.y, VITRINA.x + VITRINA.w, VITRINA.y + VITRINA.d);
+estatico(VITRINA.x + 2 + VITRINA.y + .75, () => vitrina());
+const RECEPTOR = {x: 24.1, y: 6.1, w: .7, d: .9};
+bloquear(RECEPTOR.x, RECEPTOR.y, RECEPTOR.x + RECEPTOR.w, RECEPTOR.y + RECEPTOR.d);
+estatico(24.45 + 6.55, () => {
+  caja(RECEPTOR.x, RECEPTOR.y, 0, RECEPTOR.w, RECEPTOR.d, .95, "#3b3422", {top: "#ffcf5a"});
+  brillo(24.45, 6.55, .95, 30, "#ffcf5a", .35);
+});
+const ASIENTO_BANCO = puesto({x: 22, y: 2.6, w: 1.5, color: "#3b3422", monitores: 2, colorSilla: "#5a4a2a",
+  pintar: (w, h, i) => { ctx.fillStyle = "#1a1405"; ctx.fillRect(0, 0, w, h); ctx.fillStyle = "#ffcf5a"; ctx.font = "800 7px JetBrains Mono"; ctx.fillText(i ? "BANCO" : String((S && S.banco || []).length).padStart(2, "0"), 4, 17); },
+  brilla: () => "#ffcf5a"});
+let giroCamara = 0, destelloBanco = 0;
+function lingote(i) {
+  const capa = Math.floor(i / 16), r = i % 16, fila = Math.floor(r / 8), col = r % 8;
+  return {x: VITRINA.x + .25 + col * .45 + capa * .1, y: VITRINA.y + .3 + fila * .5 + capa * .05, z: .62 + capa * .13};
+}
+function vitrina() {
+  caja(VITRINA.x, VITRINA.y, 0, VITRINA.w, VITRINA.d, .6, "#2e2819", {top: "#41381f"});
+  const n = Math.min((S && S.banco || []).length, 48);
+  for (let i = 0; i < n; i++) {
+    const p = lingote(i);
+    caja(p.x, p.y, p.z, .38, .2, .13, "#f5c542", {top: "#ffe07a", izq: "#e0ac25", der: "#b98a18"});
+  }
+  caja(VITRINA.x, VITRINA.y, .6, VITRINA.w, VITRINA.d, .75, "#000000", {top: "rgba(255,240,200,.06)", izq: "rgba(255,230,160,.08)", der: "rgba(255,230,160,.06)"});
+  brillo(VITRINA.x + 2, VITRINA.y + .75, .8, 110, "#ffcf5a", .18 + destelloBanco * .8);
+}
+
+// ---- PASILLO ----
+for (const [x, y] of [[29.4, 9.5], [12.5, 9.5]]) planta(x, y, true);
+const ROBOT = {x: 6, y: 10.4, dir: 1};
+
+// ---- SALA DE TRADING: 24 mesas ----
+const MESAS = [];
+for (const y of [12.2, 15.2, 18.2, 21.2])
+  for (const x of [1.9, 4.6, 7.3, 10, 12.7, 15.4]) {
+    const mesa = {trader: null};
+    mesa.asiento = puesto({x, y, w: 1.5, color: "#2b2f38", pintar: (w, h, i) => pantallaTrader(mesa, w, h, i),
+      brilla: () => mesa.trader ? colorTrader(mesa.trader) : null});
+    MESAS.push(mesa);
+  }
+planta(17.4, 11.6, true); planta(17.4, 23.4);
+function colorTrader(a) {
+  const p = a.datos && a.datos.posicion;
+  if (!p) return "#5cc0ff";
+  return a.datos.direccion === "largo" ? "#2ee6a6" : "#ff5a76";
+}
+function pantallaTrader(mesa, w, h, i) {
+  const a = mesa.trader;
+  if (!a) { ctx.fillStyle = "#0a0c10"; ctx.fillRect(0, 0, w, h); return; }
+  const d = a.datos || {}, col = colorTrader(a);
+  ctx.fillStyle = rgba(col, .16); ctx.fillRect(0, 0, w, h);
+  if (i === 0) {
+    const serie = S && S.papel && S.papel.precios && S.papel.precios[d.simbolo] && S.papel.precios[d.simbolo].serie;
+    if (serie && serie.length > 1) {
+      const lo = Math.min(...serie), hi = Math.max(...serie);
+      ctx.strokeStyle = col; ctx.lineWidth = 1.1; ctx.beginPath();
+      serie.forEach((v, k) => ctx.lineTo(2 + k * (w - 4) / (serie.length - 1), h - 3 - (v - lo) / (hi - lo || 1) * (h - 8)));
+      ctx.stroke();
+    }
+  } else {
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 5.5px JetBrains Mono";
+    ctx.fillText(moneda(d.simbolo) + (d.posicion ? " " + ladoTxt(d.direccion) : ""), 3, 8);
+    const r = d.resultado || 0;
+    ctx.fillStyle = r > 0 ? "#2ee6a6" : r < 0 ? "#ff5a76" : "#cfd6e0"; ctx.font = "800 8px JetBrains Mono";
+    ctx.fillText((r >= 0 ? "+" : "") + r.toFixed(1), 3, 21);
+  }
+}
+
+// ---- COMITÉ ----
+const MESA_COMITE = {x0: 20.5, x1: 27.5, y: 13.3, d: 1.2};
+bloquear(MESA_COMITE.x0, MESA_COMITE.y, MESA_COMITE.x1, MESA_COMITE.y + MESA_COMITE.d);
+for (let x = MESA_COMITE.x0; x < MESA_COMITE.x1; x++)
+  estatico(x + .5 + MESA_COMITE.y + .6, () => {
+    caja(x, MESA_COMITE.y, 0, 1, MESA_COMITE.d, .44, "#6b4b2e", {top: "#8a6440", izq: "#5a3e25", der: "#4a331e"});
+  });
+const SILLAS_NORTE = [21.2, 22.6, 24, 25.4, 26.8].map(x => ({x, y: 12.7, mira: "s"}));
+const SILLAS_SUR = [21.2, 22.6, 24, 25.4, 26.8].map(x => ({x, y: 15.15, mira: "n"}));
+const SILLA_CABECERA = {x: 28.1, y: 13.9, mira: "o"};
+for (const s of [...SILLAS_NORTE, ...SILLAS_SUR, SILLA_CABECERA]) silla(s.x, s.y, s.mira, "#2c2c34");
+estatico(24 + 11.35, () => {   // pantalla de riesgos
+  caja(23.9, 11.28, 0, .2, .1, .5, "#222");
+  caja(21, 11.2, .5, 6, .12, 1.25, "#101217");
+  caraY(21.05, 11.32 + .002, 1.7, () => pantallaRiesgos(590, 115));
+  brillo(24, 11.5, 1.1, 120, "#b58cff", .22);
+});
+planta(29.4, 11.6); planta(18.6, 16.4);
+
+// ---- DESCANSO ----
+bloquear(18.3, 17.15, 22.3, 17.8);
+estatico(20.3 + 17.5, () => {
+  caja(18.3, 17.15, 0, 4, .65, .5, "#e9e4dc", {top: "#f6f3ee"});
+  caja(18.5, 17.2, .5, .55, .45, .5, "#2b2b30", {top: "#3a3a40"});   // cafetera
+  caraY(18.55, 17.65 + .002, .95, () => { ctx.fillStyle = "#ff8a5c"; ctx.fillRect(10, 8, 12, 6); ctx.fillStyle = "#111"; ctx.fillRect(14, 22, 20, 14); });
+  brillo(18.8, 17.65, .8, 18, "#ff8a5c", .5);
+  caja(19.6, 17.35, .5, .3, .3, .12, "#fff");   // tazas
+  caja(20.1, 17.35, .5, .3, .3, .12, "#d4ff3a");
+  caja(21.1, 17.25, .5, .9, .45, .08, "#bfc5cc");
+});
+bloquear(22.4, 17.15, 23.2, 17.9);
+estatico(22.8 + 17.5, () => caja(22.4, 17.15, 0, .8, .75, 1.35, "#dfe6ec", {top: "#f4f7fa"}));
+bloquear(24.2, 17.2, 24.9, 17.9);
+estatico(24.55 + 17.55, () => {   // recreativa
+  caja(24.2, 17.2, 0, .7, .7, 1.3, "#402a6e", {top: "#5b3d99"});
+  caraY(24.25, 17.9 + .002, 1.2, () => {
+    ctx.fillStyle = "#07091a"; ctx.fillRect(4, 4, 52, 36);
+    for (let i = 0; i < 6; i++) { ctx.fillStyle = ["#ff5a76", "#ffc24a", "#2ee6a6", "#5cc0ff"][i % 4]; ctx.fillRect(8 + ((T * 30 + i * 13) % 44), 8 + i * 5, 4, 3); }
+    ctx.fillStyle = "#d4ff3a"; ctx.font = "800 6px JetBrains Mono"; ctx.fillText("HODL", 18, 46);
+  });
+  brillo(24.55, 17.9, 1, 40, "#b58cff", .45);
+});
+const PINGPONG = {x: 19.6, y: 19.8, w: 2.4, d: 1.2};
+bloquear(PINGPONG.x, PINGPONG.y, PINGPONG.x + PINGPONG.w, PINGPONG.y + PINGPONG.d);
+estatico(20.8 + 20.4, () => {
+  caja(PINGPONG.x, PINGPONG.y, 0, PINGPONG.w, PINGPONG.d, .45, "#1f6f4a", {top: "#218a57"});
+  plano(PINGPONG.x, PINGPONG.y, .452, () => { ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.strokeRect(3, 3, 234, 114); ctx.beginPath(); ctx.moveTo(3, 60); ctx.lineTo(237, 60); ctx.stroke(); });
+  caja(PINGPONG.x + 1.18, PINGPONG.y, .45, .04, PINGPONG.d, .12, "#e8e8e8");
+});
+// sofá mirando hacia nosotros, con mesa baja delante
+bloquear(25.4, 19.5, 29.7, 20.7);
+estatico(27.5 + 19.6, () => caja(25.4, 19.5, 0, 4.3, .35, .8, "#3d5a80", {top: "#4d6d96"}));
+for (let x = 25.4; x < 29.3; x += 1) estatico(x + .5 + 19.9, () => caja(x, 19.85, 0, Math.min(1, 29.3 - x), .85, .36, "#46668f", {top: "#5a7eab"}));
+estatico(29.5 + 20.3, () => caja(29.3, 19.85, 0, .4, .85, .55, "#3d5a80", {top: "#4d6d96"}));
+bloquear(26, 21.3, 28.4, 22);
+estatico(27.2 + 21.65, () => { caja(26, 21.3, 0, 2.4, .7, .3, "#6b4b2e", {top: "#8a6440"}); caja(26.4, 21.45, .3, .25, .25, .1, "#fff"); });
+for (const [x, y, c] of [[23.5, 22.8, "#ff8a5c"], [24.6, 23.2, "#d4ff3a"]]) {
+  estatico(x + y - .1, () => { const [px, py] = iso(x, y, 0); ctx.fillStyle = shade(c, .7); ctx.beginPath(); ctx.ellipse(px, py - 5, 17, 10, 0, 0, TAU); ctx.fill(); ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(px - 1, py - 9, 14, 8, 0, 0, TAU); ctx.fill(); });
+}
+planta(29.4, 23.4, true); planta(18.6, 23.4); planta(29.4, 17.6);
+const SITIOS = [
+  {x: 18.8, y: 18.4, mira: "n", postura: "de_pie", tipo: "cafe"}, {x: 19.9, y: 18.4, mira: "n", postura: "de_pie", tipo: "cafe"},
+  {x: 21, y: 18.5, mira: "n", postura: "de_pie", tipo: "cafe"},
+  {x: 26, y: 20.3, mira: "s", postura: "sentado", tipo: "sofa"}, {x: 27, y: 20.3, mira: "s", postura: "sentado", tipo: "sofa"},
+  {x: 28, y: 20.3, mira: "s", postura: "sentado", tipo: "sofa"},
+  {x: 19.15, y: 20.4, mira: "e", postura: "de_pie", tipo: "ping"}, {x: 22.45, y: 20.4, mira: "o", postura: "de_pie", tipo: "ping"},
+  {x: 24.55, y: 18.45, mira: "n", postura: "de_pie", tipo: "arcade"},
+  {x: 23.5, y: 22.75, mira: "s", postura: "sentado", tipo: "puf"}, {x: 24.6, y: 23.15, mira: "s", postura: "sentado", tipo: "puf"},
+  {x: 24.2, y: 20.5, mira: "s", postura: "de_pie", tipo: "charla"}, {x: 25, y: 21.2, mira: "o", postura: "de_pie", tipo: "charla"},
+  {x: 23.4, y: 21.3, mira: "e", postura: "de_pie", tipo: "charla"},
+];
+SITIOS.forEach(s => s.ocupante = null);
+const GATO = {x: 29.5, y: 21.1, z: .55};
+
+// ---- MACROECONOMÍA: cuatro analistas y un globo holográfico ----
+const MACRO_TICKERS = ["^GSPC", "DX-Y.NYB", "GC=F", "^TNX"];
+const PUESTOS_MACRO = [[30.7, 3.2], [33.1, 3.2], [30.7, 5.8], [33.1, 5.8]].map(([x, y], i) =>
+  puesto({x, y, w: 1.6, color: "#1d3444", colorSilla: "#2b4a5e", pintar: (w, h) => pantallaAnalista(MACRO_TICKERS[i], w, h), brilla: () => "#5cc0ff"}));
+function pantallaAnalista(ticker, w, h) {
+  const ind = S && S.macro && S.macro.indicadores && S.macro.indicadores[ticker];
+  ctx.fillStyle = "#07131c"; ctx.fillRect(0, 0, w, h);
+  if (!ind) return;
+  const col = ind.dia_pct >= 0 ? "#2ee6a6" : "#ff5a76", sr = ind.serie, lo = Math.min(...sr), hi = Math.max(...sr);
+  ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.beginPath();
+  sr.forEach((v, k) => ctx.lineTo(2 + k * (w - 4) / (sr.length - 1), h - 3 - (v - lo) / (hi - lo || 1) * (h - 10)));
+  ctx.stroke();
+  ctx.fillStyle = "#cfe8ff"; ctx.font = "700 4.6px Inter"; ctx.fillText(ind.nombre.split(" (")[0], 2, 5.5);
+}
+const GLOBO = {x: 36.3, y: 4.6};
+bloquear(35.6, 3.9, 37, 5.3);
+const CIUDADES = [[40.7, -74], [51.5, -.1], [35.7, 139.7], [50.1, 8.7], [22.3, 114.2], [40.4, -3.7], [1.3, 103.8], [-23.5, -46.6], [-33.9, 151.2], [25.2, 55.3], [19.4, -99.1], [55.8, 37.6]];
+function globo() {
+  caja(GLOBO.x - .4, GLOBO.y - .4, 0, .8, .8, .25, "#15283a", {top: "#1f3b55"});
+  const [cx, cy0] = iso(GLOBO.x, GLOBO.y, .25), r = 27, cy = cy0 - 45, giro = T * .35;
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  const g = ctx.createLinearGradient(cx, cy0, cx, cy - r);
+  g.addColorStop(0, "rgba(92,192,255,.28)"); g.addColorStop(1, "rgba(92,192,255,0)");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(cx - 10, cy0); ctx.lineTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.lineTo(cx + 10, cy0); ctx.fill();
+  ctx.fillStyle = "rgba(92,192,255,.08)"; ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.fill();
+  ctx.strokeStyle = "rgba(92,192,255,.45)"; ctx.lineWidth = .8;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, TAU); ctx.stroke();
+  for (let k = 0; k < 6; k++) { const rx = Math.abs(Math.cos(giro + k * Math.PI / 6)) * r; ctx.beginPath(); ctx.ellipse(cx, cy, rx, r, 0, 0, TAU); ctx.stroke(); }
+  for (const lat of [-60, -30, 0, 30, 60]) { const y = cy - Math.sin(lat * Math.PI / 180) * r, rx = Math.cos(lat * Math.PI / 180) * r; ctx.beginPath(); ctx.ellipse(cx, y, rx, rx * .12, 0, 0, TAU); ctx.stroke(); }
+  for (const [lat, lon] of CIUDADES) {
+    const la = lat * Math.PI / 180, lo = lon * Math.PI / 180 + giro, z = Math.cos(la) * Math.cos(lo);
+    if (z < 0) continue;
+    const x = cx + Math.cos(la) * Math.sin(lo) * r, y = cy - Math.sin(la) * r, pulso = (Math.sin(T * 3 + lon) + 1) / 2;
+    ctx.fillStyle = `rgba(255,207,90,${.5 + z * .5})`; ctx.beginPath(); ctx.arc(x, y, 1.6, 0, TAU); ctx.fill();
+    ctx.strokeStyle = `rgba(255,207,90,${(1 - pulso) * .6 * z})`; ctx.beginPath(); ctx.arc(x, y, 2 + pulso * 5, 0, TAU); ctx.stroke();
+  }
+  ctx.restore();
+  const m = S && S.macro;
+  if (m && m.regimen) {
+    ctx.textAlign = "center"; ctx.font = "800 9px JetBrains Mono";
+    ctx.fillStyle = m.regimen === "RISK-ON" ? "#2ee6a6" : m.regimen === "RISK-OFF" ? "#ff5a76" : "#cfd6e0";
+    ctx.fillText(m.regimen, cx, cy - r - 8); ctx.textAlign = "start";
+  }
+  brillo(GLOBO.x, GLOBO.y, 1.5, 80, "#5cc0ff", .4);
+}
+planta(37.4, 8.4, true);
+
+// ---- TERRAZA: mesa con sombrilla, tumbonas, barbacoa y guirnalda de luces ----
+bloquear(31.9, 14.9, 33.1, 16.1);
+estatico(32.5 + 15.5, () => {
+  caja(32.45, 15.45, 0, .1, .1, .45, "#444");
+  caja(32, 15, .45, 1, 1, .06, "#f2efe8");
+  caja(32.47, 15.47, .5, .06, .06, 1.2, "#666");
+  const [px, py] = iso(32.5, 15.5, 1.72);
+  ctx.fillStyle = "#ff5a76"; ctx.beginPath(); ctx.moveTo(px, py - 10); ctx.lineTo(px - 46, py + 12); ctx.lineTo(px, py + 22); ctx.lineTo(px + 46, py + 12); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.moveTo(px, py - 10); ctx.lineTo(px - 15, py + 17); ctx.lineTo(px, py + 22); ctx.lineTo(px + 15, py + 17); ctx.closePath(); ctx.fill();
+});
+for (const y of [20.2, 21.9]) {
+  bloquear(33.4, y, 35.6, y + .7);
+  estatico(34.5 + y + .35, () => { caja(33.4, y, 0, 2.2, .7, .22, "#e9e4dc", {top: "#fbf8f2"}); caja(35.1, y, .22, .5, .7, .28, "#e9e4dc", {top: "#fbf8f2"}); caja(33.5, y + .05, .22, 1.5, .6, .05, "#5cc0ff"); });
+}
+bloquear(35.9, 12.6, 36.9, 13.4);
+estatico(36.4 + 13, () => {
+  caja(35.9, 12.6, 0, 1, .8, .7, "#2b2b30", {top: "#3a3a40"});
+  plano(35.95, 12.65, .705, () => { for (let i = 0; i < 4; i++) { ctx.fillStyle = Math.sin(T * 4 + i) > 0 ? "#ff8a3c" : "#c2410c"; ctx.fillRect(8 + i * 22, 20, 14, 40); } });
+  brillo(36.4, 13, .8, 40, "#ff8a3c", .5);
+  if (Math.random() < .08) particulas.push({x: 36.4 + rand(-.2, .2), y: 13, z: .8, vx: 0, vy: 0, vz: .4, g: -.05, vida: 2, t: 0, color: "#ffffff", r: 2.5, vapor: true});
+});
+for (const [x, y] of [[37.5, 11.5], [37.5, 17], [37.5, 23.4], [30.6, 23.4]]) planta(x, y, true);
+const BOMBILLAS = [];
+for (let x = 30.4; x < 37.8; x += .55) BOMBILLAS.push([x, 11.2]);
+for (let y = 11.6; y < 23.8; y += .55) BOMBILLAS.push([37.8, y]);
+SITIOS.push(
+  {x: 31.75, y: 15.5, mira: "e", postura: "de_pie", tipo: "terraza"}, {x: 33.25, y: 15.5, mira: "o", postura: "de_pie", tipo: "terraza"},
+  {x: 34, y: 20.55, mira: "s", postura: "sentado", tipo: "tumbona"}, {x: 34, y: 22.25, mira: "s", postura: "sentado", tipo: "tumbona"},
+  {x: 36.4, y: 13.9, mira: "n", postura: "de_pie", tipo: "barbacoa"}, {x: 35.4, y: 14.2, mira: "e", postura: "de_pie", tipo: "terraza"});
+SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
+
+// ---- tabiques ----
+muroH(9, 0, 38, [[4, 6], [15, 17], [25, 27], [33, 35]], 1, "#d4ff3a");
+muroV(30, 0, 9, [], 1, "#5cc0ff");
+muroH(11, 30, 38, [[33, 35]], 1, "#d4ff3a");
+muroV(30, 11, 24, [[19, 21]], 1, "#ff8a5c");
+muroV(10, 0, 9, [[6, 7]], 1, "#ffc24a");
+muroV(21, 0, 9, [[6, 7]], 1, "#ffcf5a");
+muroH(11, 0, 18, [[8, 10]], 1, "#d4ff3a");
+muroH(11, 18, 30, [[23, 25]], 1, "#b58cff");
+muroV(18, 11, 24, [[20, 22]], 1, "#ff8a5c");
+muroH(17, 18, 30, [[26, 28]], 1, "#ff8a5c");
+for (let y = 0; y < D; y++) { muros.add(arista(-1, y, 0, y)); }
+estaticos.sort((a, b) => a.k - b.k);
+
+// ---------------------------------------------------------- caminos --
+function libre(x, y) { return x >= 0 && y >= 0 && x < W && y < D && !bloqueado[x][y]; }
+function celdaLibreCerca(px, py) {
+  const cx = clamp(Math.floor(px), 0, W - 1), cy = clamp(Math.floor(py), 0, D - 1);
+  if (libre(cx, cy)) return [cx, cy];
+  let mejor = null, md = 1e9;
+  for (let dx = -3; dx <= 3; dx++) for (let dy = -3; dy <= 3; dy++) {
+    const x = cx + dx, y = cy + dy;
+    if (!libre(x, y)) continue;
+    const d = Math.hypot(x + .5 - px, y + .5 - py);
+    if (d < md) { md = d; mejor = [x, y]; }
+  }
+  return mejor || [cx, cy];
+}
+function ruta(ax, ay, bx, by) {
+  const [sx, sy] = celdaLibreCerca(ax, ay), [gx, gy] = celdaLibreCerca(bx, by);
+  const previo = new Int32Array(W * D).fill(-1), inicio = sx * D + sy, meta = gx * D + gy;
+  previo[inicio] = inicio;
+  const cola = [inicio];
+  for (let i = 0; i < cola.length && previo[meta] < 0; i++) {
+    const c = cola[i], x = Math.floor(c / D), y = c % D;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nx = x + dx, ny = y + dy, n = nx * D + ny;
+      if (!libre(nx, ny) || previo[n] >= 0 || muros.has(arista(x, y, nx, ny))) continue;
+      previo[n] = c; cola.push(n);
+    }
+  }
+  if (previo[meta] < 0) return [[bx, by]];
+  const puntos = [];
+  for (let c = meta; c !== inicio; c = previo[c]) puntos.push([Math.floor(c / D) + .5, c % D + .5]);
+  puntos.reverse();
+  // atajos: quita puntos intermedios alineados
+  const limpio = [];
+  for (let i = 0; i < puntos.length; i++) {
+    const p = puntos[i], a = limpio[limpio.length - 1] || [sx + .5, sy + .5], b = puntos[i + 1];
+    if (b && ((a[0] === p[0] && p[0] === b[0]) || (a[1] === p[1] && p[1] === b[1]))) continue;
+    limpio.push(p);
+  }
+  return [[sx + .5, sy + .5], ...limpio, [bx, by]];
+}
+
+// =============================================================== GENTE ==
+const PIELES = ["#f2c9a8", "#e3ae88", "#c98d64", "#a06a46", "#734a32", "#f6d7bf"];
+const PELOS = ["#1e1915", "#3a2a1f", "#6b4424", "#a8743d", "#dcb66e", "#b8452f", "#8f9095", "#ece6df", "#2b3d63"];
+const PEINADOS = ["corto", "largo", "moño", "rizado", "rapado", "coleta"];
+const CAMISAS = ["#3d7bf7", "#18a999", "#e0457b", "#f0a202", "#7b61ff", "#2d9cdb", "#ef6f3c", "#20b26b", "#c2448e", "#5b6cf2", "#0fb5ae", "#e85d75"];
+const ROLES = {
+  minero: {puesto: "Minería", camisa: "#ee7a2e", pantalon: "#2a3342", accesorio: "casco"},
+  prueba: {puesto: "Laboratorio", camisa: "#f4f6f9", pantalon: "#3a4252", accesorio: "gafas", tono: "#5cc0ff"},
+  banco: {puesto: "Guardián del banco", camisa: "#1d2230", pantalon: "#151922", accesorio: "corbata_oro", tono: "#ffcf5a"},
+  director: {puesto: "Dirección", camisa: "#22304a", pantalon: "#1a2233", accesorio: "corbata", tono: "#8fb4ff"},
+  riesgos: {puesto: "Riesgos", camisa: "#6a4bc4", pantalon: "#2a2440", accesorio: null, tono: "#b58cff"},
+  macro: {puesto: "Macroeconomía", camisa: "#1f8fa3", pantalon: "#23303d", accesorio: "gafas_pasta"},
+  trader: {puesto: "Trader", camisa: null, pantalon: "#2b3140", accesorio: "cascos"},
+};
+const agentes = [];
+class Agente {
+  constructor(o) {
+    const h = hash(o.nombre + (o.id || ""));
+    const rol = ROLES[o.rol];
+    Object.assign(this, {
+      x: 0, y: 0, z: 0, mira: "s", postura: "de_pie", ruta: [], andando: false, fase: 0, velocidad: 1.8,
+      burbuja: null, tarea: null, hasta: 0, sitio: null, alLlegar: null, semilla: h % 1000,
+      piel: PIELES[h % PIELES.length], pelo: PELOS[(h >>> 4) % PELOS.length], peinado: PEINADOS[(h >>> 9) % PEINADOS.length],
+      camisa: rol.camisa || CAMISAS[(h >>> 13) % CAMISAS.length], pantalon: rol.pantalon, accesorio: rol.accesorio, puesto: rol.puesto,
+    }, o);
+    this.tono = rol.tono || this.camisa;
+  }
+}
+function colocar(a, s) { a.x = s.x; a.y = s.y; a.mira = s.mira; a.postura = s.postura || "sentado"; a.ruta = []; a.andando = false; }
+function irA(a, x, y, postura, mira, alLlegar) {
+  a.ruta = ruta(a.x, a.y, x, y);
+  a.andando = true; a.postura = "de_pie";
+  a.alLlegar = () => { a.postura = postura; if (mira) a.mira = mira; alLlegar && alLlegar(); };
+}
+function volverAlPuesto(a, alLlegar) { if (a.casa) irA(a, a.casa.x, a.casa.y, "sentado", a.casa.mira, alLlegar); }
+function moverAgente(a, dt) {
+  if (!a.ruta.length) return;
+  const [tx, ty] = a.ruta[0], dx = tx - a.x, dy = ty - a.y, dist = Math.hypot(dx, dy), paso = a.velocidad * dt;
+  if (dist > .01) a.mira = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "e" : "o") : (dy > 0 ? "s" : "n");
+  a.fase += dt;
+  if (dist <= paso) {
+    a.x = tx; a.y = ty; a.ruta.shift();
+    if (!a.ruta.length) { a.andando = false; const f = a.alLlegar; a.alLlegar = null; f && f(); }
+  } else { a.x += dx / dist * paso; a.y += dy / dist * paso; }
+}
+
+// ---- plantilla ----
+const PLANTILLA = [];
+function empleado(o, asiento) { const a = new Agente(o); a.casa = asiento; colocar(a, asiento); agentes.push(a); PLANTILLA.push(a); return a; }
+const MINEROS = ["Hugo", "Noa", "Iker", "Vega"].map((n, i) => empleado({nombre: n, rol: "minero", explica: "Genera estrategias sin parar: combina indicadores al azar y con un algoritmo genético, y las prueba en el 70 % inicial de los datos. Las que parecen rentables las manda a la cinta del laboratorio."}, PUESTOS_MINA[[0, 2, 3, 5][i]]));
+const TEXTOS_PRUEBA = {
+  "Fuera de muestra": "Prueba la estrategia en el 30 % final de los datos, que la minería nunca vio. Si solo funcionaba en el pasado que conocía, aquí se cae. Es donde más estrategias mueren.",
+  "Costes x2": "Repite el backtest con el doble de comisiones y deslizamiento. Una ventaja de verdad no debería desaparecer por pagar un poco más.",
+  "Consistencia": "Parte el histórico en 6 tramos y exige que gane en la mayoría. Así descarta las que solo tuvieron una buena racha.",
+  "Monte Carlo": "Baraja 1.000 veces el orden de las operaciones. Si en el peor 5 % de los casos pierdes dinero, la estrategia es demasiado frágil.",
+  "Estabilidad": "Prueba 20 variantes con parámetros vecinos (RSI 21 en vez de 14...). Si al tocar un número deja de ganar, es sobreajuste.",
+  "Test del mono": "Compara la estrategia con 100 «monos» que entran en momentos al azar con las mismas salidas, en datos no vistos. Hay que ganar al 90 % de ellos.",
+};
+const PROBADORES = ["Carmen", "Pol", "Sara", "Marc", "Nerea", "Dani"].map((n, i) =>
+  empleado({nombre: n, rol: "prueba", prueba: PRUEBAS[i], puesto: "Laboratorio · " + PRUEBAS[i], explica: TEXTOS_PRUEBA[PRUEBAS[i]]}, ESTACIONES[i].asiento));
+const BANQUERA = empleado({nombre: "Irene", rol: "banco", explica: "Recibe por el tubo las estrategias que superan las seis pruebas y las guarda en la cámara (cada lingote es una). Rechaza las que se parecen demasiado a otra que ya está dentro, o las de un símbolo cuyo banco ya está lleno."}, ASIENTO_BANCO);
+const DIRECTOR = empleado({nombre: "Bruno", rol: "director", explica: "Preside el comité: repasa el patrimonio y los resultados de cada trader."}, SILLA_CABECERA);
+const RIESGOS = empleado({nombre: "Julia", rol: "riesgos", explica: "Vigila la exposición: cuántas posiciones hay abiertas y hacia qué lado. Si todas apuestan lo mismo, avisa."}, SILLAS_NORTE[0]);
+const EXPLICA_MACRO = {
+  "^GSPC": "Sigue la bolsa (S&P 500 y Nasdaq) y el VIX, el «índice del miedo». Con ellos decide si el mercado está en RISK-ON o RISK-OFF.",
+  "DX-Y.NYB": "Sigue las divisas: el índice del dólar (DXY) y el EUR/USD. Un dólar fuerte suele poner las cosas difíciles a los activos de riesgo.",
+  "GC=F": "Sigue las materias primas: el oro (el refugio clásico) y el petróleo (clave para la inflación).",
+  "^TNX": "Sigue los tipos de interés: la rentabilidad del bono de EE. UU. a 10 años y el sentimiento cripto (Fear & Greed).",
+};
+const MACROS = [["Rocío", "Bolsa"], ["Adrián", "Divisas"], ["Laia", "Materias primas"], ["Samuel", "Tipos y sentimiento"]].map(([n, area], i) =>
+  empleado({nombre: n, rol: "macro", area, ticker: MACRO_TICKERS[i], puesto: "Macro · " + area, explica: EXPLICA_MACRO[MACRO_TICKERS[i]] + " Ojo: es contexto para el comité, las estrategias no usan estos datos."}, PUESTOS_MACRO[i]));
+const NOMBRES_TRADERS = ["Lucía", "Mateo", "Aitana", "Leo", "Martina", "Unai", "Alba", "Gael", "Carla", "Nico", "Emma", "Izan", "Olivia", "Teo", "Lola", "Enzo", "Jana", "Biel", "Ainhoa", "Rayan", "Candela", "Omar", "Valeria", "Joel"];
+const traders = new Map();
+
+// ---- dibujo de una persona (en coordenadas del mundo) ----
+function persona(a) {
+  const [fx, fy] = iso(a.x, a.y, a.z);
+  const sentado = a.postura === "sentado";
+  const frente = a.mira === "s" || a.mira === "e";
+  const paso = a.andando ? Math.sin(a.fase * 10) : 0;
+  const bote = a.andando ? Math.abs(Math.cos(a.fase * 10)) * 1.3 : 0;
+  const teclea = sentado && a.tecleando;
+  ctx.fillStyle = "rgba(0,0,0,.22)"; ctx.beginPath(); ctx.ellipse(fx, fy, 8, 3.8, 0, 0, TAU); ctx.fill();
+  const cadera = fy - (sentado ? 10 : 12) - bote;
+  if (!sentado) {
+    ctx.fillStyle = a.pantalon;
+    ctx.fillRect(fx - 4.6 + paso * 1.4, cadera, 3.8, 12 + bote - Math.max(0, paso) * 1.6);
+    ctx.fillRect(fx + .8 - paso * 1.4, cadera, 3.8, 12 + bote - Math.max(0, -paso) * 1.6);
+    ctx.fillStyle = "#1a1c22";
+    ctx.fillRect(fx - 5 + paso * 1.4, fy - 1.6 - Math.max(0, paso) * 1.6, 4.6, 2.2);
+    ctx.fillRect(fx + .5 - paso * 1.4, fy - 1.6 - Math.max(0, -paso) * 1.6, 4.6, 2.2);
+  } else if (frente) {
+    ctx.fillStyle = a.pantalon; ctx.fillRect(fx - 5, cadera - 1, 10, 5);
+  }
+  const tw = 13, th = 14, top = cadera - th;
+  // brazos
+  ctx.fillStyle = shade(a.camisa, .82);
+  if (teclea) {
+    const t1 = Math.sin(T * 16 + a.semilla) * .8, t2 = Math.sin(T * 16 + a.semilla + 2) * .8;
+    ctx.fillRect(fx - tw / 2 - 1.5, top + 3 + t1, 3.2, 9); ctx.fillRect(fx + tw / 2 - 1.7, top + 3 + t2, 3.2, 9);
+  } else {
+    ctx.fillRect(fx - tw / 2 - 2.2, top + 2 - paso * 1.2, 3.2, 11); ctx.fillRect(fx + tw / 2 - 1, top + 2 + paso * 1.2, 3.2, 11);
+  }
+  // torso
+  ctx.fillStyle = a.camisa; rr(fx - tw / 2, top, tw, th + (a.rol === "prueba" ? 3 : 0), 4); ctx.fill();
+  if (a.accesorio === "corbata" || a.accesorio === "corbata_oro") {
+    if (frente) { ctx.fillStyle = "#e8ecf2"; ctx.beginPath(); ctx.moveTo(fx - 3, top); ctx.lineTo(fx + 3, top); ctx.lineTo(fx, top + 4); ctx.fill();
+      ctx.fillStyle = a.accesorio === "corbata_oro" ? "#f5c542" : "#d6334f"; ctx.fillRect(fx - 1, top + 2, 2, 8); }
+  }
+  if (a.rol === "minero") { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(fx - tw / 2, top + 7, tw, 2); }
+  if (a.rol === "prueba" && frente) { ctx.fillStyle = "#cfd6df"; ctx.fillRect(fx - .5, top + 1, 1, th); }
+  // cabeza
+  const hy = top - 6.8;
+  ctx.fillStyle = shade(a.piel, .9); ctx.fillRect(fx - 2, top - 2.5, 4, 3);
+  circulo(fx, hy, 6.4, a.piel);
+  ctx.fillStyle = a.pelo;
+  const pe = a.peinado;
+  if (pe !== "rapado" || !frente) {
+    ctx.beginPath();
+    if (frente) ctx.arc(fx, hy - .8, 6.7, Math.PI * 1.02, Math.PI * 1.98);
+    else ctx.arc(fx, hy - .3, 6.8, Math.PI * .9, Math.PI * 2.1);
+    ctx.fill();
+    if (!frente) circulo(fx, hy + .6, 6, a.pelo);
+  } else { ctx.beginPath(); ctx.arc(fx, hy - 1.5, 6.4, Math.PI * 1.15, Math.PI * 1.85); ctx.fill(); }
+  if (pe === "largo") { ctx.fillRect(fx - 7, hy - 1, 3, 10); ctx.fillRect(fx + 4, hy - 1, 3, 10); if (!frente) ctx.fillRect(fx - 6, hy, 12, 9); }
+  if (pe === "moño") circulo(fx, hy - 8.2, 3.3, a.pelo);
+  if (pe === "coleta" && !frente) ctx.fillRect(fx - 1.5, hy + 3, 3, 8);
+  if (pe === "rizado") for (let i = 0; i < 5; i++) circulo(fx - 5 + i * 2.5, hy - 5.5 + (i % 2), 2.4, a.pelo);
+  if (frente) {
+    ctx.fillStyle = "#1b1b1f"; ctx.fillRect(fx - 3, hy + .3, 1.6, 1.8); ctx.fillRect(fx + 1.4, hy + .3, 1.6, 1.8);
+    if (a.burbuja && T < a.burbuja.t1 && Math.sin(T * 18) > 0) { ctx.fillStyle = "#7a3b32"; ctx.fillRect(fx - 1.2, hy + 3.4, 2.4, 1.3); }
+  }
+  // accesorios de cabeza
+  if (a.accesorio === "casco") {
+    ctx.fillStyle = "#ffcc1f"; ctx.beginPath(); ctx.arc(fx, hy - 1.4, 7.1, Math.PI, TAU); ctx.fill(); ctx.fillRect(fx - 8, hy - 1.6, 16, 1.8);
+    if (frente) { circulo(fx, hy - 4.8, 1.6, "#fffbe0"); brillo(a.x, a.y, 1.3, 16, "#fff2a8", .6); }
+  } else if (a.accesorio === "gafas_pasta" && frente) {
+    ctx.strokeStyle = "#101010"; ctx.lineWidth = 1.1; ctx.strokeRect(fx - 4.4, hy - .6, 3.6, 2.8); ctx.strokeRect(fx + .8, hy - .6, 3.6, 2.8);
+  } else if (a.accesorio === "gafas" && frente) {
+    ctx.fillStyle = "rgba(92,192,255,.85)"; ctx.fillRect(fx - 5, hy - .6, 10, 3);
+  } else if (a.accesorio === "cascos") {
+    ctx.strokeStyle = "#16181d"; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(fx, hy, 7.2, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke();
+    circulo(fx - 6.8, hy + .5, 2.2, "#16181d"); circulo(fx + 6.8, hy + .5, 2.2, "#16181d");
+    if (frente) { ctx.beginPath(); ctx.moveTo(fx - 6.5, hy + 2); ctx.quadraticCurveTo(fx - 5, hy + 6, fx - 1.5, hy + 5); ctx.stroke(); }
+  }
+  // zona clicable (en pantalla) para el ratón
+  a.caja = [fx - 9, hy - 10, fx + 9, fy + 2];
+}
+
+function gato() {
+  const [px, py] = iso(GATO.x, GATO.y, GATO.z);
+  const respira = Math.sin(T * 2) * .6;
+  ctx.fillStyle = "#e28f3e"; ctx.beginPath(); ctx.ellipse(px, py - 4, 9 + respira * .3, 5 + respira * .3, 0, 0, TAU); ctx.fill();
+  circulo(px + 7, py - 7, 4, "#e28f3e");
+  ctx.fillStyle = "#e28f3e"; ctx.beginPath(); ctx.moveTo(px + 4.5, py - 10); ctx.lineTo(px + 5.5, py - 13.5); ctx.lineTo(px + 7.5, py - 10.5); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(px + 8, py - 10.5); ctx.lineTo(px + 10.5, py - 13); ctx.lineTo(px + 10.5, py - 9.5); ctx.fill();
+  ctx.strokeStyle = "#b86a26"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px - 8, py - 3); ctx.quadraticCurveTo(px - 13, py + 2, px - 5, py + 1); ctx.stroke();
+  ctx.fillStyle = "#b86a26"; for (let i = 0; i < 3; i++) ctx.fillRect(px - 5 + i * 4, py - 8.5, 1.5, 3);
+  GATO.caja = [px - 12, py - 14, px + 12, py + 2];
+}
+function robot(dt) {
+  ROBOT.x += ROBOT.dir * dt * .7;
+  if (ROBOT.x > 27.5) ROBOT.dir = -1; if (ROBOT.x < 1.8) ROBOT.dir = 1;
+}
+function dibujarRobot() {
+  const [px, py] = iso(ROBOT.x, ROBOT.y, 0);
+  ctx.fillStyle = "rgba(0,0,0,.3)"; ctx.beginPath(); ctx.ellipse(px, py, 9, 4.5, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = "#2d323c"; ctx.beginPath(); ctx.ellipse(px, py - 3, 9, 4.5, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = "#3d4450"; ctx.beginPath(); ctx.ellipse(px, py - 5, 8, 4, 0, 0, TAU); ctx.fill();
+  circulo(px + ROBOT.dir * 3, py - 6, 1.3, Math.sin(T * 6) > 0 ? "#2ee6a6" : "#11453a");
+  brillo(ROBOT.x, ROBOT.y, .2, 14, "#2ee6a6", .35);
+}
+
+// ========================================================== EFECTOS ==
+const paquetes = [], colaPaquetes = [], particulas = [], flotantes = [];
+let ultimoPaquete = 0, actividadLab = -99, ascensor = 0, ascensorHasta = 0;
+function puff(x, y, z, color, n = 10) {
+  for (let i = 0; i < n; i++) particulas.push({x, y, z, vx: rand(-.6, .6), vy: rand(-.6, .6), vz: rand(.4, 1.4), vida: rand(.5, .9), t: 0, color, r: rand(1.5, 3)});
+}
+function confeti(x, y, z) {
+  for (let i = 0; i < 60; i++) particulas.push({x, y, z, vx: rand(-1.5, 1.5), vy: rand(-1.5, 1.5), vz: rand(1.5, 3.5), g: 4, vida: rand(1.2, 2), t: 0,
+    color: pick(["#ffcf5a", "#d4ff3a", "#2ee6a6", "#5cc0ff", "#ff5a76", "#b58cff"]), r: rand(1.5, 2.6), cuadrado: true});
+}
+function flotante(x, y, z, texto, color) { flotantes.push({x, y, z, texto, color, t: 0}); }
+function encolarPaquetes(antes, ahora) {
+  const d = k => Math.max(0, (ahora[k] || 0) - (antes[k] || 0));
+  const llegan = d("Rentables en muestra"), aprobadas = d("Distinta a las del banco");
+  if (!llegan && !aprobadas) return;
+  const grupos = [];
+  let vivos = llegan;
+  PRUEBAS.forEach((p, i) => { const pasan = d(p); grupos.push([i, Math.max(0, vivos - pasan)]); vivos = pasan; });
+  grupos.push([6, Math.max(0, vivos - aprobadas)]);
+  grupos.push([7, aprobadas]);
+  const total = grupos.reduce((s, g) => s + g[1], 0), escala = total > 16 ? 16 / total : 1;
+  const lista = [];
+  for (const [destino, n] of grupos) {
+    let m = destino === 7 ? n : Math.round(n * escala);
+    if (n > 0 && m === 0 && destino >= 2) m = 1;
+    for (let i = 0; i < m; i++) lista.push(destino);
+  }
+  for (let i = lista.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [lista[i], lista[j]] = [lista[j], lista[i]]; }
+  let t = Math.max(T, ultimoPaquete);
+  for (const destino of lista) { t += rand(.18, .35); colaPaquetes.push({destino, t}); }
+  ultimoPaquete = t;
+}
+function moverPaquetes(dt) {
+  while (colaPaquetes.length && colaPaquetes[0].t <= T) {
+    const {destino} = colaPaquetes.shift();
+    paquetes.push({x: X_CINTA0 + .1, y: Y_CINTA + .25, z: .36, destino, est: 0, espera: 0, fase: "cinta"});
+    actividadLab = T;
+  }
+  for (const p of paquetes) {
+    if (p.fase === "cinta") {
+      if (p.espera > 0) { p.espera -= dt; if (p.espera <= 0 && p.cae) p.fase = "cae"; continue; }
+      p.x += 2.6 * dt;
+      if (p.est < 6 && p.x >= ESTACIONES[p.est].bx) {
+        const e = ESTACIONES[p.est], falla = p.destino === p.est;
+        p.x = e.bx;
+        e.flash = {color: falla ? "#ff5a76" : "#2ee6a6", hasta: T + .45};
+        PROBADORES[p.est].tecleoHasta = T + 1.5;
+        if (falla) { p.espera = .5; p.cae = true; } else { p.espera = .14; p.est++; }
+      }
+      if (p.x > TUBO.x0) p.z = lerp(.36, .5, clamp((p.x - TUBO.x0) / .4, 0, 1));
+      if (p.est >= 6 && p.x >= RECEPTOR.x + .3) {
+        if (p.destino === 6) { puff(RECEPTOR.x + .35, RECEPTOR.y + .4, 1, "#ff5a76", 14); p.muerto = true; }
+        else { p.fase = "vuelo"; p.t0 = T; p.x0 = p.x; p.y0 = p.y; const l = lingote(Math.min((S && S.banco || []).length, 47)); p.x1 = l.x + .2; p.y1 = l.y + .1; p.z1 = l.z + .2; }
+      }
+    } else if (p.fase === "cae") {
+      p.y += 1.6 * dt; p.z -= 2 * dt;
+      if (p.z <= .2) { puff(p.x, 7.3, .45, "#ff5a76"); p.muerto = true; }
+    } else if (p.fase === "vuelo") {
+      const k = (T - p.t0) / 1.1;
+      p.x = lerp(p.x0, p.x1, k); p.y = lerp(p.y0, p.y1, k); p.z = lerp(1, p.z1, k) + Math.sin(k * Math.PI) * 1.6;
+      if (k >= 1) { confeti(p.x1, p.y1, p.z1 + .3); destelloBanco = 1; giroCamara += Math.PI * 2; p.muerto = true; }
+    }
+  }
+  for (let i = paquetes.length - 1; i >= 0; i--) if (paquetes[i].muerto) paquetes.splice(i, 1);
+}
+function dibujarPaquete(p) {
+  const oro = p.destino === 7;
+  const c = oro ? "#ffcf5a" : "#d4ff3a";
+  caja(p.x - .11, p.y - .11, p.z, .22, .22, .2, c, {top: shade(c, 1.2)});
+  brillo(p.x, p.y, p.z + .1, oro ? 30 : 18, c, oro ? .9 : .55);
+}
+function moverParticulas(dt) {
+  for (const q of particulas) { q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.z += q.vz * dt; q.vz -= (q.g || 1.2) * dt; if (q.z < 0) { q.z = 0; q.vz *= -.3; q.vx *= .6; q.vy *= .6; } }
+  for (let i = particulas.length - 1; i >= 0; i--) if (particulas[i].t > particulas[i].vida) particulas.splice(i, 1);
+  for (const f of flotantes) f.t += dt;
+  for (let i = flotantes.length - 1; i >= 0; i--) if (flotantes[i].t > 2.6) flotantes.splice(i, 1);
+  // vapor de la cafetera
+  if (Math.random() < dt * 5) particulas.push({x: 18.78 + rand(-.05, .05), y: 17.45, z: 1.02, vx: rand(-.05, .05), vy: 0, vz: .5, g: -.1, vida: 1.6, t: 0, color: "#ffffff", r: 2.2, vapor: true});
+  // Zzz del gato
+  if (Math.random() < dt * .6) particulas.push({x: GATO.x + .1, y: GATO.y - .1, z: GATO.z + .45, vx: .1, vy: -.05, vz: .25, g: 0, vida: 2.2, t: 0, color: "#ffffff", texto: "z"});
+  if (S && S.mineria && S.mineria.estado === "minando" && Math.random() < dt * 14)
+    particulas.push({x: HOLO.x + rand(-.25, .25), y: HOLO.y + rand(-.25, .25), z: .3, vx: 0, vy: 0, vz: rand(.6, 1.3), g: 0, vida: 1.6, t: 0, color: "#3effd0", r: 1.4});
+  destelloBanco = Math.max(0, destelloBanco - dt * .8);
+}
+function dibujarParticula(q) {
+  const [px, py] = iso(q.x, q.y, q.z), a = 1 - q.t / q.vida;
+  if (q.texto) { ctx.fillStyle = `rgba(255,255,255,${a * .8})`; ctx.font = "700 9px Inter"; ctx.fillText(q.texto, px, py); return; }
+  if (q.vapor) { ctx.fillStyle = `rgba(255,255,255,${a * .35})`; ctx.beginPath(); ctx.arc(px, py, q.r + q.t * 4, 0, TAU); ctx.fill(); return; }
+  ctx.fillStyle = rgba(q.color, a);
+  if (q.cuadrado) ctx.fillRect(px - q.r, py - q.r, q.r * 2, q.r * 1.4); else { ctx.beginPath(); ctx.arc(px, py, q.r, 0, TAU); ctx.fill(); }
+}
+function holograma() {
+  const act = S && S.mineria && S.mineria.estado === "minando";
+  caja(HOLO.x - .38, HOLO.y - .38, 0, .76, .76, .2, "#1b212b", {top: "#2a3342"});
+  const [bx, by] = iso(HOLO.x, HOLO.y, .22);
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  const g = ctx.createLinearGradient(bx, by, bx, by - 95);
+  g.addColorStop(0, act ? "rgba(62,255,208,.35)" : "rgba(62,255,208,.08)"); g.addColorStop(1, "rgba(62,255,208,0)");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(bx - 12, by); ctx.lineTo(bx - 24, by - 95); ctx.lineTo(bx + 24, by - 95); ctx.lineTo(bx + 12, by); ctx.fill();
+  const vel = act ? 2.4 : .5;
+  for (let i = 0; i < 26; i++) {
+    const h = i / 26, ang = T * vel + h * TAU * 1.4;
+    for (const f of [0, Math.PI]) {
+      const s = Math.sin(ang + f), px = bx + Math.cos(ang + f) * 15, py = by - 8 - h * 78 + s * 4;
+      ctx.fillStyle = s > 0 ? `rgba(62,255,208,${act ? .95 : .45})` : `rgba(62,255,208,${act ? .4 : .18})`;
+      ctx.beginPath(); ctx.arc(px, py, s > 0 ? 2.1 : 1.4, 0, TAU); ctx.fill();
+    }
+    if (i % 3 === 0) { ctx.strokeStyle = `rgba(62,255,208,${act ? .25 : .1})`; ctx.beginPath(); ctx.moveTo(bx + Math.cos(ang) * 15, by - 8 - h * 78 + Math.sin(ang) * 4); ctx.lineTo(bx - Math.cos(ang) * 15, by - 8 - h * 78 - Math.sin(ang) * 4); ctx.stroke(); }
+  }
+  ctx.restore();
+  const m = S && S.mineria || {};
+  ctx.textAlign = "center";
+  ctx.fillStyle = act ? "#3effd0" : "rgba(62,255,208,.5)"; ctx.font = "800 9px JetBrains Mono";
+  ctx.fillText(act ? `GEN ${m.generacion || 0}/${m.generaciones || 0}` : (m.estado === "descanso" ? "EN PAUSA" : "EN ESPERA"), bx, by - 102);
+  ctx.font = "600 7px JetBrains Mono"; ctx.fillText(act ? (m.simbolo || "") : "", bx, by - 92);
+  ctx.textAlign = "start";
+  brillo(HOLO.x, HOLO.y, 1.2, 70, "#3effd0", act ? .45 : .12);
+}
+function guirnalda() {
+  ctx.strokeStyle = "rgba(40,40,40,.8)"; ctx.lineWidth = 1;
+  ctx.beginPath(); for (const [x, y] of BOMBILLAS) { const [px, py] = iso(x, y, 1.9 - Math.abs(Math.sin(x * 5.7 + y * 5.7)) * .15); ctx.lineTo(px, py); } ctx.stroke();
+  BOMBILLAS.forEach(([x, y], i) => {
+    const z = 1.9 - Math.abs(Math.sin(x * 5.7 + y * 5.7)) * .15, [px, py] = iso(x, y, z), c = ["#ffcf5a", "#ff8a5c", "#d4ff3a", "#5cc0ff"][i % 4];
+    circulo(px, py + 2, 2.2, noche > .3 ? c : shade(c, .7));
+    if (i % 2 === 0) brillo(x, y, z - .05, 16, c, .25 + noche * .5);
+  });
+}
+function pelotaPingPong() {
+  const a = SITIOS[6].ocupante, b = SITIOS[7].ocupante;
+  if (!a || !b || a.andando || b.andando) return null;
+  const k = (T * .9) % 2, ida = k < 1, t = ida ? k : 2 - k;
+  return {x: lerp(19.5, 22.1, t), y: 20.4 + Math.sin(t * 7) * .15, z: .5 + Math.abs(Math.sin(t * Math.PI * 2)) * .5};
+}
+
+// ========================================================== PAREDES ==
+const EDIFICIOS = Array.from({length: 40}, (_, i) => ({x: i * 27 + rand(-6, 6), w: rand(16, 30), h: rand(30, 110), v: Array.from({length: 30}, () => Math.random() < .55)}));
+function cielo() {
+  const h = horaDelDia();
+  if (h > 6.5 && h < 8) return ["#f7a86b", "#6f7fc9"];
+  if (h >= 8 && h < 18.5) return ["#8fd0ff", "#dff2ff"];
+  if (h >= 18.5 && h < 20.5) return ["#ff8b5c", "#5b3f8f"];
+  return ["#070b1f", "#1b2150"];
+}
+function ventana(w, h) {
+  const [c1, c2] = cielo();
+  const g = ctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, c2); g.addColorStop(1, c1);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  if (noche > .5) for (let i = 0; i < 25; i++) { ctx.fillStyle = `rgba(255,255,255,${.3 + (i * 37 % 10) / 15})`; ctx.fillRect((i * 97) % w, (i * 53) % (h * .5), 1.5, 1.5); }
+  for (const b of EDIFICIOS) {
+    if (b.x > w) break;
+    ctx.fillStyle = noche > .5 ? "#0c1024" : "rgba(40,60,90,.55)"; ctx.fillRect(b.x, h - b.h, b.w, b.h);
+    if (noche > .3) for (let k = 0; k < b.v.length; k++) if (b.v[k]) { const cx = b.x + 3 + (k % 3) * (b.w / 3.2), cy = h - b.h + 5 + Math.floor(k / 3) * 9; if (cy < h - 3) { ctx.fillStyle = "rgba(255,210,120,.8)"; ctx.fillRect(cx, cy, 3, 4); } }
+  }
+  ctx.strokeStyle = "#2b313b"; ctx.lineWidth = 5; ctx.strokeRect(0, 0, w, h);
+  ctx.beginPath(); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h); ctx.stroke();
+}
+function paredes() {
+  const colorMuro = "#262b34";
+  caja(-.25, -.25, 0, W + .25, .25, ALTO_MURO, colorMuro, {izq: "#2d333d", top: "#3a414d"});
+  caja(-.25, 0, 0, .25, D, ALTO_MURO, colorMuro, {der: "#2a3039", top: "#3a414d"});
+  // zócalo neón
+  caraY(0, .002, .12, () => { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 0, W * 100, 3); });
+  caraX(.002, D, .12, () => { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 0, D * 100, 3); });
+  // MINERÍA: letrero
+  caraY(.3, .002, 2.34, () => { ctx.fillStyle = "#ffc24a"; ctx.font = "900 20px Inter"; ctx.fillText("MINERÍA ALGORÍTMICA", 8, 22); });
+  // LABORATORIO: ventanas y cartel
+  caraY(10.6, .002, 2.1, () => { ventana(420, 130); });
+  caraY(15.4, .002, 2.1, () => {
+    ctx.fillStyle = "#f4f6f9"; ctx.fillRect(0, 0, 250, 130);
+    ctx.fillStyle = "#0e1a2b"; ctx.font = "900 20px Inter"; ctx.fillText("¿SUERTE O VENTAJA?", 12, 30);
+    ctx.font = "600 11px Inter"; ctx.fillStyle = "#44556d";
+    ["Si pruebas miles de estrategias al azar,", "algunas parecerán geniales por casualidad.", "Aquí intentamos pillarlas."].forEach((l, i) => ctx.fillText(l, 12, 56 + i * 17));
+  });
+  caraY(18.1, .002, 2.1, () => { ventana(270, 130); });
+  // MACRO: gran panel de indicadores
+  caraY(30.25, .002, 2.32, () => pantallaMacro(750, 200));
+  brillo(34, .3, 1.6, 170, "#5cc0ff", .22);
+  // CÁMARA: puerta acorazada
+  caraY(21.2, .002, 2.35, () => {
+    ctx.fillStyle = "#2f2a1d"; ctx.fillRect(0, 0, 860, 235);
+    const cx = 520, cy = 118;
+    const g = ctx.createRadialGradient(cx - 20, cy - 20, 10, cx, cy, 100); g.addColorStop(0, "#fff0b8"); g.addColorStop(.5, "#d9a93a"); g.addColorStop(1, "#7a5a18");
+    ctx.fillStyle = "#1a1609"; ctx.beginPath(); ctx.arc(cx, cy, 104, 0, TAU); ctx.fill();
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, 96, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#b8b8be"; ctx.beginPath(); ctx.arc(cx, cy, 70, 0, TAU); ctx.fill();
+    ctx.strokeStyle = "#6b6b73"; ctx.lineWidth = 4;
+    for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; circulo(cx + Math.cos(a) * 84, cy + Math.sin(a) * 84, 5, "#5a4413"); }
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(giroCamara * (1 - Math.exp(-T)) + T * .05);
+    ctx.strokeStyle = "#3d3d44"; ctx.lineWidth = 9;
+    for (let i = 0; i < 3; i++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(-50, 0); ctx.lineTo(50, 0); ctx.stroke(); }
+    circulo(0, 0, 14, "#3d3d44"); ctx.restore();
+    ctx.fillStyle = "#ffcf5a"; ctx.font = "900 20px Inter"; ctx.fillText("CÁMARA DEL BANCO", 30, 40);
+  });
+  // PARED OESTE: pantalla de minería, ascensor y videowall
+  caraX(.002, 7.6, 2.2, () => pantallaMineria(600, 150));
+  caraX(.002, 11, 2.35, () => {
+    ctx.fillStyle = "#1a1e26"; ctx.fillRect(10, 30, 180, 205);
+    const ab = ascensor * 42;
+    ctx.fillStyle = "#0b0d11"; ctx.fillRect(28, 50, 144, 185);
+    ctx.fillStyle = "#8b95a5"; ctx.fillRect(28 - ab, 50, 72, 185); ctx.fillRect(100 + ab, 50, 72, 185);
+    ctx.fillStyle = "#6b7585"; ctx.fillRect(99 + ab, 50, 2, 185);
+    ctx.fillStyle = "#d4ff3a"; ctx.font = "900 17px Inter"; ctx.fillText("TRADING FLOOR", 30, 22);
+    ctx.fillStyle = ascensor > .1 ? "#2ee6a6" : "#394252"; ctx.fillRect(92, 36, 16, 8);
+  });
+  brillo(.1, 10, 2.1, 60, "#d4ff3a", .3);
+  const precios = S && S.papel && S.papel.precios || {};
+  const simbolos = Object.keys(precios).slice(0, 3);
+  const paneles = [[23.6, 0], [20.5, 1], [17.4, 2], [14.3, 3]];
+  for (const [yFin, i] of paneles) {
+    caraX(.002, yFin, 2.25, () => {
+      ctx.fillStyle = "#07090e"; ctx.fillRect(0, 0, 300, 160);
+      ctx.strokeStyle = "#1e2430"; ctx.lineWidth = 3; ctx.strokeRect(0, 0, 300, 160);
+      if (i < 3) grafico(simbolos[i], precios[simbolos[i]], 300, 160); else resumenPared(300, 160);
+    });
+    brillo(.1, yFin - 1.5, 1.5, 110, i < 3 && simbolos[i] && precios[simbolos[i]].cambio_24h_pct < 0 ? "#ff5a76" : "#2ee6a6", .18);
+  }
+}
+function grafico(sim, p, w, h) {
+  if (!sim || !p) { ctx.fillStyle = "#394252"; ctx.font = "700 14px Inter"; ctx.fillText("Sin precios todavía", 20, 80); return; }
+  const s = p.serie || [], sube = p.cambio_24h_pct >= 0, col = sube ? "#2ee6a6" : "#ff5a76";
+  ctx.fillStyle = "#e9edf3"; ctx.font = "800 17px JetBrains Mono"; ctx.fillText(moneda(sim) + "/USDT", 12, 24);
+  ctx.fillStyle = col; ctx.fillText(fmt.precio(p.precio), 12, 46);
+  ctx.font = "700 12px JetBrains Mono"; ctx.fillText(fmt.pct(p.cambio_24h_pct) + " 24h", 190, 24);
+  if (s.length > 1) {
+    const lo = Math.min(...s), hi = Math.max(...s), x = k => 10 + k * (w - 20) / (s.length - 1), y = v => h - 12 - (v - lo) / (hi - lo || 1) * (h - 70);
+    const g = ctx.createLinearGradient(0, 56, 0, h); g.addColorStop(0, rgba(col, .35)); g.addColorStop(1, rgba(col, 0));
+    ctx.beginPath(); s.forEach((v, k) => ctx.lineTo(x(k), y(v))); ctx.lineTo(x(s.length - 1), h - 8); ctx.lineTo(x(0), h - 8); ctx.fillStyle = g; ctx.fill();
+    ctx.beginPath(); s.forEach((v, k) => ctx.lineTo(x(k), y(v))); ctx.strokeStyle = col; ctx.lineWidth = 2.2; ctx.stroke();
+    const k = s.length - 1; circulo(x(k), y(s[k]), 4 + Math.sin(T * 5), col);
+  }
+}
+function totales() {
+  const ts = Object.values(S && S.papel && S.papel.estrategias || {});
+  const cap = S && S.capital_por_estrategia || 1000;
+  const patrimonio = ts.reduce((s, t) => s + (t.patrimonio || cap), 0), inicial = cap * ts.length;
+  const abiertas = ts.filter(t => t.posicion), r = S && S.papel && S.papel.resumen;
+  return {n: ts.length, patrimonio: r ? r.patrimonio : patrimonio, resultado: r ? r.resultado : patrimonio - inicial,
+    pct: r ? r.resultado_pct : inicial ? (patrimonio / inicial - 1) * 100 : 0, hoy: r ? r.hoy : 0, hoyPct: r ? r.hoy_pct : 0,
+    abiertas: abiertas.length, largos: abiertas.filter(t => t.direccion === "largo").length, cortos: abiertas.filter(t => t.direccion !== "largo").length};
+}
+function resumenPared(w, h) {
+  const t = totales(), col = t.resultado >= 0 ? "#2ee6a6" : "#ff5a76";
+  ctx.fillStyle = "#8a94a6"; ctx.font = "700 11px Inter"; ctx.fillText("RESULTADO DEL FONDO · PAPEL", 12, 20);
+  ctx.fillStyle = col; ctx.font = "800 24px JetBrains Mono"; ctx.fillText(t.n ? `${t.resultado >= 0 ? "+" : "−"}${NF2.format(Math.abs(t.resultado))} $` : "—", 12, 48);
+  ctx.font = "700 12px JetBrains Mono"; ctx.fillStyle = t.hoy >= 0 ? "#2ee6a6" : "#ff5a76";
+  ctx.fillText(t.n ? `hoy ${t.hoy >= 0 ? "+" : "−"}${NF2.format(Math.abs(t.hoy))} $` : "", 190, 48);
+  const c = (S && S.papel && S.papel.curva || []).slice(-168);
+  if (c.length > 1) {
+    const v = c.map(p => p[1]), lo = Math.min(0, ...v), hi = Math.max(0, ...v), X = i => 10 + i * (w - 20) / (c.length - 1), Y = x => 150 - (x - lo) / (hi - lo || 1) * 80;
+    ctx.strokeStyle = "rgba(255,255,255,.2)"; ctx.setLineDash([4, 5]); ctx.beginPath(); ctx.moveTo(10, Y(0)); ctx.lineTo(w - 10, Y(0)); ctx.stroke(); ctx.setLineDash([]);
+    const g = ctx.createLinearGradient(0, 60, 0, 150); g.addColorStop(0, rgba(col, .4)); g.addColorStop(1, rgba(col, 0));
+    ctx.beginPath(); c.forEach((p, i) => ctx.lineTo(X(i), Y(p[1]))); ctx.lineTo(X(c.length - 1), Y(0)); ctx.lineTo(X(0), Y(0)); ctx.fillStyle = g; ctx.fill();
+    ctx.beginPath(); c.forEach((p, i) => ctx.lineTo(X(i), Y(p[1]))); ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.stroke();
+    circulo(X(c.length - 1), Y(v[v.length - 1]), 4 + Math.sin(T * 5), col);
+  } else { ctx.fillStyle = "#8a94a6"; ctx.font = "600 12px Inter"; ctx.fillText(`${t.n} traders · dinero ficticio`, 12, 110); }
+}
+function pantallaMineria(w, h) {
+  const m = S && S.mineria || {}, e = m.embudo || {}, act = m.estado === "minando";
+  ctx.fillStyle = "#0a0c10"; ctx.fillRect(0, 0, w, h); ctx.strokeStyle = "#2a2f38"; ctx.lineWidth = 4; ctx.strokeRect(0, 0, w, h);
+  ctx.fillStyle = "#ffc24a"; ctx.font = "800 16px JetBrains Mono";
+  ctx.fillText(act ? `MINANDO ${m.simbolo || ""}` : m.estado === "descanso" ? "RONDA TERMINADA · PAUSA" : "MINERÍA EN ESPERA", 14, 26);
+  const g = m.generaciones ? (m.generacion || 0) / m.generaciones : 0;
+  ctx.fillStyle = "#1c222c"; ctx.fillRect(14, 38, 300, 10); ctx.fillStyle = "#ffc24a"; ctx.fillRect(14, 38, 300 * (act ? g : 0), 10);
+  ctx.fillStyle = "#8a94a6"; ctx.font = "600 11px Inter"; ctx.fillText(act ? `generación ${m.generacion}/${m.generaciones}` : "", 322, 47);
+  const filas = [["evaluadas", e["Generadas"] || 0, "#e9edf3"], ["rentables en muestra", e["Rentables en muestra"] || 0, "#ffc24a"], ["aprobadas", e["Distinta a las del banco"] || 0, "#2ee6a6"]];
+  filas.forEach(([t, v, c], i) => { ctx.fillStyle = c; ctx.font = "800 22px JetBrains Mono"; ctx.fillText(fmt.n(v), 14 + i * 190, 88); ctx.fillStyle = "#8a94a6"; ctx.font = "600 11px Inter"; ctx.fillText(t, 14 + i * 190, 104); });
+  ctx.font = "600 9px JetBrains Mono";
+  for (let i = 0; i < 24; i++) { const s = Math.floor(T * (act ? 4 : .3)) + i * 7; ctx.fillStyle = `rgba(255,194,74,${act ? .35 : .1})`; ctx.fillText("E-" + ((s * 2654435761) >>> 0).toString(16).slice(0, 6).toUpperCase(), 14 + (i % 8) * 72, 124 + Math.floor(i / 8) * 11); }
+  brillo(.1, 4.6, 1.5, 120, "#ffc24a", act ? .2 : .06);
+}
+function pantallaMacro(w, h) {
+  const m = S && S.macro || {}, ind = m.indicadores || {}, fng = m.fear_greed;
+  ctx.fillStyle = "#06101a"; ctx.fillRect(0, 0, w, h); ctx.strokeStyle = "#1c3346"; ctx.lineWidth = 4; ctx.strokeRect(0, 0, w, h);
+  ctx.fillStyle = "#5cc0ff"; ctx.font = "900 17px Inter"; ctx.fillText("MACROECONOMÍA", 14, 26);
+  const reg = m.regimen || "SIN DATOS", col = reg === "RISK-ON" ? "#2ee6a6" : reg === "RISK-OFF" ? "#ff5a76" : "#cfd6e0";
+  ctx.fillStyle = rgba(col, .15); rr(14, 38, 150, 40, 8); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = col; ctx.font = "900 22px JetBrains Mono"; ctx.fillText(reg, 24, 66);
+  // indicador Fear & Greed (semicírculo con aguja)
+  const gx = 90, gy = 170, gr = 62;
+  const tramos = [["#ff5a76", 0, 25], ["#ff9a5c", 25, 45], ["#cfd6e0", 45, 55], ["#a8e05f", 55, 75], ["#2ee6a6", 75, 100]];
+  ctx.lineWidth = 12;
+  for (const [c, a0, a1] of tramos) { ctx.strokeStyle = c; ctx.beginPath(); ctx.arc(gx, gy, gr, Math.PI + a0 / 100 * Math.PI, Math.PI + a1 / 100 * Math.PI); ctx.stroke(); }
+  if (fng) {
+    const ang = Math.PI + fng.valor / 100 * Math.PI + Math.sin(T * 2) * .01;
+    ctx.strokeStyle = "#e9edf3"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(gx + Math.cos(ang) * (gr - 8), gy + Math.sin(ang) * (gr - 8)); ctx.stroke();
+    circulo(gx, gy, 5, "#e9edf3");
+    ctx.textAlign = "center"; ctx.fillStyle = "#e9edf3"; ctx.font = "900 20px JetBrains Mono"; ctx.fillText(fng.valor, gx, gy - 18);
+    ctx.font = "700 10px Inter"; ctx.fillStyle = "#8a94a6"; ctx.fillText("FEAR & GREED · " + fng.clase.toUpperCase(), gx, gy + 18); ctx.textAlign = "start";
+  }
+  // baldosas de indicadores
+  Object.values(ind).slice(0, 8).forEach((d, i) => {
+    const x = 190 + (i % 4) * 138, y = 14 + Math.floor(i / 4) * 92, c = d.dia_pct >= 0 ? "#2ee6a6" : "#ff5a76";
+    ctx.fillStyle = "#0b1824"; rr(x, y, 130, 84, 6); ctx.fill();
+    ctx.fillStyle = "#8aa4bd"; ctx.font = "700 10px Inter"; ctx.fillText(d.nombre.split(" (")[0].toUpperCase(), x + 8, y + 16);
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 16px JetBrains Mono"; ctx.fillText(d.valor >= 100 ? fmt.n(d.valor) : NF2.format(d.valor), x + 8, y + 36);
+    ctx.fillStyle = c; ctx.font = "700 11px JetBrains Mono"; ctx.fillText(fmt.pct(d.dia_pct), x + 8, y + 51);
+    const sr = d.serie, lo = Math.min(...sr), hi = Math.max(...sr);
+    ctx.strokeStyle = c; ctx.lineWidth = 1.4; ctx.beginPath();
+    sr.forEach((v, k) => ctx.lineTo(x + 8 + k * 114 / (sr.length - 1), y + 78 - (v - lo) / (hi - lo || 1) * 20)); ctx.stroke();
+  });
+  if (!m.indicadores) { ctx.fillStyle = "#394252"; ctx.font = "700 14px Inter"; ctx.fillText("Esperando datos macro…", 200, 100); }
+}
+function pantallaRiesgos(w, h) {
+  const t = totales();
+  ctx.fillStyle = "#0b0a14"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#b58cff"; ctx.font = "800 15px Inter"; ctx.fillText("RIESGO · EXPOSICIÓN", 14, 24);
+  const total = Math.max(1, t.largos + t.cortos);
+  ctx.fillStyle = "#1c1a2c"; ctx.fillRect(14, 40, 360, 18);
+  ctx.fillStyle = "#2ee6a6"; ctx.fillRect(14, 40, 360 * t.largos / total, 18);
+  ctx.fillStyle = "#ff5a76"; ctx.fillRect(14 + 360 * t.largos / total, 40, 360 * t.cortos / total, 18);
+  if (!t.abiertas) { ctx.fillStyle = "#1c1a2c"; ctx.fillRect(14, 40, 360, 18); }
+  ctx.fillStyle = "#cfd6e0"; ctx.font = "700 12px Inter";
+  ctx.fillText(`${t.largos} largas · ${t.cortos} cortas · ${t.n - t.abiertas} sin posición`, 14, 78);
+  ctx.fillStyle = t.resultado >= 0 ? "#2ee6a6" : "#ff5a76"; ctx.font = "800 22px JetBrains Mono";
+  ctx.fillText(t.n ? fmt.pct(t.pct) : "—", 400, 58);
+  ctx.fillStyle = "#8a94a6"; ctx.font = "600 11px Inter"; ctx.fillText("resultado del fondo en papel", 400, 78);
+  ctx.fillText(`Banco: ${(S && S.banco || []).length} estrategias`, 14, 100);
+}
+
+// ========================================================= DIBUJO =====
+let sueloCache = null;
+function crearSuelo() {
+  const esc = 2, minX = -D * TW / 2 - 30, maxX = W * TW / 2 + 30, minY = -30, maxY = (W + D) * TH / 2 + 30;
+  const c = document.createElement("canvas");
+  c.width = Math.ceil((maxX - minX) * esc); c.height = Math.ceil((maxY - minY) * esc);
+  const principal = ctx;
+  ctx = c.getContext("2d");
+  ctx.setTransform(esc, 0, 0, esc, -minX * esc, -minY * esc);
+  // grosor del forjado
+  caja(0, 0, -.35, W, D, .35, "#15181e", {izq: "#1b1f27", der: "#12151a"});
+  for (const s of SALAS) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
+    cuad(iso(x, y), iso(x + 1, y), iso(x + 1, y + 1), iso(x, y + 1), (x + y) % 2 ? s.a : s.b);
+  }
+  // pasillo: líneas de neón y flechas
+  plano(0, 9, 0, () => {
+    ctx.fillStyle = "rgba(212,255,58,.8)"; ctx.fillRect(0, 12, W * 100, 3); ctx.fillRect(0, 185, W * 100, 3);
+    ctx.fillStyle = "rgba(212,255,58,.25)";
+    for (let x = 150; x < W * 100; x += 300) { ctx.beginPath(); ctx.moveTo(x, 80); ctx.lineTo(x + 40, 100); ctx.lineTo(x, 120); ctx.fill(); }
+  });
+  // alfombra del descanso y del comité
+  plano(22.8, 19.3, 0, () => { ctx.fillStyle = "rgba(255,138,92,.28)"; rr(0, 0, 690, 380, 60); ctx.fill(); });
+  plano(19.8, 12.3, 0, () => { ctx.fillStyle = "rgba(181,140,255,.16)"; rr(0, 0, 900, 380, 30); ctx.fill(); });
+  // rótulos en el suelo
+  plano(30, 11, 0, () => { ctx.strokeStyle = "rgba(0,0,0,.18)"; ctx.lineWidth = 2; for (let v = 25; v < 1300; v += 50) { ctx.beginPath(); ctx.moveTo(0, v); ctx.lineTo(800, v); ctx.stroke(); } });
+  const rotulos = [["macro", 30.4, 8.7, 105], ["terraza", 30.5, 23.7, 100], ["mineria", .4, 8.7, 105], ["laboratorio", 10.4, 8.7, 88], ["banco", 21.4, 8.7, 105], ["trading", .6, 23.7, 150], ["comite", 18.5, 16.7, 95], ["descanso", 18.5, 23.8, 95]];
+  for (const [id, x, y, t] of rotulos) {
+    const s = SALAS.find(s => s.id === id);
+    plano(x, y, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
+  }
+  ctx = principal;
+  sueloCache = {c, minX, minY, esc};
+}
+
+function horaDelDia() { const d = new Date(); const h = parametros.get("hora"); return h !== null ? +h : d.getHours() + d.getMinutes() / 60; }
+function calcularNoche() {
+  if (modoNoche === "dia") return 0;
+  if (modoNoche === "noche") return 1;
+  const h = horaDelDia();
+  if (h >= 8 && h <= 18.5) return 0;
+  if (h > 18.5 && h < 21) return (h - 18.5) / 2.5;
+  if (h > 6 && h < 8) return 1 - (h - 6) / 2;
+  return 1;
+}
+
+function dibujar() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const g = ctx.createRadialGradient(vw * .4, vh * .5, 50, vw * .4, vh * .5, Math.max(vw, vh) * .8);
+  g.addColorStop(0, noche > .5 ? "#0b1024" : "#141a26"); g.addColorStop(1, "#04060a");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, vw, vh);
+  brillos = [];
+  transformarMundo();
+  const s = sueloCache;
+  ctx.drawImage(s.c, s.minX, s.minY, s.c.width / s.esc, s.c.height / s.esc);
+  paredes();
+  // objetos dinámicos, ordenados por profundidad y mezclados con los estáticos
+  const dinamicos = [];
+  for (const a of agentes) dinamicos.push({k: a.x + a.y + (a.postura === "sentado" ? .02 : .05), f: () => persona(a)});
+  for (const p of paquetes) dinamicos.push({k: p.x + p.y + .3, f: () => dibujarPaquete(p)});
+  for (const q of particulas) dinamicos.push({k: q.x + q.y + .5, f: () => dibujarParticula(q)});
+  dinamicos.push({k: HOLO.x + HOLO.y, f: holograma});
+  dinamicos.push({k: GLOBO.x + GLOBO.y, f: globo});
+  dinamicos.push({k: 62, f: guirnalda});
+  dinamicos.push({k: GATO.x + GATO.y + .3, f: gato});
+  dinamicos.push({k: ROBOT.x + ROBOT.y, f: dibujarRobot});
+  const bola = pelotaPingPong();
+  if (bola) dinamicos.push({k: bola.x + bola.y + .1, f: () => { const [px, py] = iso(bola.x, bola.y, bola.z); circulo(px, py, 2.2, "#fff"); }});
+  dinamicos.sort((a, b) => a.k - b.k);
+  let i = 0, j = 0;
+  while (i < estaticos.length || j < dinamicos.length) {
+    if (j >= dinamicos.length || (i < estaticos.length && estaticos[i].k <= dinamicos[j].k)) estaticos[i++].f();
+    else dinamicos[j++].f();
+  }
+  // noche
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (noche > 0) { ctx.fillStyle = `rgba(8,12,36,${noche * .5})`; ctx.fillRect(0, 0, vw, vh); }
+  // brillos
+  transformarMundo();
+  ctx.save(); ctx.globalCompositeOperation = "lighter";
+  const f = .45 + noche * .75;
+  for (const [x, y, z, r, c, a] of brillos) {
+    const [px, py] = iso(x, y, z), gr = ctx.createRadialGradient(px, py, 0, px, py, r);
+    gr.addColorStop(0, rgba(c, Math.min(1, a * f))); gr.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = gr; ctx.fillRect(px - r, py - r, r * 2, r * 2);
+  }
+  ctx.restore();
+  dibujarFlotantes();
+  dibujarBurbujas();
+  if (sobre) etiqueta(sobre);
+}
+
+function dibujarFlotantes() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.textAlign = "center";
+  for (const f of flotantes) {
+    const [sx, sy] = aPantalla(f.x, f.y, f.z), a = f.t < 2 ? 1 : 1 - (f.t - 2) / .6;
+    ctx.font = `800 ${13 + 3 * cam.zoom}px JetBrains Mono`;
+    ctx.fillStyle = rgba(f.color, a); ctx.fillText(f.texto, sx, sy - f.t * 26 * cam.zoom - 40 * cam.zoom);
+  }
+  ctx.textAlign = "start";
+}
+function partirTexto(texto, max) {
+  const palabras = texto.split(" "), lineas = [];
+  let l = "";
+  for (const p of palabras) { const prueba = l ? l + " " + p : p; if (ctx.measureText(prueba).width > max && l) { lineas.push(l); l = p; } else l = prueba; }
+  if (l) lineas.push(l);
+  return lineas.slice(0, 7);
+}
+function dibujarBurbujas() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const puestas = [];
+  const activas = agentes.filter(a => a.burbuja && T < a.burbuja.t1).sort((a, b) => (b.x + b.y) - (a.x + a.y));
+  for (const a of activas) {
+    const b = a.burbuja;
+    const [sx, sy0] = aPantalla(a.x, a.y, a.z);
+    ctx.font = "600 12px Inter, sans-serif";
+    const lineas = partirTexto(b.texto, b.texto.length > 120 ? 250 : 200);
+    const ancho = Math.max(...lineas.map(l => ctx.measureText(l).width), ctx.measureText(a.nombre).width + 10) + 20;
+    const alto = 22 + lineas.length * 15;
+    let x = clamp(sx - ancho / 2, 8, vw - ancho - 8), y = sy0 - (a.postura === "sentado" ? 42 : 50) * cam.zoom - alto - 10;
+    for (let n = 0; n < 6; n++) {
+      const choca = puestas.find(p => x < p[0] + p[2] && x + ancho > p[0] && y < p[1] + p[3] && y + alto > p[1]);
+      if (!choca) break;
+      y = choca[1] - alto - 6;
+    }
+    puestas.push([x, y, ancho, alto]);
+    const ent = clamp((T - b.t0) * 5, 0, 1), sal = clamp((b.t1 - T) * 2, 0, 1), al = Math.min(ent, sal);
+    ctx.globalAlpha = al;
+    ctx.fillStyle = "rgba(0,0,0,.35)"; rr(x + 2, y + 3, ancho, alto, 11); ctx.fill();
+    ctx.fillStyle = "#fbfcfd"; rr(x, y, ancho, alto, 11); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(clamp(sx - 7, x + 10, x + ancho - 20), y + alto - 1); ctx.lineTo(clamp(sx, x + 14, x + ancho - 14), y + alto + 8); ctx.lineTo(clamp(sx + 7, x + 20, x + ancho - 10), y + alto - 1); ctx.fill();
+    ctx.fillStyle = shade(a.tono, .75); ctx.font = "800 11px Inter, sans-serif"; ctx.fillText(a.nombre, x + 10, y + 15);
+    ctx.fillStyle = "#16202c"; ctx.font = "600 12px Inter, sans-serif";
+    lineas.forEach((l, i) => ctx.fillText(l, x + 10, y + 31 + i * 15));
+    ctx.globalAlpha = 1;
+  }
+}
+function etiqueta(a) {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const [sx, sy] = aPantalla(a.x, a.y, a.z);
+  const texto = a.nombre + (a.puesto ? " · " + a.puesto : "");
+  ctx.font = "700 12px Inter, sans-serif";
+  const w = ctx.measureText(texto).width + 16;
+  ctx.fillStyle = "rgba(10,13,19,.92)"; rr(sx - w / 2, sy + 6, w, 22, 11); ctx.fill();
+  ctx.strokeStyle = "#d4ff3a"; ctx.lineWidth = 1; ctx.stroke();
+  ctx.fillStyle = "#e9edf3"; ctx.textAlign = "center"; ctx.fillText(texto, sx, sy + 21); ctx.textAlign = "start";
+}
+
+// ====================================================== CONVERSACIÓN ==
+const colaChat = [];
+let proximaLinea = 0, sinLeer = 0;
+function decir(a, texto, prioridad = 1, clase = "") {
+  if (!a) return;
+  colaChat.push({a, texto, prioridad, clase});
+  if (colaChat.length > 10) {   // si hay atasco, se descarta lo menos importante
+    let peor = 0;
+    colaChat.forEach((l, i) => { if (l.prioridad < colaChat[peor].prioridad) peor = i; });
+    colaChat.splice(peor, 1);
+  }
+}
+function charla(lineas, prioridad = 1) { for (const [a, t, c] of lineas) decir(a, t, prioridad, c); }
+function procesarChat() {
+  if (T < proximaLinea || !colaChat.length) return;
+  const {a, texto, clase} = colaChat.shift();
+  a.burbuja = {texto, t0: T, t1: T + clamp(2.8 + texto.length * .05, 3.2, 7.5)};
+  anadirChat(a, texto, clase);
+  proximaLinea = T + 1.5;
+}
+function iniciales(n) { return n.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase(); }
+function anadirChat(a, texto, clase = "") {
+  const caja = $("#chat");
+  const el = document.createElement("div");
+  el.className = "msg " + (a ? clase : "sistema");
+  const color = a ? a.tono : "#d4ff3a";
+  el.innerHTML = `<div class="av" style="background:${color}">${a ? esc(iniciales(a.nombre)) : "TF"}</div>
+    <div><div class="cab"><b>${a ? esc(a.nombre) : "Trading Floor"}</b>${a ? esc(a.puesto) + " · " : ""}${fmt.hora(new Date())}</div><div class="txt">${esc(texto)}</div></div>`;
+  const abajo = caja.parentElement.scrollHeight - caja.parentElement.scrollTop - caja.parentElement.clientHeight < 60;
+  caja.appendChild(el);
+  while (caja.children.length > 120) caja.firstChild.remove();
+  if (abajo) caja.parentElement.scrollTop = caja.parentElement.scrollHeight;
+  if (!$("#p-chat").classList.contains("activa") || $("#panel").classList.contains("plegado")) { sinLeer++; $("#nChat").hidden = false; $("#nChat").textContent = sinLeer; }
+}
+
+// ======================================================== EL DIRECTOR ==
+// Traduce los cambios del estado real en movimientos, paquetes y charlas.
+const visto = new Set();
+let anterior = null, ultimoComentarioLab = -99, proximoCafe = 10, proximaCharla = 14, proximoComite = 120;
+function nuevosEventos(lista) {
+  if (visto.size > 4000) {   // se vacía de vez en cuando, sin repetir lo que sigue en pantalla
+    visto.clear();
+    for (const l of [S.mineria && S.mineria.actividad, S.papel && S.papel.actividad]) for (const e of l || []) visto.add(e.t + "|" + e.texto);
+  }
+  const out = [];
+  for (const e of lista || []) { const k = e.t + "|" + e.texto; if (!visto.has(k)) { visto.add(k); out.push(e); } }
+  return out.reverse();
+}
+function agenteDeTrader(id) { return traders.get(id); }
+const DESCARTES = {
+  "Fuera de muestra": id => pick([`${id} fuera: en datos que no había visto, pierde.`, `${id} solo funcionaba en el pasado que conocía. A la trituradora.`, `Otra que cae fuera de muestra: ${id}.`]),
+  "Costes x2": id => pick([`${id} no aguanta el doble de comisiones. Fuera.`, `Con costes realistas, ${id} deja de ganar.`]),
+  "Consistencia": id => pick([`${id} ganó en una racha y poco más. Descartada.`, `${id} solo gana en un par de tramos. No me fío.`]),
+  "Monte Carlo": id => pick([`${id}: barajando sus operaciones, el peor 5 % pierde dinero. Fuera.`, `Monte Carlo dice que ${id} es demasiado frágil.`]),
+  "Estabilidad": id => pick([`${id}: tocas un parámetro y deja de ganar. Sobreajuste de libro.`, `Las variantes de ${id} pierden. Era casualidad.`]),
+  "Test del mono": id => pick([`${id}: un mono entrando al azar lo hace igual de bien 🐒`, `El mono gana otra vez. ${id}, descartada.`]),
+};
+function procesarMineria(eventos) {
+  const descartes = [];
+  for (const e of eventos) {
+    if (e.tipo === "descarga") decir(pick(MINEROS), `Bajando velas de ${e.simbolo || ""}. ${pick(["¡A picar datos!", "Tres años, hora a hora.", "Vamos allá."])}`);
+    else if (e.tipo === "generacion") {
+      const m = /(\d+) evaluadas, (\d+) rentables en muestra, (\d+) aprobadas/.exec(e.texto);
+      if (m && (e.generacion === 1 || e.generacion === e.generaciones || Math.random() < .3)) {
+        const [, ev, re, ap] = m.map(Number);
+        decir(pick(MINEROS), `${e.simbolo}, generación ${e.generacion}/${e.generaciones}: ${fmt.n(ev)} evaluadas y ${fmt.n(re)} parecen rentables.`);
+        if (e.generacion === e.generaciones) decir(PROBADORES[0], ap ? `Y de esas, ${ap} han sobrevivido al laboratorio.` : "Y de esas, ninguna ha sobrevivido al laboratorio. Así es esto.");
+        else if (Math.random() < .35) decir(pick(PROBADORES), "Tranquilidad, que casi todas caerán aquí.");
+      }
+    }
+    else if (e.tipo === "descartada") descartes.push(e);
+    else if (e.tipo === "aprobada") {
+      enfocar(26, 5.5, 2.2, 7);
+      const n = (S.banco || []).length;
+      charla([[PROBADORES[5], `¡${e.id} ha superado las seis pruebas! ${e.fuera ? "Fuera de muestra: " + e.fuera + "." : ""}`, "bueno"],
+        [BANQUERA, `Guardada en la cámara. Ya van ${n} estrategias en el banco.`, "oro"],
+        [DIRECTOR, pick(["Buen trabajo. Que empiece a operar en papel y veremos.", "Bien. Ahora a demostrarlo con precios de verdad.", "Una más. Sin euforia: el backtest no es el futuro."])]], 3);
+    }
+    else if (e.tipo === "descanso") decir(pick(MINEROS), pick(["Ronda terminada. ¡Café!", "Fin de ronda. Me voy al sofá.", "Los servidores descansan y yo también."]));
+    else if (e.tipo === "error") decir(pick(MINEROS), `Tenemos un problema: ${e.texto}`, 2, "malo");
+  }
+  if (descartes.length && T - ultimoComentarioLab > 7) {
+    const orden = e => ETAPAS.indexOf(e.etapa);
+    const e = descartes.sort((a, b) => orden(b) - orden(a))[0];
+    if (e.etapa === "Distinta a las del banco") decir(BANQUERA, /lleno/.test(e.texto) ? `${e.id} lo aprueba todo, pero el banco de ese símbolo ya está lleno.` : `${e.id} lo aprueba todo, pero es casi igual que otra que ya tenemos.`, 1);
+    else if (DESCARTES[e.etapa]) decir(PROBADORES[PRUEBAS.indexOf(e.etapa)], DESCARTES[e.etapa](e.id), 1, "malo");
+    ultimoComentarioLab = T;
+  }
+}
+function procesarPapel(eventos) {
+  for (const e of eventos) {
+    const a = agenteDeTrader(e.id);
+    if (!a) continue;
+    if (a.casa) enfocar(a.casa.x, a.casa.y, 2.4, 6);
+    if (e.tipo === "apertura") {
+      decir(a, `Abro ${ladoTxt(e.direccion)} en ${moneda(e.simbolo)} a ${fmt.precio(e.precio)}. ${pick(["Stop puesto.", "Sigo el plan.", "A ver qué pasa."])}`, 2);
+      const t = totales();
+      if (t.abiertas >= 3 && (t.largos === t.abiertas || t.cortos === t.abiertas)) decir(RIESGOS, `Ojo: ${t.abiertas} posiciones abiertas y todas ${t.largos ? "largas" : "cortas"}. Es casi la misma apuesta.`, 2);
+    } else if (e.tipo === "cierre") {
+      const r = e.retorno_pct || 0, bien = r > 0;
+      const motivo = {stop: "stop", objetivo: "objetivo", tiempo: "tiempo", fin: "fin"}[e.motivo] || e.motivo;
+      decir(a, `Cierro ${moneda(e.simbolo)}: ${fmt.pct(r)} (${motivo}). ${bien ? pick(["✅", "Bien.", "Así da gusto."]) : pick(["El stop está para eso.", "Sin dramas: el plan es el plan.", "Toca aceptar la pérdida."])}`, 2, bien ? "bueno" : "malo");
+      if (a.casa) flotante(a.casa.x, a.casa.y - .5, .9, (r > 0 ? "+" : "−") + NF2.format(Math.abs(r * 10)) + " $", bien ? "#2ee6a6" : "#ff5a76");
+      if (r > 1.5) { const otro = pick([...traders.values()].filter(t => t !== a)); if (otro) decir(otro, pick(["¡Buena!", "Eso es seguir el plan.", "👏"]), 1); }
+    }
+  }
+}
+function crearTrader(id, datos) {
+  const usados = new Set([...traders.values()].map(t => t.nombre));
+  let n = hash(id) % NOMBRES_TRADERS.length;
+  for (let k = 0; k < NOMBRES_TRADERS.length && usados.has(NOMBRES_TRADERS[n]); k++) n = (n + 1) % NOMBRES_TRADERS.length;
+  return new Agente({nombre: NOMBRES_TRADERS[n], rol: "trader", id, datos, puesto: "Trader · " + id});
+}
+function sincronizarTraders(inicial) {
+  const ests = S.papel && S.papel.estrategias || {};
+  const ids = Object.keys(ests).sort((a, b) => String(ests[a].inicio).localeCompare(String(ests[b].inicio)) || a.localeCompare(b));
+  for (const id of ids) {
+    const a = traders.get(id);
+    if (a) { a.datos = ests[id]; continue; }
+    const mesa = MESAS.find(m => !m.trader);
+    if (!mesa) continue;
+    const nuevo = crearTrader(id, ests[id]);
+    nuevo.casa = mesa.asiento; nuevo.mesa = mesa; mesa.trader = nuevo;
+    traders.set(id, nuevo); agentes.push(nuevo);
+    if (inicial) colocar(nuevo, mesa.asiento);
+    else {
+      nuevo.x = .6; nuevo.y = 10; nuevo.mira = "e"; ascensorHasta = T + 3;
+      const d = ests[id];
+      volverAlPuesto(nuevo, () => decir(nuevo, `Hola, soy ${nuevo.nombre}. Llevo ${id}: ${ladoTxt(d.direccion).toLowerCase()} en ${moneda(d.simbolo)}, con 1.000 $ ficticios.`, 2));
+      decir(DIRECTOR, pick([`¡Te damos la bienvenida! Tu mesa te espera en la sala de trading.`, `Llega ${id} al parqué. A operar en papel.`]), 2);
+    }
+  }
+  for (const [id, a] of traders) if (!ests[id]) {
+    traders.delete(id); a.mesa.trader = null; a.casa = null; a.tarea = "salir"; ascensorHasta = T + 5;
+    decir(a, "Me han sacado del banco. ¡Hasta otra!", 1);
+    irA(a, .6, 10, "de_pie", "o", () => { const i = agentes.indexOf(a); if (i >= 0) agentes.splice(i, 1); });
+  }
+}
+
+// ---- descansos, comité y charla de fondo ----
+function sitioLibre(tipos) {
+  const libres = SITIOS.filter(s => !s.ocupante && (!tipos || tipos.includes(s.tipo)));
+  return libres.length ? pick(libres) : null;
+}
+function mandarDescanso(a, duracion, tipos) {
+  const s = sitioLibre(tipos);
+  if (!s) return false;
+  s.ocupante = a; a.sitio = s; a.tarea = "descanso"; a.hasta = T + duracion;
+  irA(a, s.x, s.y, s.postura, s.mira);
+  return true;
+}
+function liberarSitio(a) { if (a.sitio) { a.sitio.ocupante = null; a.sitio = null; } }
+function estaLibre(a) { return !a.tarea && !a.andando && a.casa; }
+function planificar() {
+  const minando = S && S.mineria && S.mineria.estado === "minando";
+  for (const a of MINEROS) {
+    if (!minando && !a.tarea && !a.andando && S) mandarDescanso(a, 1e9);
+    if (minando && a.tarea === "descanso" && a.hasta > 1e8) { a.hasta = 0; }
+  }
+  for (const a of agentes) {
+    if (a.tarea === "descanso" && T > a.hasta && !a.andando) { liberarSitio(a); a.tarea = null; volverAlPuesto(a); }
+    a.tecleando = a.postura === "sentado" && a.sitio === null && !a.tarea &&
+      (a.rol === "minero" ? minando : a.rol === "prueba" ? T < (a.tecleoHasta || 0) || Math.sin(T * .3 + a.semilla) > .6 : a.rol === "trader" ? Math.sin(T * .4 + a.semilla) > -.2 : Math.sin(T * .2 + a.semilla) > .3);
+  }
+  if (T > proximoCafe) {
+    proximoCafe = T + rand(7, 15);
+    const candidatos = agentes.filter(a => estaLibre(a) && a.postura === "sentado" && (
+      (a.rol === "trader" && !(a.datos && a.datos.posicion)) || (a.rol === "prueba" && T - actividadLab > 20) || a.rol === "banco" || a.rol === "macro"));
+    if (candidatos.length) mandarDescanso(pick(candidatos), rand(25, 55));
+  }
+  if (T > proximaCharla) { proximaCharla = T + rand(16, 28); charlaDeFondo(); }
+  if (T > proximoComite) { proximoComite = T + rand(200, 300); comite(); }
+  ascensor = clamp(ascensor + (T < ascensorHasta ? .05 : -.04), 0, 1);
+}
+function charlaDeFondo() {
+  const enDescanso = agentes.filter(a => a.tarea === "descanso" && !a.andando);
+  let a, b;
+  if (enDescanso.length >= 2) { a = pick(enDescanso); b = pick(enDescanso.filter(x => x !== a)); }
+  else { const sentados = agentes.filter(x => estaLibre(x)); if (sentados.length < 2) return; a = pick(sentados); b = pick(sentados.filter(x => x !== a && Math.hypot(x.x - a.x, x.y - a.y) < 6)) || pick(sentados.filter(x => x !== a)); }
+  if (!a || !b) return;
+  const precios = S && S.papel && S.papel.precios || {}, sims = Object.keys(precios);
+  const sim = sims.length ? pick(sims) : null, e = S && S.mineria && S.mineria.embudo || {}, t = totales();
+  const opciones = [
+    () => ["¿Café?", pick(["Solo, gracias.", "Con leche de avena.", "Un cortado.", "Mejor un té, que llevo tres."])],
+    () => ["Recordad que aquí todo es dinero ficticio.", "Paper trading: primero demostrar, luego ya veremos."],
+    () => ["Un backtest bonito no es una estrategia rentable.", "Por eso existe el laboratorio."],
+    () => ["¿Por qué os da tanto miedo el mono del laboratorio?", "Porque si un mono te gana, tu estrategia no vale nada 🐒"],
+    () => ["¿Por qué solo minamos con el 70 % de los datos?", "Para tener un 30 % que nadie ha visto. Si no, te engañas a ti mismo."],
+    () => ["¿Quién va ganando al ping-pong?", "Yo, como siempre 😏"],
+    () => ["¿Alguien ha dado de comer a Satoshi?", "Duerme más que los servidores en pausa."],
+  ];
+  if (sim) opciones.push(() => [`¿Habéis visto ${moneda(sim)}? ${fmt.pct(precios[sim].cambio_24h_pct)} en 24 horas.`, pick(["Volatilidad: la mejor amiga del minero.", "Yo solo miro el plan.", "Ni lo miro, que me entran los nervios."])]);
+  if (e["Generadas"]) opciones.push(() => [`Llevamos ${fmt.n(e["Generadas"])} estrategias minadas y solo ${e["Distinta a las del banco"] || 0} han llegado al banco.`, "Así es esto: casi todo es ruido."]);
+  if (t.n) opciones.push(() => [`Entre todos llevamos ${fmt.pct(t.pct)} en papel.`, t.resultado >= 0 ? "No está mal. Sin euforia." : "Paciencia: aún son pocas operaciones."]);
+  const macro = opcionesMacro();
+  if (macro.length && Math.random() < .45) {
+    const [l1, l2] = pick(macro)();
+    const x = pick(MACROS);
+    charla([[x, l1], [b !== x ? b : a, l2]], 0);
+    return;
+  }
+  const [l1, l2] = pick(opciones)();
+  charla([[a, l1], [b, l2]], 0);
+}
+function opcionesMacro() {
+  const m = S && S.macro, i = m && m.indicadores || {}, out = [];
+  if (!m || !m.indicadores) return out;
+  const v = i["^VIX"], pe = i["CL=F"], bo = i["^TNX"], dx = i["DX-Y.NYB"], oro = i["GC=F"], sp = i["^GSPC"], f = m.fear_greed;
+  if (v) out.push(() => [`El VIX está en ${NF2.format(v.valor)}: ${v.valor < 15 ? "la bolsa, en calma total" : v.valor < 20 ? "tranquilidad en bolsa" : v.valor < 30 ? "hay nervios en bolsa" : "pánico en bolsa"}.`, pick(["Cuando el VIX duerme, hay que dormir con un ojo abierto.", "Bien. Menos sustos.", "Apuntado para el comité."])]);
+  if (pe) out.push(() => [`El petróleo ${pe.dia_pct >= 0 ? "sube" : "cae"} un ${NF2.format(Math.abs(pe.dia_pct))} % hoy.`, "Eso acaba notándose en la inflación…"]);
+  if (bo) out.push(() => [`El bono de EE. UU. a 10 años paga un ${NF2.format(bo.valor)} %.`, "Con tipos así, el dinero sin riesgo ya rinde algo."]);
+  if (dx) out.push(() => [`El dólar ${dx.semana_pct >= 0 ? "se fortalece" : "se debilita"} un ${NF2.format(Math.abs(dx.semana_pct))} % esta semana.`, "Un dólar fuerte no suele ayudar al cripto."]);
+  if (oro) out.push(() => [`El oro está a ${fmt.n(oro.valor)} $ la onza.`, "El refugio de toda la vida."]);
+  if (sp) out.push(() => [`El S&P 500 ${sp.semana_pct >= 0 ? "sube" : "baja"} un ${NF2.format(Math.abs(sp.semana_pct))} % en la semana.`, `Régimen: ${m.regimen}.`]);
+  if (f) out.push(() => [`Fear & Greed del cripto en ${f.valor}: ${f.clase.toLowerCase()}.`, f.valor > 70 ? "«Ten miedo cuando los demás son codiciosos», que decía Buffett." : f.valor < 30 ? "«Sé codicioso cuando los demás tienen miedo», que decía Buffett." : "Ni frío ni calor."]);
+  return out;
+}
+let macroVisto = null;
+function procesarMacro() {
+  const m = S.macro;
+  if (!m || !m.actualizado || m.actualizado === macroVisto) return;
+  const primera = macroVisto === null;
+  macroVisto = m.actualizado;
+  const f = m.fear_greed;
+  const texto = `${primera ? "Resumen macro" : "Datos macro actualizados"}: ${m.regimen}. ${m.explicacion}${f ? ` Fear & Greed cripto: ${f.valor} (${f.clase.toLowerCase()}).` : ""}`;
+  if (primera) setTimeout(() => decir(MACROS[0], texto, 2), 5000); else decir(MACROS[0], texto, 2);
+}
+function comite() {
+  const ts = [...traders.values()].filter(a => estaLibre(a)).slice(0, 3);
+  if (!ts.length) return;
+  ts.forEach((a, i) => { a.tarea = "comite"; irA(a, SILLAS_SUR[i + 1].x, SILLAS_SUR[i + 1].y, "sentado", "n"); });
+  setTimeout(() => {
+    const t = totales();
+    const lineas = [[DIRECTOR, `Comité. ${t.n} traders, patrimonio ${fmt.n(t.patrimonio)} $ (${fmt.pct(t.pct)}).`],
+      [RIESGOS, t.abiertas ? `${t.abiertas} posiciones abiertas: ${t.largos} largas y ${t.cortos} cortas.${t.abiertas >= 3 && (!t.largos || !t.cortos) ? " Demasiado hacia un lado." : " Exposición razonable."}` : "Ninguna posición abierta ahora mismo. Riesgo cero."]];
+    const mc = S.macro;
+    if (mc && mc.regimen) lineas.push([MACROS[0], `Macro: ${mc.regimen}.${mc.fear_greed ? ` Fear & Greed ${mc.fear_greed.valor}.` : ""} Recordad que nuestras estrategias no usan estos datos.`]);
+    for (const a of ts) { const d = a.datos || {}; lineas.push([a, `${a.id}: ${fmt.pct((d.resultado || 0) / 10)} desde que llegué, ${(d.operaciones || []).length} operaciones cerradas.`]); }
+    lineas.push([DIRECTOR, pick(["Perfecto. A seguir con el plan.", "Bien. Nadie toca las reglas a mitad de partido.", "Gracias. Volvemos a las mesas."])]);
+    charla(lineas, 2);
+    setTimeout(() => ts.forEach(a => { if (a.tarea === "comite") { a.tarea = null; volverAlPuesto(a); } }), 16000);
+  }, 9000);
+}
+
+// ============================================================ HUD =====
+function actualizarHUD() {
+  const t = totales(), m = S.mineria || {};
+  actualizarResultados();
+  $("#kPosiciones").textContent = t.n ? `${t.abiertas} / ${t.n}` : "—";
+  $("#kBanco").textContent = (S.banco || []).length;
+  const p = $("#pMineria");
+  const viva = m.actualizado && (Date.now() - new Date(m.actualizado).getTime()) < 120000;
+  if (m.estado === "minando" && viva) { p.className = "pastilla minando"; p.textContent = `Minando ${m.simbolo || ""} · gen ${m.generacion || 0}/${m.generaciones || 0}`; }
+  else if (m.estado === "descanso") { p.className = "pastilla descanso"; p.textContent = m.proxima ? `Pausa hasta las ${fmt.hora(new Date(m.proxima))}` : "Minería en pausa"; }
+  else { p.className = "pastilla"; p.textContent = "Minería parada"; }
+  const mc = S.macro || {};
+  const pReg = $("#pRegimen");
+  pReg.textContent = mc.regimen || "—"; pReg.className = "pastilla " + (mc.regimen === "RISK-ON" ? "on" : mc.regimen === "RISK-OFF" ? "off" : "neutral");
+  pReg.title = mc.explicacion || "Régimen de mercado";
+  const f = mc.fear_greed, pf = $("#pFng");
+  pf.textContent = f ? `F&G ${f.valor} · ${f.clase}` : "F&G —";
+  pf.className = "pastilla " + (f ? (f.valor >= 55 ? "on" : f.valor <= 45 ? "off" : "neutral") : "neutral");
+  $("#macro").innerHTML = mc.indicadores ? `<div class="macro-reg"><b class="${mc.regimen === "RISK-ON" ? "sube" : mc.regimen === "RISK-OFF" ? "baja" : ""}">${esc(mc.regimen)}</b><p>${esc(mc.explicacion)}</p>
+      ${f ? `<p>Fear &amp; Greed (cripto): <b style="font-size:13px">${f.valor}</b> · ${esc(f.clase)}</p>` : ""}</div>` +
+    Object.values(mc.indicadores).map(d => `<div class="ind"><span>${esc(d.nombre)}</span><b>${d.valor >= 100 ? fmt.n(d.valor) : NF2.format(d.valor)}</b><span class="${d.dia_pct >= 0 ? "sube" : "baja"}">${fmt.pct(d.dia_pct)}</span></div>`).join("") +
+    `<p class="nota">Actualizado a las ${fmt.hora(new Date(mc.actualizado))}.</p>`
+    : `<p class="vacio">Aún no hay datos macro. Se actualizan cada 15 minutos con la oficina en marcha.</p>`;
+  // embudo
+  const e = m.embudo || {}, base = Math.max(1, e["Generadas"] || 0);
+  $("#embudo").innerHTML = ETAPAS.map(k => {
+    const v = e[k] || 0, w = v ? Math.max(1.5, Math.log10(v + 1) / Math.log10(base + 1) * 100) : 0;
+    return `<div class="etapa"><div class="fila"><span>${esc(k === "Distinta a las del banco" ? "Aprobadas → banco" : k)}</span><b>${fmt.n(v)}</b></div>
+      <div class="barrita"><i style="width:${w}%"></i></div><div class="expl">${esc(EXPLICA[k])}</div></div>`;
+  }).join("") + (e["Generadas"] ? "" : `<p class="vacio">Aún no se ha minado nada en esta sesión.</p>`);
+  // traders
+  const lista = [...traders.values()].sort((a, b) => (b.datos.resultado || 0) - (a.datos.resultado || 0));
+  $("#traders").innerHTML = lista.length ? lista.map(a => {
+    const d = a.datos, r = d.resultado || 0;
+    return `<div class="trader" data-id="${esc(a.id)}"><div class="av" style="background:${a.camisa}">${esc(iniciales(a.nombre))}</div>
+      <div style="min-width:0"><div class="n">${esc(a.nombre)} · ${esc(a.id)}</div><div class="d">${esc(moneda(d.simbolo))} ${esc(ladoTxt(d.direccion))} · ${d.posicion ? "posición abierta" : "esperando señal"}</div></div>
+      <div class="r ${r > 0 ? "sube" : r < 0 ? "baja" : ""}">${dineroS(r)}<small>hoy ${dineroS(d.hoy || 0)} · ${(d.operaciones || []).length} ops</small></div></div>`;
+  }).join("") : `<p class="vacio">Todavía no hay traders. Llegarán cuando la minería apruebe estrategias.</p>`;
+  // cinta de precios
+  const pr = S.papel && S.papel.precios || {};
+  const trozos = Object.entries(pr).map(([s, v]) => `<span><em>${esc(moneda(s))}</em>${fmt.precio(v.precio)} <b class="${v.cambio_24h_pct >= 0 ? "sube" : "baja"}">${fmt.pct(v.cambio_24h_pct)}</b></span>`);
+  trozos.push(`<span><em>BANCO</em>${(S.banco || []).length} estrategias</span>`, `<span><em>TRADERS</em>${t.n}</span>`,
+    `<span><em>EVALUADAS</em>${fmt.n(e["Generadas"] || 0)}</span>`, `<span><em>MODO</em>paper trading · dinero ficticio</span>`);
+  const html = trozos.join("");
+  if ($("#cintaInterior").dataset.html !== html) { $("#cintaInterior").dataset.html = html; $("#cintaInterior").innerHTML = html + html; }
+}
+
+// ============================================== GRÁFICAS Y NÚMEROS ====
+const rango = {tarjeta: 168, panel: 168};
+function prepararLienzo(cv) {
+  if (!cv.dataset.h) cv.dataset.h = cv.getAttribute("height");
+  const w = cv.clientWidth, h = +cv.dataset.h, r = Math.min(devicePixelRatio || 1, 2);
+  if (!w) return null;
+  cv.style.height = h + "px";
+  cv.width = Math.round(w * r); cv.height = Math.round(h * r);
+  const g = cv.getContext("2d"); g.setTransform(r, 0, 0, r, 0, 0);
+  return [g, w, h];
+}
+function fechaCorta(iso) { return new Date(iso).toLocaleString("es-ES", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}); }
+function dibujarCurva(cv, puntos, horas) {
+  const l = prepararLienzo(cv); if (!l) return;
+  const [g, w, h] = l, datos = puntos.slice(-horas);
+  if (datos.length < 2) {
+    g.fillStyle = "#6f7a8c"; g.font = "600 12px Inter, sans-serif"; g.textAlign = "center";
+    g.fillText("La curva aparecerá cuando los traders lleven un rato operando", w / 2, h / 2); return;
+  }
+  const v = datos.map(p => p[1]), lo = Math.min(0, ...v), hi = Math.max(0, ...v), m = (hi - lo) * .15 || 1;
+  const X = i => 4 + i * (w - 8) / (datos.length - 1), Y = x => 6 + (hi + m - x) / (hi - lo + 2 * m) * (h - 24), y0 = Y(0);
+  g.strokeStyle = "rgba(255,255,255,.05)"; g.lineWidth = 1;
+  for (let k = 1; k < 4; k++) { g.beginPath(); g.moveTo(0, k * (h - 18) / 4); g.lineTo(w, k * (h - 18) / 4); g.stroke(); }
+  const trazo = () => { g.beginPath(); datos.forEach((p, i) => i ? g.lineTo(X(i), Y(p[1])) : g.moveTo(X(i), Y(p[1]))); };
+  for (const [arriba, col] of [[true, "#2ee6a6"], [false, "#ff5a76"]]) {
+    g.save(); g.beginPath(); arriba ? g.rect(0, 0, w, y0) : g.rect(0, y0, w, h); g.clip();
+    trazo(); g.lineTo(X(datos.length - 1), y0); g.lineTo(X(0), y0); g.closePath();
+    const gr = g.createLinearGradient(0, arriba ? Y(hi) : y0, 0, arriba ? y0 : Y(lo));
+    gr.addColorStop(0, rgba(col, arriba ? .42 : .04)); gr.addColorStop(1, rgba(col, arriba ? .03 : .42));
+    g.fillStyle = gr; g.fill();
+    trazo(); g.strokeStyle = col; g.lineWidth = 2; g.shadowColor = col; g.shadowBlur = 12; g.stroke();
+    g.restore();
+  }
+  g.setLineDash([3, 4]); g.strokeStyle = "rgba(255,255,255,.28)"; g.beginPath(); g.moveTo(0, y0); g.lineTo(w, y0); g.stroke(); g.setLineDash([]);
+  const ult = v[v.length - 1], col = ult >= 0 ? "#2ee6a6" : "#ff5a76", lx = X(datos.length - 1), ly = Y(ult);
+  g.fillStyle = rgba(col, .22); g.beginPath(); g.arc(lx, ly, 8, 0, TAU); g.fill();
+  g.fillStyle = col; g.beginPath(); g.arc(lx, ly, 3.4, 0, TAU); g.fill();
+  const imax = v.indexOf(Math.max(...v));
+  if (v[imax] > 0) { g.fillStyle = "#8fa0b5"; g.font = "700 10px JetBrains Mono, monospace"; g.textAlign = imax > datos.length * .7 ? "right" : "left"; g.fillText("máx +" + NF2.format(v[imax]) + " $", X(imax), Math.max(12, Y(v[imax]) - 7)); }
+  g.fillStyle = "#6f7a8c"; g.font = "600 10px Inter, sans-serif";
+  g.textAlign = "left"; g.fillText(fechaCorta(datos[0][0]), 4, h - 3);
+  g.textAlign = "right"; g.fillText("ahora", w - 4, h - 3);
+}
+function dibujarDias(cv, diarios, etiquetas) {
+  const l = prepararLienzo(cv); if (!l) return;
+  const [g, w, h] = l;
+  if (!diarios.length) return;
+  const max = Math.max(1, ...diarios.map(d => Math.abs(d[1]))), n = diarios.length, bw = (w - 4) / n;
+  const alto = etiquetas ? (h - 18) / 2 : (h - 4) / 2, mid = 2 + alto;
+  g.strokeStyle = "rgba(255,255,255,.12)"; g.beginPath(); g.moveTo(0, mid); g.lineTo(w, mid); g.stroke();
+  diarios.forEach(([dia, val], i) => {
+    const x = 2 + i * bw + bw * .18, ancho = bw * .64, alt = Math.max(1.5, Math.abs(val) / max * (alto - 2)), col = val > 0 ? "#2ee6a6" : val < 0 ? "#ff5a76" : "#394252";
+    const hoy = i === n - 1;
+    const gr = g.createLinearGradient(0, val >= 0 ? mid - alt : mid, 0, val >= 0 ? mid : mid + alt);
+    gr.addColorStop(0, rgba(col, val >= 0 ? 1 : .35)); gr.addColorStop(1, rgba(col, val >= 0 ? .35 : 1));
+    g.fillStyle = gr; if (hoy) { g.shadowColor = col; g.shadowBlur = 10; }
+    g.beginPath(); g.roundRect ? g.roundRect(x, val >= 0 ? mid - alt : mid, ancho, alt, 2) : g.rect(x, val >= 0 ? mid - alt : mid, ancho, alt); g.fill(); g.shadowBlur = 0;
+    if (etiquetas) {
+      g.fillStyle = hoy ? "#e9edf3" : "#6f7a8c"; g.font = `${hoy ? 800 : 600} 10px Inter, sans-serif`; g.textAlign = "center";
+      g.fillText(hoy ? "hoy" : new Date(dia + "T12:00").toLocaleDateString("es-ES", {weekday: "narrow"}).toUpperCase(), x + ancho / 2, h - 3);
+    }
+  });
+}
+const animados = new Map();
+function animar(el, valor, formato) {
+  const previo = animados.get(el), desde = previo ? previo.actual : valor;
+  animados.set(el, {desde, hasta: valor, t0: performance.now(), actual: desde, formato});
+}
+function pasoAnimaciones(ahora) {
+  for (const [el, a] of animados) {
+    const k = clamp((ahora - a.t0) / 900, 0, 1), e = 1 - Math.pow(1 - k, 3);
+    a.actual = a.desde + (a.hasta - a.desde) * e;
+    const html = a.formato(a.actual);
+    if (el._html !== html) { el._html = html; el.innerHTML = html; }
+  }
+}
+const signo = x => x > 0.004 ? "+" : x < -0.004 ? "−" : "";
+const dineroS = x => signo(x) + NF2.format(Math.abs(x)) + " $";
+const pctS = x => signo(x) + NF2.format(Math.abs(x)) + " %";
+function actualizarResultados() {
+  const t = totales(), papel = S.papel || {}, curva = papel.curva || [], diarios = papel.diarios || [];
+  const clase = x => x > 0.004 ? "sube" : x < -0.004 ? "baja" : "";
+  const kr = $("#kResultado"), kh = $("#kHoy"), rt = $("#rTotal"), rh = $("#rHoy");
+  kr.className = clase(t.resultado); kh.className = clase(t.hoy); rt.className = "gordo " + clase(t.resultado); rh.className = "chip " + clase(t.hoy);
+  if (t.n) {
+    animar($("#kPatrimonio"), t.patrimonio, x => fmt.dinero(x));
+    animar(kr, t.resultado, x => `${dineroS(x)}<small>${pctS(t.pct)}</small>`);
+    animar(kh, t.hoy, x => `${dineroS(x)}<small>${pctS(t.hoyPct)}</small>`);
+    animar(rt, t.resultado, x => `${dineroS(x)}<small>${pctS(t.pct)}</small>`);
+    animar(rh, t.hoy, x => `<em>HOY</em>${dineroS(x)} · ${pctS(t.hoyPct)}`);
+    animar($("#rPatr"), t.patrimonio, x => `<em>PATRIMONIO</em>${fmt.n(x)} $`);
+  } else {
+    for (const id of ["#kPatrimonio", "#kResultado", "#kHoy", "#rTotal"]) $(id).textContent = "—";
+    $("#rHoy").innerHTML = "<em>HOY</em>—"; $("#rPatr").innerHTML = "<em>PATRIMONIO</em>—";
+  }
+  $("#rTraders").textContent = t.n; $("#rAbiertas").textContent = t.abiertas;
+  $("#rDesde").textContent = curva.length ? new Date(curva[0][0]).toLocaleDateString("es-ES", {day: "numeric", month: "short"}) : "—";
+  dibujarCurva($("#gTarjeta"), curva, rango.tarjeta);
+  dibujarDias($("#gTarjetaDias"), diarios.slice(-14), false);
+  dibujarCurva($("#gPanel"), curva, rango.panel);
+  dibujarDias($("#gDias"), diarios, true);
+}
+document.querySelectorAll(".rangos").forEach(div => div.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  rango[div.dataset.grafica] = +b.dataset.r;
+  div.querySelectorAll("button").forEach(x => x.classList.toggle("activo", x === b));
+  if (S) actualizarResultados();
+}));
+$("#plegarRes").onclick = () => { const r = $("#resultados"); r.classList.toggle("plegado"); $("#plegarRes").textContent = r.classList.contains("plegado") ? "▴" : "▾"; if (!cam.tocada) encuadrar(); };
+
+// ---- modo cine: la cámara recorre las salas y persigue lo que pasa ----
+let cine = false, cineHasta = 0, cineIdx = -1, camObjetivo = null;
+const PARADAS = [[5, 4.5, 1.8], [15.5, 5, 1.6], [26, 5, 1.7], [34.5, 5, 1.7], [9, 17.5, 1.25], [24, 14, 1.8], [23.5, 20.5, 1.8], [34, 17.5, 1.5], null];
+function objetivoEn(x, y, z, zoom) {
+  const movil = vw <= 760, panelW = !movil && !$("#panel").classList.contains("plegado") ? 390 : 0;
+  const [ix, iy] = iso(x, y, z);
+  const areaW = vw - panelW - 24, arriba = 66, areaH = vh - arriba - 44;
+  return {x: ix - ((12 + areaW / 2) - vw / 2) / zoom, y: iy - ((arriba + areaH / 2) - vh / 2) / zoom, zoom};
+}
+function enfocar(x, y, zoom = 2, segundos = 6) {
+  if (!cine) return;
+  camObjetivo = objetivoEn(x, y, .7, zoom); cineHasta = T + segundos;
+}
+function moverCamara(dt) {
+  if (!cine) return;
+  if (T > cineHasta) {
+    cineIdx = (cineIdx + 1) % PARADAS.length; cineHasta = T + 8;
+    const p = PARADAS[cineIdx];
+    if (p) camObjetivo = objetivoEn(p[0], p[1], .7, p[2]);
+    else { const guardada = {...cam}; encuadrar(); camObjetivo = {x: cam.x, y: cam.y, zoom: cam.zoom}; Object.assign(cam, guardada); }
+  }
+  if (!camObjetivo) return;
+  const k = 1 - Math.exp(-dt * 1.4);
+  cam.x += (camObjetivo.x - cam.x) * k; cam.y += (camObjetivo.y - cam.y) * k; cam.zoom += (camObjetivo.zoom - cam.zoom) * k;
+  cam.tocada = true;
+}
+function alternarCine(activar = !cine) {
+  cine = activar; $("#bCine").classList.toggle("activo", cine); cineHasta = 0; camObjetivo = null;
+  if (!cine) return;
+  $("#ayuda").style.opacity = 0;
+}
+$("#bCine").onclick = () => alternarCine();
+
+// ======================================================= DATOS ========
+let fallos = 0, primeraVez = true;
+async function refrescar() {
+  try {
+    const r = await fetch("/api/estado", {cache: "no-store"});
+    if (!r.ok) throw new Error(r.status);
+    S = await r.json();
+    fallos = 0; $("#sinConexion").hidden = true;
+  } catch (err) {
+    if (++fallos >= 3) $("#sinConexion").hidden = false;
+    return;
+  }
+  const m = S.mineria || {};
+  if (primeraVez) {
+    primeraVez = false;
+    nuevosEventos(m.actividad); nuevosEventos(S.papel && S.papel.actividad);
+    sincronizarTraders(true);
+    anadirChat(null, "Te damos la bienvenida al Trading Floor. Todo lo que ves es real salvo el dinero: es paper trading, con dinero ficticio.");
+    if (!(S.banco || []).length && m.estado !== "minando") anadirChat(null, "El banco está vacío. Arranca la minería con ./trading.sh (o trading.bat) y verás llegar estrategias al laboratorio.");
+  } else {
+    const nuevaSesion = anterior && anterior.mineria && anterior.mineria.inicio !== m.inicio;
+    if (!nuevaSesion && anterior) encolarPaquetes(anterior.mineria && anterior.mineria.embudo || {}, m.embudo || {});
+    sincronizarTraders(false);
+    procesarMineria(nuevosEventos(m.actividad));
+    procesarPapel(nuevosEventos(S.papel && S.papel.actividad));
+    if (anterior && anterior.mineria && anterior.mineria.estado !== "minando" && m.estado === "minando")
+      decir(pick(MINEROS), pick(["¡Nueva ronda! Vuelta al tajo.", "Se acabó el café: a minar.", "Servidores arriba. Vamos."]), 2);
+  }
+  procesarMacro();
+  anterior = S;
+  actualizarHUD();
+  if (fichaAbierta) mostrarFicha(fichaAbierta, false);
+}
+
+// ============================================== INTERACCIÓN / FICHA ====
+let sobre = null, fichaAbierta = null;
+function agenteEn(sx, sy) {
+  const [ix, iy] = [(sx - vw / 2) / cam.zoom + cam.x, (sy - vh / 2) / cam.zoom + cam.y];
+  let mejor = null;
+  for (const a of agentes) if (a.caja && ix >= a.caja[0] && ix <= a.caja[2] && iy >= a.caja[1] && iy <= a.caja[3]) if (!mejor || a.x + a.y > mejor.x + mejor.y) mejor = a;
+  if (!mejor && GATO.caja && ix >= GATO.caja[0] && ix <= GATO.caja[2] && iy >= GATO.caja[1] && iy <= GATO.caja[3]) return GATO_AGENTE;
+  return mejor;
+}
+const GATO_AGENTE = {nombre: "Satoshi", puesto: "Gato de la oficina", x: GATO.x, y: GATO.y, z: GATO.z, camisa: "#e28f3e", explica: "No opera, no mina y no hace backtests. Duerme en el sofá y es, con diferencia, quien mejor gestiona el riesgo de toda la oficina."};
+function filaMetricas(nombre, m) {
+  if (!m) return "";
+  return `<tr><td>${esc(nombre)}</td><td>${fmt.pct(m.retorno_pct)}</td><td>${fmt.n(m.operaciones)}</td><td>${NF2.format(m.factor_beneficio)}</td><td>${NF2.format(m.max_dd_pct)} %</td></tr>`;
+}
+function mostrarFicha(a, abrir = true) {
+  fichaAbierta = a;
+  const f = $("#ficha");
+  const color = a.tono || a.camisa;
+  let html = `<button class="cerrar" aria-label="Cerrar">✕</button>
+    <div class="quien"><div class="av" style="background:${color}">${esc(iniciales(a.nombre))}</div><div><h2>${esc(a.nombre)}</h2><div class="puesto">${esc(a.puesto || "")}</div></div></div>`;
+  if (a.rol === "trader") {
+    const d = a.datos || {}, b = (S.banco || []).find(x => x.id === a.id) || {};
+    const r = d.resultado || 0, pos = d.posicion;
+    html += `<div class="desc">${esc(d.descripcion || b.descripcion || "")}</div>
+      <table><tr><td>Patrimonio (ficticio)</td><td>${fmt.dinero(d.patrimonio || 1000)}</td></tr>
+      <tr><td>Resultado</td><td class="${r > 0 ? "sube" : r < 0 ? "baja" : ""}">${r >= 0 ? "+" : "−"}${NF2.format(Math.abs(r))} $</td></tr>
+      <tr><td>Operaciones cerradas</td><td>${(d.operaciones || []).length}</td></tr>
+      <tr><td>Opera desde</td><td>${d.inicio ? new Date(d.inicio).toLocaleString("es-ES", {dateStyle: "short", timeStyle: "short"}) : "—"}</td></tr></table>`;
+    if (pos) html += `<h3>Posición abierta</h3><table><tr><td>${esc(ladoTxt(d.direccion))} ${esc(moneda(d.simbolo))} a</td><td>${fmt.precio(pos.entrada)}</td></tr>
+      <tr><td>Stop / objetivo</td><td>${fmt.precio(pos.stop)} / ${fmt.precio(pos.objetivo)}</td></tr>
+      <tr><td>Ahora</td><td class="${pos.retorno_pct >= 0 ? "sube" : "baja"}">${fmt.pct(pos.retorno_pct)}</td></tr>
+      <tr><td>Velas</td><td>${pos.velas} de ${pos.max_velas}</td></tr></table>`;
+    const ops = (d.operaciones || []).slice(-5).reverse();
+    if (ops.length) html += `<h3>Últimas operaciones</h3><table>${ops.map(o => `<tr><td>${new Date(o.salida_t).toLocaleString("es-ES", {dateStyle: "short", timeStyle: "short"})} · ${esc(o.motivo)}</td><td class="${o.retorno_pct >= 0 ? "sube" : "baja"}">${fmt.pct(o.retorno_pct)}</td></tr>`).join("")}</table>`;
+    if (b.muestra) html += `<h3>Backtest (datos pasados)</h3><table><tr><th></th><th>Retorno</th><th>Ops</th><th>FB</th><th>Caída</th></tr>${filaMetricas("Minería (70 %)", b.muestra)}${filaMetricas("Fuera de muestra", b.fuera)}</table>`;
+    if (b.pruebas) html += `<h3>Pruebas superadas</h3><ul>${Object.entries(b.pruebas).map(([k, v]) => `<li><b>${esc(k)}:</b> ${esc(v)}</li>`).join("")}</ul>`;
+    html += `<p class="aviso">Dinero ficticio. Un buen backtest no garantiza resultados futuros.</p>`;
+  } else {
+    html += `<div class="desc">${esc(a.explica || "")}</div>`;
+    const e = S && S.mineria && S.mineria.embudo || {};
+    if (a.rol === "prueba") {
+      const i = ETAPAS.indexOf(a.prueba), llegan = e[ETAPAS[i - 1]] || 0, pasan = e[a.prueba] || 0;
+      html += `<table><tr><td>Han llegado a mi puesto</td><td>${fmt.n(llegan)}</td></tr><tr><td>Han pasado</td><td>${fmt.n(pasan)}</td></tr><tr><td>A la trituradora</td><td>${fmt.n(Math.max(0, llegan - pasan))}</td></tr></table>`;
+    } else if (a.rol === "minero") {
+      html += `<table><tr><td>Estrategias evaluadas</td><td>${fmt.n(e["Generadas"] || 0)}</td></tr><tr><td>Parecían rentables</td><td>${fmt.n(e["Rentables en muestra"] || 0)}</td></tr></table>`;
+    } else if (a.rol === "banco") {
+      html += `<table><tr><td>Estrategias en el banco</td><td>${(S.banco || []).length}</td></tr><tr><td>Aprobadas esta sesión</td><td>${fmt.n(e["Distinta a las del banco"] || 0)}</td></tr></table>`;
+    } else if (a.rol === "macro") {
+      const ind = S.macro && S.macro.indicadores || {};
+      const mios = {"^GSPC": ["^GSPC", "^IXIC", "^VIX"], "DX-Y.NYB": ["DX-Y.NYB", "EURUSD=X"], "GC=F": ["GC=F", "CL=F"], "^TNX": ["^TNX"]}[a.ticker] || [];
+      html += `<table>${mios.filter(k => ind[k]).map(k => `<tr><td>${esc(ind[k].nombre)}</td><td>${ind[k].valor >= 100 ? fmt.n(ind[k].valor) : NF2.format(ind[k].valor)} <span class="${ind[k].dia_pct >= 0 ? "sube" : "baja"}">${fmt.pct(ind[k].dia_pct)}</span></td></tr>`).join("")}
+        ${a.ticker === "^TNX" && S.macro && S.macro.fear_greed ? `<tr><td>Fear &amp; Greed (cripto)</td><td>${S.macro.fear_greed.valor} · ${esc(S.macro.fear_greed.clase)}</td></tr>` : ""}</table>`;
+    } else if (a.rol === "riesgos" || a.rol === "director") {
+      const t = totales();
+      html += `<table><tr><td>Patrimonio (ficticio)</td><td>${t.n ? fmt.dinero(t.patrimonio) : "—"}</td></tr><tr><td>Posiciones abiertas</td><td>${t.abiertas} (${t.largos} largas, ${t.cortos} cortas)</td></tr></table>`;
+    }
+    if (a.tarea === "descanso") html += `<p class="aviso">Ahora mismo está en la sala de descanso.</p>`;
+  }
+  f.innerHTML = html;
+  f.hidden = false;
+  f.querySelector(".cerrar").onclick = () => { f.hidden = true; fichaAbierta = null; };
+}
+
+// cámara: arrastrar, zoom con rueda y pellizco
+let arrastre = null, punteros = new Map(), distPellizco = 0;
+lienzo.addEventListener("pointerdown", e => {
+  lienzo.setPointerCapture(e.pointerId); punteros.set(e.pointerId, [e.clientX, e.clientY]);
+  if (punteros.size === 1) arrastre = {x: e.clientX, y: e.clientY, cx: cam.x, cy: cam.y, movido: false};
+  if (punteros.size === 2) { const [a, b] = [...punteros.values()]; distPellizco = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+});
+lienzo.addEventListener("pointermove", e => {
+  if (punteros.has(e.pointerId)) punteros.set(e.pointerId, [e.clientX, e.clientY]);
+  if (punteros.size === 2) {
+    const [a, b] = [...punteros.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+    if (distPellizco) zoomEn((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, d / distPellizco);
+    distPellizco = d; if (arrastre) arrastre.movido = true; return;
+  }
+  if (arrastre) {
+    const dx = e.clientX - arrastre.x, dy = e.clientY - arrastre.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) { arrastre.movido = true; lienzo.classList.add("arrastrando"); cam.tocada = true; if (cine) alternarCine(false); }
+    if (arrastre.movido) { cam.x = arrastre.cx - dx / cam.zoom; cam.y = arrastre.cy - dy / cam.zoom; }
+  } else {
+    sobre = agenteEn(e.clientX, e.clientY);
+    lienzo.classList.toggle("sobre", !!sobre);
+  }
+});
+function soltar(e) {
+  punteros.delete(e.pointerId);
+  if (arrastre && !arrastre.movido && punteros.size === 0) { const a = agenteEn(e.clientX, e.clientY); if (a) mostrarFicha(a); }
+  if (punteros.size === 0) { arrastre = null; lienzo.classList.remove("arrastrando"); }
+  if (punteros.size < 2) distPellizco = 0;
+}
+lienzo.addEventListener("pointerup", soltar);
+lienzo.addEventListener("pointercancel", soltar);
+lienzo.addEventListener("pointerleave", () => { if (!arrastre) sobre = null; });
+lienzo.addEventListener("wheel", e => { e.preventDefault(); if (cine) alternarCine(false); zoomEn(e.clientX, e.clientY, Math.exp(-e.deltaY * .0015)); }, {passive: false});
+function zoomEn(sx, sy, factor) {
+  const z = clamp(cam.zoom * factor, .3, 3.2);
+  const ix = (sx - vw / 2) / cam.zoom + cam.x, iy = (sy - vh / 2) / cam.zoom + cam.y;
+  cam.zoom = z; cam.x = ix - (sx - vw / 2) / z; cam.y = iy - (sy - vh / 2) / z; cam.tocada = true;
+}
+function encuadrar() {
+  const movil = vw <= 760, panelW = !movil && !$("#panel").classList.contains("plegado") ? 390 : 0;
+  const margenIzq = !movil && !$("#resultados").classList.contains("plegado") ? 170 : 0;
+  const arriba = movil ? 58 : 66, abajo = movil ? (!$("#panel").classList.contains("plegado") ? vh * .42 + 44 : 44) : 44;
+  const areaW = vw - panelW - 24 - margenIzq, areaH = vh - arriba - abajo;
+  const minX = -D * TW / 2, maxX = W * TW / 2, minY = -ALTO_MURO * ZH - 10, maxY = (W + D) * TH / 2 + 10;
+  cam.zoom = clamp(Math.min(areaW / (maxX - minX), areaH / (maxY - minY)), .25, 3);
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+  cam.x = cx - ((12 + margenIzq + areaW / 2) - vw / 2) / cam.zoom;
+  cam.y = cy - ((arriba + areaH / 2) - vh / 2) / cam.zoom;
+  cam.tocada = false;
+}
+function redimensionar() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2); vw = innerWidth; vh = innerHeight;
+  lienzo.width = Math.round(vw * dpr); lienzo.height = Math.round(vh * dpr);
+  if (!cam.tocada) encuadrar();
+}
+addEventListener("resize", () => { redimensionar(); if (S) actualizarResultados(); });
+$("#zMas").onclick = () => zoomEn(vw / 2, vh / 2, 1.25);
+$("#zMenos").onclick = () => zoomEn(vw / 2, vh / 2, .8);
+$("#zVer").onclick = encuadrar;
+$("#bNoche").onclick = () => { modoNoche = {auto: "noche", noche: "dia", dia: "auto"}[modoNoche]; $("#bNoche").title = "Modo: " + modoNoche; };
+addEventListener("keydown", e => {
+  if (e.key === "+") zoomEn(vw / 2, vh / 2, 1.2); else if (e.key === "-") zoomEn(vw / 2, vh / 2, .83);
+  else if (e.key === "0") encuadrar(); else if (e.key === "Escape") { $("#ficha").hidden = true; fichaAbierta = null; }
+});
+document.querySelectorAll(".pestanas button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".pestanas button, .pagina").forEach(x => x.classList.remove("activa"));
+  b.classList.add("activa"); $("#p-" + b.dataset.p).classList.add("activa");
+  if (b.dataset.p === "traders" && S) actualizarResultados();
+  if (b.dataset.p === "chat") { sinLeer = 0; $("#nChat").hidden = true; const c = $("#p-chat"); c.scrollTop = c.scrollHeight; }
+});
+$("#traders").addEventListener("click", e => { const el = e.target.closest(".trader"); if (el) { const a = traders.get(el.dataset.id); if (a) mostrarFicha(a); } });
+$("#plegar").onclick = () => {
+  const p = $("#panel"); p.classList.toggle("plegado");
+  $("#plegar").classList.toggle("fuera", p.classList.contains("plegado")); $("#plegar").textContent = p.classList.contains("plegado") ? "⟨" : "⟩";
+  if (!cam.tocada) encuadrar();
+};
+setTimeout(() => { $("#ayuda").style.opacity = 0; }, 9000);
+
+// ========================================================== BUCLE =====
+let ultimo = performance.now(), acumulado = 0;
+function bucle(ahora) {
+  const dt = Math.min(.05, (ahora - ultimo) / 1000);
+  ultimo = ahora; T += dt;
+  noche = calcularNoche();
+  for (const a of agentes) moverAgente(a, dt);
+  moverPaquetes(dt); moverParticulas(dt); robot(dt); procesarChat(); moverCamara(dt); pasoAnimaciones(ahora);
+  acumulado += dt; if (acumulado > .5) { acumulado = 0; planificar(); }
+  if (!document.hidden) dibujar();
+  $("#pReloj").textContent = fmt.hora(new Date());
+  requestAnimationFrame(bucle);
+}
+crearSuelo();
+redimensionar();
+refrescar();
+setInterval(refrescar, 2000);
+if (parametros.get("cine") !== null) alternarCine(true);
+requestAnimationFrame(bucle);
+</script>
+</body>
+</html>
