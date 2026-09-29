@@ -82,6 +82,12 @@ canvas#lienzo.sobre{cursor:pointer}
 .pagina{display:none;flex:1;overflow:auto;padding:14px;scrollbar-width:thin}
 .pagina.activa{display:block}
 
+.canales{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:12px 14px 10px;margin:-14px -14px 10px;border-bottom:1px solid var(--borde);position:sticky;top:-14px;z-index:2;background:rgba(12,15,21,.97)}
+.canales::-webkit-scrollbar{display:none}
+.canales button{flex:none;border:1px solid var(--borde);background:none;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--suave);cursor:pointer}
+.canales button.activo{background:var(--neon);border-color:var(--neon);color:#0a0d12}
+.msg .para{color:var(--neon);font-weight:700;margin-right:6px}
+.msg .etq{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.06);margin-left:4px}
 .msg{display:flex;gap:10px;margin-bottom:12px;animation:entra .3s ease-out}
 @keyframes entra{from{opacity:0;transform:translateY(6px)}}
 .av{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;color:#0a0d12;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
@@ -89,6 +95,14 @@ canvas#lienzo.sobre{cursor:pointer}
 .msg .cab b{color:var(--texto);font-size:12px;margin-right:6px}
 .msg .txt{background:var(--panel2);border:1px solid var(--borde);padding:7px 11px;border-radius:4px 13px 13px 13px;margin-top:3px;font-size:13px}
 .msg.sistema .txt{border-style:dashed;color:var(--suave)}
+#chat.f-operaciones .msg:not(.c-operaciones){display:none}
+#chat.f-riesgos .msg:not(.c-riesgos){display:none}
+#chat.f-mineria .msg:not(.c-mineria){display:none}
+#chat.f-analisis .msg:not(.c-analisis){display:none}
+#chat.f-macro .msg:not(.c-macro){display:none}
+#chat.f-holding .msg:not(.c-holding){display:none}
+#chat.f-comite .msg:not(.c-comite){display:none}
+#chat.f-charla .msg:not(.c-charla){display:none}
 .msg.bueno .txt{border-color:rgba(46,230,166,.35)}
 .msg.malo .txt{border-color:rgba(255,90,118,.35)}
 .msg.oro .txt{border-color:rgba(255,207,90,.55);background:rgba(255,207,90,.07)}
@@ -172,6 +186,7 @@ canvas.grafica{display:block;width:100%}
 @media (max-width:1720px){.kpi.opc2,.pastilla.reloj{display:none}}
 @media (max-width:1250px){.kpi.opc{display:none}}
 @media (max-width:1000px){#pFng{display:none}}
+@media (max-width:1400px){#pComite{display:none}}
 @media (max-width:760px){
   #barra{height:54px;gap:8px;padding:0 10px}
   .marca > div:not(.logo),.kpis .kpi:not(.principal),.pastillas{display:none}
@@ -207,6 +222,7 @@ canvas.grafica{display:block;width:100%}
   <div class="pastillas">
     <span id="pRegimen" class="pastilla neutral" title="Régimen de mercado según la sala de macroeconomía">—</span>
     <span id="pFng" class="pastilla" title="Índice Fear & Greed de cripto (alternative.me)">F&amp;G —</span>
+    <span id="pComite" class="pastilla" title="El comité se reúne cada 15 minutos">Comité —</span>
     <span id="pMineria" class="pastilla">Conectando…</span>
     <span class="pastilla papel" title="Paper trading: precios reales, dinero ficticio. Nunca se opera dinero real.">PAPEL · dinero ficticio</span>
     <span id="pReloj" class="pastilla reloj">--:--</span>
@@ -223,7 +239,9 @@ canvas.grafica{display:block;width:100%}
     <button data-p="macro">Macro</button>
     <button data-p="info">¿Qué es?</button>
   </nav>
-  <section class="pagina activa" id="p-chat"><div id="chat"></div></section>
+  <section class="pagina activa" id="p-chat">
+    <div class="canales"><button data-c="todo" class="activo">Todo</button><button data-c="operaciones">Operaciones</button><button data-c="riesgos">Riesgos</button><button data-c="mineria">Minería</button><button data-c="analisis">Análisis</button><button data-c="macro">Macro</button><button data-c="holding">Holding</button><button data-c="comite">Comité</button><button data-c="charla">Charla</button></div>
+    <div id="chat"></div></section>
   <section class="pagina" id="p-embudo"><h3>Embudo de esta sesión</h3><div id="embudo"></div>
     <p class="nota">Cada estrategia pasa las pruebas en orden y se descarta en la primera que falla. Por eso casi ninguna llega al final: si pruebas miles al azar, muchas parecen buenas por pura suerte.</p></section>
   <section class="pagina" id="p-traders">
@@ -232,7 +250,7 @@ canvas.grafica{display:block;width:100%}
     <canvas class="grafica" id="gPanel" height="170"></canvas>
     <h3 style="margin-top:14px">Resultado por día</h3>
     <canvas class="grafica" id="gDias" height="96"></canvas>
-    <h3 style="margin-top:16px">Traders</h3><div id="traders"></div></section>
+    <h3 style="margin-top:16px">Ranking de traders</h3><div id="traders"></div></section>
   <section class="pagina" id="p-holding"><h3>Sala de holding</h3><div id="holding"></div>
     <p class="nota">Carteras de largo plazo con dinero ficticio: una compra inicial, órdenes de compra escalonadas por debajo, ventas parciales por encima y un stop de catástrofe. Crea tu propio plan con <code>trading holding --nuevo BTCUSDT --compras 75000,68000 --ventas 110000,130000</code>.</p></section>
   <section class="pagina" id="p-riesgo"><h3>Control de riesgos</h3><div id="riesgo"></div></section>
@@ -244,6 +262,7 @@ canvas.grafica{display:block;width:100%}
     <p><b>Laboratorio.</b> Las que parecen rentables viajan por la cinta. Cada puesto es una prueba de robustez; si la falla, a la trituradora.</p>
     <p><b>Cámara.</b> Las que lo superan todo se guardan en el banco (cada lingote es una estrategia), salvo que se parezcan demasiado a otra que ya esté dentro.</p>
     <p><b>Sala de trading.</b> Cada estrategia del banco es un trader con 1.000 $ ficticios que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
+    <p><b>Radar de señales.</b> El equipo de análisis mira, para cada trader, cuántas condiciones de su estrategia se cumplen ahora mismo y le avisa cuando le falta una para entrar (con la hora del próximo cierre de vela, soporte, resistencia y ATR).</p>
     <p><b>Holding.</b> Carteras de largo plazo (BTC, ETH y SOL) que compran y mantienen siguiendo un plan de zonas: compran más si el precio baja a sus zonas de compra y venden una parte en sus zonas objetivo.</p>
     <p><b>Control de riesgos.</b> Decide cuánto invierte cada operación (arriesgando como mucho un 1 % del capital del trader) y veta entradas si hay demasiadas posiciones, demasiadas iguales, o si el día o la caída acumulada pierden demasiado.</p>
     <p><b>Macroeconomía.</b> Cuatro analistas siguen la bolsa, el VIX, el dólar, el oro, el petróleo, los bonos y el sentimiento cripto, y deciden si el mercado está en modo RISK-ON (apetito por el riesgo) o RISK-OFF.</p>
@@ -790,7 +809,23 @@ estatico(36.4 + 13, () => {
   brillo(36.4, 13, .8, 40, "#ff8a3c", .5);
   if (Math.random() < .08) particulas.push({x: 36.4 + rand(-.2, .2), y: 13, z: .8, vx: 0, vy: 0, vz: .4, g: -.05, vida: 2, t: 0, color: "#ffffff", r: 2.5, vapor: true});
 });
-for (const [x, y] of [[37.5, 11.5], [37.5, 17], [37.5, 23.4], [30.6, 23.4]]) planta(x, y, true);
+for (const [x, y] of [[37.5, 11.5], [37.5, 23.4], [30.6, 23.4]]) planta(x, y, true);
+// gimnasio: cinta de correr y pesas
+bloquear(35.6, 15.9, 36.6, 16.6);
+estatico(36.1 + 16.5, () => {
+  caja(35.65, 16.35, 0, .9, 1.25, .14, "#2b2f38", {top: "#15181d"});
+  plano(35.7, 16.4, .142, () => { ctx.strokeStyle = "rgba(255,255,255,.12)"; ctx.lineWidth = 3; const o = (T * 160) % 20; for (let v = o; v < 115; v += 20) { ctx.beginPath(); ctx.moveTo(5, v); ctx.lineTo(75, v); ctx.stroke(); } });
+  caja(35.65, 16.2, 0, .08, .15, .95, "#555"); caja(36.47, 16.2, 0, .08, .15, .95, "#555");
+  caja(35.65, 16.15, .9, .9, .22, .12, "#2b2f38", {top: "#3a404c"});
+  brillo(36.1, 16.2, 1, 16, "#2ee6a6", .5);
+});
+bloquear(36.8, 18.1, 37.5, 19.6);
+estatico(37.15 + 18.85, () => {
+  caja(36.85, 18.1, 0, .55, 1.4, .7, "#2b2f38", {top: "#3a404c"});
+  for (let i = 0; i < 4; i++) { const [px, py] = iso(37.1, 18.3 + i * .32, .72); circulo(px - 5, py - 3, 3.2, "#15181d"); circulo(px + 5, py - 3, 3.2, "#15181d"); ctx.fillStyle = "#777"; ctx.fillRect(px - 5, py - 4, 10, 2); }
+});
+SITIOS.push({x: 36.1, y: 17.05, mira: "n", postura: "de_pie", tipo: "cinta"}, {x: 36.3, y: 18.85, mira: "e", postura: "de_pie", tipo: "pesas"});
+SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
 const BOMBILLAS = [];
 for (let x = 30.4; x < 37.8; x += .55) BOMBILLAS.push([x, 11.2]);
 for (let y = 11.6; y < 23.8; y += .55) BOMBILLAS.push([37.8, y]);
@@ -1027,7 +1062,7 @@ const EXPLICA_MACRO = {
   "^TNX": "Sigue los tipos de interés: la rentabilidad del bono de EE. UU. a 10 años y el sentimiento cripto (Fear & Greed).",
 };
 const MACROS = [["Rocío", "Bolsa"], ["Adrián", "Divisas"], ["Laia", "Materias primas"], ["Samuel", "Tipos y sentimiento"]].map(([n, area], i) =>
-  empleado({nombre: n, rol: "macro", area, ticker: MACRO_TICKERS[i], puesto: "Macro · " + area, explica: EXPLICA_MACRO[MACRO_TICKERS[i]] + " Ojo: es contexto para el comité, las estrategias no usan estos datos."}, PUESTOS_MACRO[i]));
+  empleado({nombre: n, rol: "macro", area, ticker: MACRO_TICKERS[i], puesto: "Macro y análisis · " + area, explica: EXPLICA_MACRO[MACRO_TICKERS[i]] + " Ojo: es contexto para el comité, las estrategias no usan estos datos. Además, hace el radar de señales: avisa a los traders cuando a su estrategia le falta poco para entrar."}, PUESTOS_MACRO[i]));
 const NOMBRES_TRADERS = ["Lucía", "Mateo", "Aitana", "Leo", "Martina", "Unai", "Alba", "Gael", "Carla", "Nico", "Emma", "Izan", "Olivia", "Teo", "Lola", "Enzo", "Jana", "Biel", "Ainhoa", "Rayan", "Candela", "Omar", "Valeria", "Joel"];
 const traders = new Map();
 
@@ -1036,8 +1071,10 @@ function persona(a) {
   const [fx, fy] = iso(a.x, a.y, a.z);
   const sentado = a.postura === "sentado";
   const frente = a.mira === "s" || a.mira === "e";
-  const paso = a.andando ? Math.sin(a.fase * 10) : 0;
-  const bote = a.andando ? Math.abs(Math.cos(a.fase * 10)) * 1.3 : 0;
+  const gym = !a.andando && a.sitio && a.tarea === "descanso" ? a.sitio.tipo : null;
+  const corre = gym === "cinta", pesas = gym === "pesas";
+  const paso = a.andando ? Math.sin(a.fase * 10) : corre ? Math.sin(T * 14 + a.semilla) : 0;
+  const bote = a.andando ? Math.abs(Math.cos(a.fase * 10)) * 1.3 : corre ? Math.abs(Math.cos(T * 14 + a.semilla)) * 1.8 : 0;
   const teclea = sentado && a.tecleando;
   ctx.fillStyle = "rgba(0,0,0,.22)"; ctx.beginPath(); ctx.ellipse(fx, fy, 8, 3.8, 0, 0, TAU); ctx.fill();
   const cadera = fy - (sentado ? 10 : 12) - bote;
@@ -1054,7 +1091,12 @@ function persona(a) {
   const tw = 13, th = 14, top = cadera - th;
   // brazos
   ctx.fillStyle = shade(a.camisa, .82);
-  if (teclea) {
+  if (pesas) {
+    const sube = (Math.sin(T * 3 + a.semilla) + 1) / 2;
+    ctx.fillRect(fx - tw / 2 - 2.2, top - 7 + sube * 9, 3.2, 11); ctx.fillRect(fx + tw / 2 - 1, top - 7 + sube * 9, 3.2, 11);
+    ctx.fillStyle = "#15181d"; ctx.fillRect(fx - tw / 2 - 4, top - 9 + sube * 9, 7, 3); ctx.fillRect(fx + tw / 2 - 3, top - 9 + sube * 9, 7, 3);
+    ctx.fillStyle = shade(a.camisa, .82);
+  } else if (teclea) {
     const t1 = Math.sin(T * 16 + a.semilla) * .8, t2 = Math.sin(T * 16 + a.semilla + 2) * .8;
     ctx.fillRect(fx - tw / 2 - 1.5, top + 3 + t1, 3.2, 9); ctx.fillRect(fx + tw / 2 - 1.7, top + 3 + t2, 3.2, 9);
   } else {
@@ -1651,31 +1693,34 @@ function etiqueta(a) {
 // ====================================================== CONVERSACIÓN ==
 const colaChat = [];
 let proximaLinea = 0, sinLeer = 0;
-function decir(a, texto, prioridad = 1, clase = "") {
+let canalActual = "charla";
+function enCanal(c, fn) { const previo = canalActual; canalActual = c; try { return fn(); } finally { canalActual = previo; } }
+function decir(a, texto, prioridad = 1, clase = "", para = null) {
   if (!a) return;
-  colaChat.push({a, texto, prioridad, clase});
+  colaChat.push({a, texto, prioridad, clase, canal: canalActual, para});
   if (colaChat.length > 10) {   // si hay atasco, se descarta lo menos importante
     let peor = 0;
     colaChat.forEach((l, i) => { if (l.prioridad < colaChat[peor].prioridad) peor = i; });
     colaChat.splice(peor, 1);
   }
 }
-function charla(lineas, prioridad = 1) { for (const [a, t, c] of lineas) decir(a, t, prioridad, c); }
+function charla(lineas, prioridad = 1) { for (const [a, t, c, para] of lineas) decir(a, t, prioridad, c, para); }
 function procesarChat() {
   if (T < proximaLinea || !colaChat.length) return;
-  const {a, texto, clase} = colaChat.shift();
-  a.burbuja = {texto, t0: T, t1: T + clamp(2.8 + texto.length * .05, 3.2, 7.5)};
-  anadirChat(a, texto, clase);
+  const {a, texto, clase, canal, para} = colaChat.shift();
+  a.burbuja = {texto: para ? `${para.nombre}: ${texto}` : texto, t0: T, t1: T + clamp(2.8 + texto.length * .05, 3.2, 7.5)};
+  anadirChat(a, texto, clase, canal, para);
   proximaLinea = T + 1.5;
 }
 function iniciales(n) { return n.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase(); }
-function anadirChat(a, texto, clase = "") {
+const NOMBRE_CANAL = {operaciones: "operaciones", riesgos: "riesgos", mineria: "minería", analisis: "análisis", macro: "macro", holding: "holding", comite: "comité", charla: "charla"};
+function anadirChat(a, texto, clase = "", canal = "charla", para = null) {
   const caja = $("#chat");
   const el = document.createElement("div");
-  el.className = "msg " + (a ? clase : "sistema");
+  el.className = "msg " + (a ? clase + " c-" + canal : "sistema");
   const color = a ? a.tono : "#d4ff3a";
   el.innerHTML = `<div class="av" style="background:${color}">${a ? esc(iniciales(a.nombre)) : "TF"}</div>
-    <div><div class="cab"><b>${a ? esc(a.nombre) : "Trading Floor"}</b>${a ? esc(a.puesto) + " · " : ""}${fmt.hora(new Date())}</div><div class="txt">${esc(texto)}</div></div>`;
+    <div><div class="cab"><b>${a ? esc(a.nombre) : "Trading Floor"}</b>${para ? `<span class="para">→ ${esc(para.nombre)}</span>` : ""}${a ? esc(a.puesto) + " · " : ""}${fmt.hora(new Date())}${a ? `<span class="etq">${NOMBRE_CANAL[canal] || canal}</span>` : ""}</div><div class="txt">${esc(texto)}</div></div>`;
   const abajo = caja.parentElement.scrollHeight - caja.parentElement.scrollTop - caja.parentElement.clientHeight < 60;
   caja.appendChild(el);
   while (caja.children.length > 120) caja.firstChild.remove();
@@ -1686,7 +1731,7 @@ function anadirChat(a, texto, clase = "") {
 // ======================================================== EL DIRECTOR ==
 // Traduce los cambios del estado real en movimientos, paquetes y charlas.
 const visto = new Set();
-let anterior = null, ultimoComentarioLab = -99, proximoCafe = 10, proximaCharla = 14, proximoComite = 120;
+let anterior = null, ultimoComentarioLab = -99, proximoCafe = 10, proximaCharla = 14;
 function nuevosEventos(lista) {
   if (visto.size > 4000) {   // se vacía de vez en cuando, sin repetir lo que sigue en pantalla
     visto.clear();
@@ -1739,13 +1784,15 @@ function procesarMineria(eventos) {
 }
 function procesarPapel(eventos) {
   for (const e of eventos) {
-    if (e.tipo === "freno") { charla([[RIESGOS, e.texto, "malo"], [DIRECTOR, "Recibido. Nadie abre nada hasta que Riesgos diga."]], 3); enfocar(42, 14, 2, 8); continue; }
-    if (e.tipo === "reanuda") { decir(RIESGOS, e.texto, 3, "bueno"); continue; }
+    if (e.tipo === "freno") { enCanal("riesgos", () => charla([[RIESGOS, e.texto, "malo"], [DIRECTOR, "Recibido. Nadie abre nada hasta que Riesgos diga."]], 3)); enfocar(42, 14, 2, 8); continue; }
+    if (e.tipo === "reanuda") { enCanal("riesgos", () => decir(RIESGOS, e.texto, 3, "bueno")); continue; }
     const a = agenteDeTrader(e.id);
     if (e.tipo === "veto") {
       const quien = pick(EQUIPO_RIESGO);
-      decir(quien, `Veto a ${e.id} (${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}): ${e.motivo}.`, 2, "malo");
-      if (a) decir(a, pick(["Entendido, me quedo fuera.", "Vale, esperaré a la siguiente señal.", "De acuerdo. Las reglas son las reglas."]), 1);
+      enCanal("riesgos", () => {
+        decir(quien, `Veto a ${e.id} (${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}): ${e.motivo}.`, 2, "malo", a);
+        if (a) decir(a, pick(["Entendido, me quedo fuera.", "Vale, esperaré a la siguiente señal.", "De acuerdo. Las reglas son las reglas."]), 1, "", quien);
+      });
       enfocar(42, 14.5, 2.2, 6);
       continue;
     }
@@ -1754,7 +1801,7 @@ function procesarPapel(eventos) {
     if (e.tipo === "apertura") {
       decir(a, `Abro ${ladoTxt(e.direccion)} en ${moneda(e.simbolo)} a ${fmt.precio(e.precio)}${e.fraccion ? ` con el ${Math.round(e.fraccion * 100)} % de mi capital` : ""}. ${pick(["Stop puesto.", "Sigo el plan.", "Riesgos da el visto bueno."])}`, 2);
       const t = totales();
-      if (t.abiertas >= 3 && (t.largos === t.abiertas || t.cortos === t.abiertas)) decir(RIESGOS, `Ojo: ${t.abiertas} posiciones abiertas y todas ${t.largos ? "largas" : "cortas"}. Es casi la misma apuesta.`, 2);
+      if (t.abiertas >= 3 && (t.largos === t.abiertas || t.cortos === t.abiertas)) enCanal("riesgos", () => decir(RIESGOS, `Ojo: ${t.abiertas} posiciones abiertas y todas ${t.largos ? "largas" : "cortas"}. Es casi la misma apuesta.`, 2));
     } else if (e.tipo === "cierre") {
       const r = e.retorno_pct || 0, bien = r > 0;
       const motivo = {stop: "stop", objetivo: "objetivo", tiempo: "tiempo", fin: "fin"}[e.motivo] || e.motivo;
@@ -1794,7 +1841,7 @@ function sincronizarTraders(inicial) {
     else {
       nuevo.x = .6; nuevo.y = 10; nuevo.mira = "e"; ascensorHasta = T + 3;
       const d = ests[id];
-      volverAlPuesto(nuevo, () => decir(nuevo, `Hola, soy ${nuevo.nombre}. Llevo ${id}: ${ladoTxt(d.direccion).toLowerCase()} en ${moneda(d.simbolo)}, con 1.000 $ ficticios.`, 2));
+      volverAlPuesto(nuevo, () => enCanal("operaciones", () => decir(nuevo, `Hola, soy ${nuevo.nombre}. Llevo ${id}: ${ladoTxt(d.direccion).toLowerCase()} en ${moneda(d.simbolo)}, con 1.000 $ ficticios.`, 2)));
       decir(DIRECTOR, pick([`¡Te damos la bienvenida! Tu mesa te espera en la sala de trading.`, `Llega ${id} al parqué. A operar en papel.`]), 2);
     }
   }
@@ -1837,7 +1884,8 @@ function planificar() {
     if (candidatos.length) mandarDescanso(pick(candidatos), rand(25, 55));
   }
   if (T > proximaCharla) { proximaCharla = T + rand(16, 28); charlaDeFondo(); }
-  if (T > proximoComite) { proximoComite = T + rand(200, 300); comite(); }
+  if (Date.now() >= proximoComiteMs) { proximoComiteMs = siguienteComite(); comite(); }
+  if (T > proximoRadar) { proximoRadar = T + rand(24, 40); radarDeSenales(); }
   ascensor = clamp(ascensor + (T < ascensorHasta ? .05 : -.04), 0, 1);
 }
 function charlaDeFondo() {
@@ -1861,26 +1909,28 @@ function charlaDeFondo() {
   if (e["Generadas"]) opciones.push(() => [`Llevamos ${fmt.n(e["Generadas"])} estrategias minadas y solo ${e["Distinta a las del banco"] || 0} han llegado al banco.`, "Así es esto: casi todo es ruido."]);
   if (t.n) opciones.push(() => [`Entre todos llevamos ${fmt.pct(t.pct)} en papel.`, t.resultado >= 0 ? "No está mal. Sin euforia." : "Paciencia: aún son pocas operaciones."]);
   const extra = [];
+  const enGym = agentes.filter(x => x.tarea === "descanso" && !x.andando && x.sitio && (x.sitio.tipo === "cinta" || x.sitio.tipo === "pesas"));
+  if (enGym.length) extra.push(() => ["charla", enGym[0], pick(["Paso por el gimnasio: el cuerpo también opera.", "¡Bum, bum! Una serie más y vuelvo.", "Correr me ayuda a no mirar el precio cada minuto."]), pick(["Tú sí que tienes disciplina.", "Luego me apunto.", "Eso es gestión del riesgo… cardiovascular."])]);
   const ph = planesHolding(), r = S && S.papel && S.papel.riesgo;
   if (ph.length) {
     const p = pick(ph), sig = p.compras.find(z => !z.llena), obj = p.ventas.find(z => !z.llena);
-    extra.push(() => [HOLDERS[0], `${moneda(p.simbolo)} a ${fmt.precio(p.precio)}.${sig ? ` Si baja a ${fmt.precio(sig.precio)}, compramos más.` : ""}${obj ? ` Si sube a ${fmt.precio(obj.precio)}, vendemos una parte.` : ""}`, "Eso es tener un plan, y no mirar el precio cada cinco minutos."]);
-    extra.push(() => [HOLDERS[1], `El holding va ${fmt.pct(S.holding.resumen ? S.holding.resumen.resultado_pct : 0)}. Manos de diamante 💎🙌`, "Mientras no toque el stop de catástrofe, aquí no se vende por miedo."]);
+    extra.push(() => ["holding", HOLDERS[0], `${moneda(p.simbolo)} a ${fmt.precio(p.precio)}.${sig ? ` Si baja a ${fmt.precio(sig.precio)}, compramos más.` : ""}${obj ? ` Si sube a ${fmt.precio(obj.precio)}, vendemos una parte.` : ""}`, "Eso es tener un plan, y no mirar el precio cada cinco minutos."]);
+    extra.push(() => ["holding", HOLDERS[1], `El holding va ${fmt.pct(S.holding.resumen ? S.holding.resumen.resultado_pct : 0)}. Manos de diamante 💎🙌`, "Mientras no toque el stop de catástrofe, aquí no se vende por miedo."]);
   }
   if (r) {
-    extra.push(() => [pick(EQUIPO_RIESGO), `Ahora mismo hay ${r.posiciones} posiciones abiertas de ${r.max_posiciones} permitidas.`, r.bloqueo ? "Y el freno sigue activado." : "Todo dentro de los límites."]);
-    extra.push(() => [RIESGOS, "Recordad: cada operación arriesga como mucho el 1 % del capital de su trader.", "Por eso los stops lejanos llevan posiciones más pequeñas."]);
+    extra.push(() => ["riesgos", pick(EQUIPO_RIESGO), `Ahora mismo hay ${r.posiciones} posiciones abiertas de ${r.max_posiciones} permitidas.`, r.bloqueo ? "Y el freno sigue activado." : "Todo dentro de los límites."]);
+    extra.push(() => ["riesgos", RIESGOS, "Recordad: cada operación arriesga como mucho el 1 % del capital de su trader.", "Por eso los stops lejanos llevan posiciones más pequeñas."]);
   }
   if (extra.length && Math.random() < .35) {
-    const [x, l1, l2] = pick(extra)();
-    charla([[x, l1], [b !== x ? b : a, l2]], 0);
+    const [canal, x, l1, l2] = pick(extra)();
+    enCanal(canal, () => charla([[x, l1], [b !== x ? b : a, l2]], 0));
     return;
   }
   const macro = opcionesMacro();
   if (macro.length && Math.random() < .45) {
     const [l1, l2] = pick(macro)();
     const x = pick(MACROS);
-    charla([[x, l1], [b !== x ? b : a, l2]], 0);
+    enCanal("macro", () => charla([[x, l1], [b !== x ? b : a, l2]], 0));
     return;
   }
   const [l1, l2] = pick(opciones)();
@@ -1907,16 +1957,37 @@ function procesarMacro() {
   macroVisto = m.actualizado;
   const f = m.fear_greed;
   const texto = `${primera ? "Resumen macro" : "Datos macro actualizados"}: ${m.regimen}. ${m.explicacion}${f ? ` Fear & Greed cripto: ${f.valor} (${f.clase.toLowerCase()}).` : ""}`;
-  if (primera) setTimeout(() => decir(MACROS[0], texto, 2), 5000); else decir(MACROS[0], texto, 2);
+  if (primera) setTimeout(() => enCanal("macro", () => decir(MACROS[0], texto, 2)), 5000); else enCanal("macro", () => decir(MACROS[0], texto, 2));
 }
+let proximoRadar = 20;
+function radarDeSenales() {
+  const ts = [...traders.values()].filter(a => a.datos && a.datos.radar && !a.datos.posicion);
+  if (!ts.length) return;
+  const cerca = ts.filter(a => a.datos.radar.total - a.datos.radar.cumplidas === 1);
+  const analista = pick(MACROS);
+  enCanal("analisis", () => {
+    if (cerca.length) {
+      const a = pick(cerca), r = a.datos.radar, d = a.datos;
+      decir(analista, `Ojo: tu setup de ${ladoTxt(d.direccion).toLowerCase()} en ${moneda(d.simbolo)} está a una condición (falta: ${r.faltan[0]}). Próximo cierre a las ${fmt.hora(new Date(r.proximo_cierre))}. Soporte en ${fmt.precio(r.soporte)}, resistencia en ${fmt.precio(r.resistencia)}, ATR ${fmt.precio(r.atr)}.`, 1, "", a);
+      decir(a, pick(["Gracias, lo tengo en el radar.", "Apuntado. Si se cumple al cierre, entro.", "Perfecto, atento a esa vela."]), 1, "", analista);
+    } else {
+      const a = pick(ts), r = a.datos.radar;
+      decir(analista, r.cumplidas ? `Tu setup cumple ${r.cumplidas} de ${r.total} condiciones. Aún falta: ${r.faltan.join(" y ")}.` : `Tu setup está lejos: ninguna de sus ${r.total} condiciones se cumple ahora. Hoy toca esperar.`, 0, "", a);
+      decir(a, pick(["Entendido. Paciencia, que el edge sale a la larga.", "Mi sistema decide, pero me gusta saberlo.", "Sin prisa: si no hay señal, no hay operación."]), 0, "", analista);
+    }
+  });
+}
+function siguienteComite() { const d = new Date(); d.setSeconds(0, 0); d.setMinutes(Math.floor(d.getMinutes() / 15) * 15 + 15); return d.getTime(); }
+let proximoComiteMs = siguienteComite();
 function comite() {
   const ts = [...traders.values()].filter(a => estaLibre(a)).slice(0, 3);
   if (!ts.length && !S.holding) return;
+  enCanal("comite", () => decir(DIRECTOR, "¡Comité! Traders, Riesgos y Holding: a la sala.", 2));
   ts.forEach((a, i) => { a.tarea = "comite"; irA(a, SILLAS_SUR[i + 1].x, SILLAS_SUR[i + 1].y, "sentado", "n"); });
   if (!RIESGOS.tarea && !RIESGOS.andando) { RIESGOS.tarea = "comite"; irA(RIESGOS, SILLAS_NORTE[0].x, SILLAS_NORTE[0].y, "sentado", "s"); ts.push(RIESGOS); }
   setTimeout(() => {
     const t = totales();
-    const lineas = [[DIRECTOR, `Comité. ${t.n} traders, patrimonio ${fmt.n(t.patrimonio)} $ (${fmt.pct(t.pct)}).`],
+    const lineas = [[DIRECTOR, `${t.n} traders, patrimonio ${fmt.n(t.patrimonio)} $ (${fmt.pct(t.pct)}).`],
       [RIESGOS, t.abiertas ? `${t.abiertas} posiciones abiertas: ${t.largos} largas y ${t.cortos} cortas.${t.abiertas >= 3 && (!t.largos || !t.cortos) ? " Demasiado hacia un lado." : " Exposición razonable."}` : "Ninguna posición abierta ahora mismo. Riesgo cero."]];
     const rv = S.papel && S.papel.riesgo;
     if (rv && rv.vetos && rv.vetos.length) lineas.push([RIESGOS, `Llevamos ${rv.vetos.length} vetos recientes. El último, a ${rv.vetos[0].id}: ${rv.vetos[0].motivo}.`]);
@@ -1926,7 +1997,7 @@ function comite() {
     if (mc && mc.regimen) lineas.push([MACROS[0], `Macro: ${mc.regimen}.${mc.fear_greed ? ` Fear & Greed ${mc.fear_greed.valor}.` : ""} Recordad que nuestras estrategias no usan estos datos.`]);
     for (const a of ts.filter(x => x.rol === "trader")) { const d = a.datos || {}; lineas.push([a, `${a.id}: ${fmt.pct((d.resultado || 0) / 10)} desde que llegué, ${(d.operaciones || []).length} operaciones cerradas.`]); }
     lineas.push([DIRECTOR, pick(["Perfecto. A seguir con el plan.", "Bien. Nadie toca las reglas a mitad de partido.", "Gracias. Volvemos a las mesas."])]);
-    charla(lineas, 2);
+    enCanal("comite", () => charla(lineas, 2));
     setTimeout(() => ts.forEach(a => { if (a.tarea === "comite") { a.tarea = null; volverAlPuesto(a); } }), 22000);
   }, 9000);
 }
@@ -1967,7 +2038,7 @@ function actualizarHUD() {
   $("#traders").innerHTML = lista.length ? lista.map(a => {
     const d = a.datos, r = d.resultado || 0;
     return `<div class="trader" data-id="${esc(a.id)}"><div class="av" style="background:${a.camisa}">${esc(iniciales(a.nombre))}</div>
-      <div style="min-width:0"><div class="n">${esc(a.nombre)} · ${esc(a.id)}</div><div class="d">${esc(moneda(d.simbolo))} ${esc(ladoTxt(d.direccion))} · ${d.posicion ? "posición abierta" : "esperando señal"}</div></div>
+      <div style="min-width:0"><div class="n">${esc(a.nombre)} · ${esc(a.id)}</div><div class="d">${esc(moneda(d.simbolo))} ${esc(ladoTxt(d.direccion))} · ${d.posicion ? "posición abierta" : d.radar ? `radar ${d.radar.cumplidas}/${d.radar.total}` : "esperando señal"}</div></div>
       <div class="r ${r > 0 ? "sube" : r < 0 ? "baja" : ""}">${dineroS(r)}<small>hoy ${dineroS(d.hoy || 0)} · ${(d.operaciones || []).length} ops</small></div></div>`;
   }).join("") : `<p class="vacio">Todavía no hay traders. Llegarán cuando la minería apruebe estrategias.</p>`;
   // cinta de precios
@@ -2175,12 +2246,13 @@ async function refrescar() {
   } else {
     const nuevaSesion = anterior && anterior.mineria && anterior.mineria.inicio !== m.inicio;
     if (!nuevaSesion && anterior) encolarPaquetes(anterior.mineria && anterior.mineria.embudo || {}, m.embudo || {});
-    sincronizarTraders(false);
-    procesarMineria(nuevosEventos(m.actividad));
-    procesarPapel(nuevosEventos(S.papel && S.papel.actividad));
-    procesarHolding(nuevosEventos(S.holding && S.holding.actividad));
+    enCanal("operaciones", () => sincronizarTraders(false));
+    const evMineria = nuevosEventos(m.actividad), evPapel = nuevosEventos(S.papel && S.papel.actividad), evHolding = nuevosEventos(S.holding && S.holding.actividad);
+    enCanal("mineria", () => procesarMineria(evMineria));
+    enCanal("operaciones", () => procesarPapel(evPapel));
+    enCanal("holding", () => procesarHolding(evHolding));
     if (anterior && anterior.mineria && anterior.mineria.estado !== "minando" && m.estado === "minando")
-      decir(pick(MINEROS), pick(["¡Nueva ronda! Vuelta al tajo.", "Se acabó el café: a minar.", "Servidores arriba. Vamos."]), 2);
+      enCanal("mineria", () => decir(pick(MINEROS), pick(["¡Nueva ronda! Vuelta al tajo.", "Se acabó el café: a minar.", "Servidores arriba. Vamos."]), 2));
   }
   procesarMacro();
   anterior = S;
@@ -2216,6 +2288,10 @@ function mostrarFicha(a, abrir = true) {
       <tr><td>Resultado</td><td class="${r > 0 ? "sube" : r < 0 ? "baja" : ""}">${r >= 0 ? "+" : "−"}${NF2.format(Math.abs(r))} $</td></tr>
       <tr><td>Operaciones cerradas</td><td>${(d.operaciones || []).length}</td></tr>
       <tr><td>Opera desde</td><td>${d.inicio ? new Date(d.inicio).toLocaleString("es-ES", {dateStyle: "short", timeStyle: "short"}) : "—"}</td></tr></table>`;
+    if (d.radar && !pos) html += `<h3>Radar de señales</h3><table><tr><td>Condiciones cumplidas</td><td>${d.radar.cumplidas} de ${d.radar.total}</td></tr>
+      ${d.radar.faltan.length ? `<tr><td>Falta</td><td style="font-family:Inter,sans-serif">${esc(d.radar.faltan.join(" y "))}</td></tr>` : ""}
+      <tr><td>Próximo cierre de vela</td><td>${fmt.hora(new Date(d.radar.proximo_cierre))}</td></tr>
+      <tr><td>Soporte / resistencia (48 velas)</td><td>${fmt.precio(d.radar.soporte)} / ${fmt.precio(d.radar.resistencia)}</td></tr><tr><td>ATR</td><td>${fmt.precio(d.radar.atr)}</td></tr></table>`;
     if (pos) html += `<h3>Posición abierta</h3><table><tr><td>${esc(ladoTxt(d.direccion))} ${esc(moneda(d.simbolo))} a</td><td>${fmt.precio(pos.entrada)}</td></tr>
       <tr><td>Stop / objetivo</td><td>${fmt.precio(pos.stop)} / ${fmt.precio(pos.objetivo)}</td></tr>
       <tr><td>Ahora</td><td class="${pos.retorno_pct >= 0 ? "sube" : "baja"}">${fmt.pct(pos.retorno_pct)}</td></tr>
@@ -2331,6 +2407,12 @@ document.querySelectorAll(".pestanas button").forEach(b => b.onclick = () => {
   if (b.dataset.p === "holding" && S) { $("#holding").innerHTML = ""; actualizarHolding(); }
   if (b.dataset.p === "chat") { sinLeer = 0; $("#nChat").hidden = true; const c = $("#p-chat"); c.scrollTop = c.scrollHeight; }
 });
+document.querySelector(".canales").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  document.querySelectorAll(".canales button").forEach(x => x.classList.toggle("activo", x === b));
+  $("#chat").className = b.dataset.c === "todo" ? "" : "f-" + b.dataset.c;
+  const c = $("#p-chat"); c.scrollTop = c.scrollHeight;
+});
 $("#traders").addEventListener("click", e => { const el = e.target.closest(".trader"); if (el) { const a = traders.get(el.dataset.id); if (a) mostrarFicha(a); } });
 $("#plegar").onclick = () => {
   const p = $("#panel"); p.classList.toggle("plegado");
@@ -2350,6 +2432,8 @@ function bucle(ahora) {
   acumulado += dt; if (acumulado > .5) { acumulado = 0; planificar(); }
   if (!document.hidden) dibujar();
   $("#pReloj").textContent = fmt.hora(new Date());
+  const falta = Math.max(0, Math.round((proximoComiteMs - Date.now()) / 1000));
+  $("#pComite").textContent = `Comité en ${String(Math.floor(falta / 60)).padStart(2, "0")}:${String(falta % 60).padStart(2, "0")}`;
   requestAnimationFrame(bucle);
 }
 crearSuelo();

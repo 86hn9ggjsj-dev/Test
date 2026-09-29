@@ -31,8 +31,8 @@ Telegram de Jarvis, si lo tienes configurado.
  estrategias                               sobreviven   trader con 1.000 $ ficticios
 ```
 
-1. **Datos.** Velas de 1 hora de los últimos 3 años de Binance (API pública, sin claves),
-   guardadas en `~/.trading_floor/datos/`.
+1. **Datos.** Velas de 1 hora de los últimos 3 años de Binance (API pública, sin claves) de BTC,
+   ETH, SOL, BNB, XRP y DOGE, guardadas en `~/.trading_floor/datos/`.
 2. **Minería** (`mineria.py`). Una estrategia es "entra en largo o en corto cuando se cumplan
    1-3 condiciones" (RSI, medias, cruces, rupturas, Bollinger, MACD, momento, volatilidad) más
    una salida por stop, objetivo o tiempo. Se generan al azar y con un algoritmo genético, y se
@@ -45,10 +45,12 @@ Telegram de Jarvis, si lo tienes configurado.
    - **Estabilidad**: ¿siguen ganando las variantes con parámetros vecinos?
    - **Test del mono**: en datos no vistos, ¿gana al 90 % de "monos" que entran al azar?
 4. **Banco** (`banco.py`). Guarda las supervivientes que no se parecen demasiado a otra del
-   banco (máximo 8 por símbolo).
+   banco (máximo 4 por activo: 6 activos × 4 = las 24 mesas de la sala de trading).
 5. **Paper trading** (`papel.py`). Cada estrategia del banco opera desde que llega, con precios
    reales y las mismas reglas que el backtest (`backtest.py`). Las posiciones se valoran a
    precio de mercado vela a vela, de ahí salen el resultado total, el de hoy y el de cada día.
+   Además calcula el **radar de señales** de cada trader: cuántas de sus condiciones se cumplen
+   ahora mismo, cuál falta, cuándo cierra la próxima vela, soporte, resistencia y ATR.
 6. **Control de riesgos** (`riesgo.py`). Encima del paper trading:
    - **Tamaño de cada operación**: arriesga como mucho el 1 % del capital de su trader si salta el
      stop (con un stop lejano se invierte menos; nunca más del 100 %).
@@ -76,8 +78,11 @@ fuera de muestra y 3 entraron en el banco. Así es esto: casi todo es ruido.
 Todo lo que pasa en la oficina sale del estado real: los cubos de la cinta son estrategias
 pasando pruebas, los lingotes de la cámara son las estrategias del banco, las pantallas de los
 traders muestran su posición y su resultado, y el videowall los precios en vivo. Los personajes
-comentan en el chat lo que ocurre (aprobaciones, descartes, operaciones, datos macro), se
-reúnen en el comité y se van a la sala de descanso o a la terraza cuando no hay trabajo.
+comentan en el chat lo que ocurre (aprobaciones, descartes, operaciones, vetos, holding, datos
+macro, radar de señales), a veces dirigiéndose a alguien ("Rocío → Jana"). El chat se puede filtrar
+por canal: operaciones, riesgos, minería, análisis, macro, holding, comité y charla. El comité se
+reúne cada 15 minutos (con cuenta atrás arriba), y cuando no hay trabajo se van a la sala de
+descanso, a la terraza o al gimnasio.
 
 - Arrastra para moverte, rueda o pellizca para hacer zoom, haz clic en cualquiera para ver su ficha.
 - 🎬 activa el **modo cine**: la cámara recorre las salas y persigue lo que va pasando.

@@ -97,6 +97,21 @@ def _resumen(pnl: list[pd.Series], traders: dict) -> tuple[dict, list, list]:
     return resumen, curva, diarios
 
 
+def _radar(est: Estrategia, m: Mercado) -> dict:
+    """Qué condiciones de la estrategia se cumplen ahora, cuándo cierra la próxima vela y niveles clave."""
+    conds = est.condiciones_ahora(m)
+    return {
+        "cumplidas": sum(ok for _, ok in conds),
+        "total": len(conds),
+        "faltan": [texto for texto, ok in conds if not ok],
+        "proximo_cierre": (m.tiempo[-1] + pd.Timedelta(minutes=2 * m.minutos)).isoformat(),
+        "soporte": float(m.l[-48:].min()),
+        "resistencia": float(m.h[-48:].max()),
+        "atr": float(m.ind("atr", 14)[-1]),
+        "precio": float(m.c[-1]),
+    }
+
+
 def ciclo(estado: dict) -> list[dict]:
     """Actualiza el estado del paper trading con las velas nuevas. Devuelve los eventos nuevos."""
     en_banco = {b["id"]: b for b in banco.cargar()}
@@ -234,6 +249,8 @@ def ciclo(estado: dict) -> list[dict]:
                    fraccion=posicion["fraccion"])
         t["operaciones"] = cerradas
         t["posicion"] = posicion
+        if sim:
+            t["radar"] = _radar(sim[0], sim[1])
         patrimonio = CAPITAL_POR_ESTRATEGIA * float(np.prod([1 + o["retorno_pct"] / 100 for o in cerradas]))
         if posicion:
             patrimonio *= 1 + posicion["retorno_pct"] / 100

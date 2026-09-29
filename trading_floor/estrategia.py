@@ -106,6 +106,10 @@ def _num(x: float) -> str:
     return f"{x:g}".replace(".", ",")
 
 
+def texto_condicion(c: dict) -> str:
+    return _TEXTOS[c["tipo"]].format(**{k: _num(v) if isinstance(v, float) else v for k, v in c.items()})
+
+
 @dataclass
 class Estrategia:
     simbolo: str
@@ -141,12 +145,14 @@ class Estrategia:
                 s &= _REGLAS[cond["tipo"]](m, cond)
         return s
 
+    def condiciones_ahora(self, m, i: int = -1) -> list[tuple[str, bool]]:
+        """Cada condición con su texto y si se cumple en la vela `i` (por defecto, la última cerrada)."""
+        with np.errstate(invalid="ignore"):
+            return [(texto_condicion(c), bool(_REGLAS[c["tipo"]](m, c)[i])) for c in self.condiciones]
+
     def describir(self) -> str:
         accion = "COMPRA" if self.direccion == "largo" else "VENDE EN CORTO"
-        reglas = " y ".join(
-            _TEXTOS[c["tipo"]].format(**{k: _num(v) if isinstance(v, float) else v for k, v in c.items()})
-            for c in self.condiciones
-        )
+        reglas = " y ".join(texto_condicion(c) for c in self.condiciones)
         return (
             f"{accion} {self.simbolo} si {reglas} · stop {_num(self.stop_atr)}×ATR · "
             f"objetivo {_num(self.objetivo_atr)}×ATR · máx. {self.max_velas} velas"

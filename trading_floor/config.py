@@ -8,7 +8,7 @@ from pathlib import Path
 DATA_DIR = Path(os.environ.get("TRADING_FLOOR_DIR", Path.home() / ".trading_floor"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-SIMBOLOS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+SIMBOLOS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "DOGEUSDT"]
 INTERVALO = "1h"
 DIAS_HISTORICO = 3 * 365
 
@@ -25,7 +25,7 @@ CAPITAL_POR_ESTRATEGIA = 1_000.0  # dinero ficticio que recibe cada estrategia e
 PARTE_EN_MUESTRA = 0.7
 
 # En la minería continua, un símbolo deja de minarse cuando ya tiene tantas estrategias en el banco.
-MAX_POR_SIMBOLO = 8
+MAX_POR_SIMBOLO = 4  # 6 activos x 4 = las 24 mesas de la sala de trading
 
 # Gestión de riesgo del paper trading (ver riesgo.py).
 RIESGO_POR_OPERACION = 0.01  # cada operación arriesga como máximo el 1 % del capital de su trader
