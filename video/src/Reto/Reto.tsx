@@ -151,8 +151,33 @@ const sans = (size: number): React.CSSProperties => ({
   textShadow: SOMBRA,
 });
 
-const Arriba: React.FC<{ top?: number; children: React.ReactNode }> = ({ top = 245, children }) => (
-  <div style={{ position: "absolute", top, width: ANCHO, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>{children}</div>
+// Tarjeta oscura translúcida con desenfoque y filo dorado: da fondo a los elementos sin perder el aire premium
+const aparicion = (t: number, t0: number, fin?: number) =>
+  lerp(t, t0, t0 + 0.45, 0, 1, salida) * (fin === undefined ? 1 : 1 - lerp(t, fin - 0.3, fin, 0, 1, recogida));
+
+const tarjeta = (v: number): React.CSSProperties => ({
+  position: "relative",
+  background: "linear-gradient(180deg, rgba(24,24,28,0.8) 0%, rgba(10,10,12,0.74) 100%)",
+  backdropFilter: "blur(22px) saturate(140%)",
+  border: "1px solid rgba(255,255,255,0.14)",
+  borderRadius: 30,
+  boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+  overflow: "hidden",
+  opacity: v,
+  transform: `translateY(${(1 - v) * 12}px) scale(${0.94 + 0.06 * v})`,
+});
+
+const Filo: React.FC = () => (
+  <div style={{ position: "absolute", top: 0, left: "12%", right: "12%", height: 2, background: `linear-gradient(90deg, transparent, ${ORO}, transparent)` }} />
+);
+
+const Arriba: React.FC<{ t: number; t0: number; fin?: number; top?: number; children: React.ReactNode }> = ({ t, t0, fin, top = 245, children }) => (
+  <div style={{ position: "absolute", top, width: ANCHO, display: "flex", justifyContent: "center" }}>
+    <div style={{ ...tarjeta(aparicion(t, t0, fin)), padding: "26px 48px 30px", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+      <Filo />
+      {children}
+    </div>
+  </div>
 );
 
 const Progreso: React.FC<{ t: number }> = ({ t }) => (
@@ -165,7 +190,7 @@ const Bienvenida: React.FC<{ t: number }> = ({ t }) => {
   const fin = esc("hoy").s;
   if (t < EV.dia - 0.1 || t >= fin) return null;
   return (
-    <Arriba>
+    <Arriba t={t} t0={EV.dia - 0.15} fin={fin}>
       <Revela t={t} t0={EV.dia - 0.1} fin={fin}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 18 }}>
           <span style={sans(64)}>Día</span>
@@ -186,7 +211,7 @@ const Hoy: React.FC<{ t: number }> = ({ t }) => {
   if (t < EV.t85 - 0.2 || t >= fin) return null;
   const n = Math.round(lerp(t, EV.t85 - 0.1, EV.t85 + 0.5, 0, 85, salida));
   return (
-    <Arriba top={235}>
+    <Arriba t={t} t0={EV.t85 - 0.25} fin={fin} top={235}>
       <Revela t={t} t0={EV.t85 - 0.2} fin={fin}>
         <div style={etiqueta}>Resultado de hoy</div>
       </Revela>
@@ -303,6 +328,9 @@ const Pasos: React.FC<{ t: number }> = ({ t }) => {
   const traza = lerp(t, e.s + 0.1, e.s + 0.8, 0, 1, salida) * (1 - lerp(t, e.e - 0.3, e.e, 0, 1, recogida));
   return (
     <div style={{ position: "absolute", top: 250, left: 0, width: ANCHO, height: 140 }}>
+      <div style={{ ...tarjeta(aparicion(t, e.s, e.e)), position: "absolute", left: x0 - 44, width: largo + 88, top: -26, height: 160 }}>
+        <Filo />
+      </div>
       <div style={{ position: "absolute", left: x0 - 12, right: ANCHO - x0 - largo - 12, top: 0, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <Revela t={t} t0={e.s + 0.05} fin={e.e}>
           <span style={etiqueta}>El reto</span>
@@ -340,7 +368,7 @@ const Casilla: React.FC<{ t: number }> = ({ t }) => {
   if (t < EV.casilla - 0.2 || t >= e.e) return null;
   const n = Math.round(lerp(t, EV.casilla - 0.1, EV.treintayuno, 2, 31, suave));
   return (
-    <Arriba top={225}>
+    <Arriba t={t} t0={EV.casilla - 0.25} fin={e.e} top={225}>
       <Revela t={t} t0={EV.casilla - 0.2} fin={e.e}>
         <div style={etiqueta}>Casilla</div>
       </Revela>
@@ -356,7 +384,7 @@ const Cta: React.FC<{ t: number }> = ({ t }) => {
   const e = esc("cta");
   if (t < e.s) return null;
   return (
-    <Arriba top={240}>
+    <Arriba t={t} t0={e.s - 0.05} top={240}>
       <Revela t={t} t0={e.s}>
         <div style={etiqueta}>Y tú, ¿qué dices?</div>
       </Revela>
