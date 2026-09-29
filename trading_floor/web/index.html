@@ -40,6 +40,27 @@ canvas#lienzo.sobre{cursor:pointer}
 .pastilla.on{border-color:rgba(46,230,166,.6);color:var(--verde)}
 .pastilla.off{border-color:rgba(255,90,118,.6);color:var(--rojo)}
 .pastilla.neutral{color:var(--suave)}
+.plan{border:1px solid var(--borde);border-radius:14px;padding:12px;margin-bottom:12px;background:var(--panel2)}
+.plan .tit{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.plan .tit b{font:800 16px var(--mono)}
+.plan .tit span{font:700 13px var(--mono)}
+.plan .sub{font-size:11px;color:var(--suave);margin:2px 0 8px}
+.zonas{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;font-size:11px}
+.zona{border:1px dashed var(--borde);border-radius:8px;padding:5px 8px;font-family:var(--mono)}
+.zona.c{border-color:rgba(46,230,166,.45)} .zona.v{border-color:rgba(255,207,90,.5)}
+.zona.llena{border-style:solid;background:rgba(255,255,255,.05)}
+.zona small{display:block;font-family:Inter,sans-serif;color:var(--suave)}
+.estado-riesgo{border-radius:14px;padding:12px 14px;margin-bottom:14px;font-weight:800;letter-spacing:.06em;display:flex;align-items:center;gap:10px}
+.estado-riesgo.ok{background:rgba(46,230,166,.1);border:1px solid rgba(46,230,166,.4);color:var(--verde)}
+.estado-riesgo.mal{background:rgba(255,90,118,.12);border:1px solid rgba(255,90,118,.5);color:var(--rojo);animation:latido 1.2s infinite}
+.estado-riesgo small{display:block;font-weight:500;letter-spacing:0;color:#c9d0db;font-size:12px}
+.limite{margin-bottom:11px}
+.limite .fila{display:flex;justify-content:space-between;font-size:12px}
+.limite .fila b{font-family:var(--mono)}
+.limite .barrita i{background:linear-gradient(90deg,var(--verde),var(--ambar) 70%,var(--rojo))}
+.veto{font-size:12px;border-left:3px solid var(--rojo);padding:4px 0 4px 10px;margin-bottom:8px;color:#c9d0db}
+.veto b{color:var(--texto)}
+.regla{font-size:12px;margin-bottom:7px;color:#c9d0db} .regla b{color:var(--texto);font-family:var(--mono)}
 .macro-reg{border:1px solid var(--borde);border-radius:12px;padding:10px 12px;margin-bottom:12px;background:var(--panel2)}
 .macro-reg b{font:800 16px var(--mono)}
 .macro-reg p{margin:4px 0 0;font-size:12px;color:#c9d0db}
@@ -51,8 +72,9 @@ canvas#lienzo.sobre{cursor:pointer}
 
 #panel{position:fixed;top:72px;right:12px;bottom:46px;width:370px;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--borde);border-radius:16px;backdrop-filter:blur(12px);z-index:5;overflow:hidden;transition:transform .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 20px 60px rgba(0,0,0,.45)}
 #panel.plegado{transform:translateX(calc(100% + 24px))}
-.pestanas{display:flex;border-bottom:1px solid var(--borde);flex:none}
-.pestanas button{flex:1;background:none;border:0;color:var(--suave);font-weight:600;font-size:12px;padding:12px 4px 10px;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s}
+.pestanas{display:flex;border-bottom:1px solid var(--borde);flex:none;overflow-x:auto;scrollbar-width:none}
+.pestanas::-webkit-scrollbar{display:none}
+.pestanas button{flex:none;padding-left:10px!important;padding-right:10px!important;background:none;border:0;color:var(--suave);font-weight:600;font-size:12px;padding:12px 4px 10px;cursor:pointer;border-bottom:2px solid transparent;transition:color .2s}
 .pestanas button:hover{color:var(--texto)}
 .pestanas button.activa{color:var(--texto);border-bottom-color:var(--neon)}
 .pestanas .num[hidden]{display:none}
@@ -179,6 +201,7 @@ canvas.grafica{display:block;width:100%}
     <div class="kpi principal"><small>Resultado total</small><b id="kResultado">—</b></div>
     <div class="kpi"><small>Hoy</small><b id="kHoy">—</b></div>
     <div class="kpi opc"><small>Posiciones</small><b id="kPosiciones">—</b></div>
+    <div class="kpi opc"><small>Holding</small><b id="kHolding">—</b></div>
     <div class="kpi opc opc2"><small>Banco</small><b id="kBanco">—</b></div>
   </div>
   <div class="pastillas">
@@ -195,6 +218,8 @@ canvas.grafica{display:block;width:100%}
     <button data-p="chat" class="activa">Chat<span class="num" id="nChat" hidden>0</span></button>
     <button data-p="embudo">Embudo</button>
     <button data-p="traders">Resultados</button>
+    <button data-p="holding">Holding</button>
+    <button data-p="riesgo">Riesgo</button>
     <button data-p="macro">Macro</button>
     <button data-p="info">¿Qué es?</button>
   </nav>
@@ -208,6 +233,9 @@ canvas.grafica{display:block;width:100%}
     <h3 style="margin-top:14px">Resultado por día</h3>
     <canvas class="grafica" id="gDias" height="96"></canvas>
     <h3 style="margin-top:16px">Traders</h3><div id="traders"></div></section>
+  <section class="pagina" id="p-holding"><h3>Sala de holding</h3><div id="holding"></div>
+    <p class="nota">Carteras de largo plazo con dinero ficticio: una compra inicial, órdenes de compra escalonadas por debajo, ventas parciales por encima y un stop de catástrofe. Crea tu propio plan con <code>trading holding --nuevo BTCUSDT --compras 75000,68000 --ventas 110000,130000</code>.</p></section>
+  <section class="pagina" id="p-riesgo"><h3>Control de riesgos</h3><div id="riesgo"></div></section>
   <section class="pagina" id="p-macro"><h3>Sala de macroeconomía</h3><div id="macro"></div>
     <p class="nota">Datos diarios de Yahoo Finance y el índice Fear &amp; Greed de alternative.me. Es contexto para el comité: las estrategias minadas no usan estos datos para operar.</p></section>
   <section class="pagina info" id="p-info">
@@ -216,6 +244,8 @@ canvas.grafica{display:block;width:100%}
     <p><b>Laboratorio.</b> Las que parecen rentables viajan por la cinta. Cada puesto es una prueba de robustez; si la falla, a la trituradora.</p>
     <p><b>Cámara.</b> Las que lo superan todo se guardan en el banco (cada lingote es una estrategia), salvo que se parezcan demasiado a otra que ya esté dentro.</p>
     <p><b>Sala de trading.</b> Cada estrategia del banco es un trader con 1.000 $ ficticios que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
+    <p><b>Holding.</b> Carteras de largo plazo (BTC, ETH y SOL) que compran y mantienen siguiendo un plan de zonas: compran más si el precio baja a sus zonas de compra y venden una parte en sus zonas objetivo.</p>
+    <p><b>Control de riesgos.</b> Decide cuánto invierte cada operación (arriesgando como mucho un 1 % del capital del trader) y veta entradas si hay demasiadas posiciones, demasiadas iguales, o si el día o la caída acumulada pierden demasiado.</p>
     <p><b>Macroeconomía.</b> Cuatro analistas siguen la bolsa, el VIX, el dólar, el oro, el petróleo, los bonos y el sentimiento cripto, y deciden si el mercado está en modo RISK-ON (apetito por el riesgo) o RISK-OFF.</p>
     <p><b>Comité, descanso y terraza.</b> De vez en cuando se reúnen para repasar el riesgo, y cuando no hay trabajo se van a por café.</p>
     <p class="nota">Todo es <b>paper trading</b>: nunca se envía ninguna orden real. Los resultados de un backtest no garantizan nada sobre el futuro.</p>
@@ -293,7 +323,7 @@ function rgba(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >
 
 // ------------------------------------------------ proyección isométrica --
 const TW = 64, TH = 32, ZH = 34;       // ancho y alto de una baldosa; píxeles por unidad de altura
-const W = 38, D = 24;                  // tamaño de la planta en baldosas
+const W = 46, D = 24;                  // tamaño de la planta en baldosas
 const ALTO_MURO = 2.4;
 const iso = (x, y, z = 0) => [(x - y) * TW / 2, (x + y) * TH / 2 - z * ZH];
 
@@ -345,7 +375,9 @@ const SALAS = [
   {id: "laboratorio", nombre: "LABORATORIO", x0: 10, y0: 0, x1: 21, y1: 9, a: "#e8edf3", b: "#dde4ec", rotulo: "rgba(20,40,70,.09)"},
   {id: "banco", nombre: "CÁMARA", x0: 21, y0: 0, x1: 30, y1: 9, a: "#241f16", b: "#2b251a", rotulo: "rgba(255,207,90,.09)"},
   {id: "macro", nombre: "MACRO", x0: 30, y0: 0, x1: 38, y1: 9, a: "#0f2230", b: "#122838", rotulo: "rgba(92,192,255,.1)"},
-  {id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 38, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
+  {id: "holding", nombre: "HOLDING", x0: 38, y0: 0, x1: 46, y1: 9, a: "#231b0c", b: "#2a2010", rotulo: "rgba(247,147,26,.12)"},
+  {id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 46, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
+  {id: "riesgos", nombre: "RIESGOS", x0: 38, y0: 11, x1: 46, y1: 24, a: "#1c1216", b: "#22161b", rotulo: "rgba(255,90,118,.1)"},
   {id: "terraza", nombre: "TERRAZA", x0: 30, y0: 11, x1: 38, y1: 24, a: "#8a6a48", b: "#7f6141", rotulo: "rgba(40,20,0,.14)"},
   {id: "trading", nombre: "SALA DE TRADING", x0: 0, y0: 11, x1: 18, y1: 24, a: "#eceee8", b: "#e2e5dd", rotulo: "rgba(0,0,0,.075)"},
   {id: "comite", nombre: "COMITÉ", x0: 18, y0: 11, x1: 30, y1: 17, a: "#d8d0c2", b: "#cec5b5", rotulo: "rgba(60,30,0,.09)"},
@@ -516,7 +548,7 @@ function pantallaPrueba(e, w, h) {
 }
 function trituradora(e) {
   caja(e.bx - .25, 7.08, 0, .5, .45, .42, "#3a3f4a", {top: "#1b1e24"});
-  caraY(e.bx - .2, 7.53 + .002, .36, () => { ctx.fillStyle = "#ff5a76"; ctx.fillRect(0, 6, 40, 5); ctx.fillStyle = "#fff"; ctx.font = "800 7px Inter"; ctx.fillText("✕", 16, 24); });
+  caraY(e.bx - .2, 7.53 + .002, .36, () => { ctx.fillStyle = "#ff5a76"; ctx.fillRect(0, 6, 40, 5); ctx.fillStyle = "#fff"; ctx.font = "800 7px Inter, sans-serif"; ctx.fillText("✕", 16, 24); });
 }
 function arco(e) {
   const c = e.flash && T < e.flash.hasta ? e.flash.color : "#5cc0ff";
@@ -557,7 +589,7 @@ estatico(24.45 + 6.55, () => {
   brillo(24.45, 6.55, .95, 30, "#ffcf5a", .35);
 });
 const ASIENTO_BANCO = puesto({x: 22, y: 2.6, w: 1.5, color: "#3b3422", monitores: 2, colorSilla: "#5a4a2a",
-  pintar: (w, h, i) => { ctx.fillStyle = "#1a1405"; ctx.fillRect(0, 0, w, h); ctx.fillStyle = "#ffcf5a"; ctx.font = "800 7px JetBrains Mono"; ctx.fillText(i ? "BANCO" : String((S && S.banco || []).length).padStart(2, "0"), 4, 17); },
+  pintar: (w, h, i) => { ctx.fillStyle = "#1a1405"; ctx.fillRect(0, 0, w, h); ctx.fillStyle = "#ffcf5a"; ctx.font = "800 7px JetBrains Mono, monospace"; ctx.fillText(i ? "BANCO" : String((S && S.banco || []).length).padStart(2, "0"), 4, 17); },
   brilla: () => "#ffcf5a"});
 let giroCamara = 0, destelloBanco = 0;
 function lingote(i) {
@@ -608,10 +640,10 @@ function pantallaTrader(mesa, w, h, i) {
       ctx.stroke();
     }
   } else {
-    ctx.fillStyle = "#e9edf3"; ctx.font = "800 5.5px JetBrains Mono";
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 5.5px JetBrains Mono, monospace";
     ctx.fillText(moneda(d.simbolo) + (d.posicion ? " " + ladoTxt(d.direccion) : ""), 3, 8);
     const r = d.resultado || 0;
-    ctx.fillStyle = r > 0 ? "#2ee6a6" : r < 0 ? "#ff5a76" : "#cfd6e0"; ctx.font = "800 8px JetBrains Mono";
+    ctx.fillStyle = r > 0 ? "#2ee6a6" : r < 0 ? "#ff5a76" : "#cfd6e0"; ctx.font = "800 8px JetBrains Mono, monospace";
     ctx.fillText((r >= 0 ? "+" : "") + r.toFixed(1), 3, 21);
   }
 }
@@ -654,7 +686,7 @@ estatico(24.55 + 17.55, () => {   // recreativa
   caraY(24.25, 17.9 + .002, 1.2, () => {
     ctx.fillStyle = "#07091a"; ctx.fillRect(4, 4, 52, 36);
     for (let i = 0; i < 6; i++) { ctx.fillStyle = ["#ff5a76", "#ffc24a", "#2ee6a6", "#5cc0ff"][i % 4]; ctx.fillRect(8 + ((T * 30 + i * 13) % 44), 8 + i * 5, 4, 3); }
-    ctx.fillStyle = "#d4ff3a"; ctx.font = "800 6px JetBrains Mono"; ctx.fillText("HODL", 18, 46);
+    ctx.fillStyle = "#d4ff3a"; ctx.font = "800 6px JetBrains Mono, monospace"; ctx.fillText("HODL", 18, 46);
   });
   brillo(24.55, 17.9, 1, 40, "#b58cff", .45);
 });
@@ -702,7 +734,7 @@ function pantallaAnalista(ticker, w, h) {
   ctx.strokeStyle = col; ctx.lineWidth = 1; ctx.beginPath();
   sr.forEach((v, k) => ctx.lineTo(2 + k * (w - 4) / (sr.length - 1), h - 3 - (v - lo) / (hi - lo || 1) * (h - 10)));
   ctx.stroke();
-  ctx.fillStyle = "#cfe8ff"; ctx.font = "700 4.6px Inter"; ctx.fillText(ind.nombre.split(" (")[0], 2, 5.5);
+  ctx.fillStyle = "#cfe8ff"; ctx.font = "700 4.6px Inter, sans-serif"; ctx.fillText(ind.nombre.split(" (")[0], 2, 5.5);
 }
 const GLOBO = {x: 36.3, y: 4.6};
 bloquear(35.6, 3.9, 37, 5.3);
@@ -729,7 +761,7 @@ function globo() {
   ctx.restore();
   const m = S && S.macro;
   if (m && m.regimen) {
-    ctx.textAlign = "center"; ctx.font = "800 9px JetBrains Mono";
+    ctx.textAlign = "center"; ctx.font = "800 9px JetBrains Mono, monospace";
     ctx.fillStyle = m.regimen === "RISK-ON" ? "#2ee6a6" : m.regimen === "RISK-OFF" ? "#ff5a76" : "#cfd6e0";
     ctx.fillText(m.regimen, cx, cy - r - 8); ctx.textAlign = "start";
   }
@@ -768,8 +800,104 @@ SITIOS.push(
   {x: 36.4, y: 13.9, mira: "n", postura: "de_pie", tipo: "barbacoa"}, {x: 35.4, y: 14.2, mira: "e", postura: "de_pie", tipo: "terraza"});
 SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
 
+// ---- HOLDING: dos holders, moneda gigante y gráfico de zonas en la pared ----
+const PUESTOS_HOLDING = [[38.7, 3.2], [38.7, 5.8]].map(([x, y], i) =>
+  puesto({x, y, w: 1.6, color: "#3a2a12", colorSilla: "#5a3d16", pintar: (w, h) => pantallaHolder(i, w, h), brilla: () => "#f7931a"}));
+function planesHolding() { return Object.values(S && S.holding && S.holding.planes || {}); }
+function planEnPared() { const ps = planesHolding(); return ps.length ? ps[Math.floor(T / 9) % ps.length] : null; }
+function pantallaHolder(i, w, h) {
+  const ps = planesHolding(), p = ps[i % Math.max(1, ps.length)];
+  ctx.fillStyle = "#140d03"; ctx.fillRect(0, 0, w, h);
+  if (!p) return;
+  const sr = p.precios || [], lo = Math.min(...sr), hi = Math.max(...sr);
+  ctx.strokeStyle = "#f7931a"; ctx.lineWidth = 1; ctx.beginPath();
+  sr.forEach((v, k) => ctx.lineTo(2 + k * (w - 4) / (sr.length - 1), h - 3 - (v - lo) / (hi - lo || 1) * (h - 10))); ctx.stroke();
+  ctx.fillStyle = "#ffd9a8"; ctx.font = "800 5px JetBrains Mono, monospace"; ctx.fillText(moneda(p.simbolo) + " " + (p.resultado_pct >= 0 ? "+" : "") + p.resultado_pct.toFixed(1) + "%", 2, 6);
+}
+const MONEDA = {x: 42.9, y: 4.6};
+bloquear(42.3, 4, 43.5, 5.2);
+function monedaGigante() {
+  caja(MONEDA.x - .45, MONEDA.y - .45, 0, .9, .9, .35, "#2b2210", {top: "#3d3016"});
+  const [cx, cy0] = iso(MONEDA.x, MONEDA.y, .35), cy = cy0 - 40 - Math.sin(T * 1.5) * 3, r = 28, esc = Math.cos(T * 1.1);
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(Math.max(.08, Math.abs(esc)), 1);
+  ctx.fillStyle = "#b8741a"; ctx.beginPath(); ctx.arc(0, 0, r + 3, 0, TAU); ctx.fill();
+  const g = ctx.createRadialGradient(-8, -10, 4, 0, 0, r); g.addColorStop(0, "#ffe3a3"); g.addColorStop(.6, "#f7931a"); g.addColorStop(1, "#c46a0c");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill();
+  if (esc > 0) { ctx.fillStyle = "#fff6e5"; ctx.font = "900 34px Inter, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("₿", 0, 2); }
+  else { ctx.strokeStyle = "#ffe3a3"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, r - 7, 0, TAU); ctx.stroke(); }
+  ctx.restore(); ctx.textAlign = "start"; ctx.textBaseline = "alphabetic";
+  brillo(MONEDA.x, MONEDA.y, 1.4, 70, "#f7931a", .55);
+}
+planta(45.4, 8.4, true); planta(45.4, .9);
+
+// ---- CONTROL DE RIESGOS: pantalla de límites, baliza y puestos ----
+estatico(42 + 11.5, () => {
+  caja(41.9, 11.3, 0, .2, .1, .5, "#222");
+  caja(38.6, 11.22, .5, 6.8, .12, 1.4, "#101217");
+  caraY(38.65, 11.34 + .002, 1.85, () => pantallaLimites(670, 130));
+  brillo(42, 11.5, 1.2, 130, S && S.papel && S.papel.riesgo && S.papel.riesgo.bloqueo ? "#ff5a76" : "#2ee6a6", .2);
+});
+const BALIZA = {x: 45.3, y: 12.3};
+bloquear(45, 12, 45.6, 12.6);
+function baliza() {
+  const mal = !!(S && S.papel && S.papel.riesgo && S.papel.riesgo.bloqueo), c = mal ? "#ff5a76" : "#2ee6a6";
+  caja(BALIZA.x - .08, BALIZA.y - .08, 0, .16, .16, 1.5, "#2a2e36");
+  caja(BALIZA.x - .2, BALIZA.y - .2, 1.5, .4, .4, .35, c, {top: shade(c, 1.3)});
+  const [px, py] = iso(BALIZA.x, BALIZA.y, 1.7);
+  if (mal) {
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    const a = T * 5, g = ctx.createRadialGradient(px, py, 0, px, py, 160);
+    g.addColorStop(0, "rgba(255,90,118,.5)"); g.addColorStop(1, "rgba(255,90,118,0)");
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(px, py); ctx.arc(px, py, 160, a, a + .5); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.arc(px, py, 160, a + Math.PI, a + Math.PI + .5); ctx.fill();
+    ctx.restore();
+  }
+  brillo(BALIZA.x, BALIZA.y, 1.7, mal ? 60 + Math.sin(T * 10) * 15 : 30, c, mal ? .9 : .5);
+}
+const PUESTOS_RIESGO = [[39, 14.2], [41.2, 14.2], [43.4, 14.2]].map(([x, y]) =>
+  puesto({x, y, w: 1.6, color: "#3a1f28", colorSilla: "#5a2a38", pintar: (w, h, i) => pantallaRiesgo(w, h, i), brilla: () => S && S.papel && S.papel.riesgo && S.papel.riesgo.bloqueo ? "#ff5a76" : "#b58cff"}));
+function pantallaRiesgo(w, h, i) {
+  const r = S && S.papel && S.papel.riesgo, mal = r && r.bloqueo;
+  ctx.fillStyle = mal ? "#2a0a12" : "#140c18"; ctx.fillRect(0, 0, w, h);
+  if (!r) return;
+  const barras = [[r.posiciones, r.max_posiciones], [r.mayor_apuesta, r.max_misma_apuesta], [r.perdida_hoy_pct, r.limite_diario_pct], [r.caida_pct, r.max_caida_pct]];
+  barras.forEach(([v, m], k) => { const f = clamp(v / m, 0, 1); ctx.fillStyle = "#2a1f33"; ctx.fillRect(3, 4 + k * 6, w - 6, 3.5); ctx.fillStyle = f > .8 ? "#ff5a76" : f > .5 ? "#ffc24a" : "#2ee6a6"; ctx.fillRect(3, 4 + k * 6, (w - 6) * f, 3.5); });
+}
+function pantallaLimites(w, h) {
+  const r = S && S.papel && S.papel.riesgo;
+  ctx.fillStyle = "#0b0810"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#ff5a76"; ctx.font = "900 16px Inter, sans-serif"; ctx.fillText("CONTROL DE RIESGOS", 14, 24);
+  if (!r) { ctx.fillStyle = "#394252"; ctx.font = "700 13px Inter, sans-serif"; ctx.fillText("Esperando al paper trading…", 14, 70); return; }
+  const mal = !!r.bloqueo;
+  ctx.fillStyle = mal ? "#ff5a76" : "#2ee6a6"; ctx.font = "900 14px JetBrains Mono, monospace";
+  ctx.fillText(mal ? "● FRENO ACTIVADO" : "● OPERATIVA NORMAL", 260, 24);
+  const filas = [["Posiciones abiertas", r.posiciones, r.max_posiciones, ""], ["Misma apuesta", r.mayor_apuesta, r.max_misma_apuesta, ""],
+    ["Pérdida de hoy", r.perdida_hoy_pct, r.limite_diario_pct, " %"], ["Caída desde el máximo", r.caida_pct, r.max_caida_pct, " %"]];
+  filas.forEach(([t, v, m, u], k) => {
+    const x = 14 + (k % 2) * 330, y = 48 + Math.floor(k / 2) * 40, f = clamp(v / m, 0, 1), c = f >= 1 ? "#ff5a76" : f > .6 ? "#ffc24a" : "#2ee6a6";
+    ctx.fillStyle = "#8a94a6"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText(t, x, y);
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 11px JetBrains Mono, monospace"; ctx.fillText(`${u ? NF2.format(v) : v}${u} / ${u ? NF2.format(m) : m}${u}`, x + 190, y);
+    ctx.fillStyle = "#1e1826"; ctx.fillRect(x, y + 7, 300, 10); ctx.fillStyle = c; ctx.fillRect(x, y + 7, 300 * f, 10);
+  });
+}
+bloquear(40.8, 19.4, 43.2, 21.2);
+estatico(42 + 20.3, () => {
+  caja(41.9, 20.2, 0, .2, .2, .42, "#333");
+  const [px, py] = iso(42, 20.3, .45);
+  ctx.fillStyle = "#4a2632"; ctx.beginPath(); ctx.ellipse(px, py + 2, 44, 22, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = "#6b3445"; ctx.beginPath(); ctx.ellipse(px, py, 44, 22, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = "#ff5a76"; ctx.font = "900 11px Inter, sans-serif"; ctx.textAlign = "center"; ctx.fillText("SALA DE CRISIS", px, py + 4); ctx.textAlign = "start";
+});
+for (const [x, y, mira] of [[40.5, 20.3, "e"], [43.5, 20.3, "o"], [42, 18.9, "s"]]) silla(x, y, mira, "#3a2a30");
+planta(45.4, 23.4, true); planta(38.6, 23.4);
+SITIOS.push({x: 40.5, y: 20.3, mira: "e", postura: "sentado", tipo: "crisis"}, {x: 43.5, y: 20.3, mira: "o", postura: "sentado", tipo: "crisis"});
+SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
+
 // ---- tabiques ----
-muroH(9, 0, 38, [[4, 6], [15, 17], [25, 27], [33, 35]], 1, "#d4ff3a");
+muroH(9, 0, 46, [[4, 6], [15, 17], [25, 27], [33, 35], [41, 43]], 1, "#d4ff3a");
+muroV(38, 0, 9, [], 1, "#f7931a");
+muroH(11, 38, 46, [[41, 43]], 1, "#ff5a76");
+muroV(38, 11, 24, [], 1, "#ff5a76");
 muroV(30, 0, 9, [], 1, "#5cc0ff");
 muroH(11, 30, 38, [[33, 35]], 1, "#d4ff3a");
 muroV(30, 11, 24, [[19, 21]], 1, "#ff8a5c");
@@ -835,6 +963,8 @@ const ROLES = {
   director: {puesto: "Dirección", camisa: "#22304a", pantalon: "#1a2233", accesorio: "corbata", tono: "#8fb4ff"},
   riesgos: {puesto: "Riesgos", camisa: "#6a4bc4", pantalon: "#2a2440", accesorio: null, tono: "#b58cff"},
   macro: {puesto: "Macroeconomía", camisa: "#1f8fa3", pantalon: "#23303d", accesorio: "gafas_pasta"},
+  holder: {puesto: "Holding", camisa: "#f7931a", pantalon: "#2b2b30", accesorio: null},
+  riesgo2: {puesto: "Control de riesgos", camisa: "#8a2c45", pantalon: "#241820", accesorio: "gafas_pasta", tono: "#ff7a95"},
   trader: {puesto: "Trader", camisa: null, pantalon: "#2b3140", accesorio: "cascos"},
 };
 const agentes = [];
@@ -885,7 +1015,11 @@ const PROBADORES = ["Carmen", "Pol", "Sara", "Marc", "Nerea", "Dani"].map((n, i)
   empleado({nombre: n, rol: "prueba", prueba: PRUEBAS[i], puesto: "Laboratorio · " + PRUEBAS[i], explica: TEXTOS_PRUEBA[PRUEBAS[i]]}, ESTACIONES[i].asiento));
 const BANQUERA = empleado({nombre: "Irene", rol: "banco", explica: "Recibe por el tubo las estrategias que superan las seis pruebas y las guarda en la cámara (cada lingote es una). Rechaza las que se parecen demasiado a otra que ya está dentro, o las de un símbolo cuyo banco ya está lleno."}, ASIENTO_BANCO);
 const DIRECTOR = empleado({nombre: "Bruno", rol: "director", explica: "Preside el comité: repasa el patrimonio y los resultados de cada trader."}, SILLA_CABECERA);
-const RIESGOS = empleado({nombre: "Julia", rol: "riesgos", explica: "Vigila la exposición: cuántas posiciones hay abiertas y hacia qué lado. Si todas apuestan lo mismo, avisa."}, SILLAS_NORTE[0]);
+const RIESGOS = empleado({nombre: "Julia", rol: "riesgos", puesto: "Jefa de riesgos", explica: "Dirige el control de riesgos: decide cuánto invierte cada operación (como mucho un 1 % de riesgo sobre el capital del trader) y veta entradas si se superan los límites de la sala. Puede activar el freno si el día o la caída acumulada pierden demasiado."}, PUESTOS_RIESGO[1]);
+const EQUIPO_RIESGO = [RIESGOS, ...[["Óscar", "Vigila la exposición: cuántas posiciones hay abiertas y cuántas son la misma apuesta (mismo activo y misma dirección)."], ["Nuria", "Vigila las pérdidas: la del día (freno al −2 %) y la caída desde el máximo (pausa al −6 %)."]].map(([n, e], i) =>
+  empleado({nombre: n, rol: "riesgo2", explica: e}, PUESTOS_RIESGO[i === 0 ? 0 : 2]))];
+const HOLDERS = [["Paula", "Lleva el holding de BTC y ETH: compra en zonas bajas, vende una parte en las altas y no se pone nerviosa con la volatilidad."], ["Íñigo", "Lleva el holding de SOL y vigila los stops de catástrofe de todas las carteras."]].map(([n, e], i) =>
+  empleado({nombre: n, rol: "holder", explica: e + " Todo con dinero ficticio."}, PUESTOS_HOLDING[i]));
 const EXPLICA_MACRO = {
   "^GSPC": "Sigue la bolsa (S&P 500 y Nasdaq) y el VIX, el «índice del miedo». Con ellos decide si el mercado está en RISK-ON o RISK-OFF.",
   "DX-Y.NYB": "Sigue las divisas: el índice del dólar (DXY) y el EUR/USD. Un dólar fuerte suele poner las cosas difíciles a los activos de riesgo.",
@@ -1082,7 +1216,7 @@ function moverParticulas(dt) {
 }
 function dibujarParticula(q) {
   const [px, py] = iso(q.x, q.y, q.z), a = 1 - q.t / q.vida;
-  if (q.texto) { ctx.fillStyle = `rgba(255,255,255,${a * .8})`; ctx.font = "700 9px Inter"; ctx.fillText(q.texto, px, py); return; }
+  if (q.texto) { ctx.fillStyle = `rgba(255,255,255,${a * .8})`; ctx.font = "700 9px Inter, sans-serif"; ctx.fillText(q.texto, px, py); return; }
   if (q.vapor) { ctx.fillStyle = `rgba(255,255,255,${a * .35})`; ctx.beginPath(); ctx.arc(px, py, q.r + q.t * 4, 0, TAU); ctx.fill(); return; }
   ctx.fillStyle = rgba(q.color, a);
   if (q.cuadrado) ctx.fillRect(px - q.r, py - q.r, q.r * 2, q.r * 1.4); else { ctx.beginPath(); ctx.arc(px, py, q.r, 0, TAU); ctx.fill(); }
@@ -1108,9 +1242,9 @@ function holograma() {
   ctx.restore();
   const m = S && S.mineria || {};
   ctx.textAlign = "center";
-  ctx.fillStyle = act ? "#3effd0" : "rgba(62,255,208,.5)"; ctx.font = "800 9px JetBrains Mono";
+  ctx.fillStyle = act ? "#3effd0" : "rgba(62,255,208,.5)"; ctx.font = "800 9px JetBrains Mono, monospace";
   ctx.fillText(act ? `GEN ${m.generacion || 0}/${m.generaciones || 0}` : (m.estado === "descanso" ? "EN PAUSA" : "EN ESPERA"), bx, by - 102);
-  ctx.font = "600 7px JetBrains Mono"; ctx.fillText(act ? (m.simbolo || "") : "", bx, by - 92);
+  ctx.font = "600 7px JetBrains Mono, monospace"; ctx.fillText(act ? (m.simbolo || "") : "", bx, by - 92);
   ctx.textAlign = "start";
   brillo(HOLO.x, HOLO.y, 1.2, 70, "#3effd0", act ? .45 : .12);
 }
@@ -1160,16 +1294,19 @@ function paredes() {
   caraY(0, .002, .12, () => { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 0, W * 100, 3); });
   caraX(.002, D, .12, () => { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 0, D * 100, 3); });
   // MINERÍA: letrero
-  caraY(.3, .002, 2.34, () => { ctx.fillStyle = "#ffc24a"; ctx.font = "900 20px Inter"; ctx.fillText("MINERÍA ALGORÍTMICA", 8, 22); });
+  caraY(.3, .002, 2.34, () => { ctx.fillStyle = "#ffc24a"; ctx.font = "900 20px Inter, sans-serif"; ctx.fillText("MINERÍA ALGORÍTMICA", 8, 22); });
   // LABORATORIO: ventanas y cartel
   caraY(10.6, .002, 2.1, () => { ventana(420, 130); });
   caraY(15.4, .002, 2.1, () => {
     ctx.fillStyle = "#f4f6f9"; ctx.fillRect(0, 0, 250, 130);
-    ctx.fillStyle = "#0e1a2b"; ctx.font = "900 20px Inter"; ctx.fillText("¿SUERTE O VENTAJA?", 12, 30);
-    ctx.font = "600 11px Inter"; ctx.fillStyle = "#44556d";
+    ctx.fillStyle = "#0e1a2b"; ctx.font = "900 20px Inter, sans-serif"; ctx.fillText("¿SUERTE O VENTAJA?", 12, 30);
+    ctx.font = "600 11px Inter, sans-serif"; ctx.fillStyle = "#44556d";
     ["Si pruebas miles de estrategias al azar,", "algunas parecerán geniales por casualidad.", "Aquí intentamos pillarlas."].forEach((l, i) => ctx.fillText(l, 12, 56 + i * 17));
   });
   caraY(18.1, .002, 2.1, () => { ventana(270, 130); });
+  // HOLDING: gráfico de zonas objetivo
+  caraY(38.25, .002, 2.34, () => { const p = planEnPared(); pintarZonas(ctx, 750, 205, p, true); });
+  brillo(42, .3, 1.6, 170, "#f7931a", .2);
   // MACRO: gran panel de indicadores
   caraY(30.25, .002, 2.32, () => pantallaMacro(750, 200));
   brillo(34, .3, 1.6, 170, "#5cc0ff", .22);
@@ -1187,7 +1324,7 @@ function paredes() {
     ctx.strokeStyle = "#3d3d44"; ctx.lineWidth = 9;
     for (let i = 0; i < 3; i++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(-50, 0); ctx.lineTo(50, 0); ctx.stroke(); }
     circulo(0, 0, 14, "#3d3d44"); ctx.restore();
-    ctx.fillStyle = "#ffcf5a"; ctx.font = "900 20px Inter"; ctx.fillText("CÁMARA DEL BANCO", 30, 40);
+    ctx.fillStyle = "#ffcf5a"; ctx.font = "900 20px Inter, sans-serif"; ctx.fillText("CÁMARA DEL BANCO", 30, 40);
   });
   // PARED OESTE: pantalla de minería, ascensor y videowall
   caraX(.002, 7.6, 2.2, () => pantallaMineria(600, 150));
@@ -1197,7 +1334,7 @@ function paredes() {
     ctx.fillStyle = "#0b0d11"; ctx.fillRect(28, 50, 144, 185);
     ctx.fillStyle = "#8b95a5"; ctx.fillRect(28 - ab, 50, 72, 185); ctx.fillRect(100 + ab, 50, 72, 185);
     ctx.fillStyle = "#6b7585"; ctx.fillRect(99 + ab, 50, 2, 185);
-    ctx.fillStyle = "#d4ff3a"; ctx.font = "900 17px Inter"; ctx.fillText("TRADING FLOOR", 30, 22);
+    ctx.fillStyle = "#d4ff3a"; ctx.font = "900 17px Inter, sans-serif"; ctx.fillText("TRADING FLOOR", 30, 22);
     ctx.fillStyle = ascensor > .1 ? "#2ee6a6" : "#394252"; ctx.fillRect(92, 36, 16, 8);
   });
   brillo(.1, 10, 2.1, 60, "#d4ff3a", .3);
@@ -1214,11 +1351,11 @@ function paredes() {
   }
 }
 function grafico(sim, p, w, h) {
-  if (!sim || !p) { ctx.fillStyle = "#394252"; ctx.font = "700 14px Inter"; ctx.fillText("Sin precios todavía", 20, 80); return; }
+  if (!sim || !p) { ctx.fillStyle = "#394252"; ctx.font = "700 14px Inter, sans-serif"; ctx.fillText("Sin precios todavía", 20, 80); return; }
   const s = p.serie || [], sube = p.cambio_24h_pct >= 0, col = sube ? "#2ee6a6" : "#ff5a76";
-  ctx.fillStyle = "#e9edf3"; ctx.font = "800 17px JetBrains Mono"; ctx.fillText(moneda(sim) + "/USDT", 12, 24);
+  ctx.fillStyle = "#e9edf3"; ctx.font = "800 17px JetBrains Mono, monospace"; ctx.fillText(moneda(sim) + "/USDT", 12, 24);
   ctx.fillStyle = col; ctx.fillText(fmt.precio(p.precio), 12, 46);
-  ctx.font = "700 12px JetBrains Mono"; ctx.fillText(fmt.pct(p.cambio_24h_pct) + " 24h", 190, 24);
+  ctx.font = "700 12px JetBrains Mono, monospace"; ctx.fillText(fmt.pct(p.cambio_24h_pct) + " 24h", 190, 24);
   if (s.length > 1) {
     const lo = Math.min(...s), hi = Math.max(...s), x = k => 10 + k * (w - 20) / (s.length - 1), y = v => h - 12 - (v - lo) / (hi - lo || 1) * (h - 70);
     const g = ctx.createLinearGradient(0, 56, 0, h); g.addColorStop(0, rgba(col, .35)); g.addColorStop(1, rgba(col, 0));
@@ -1238,9 +1375,9 @@ function totales() {
 }
 function resumenPared(w, h) {
   const t = totales(), col = t.resultado >= 0 ? "#2ee6a6" : "#ff5a76";
-  ctx.fillStyle = "#8a94a6"; ctx.font = "700 11px Inter"; ctx.fillText("RESULTADO DEL FONDO · PAPEL", 12, 20);
-  ctx.fillStyle = col; ctx.font = "800 24px JetBrains Mono"; ctx.fillText(t.n ? `${t.resultado >= 0 ? "+" : "−"}${NF2.format(Math.abs(t.resultado))} $` : "—", 12, 48);
-  ctx.font = "700 12px JetBrains Mono"; ctx.fillStyle = t.hoy >= 0 ? "#2ee6a6" : "#ff5a76";
+  ctx.fillStyle = "#8a94a6"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText("RESULTADO DEL FONDO · PAPEL", 12, 20);
+  ctx.fillStyle = col; ctx.font = "800 24px JetBrains Mono, monospace"; ctx.fillText(t.n ? `${t.resultado >= 0 ? "+" : "−"}${NF2.format(Math.abs(t.resultado))} $` : "—", 12, 48);
+  ctx.font = "700 12px JetBrains Mono, monospace"; ctx.fillStyle = t.hoy >= 0 ? "#2ee6a6" : "#ff5a76";
   ctx.fillText(t.n ? `hoy ${t.hoy >= 0 ? "+" : "−"}${NF2.format(Math.abs(t.hoy))} $` : "", 190, 48);
   const c = (S && S.papel && S.papel.curva || []).slice(-168);
   if (c.length > 1) {
@@ -1250,29 +1387,29 @@ function resumenPared(w, h) {
     ctx.beginPath(); c.forEach((p, i) => ctx.lineTo(X(i), Y(p[1]))); ctx.lineTo(X(c.length - 1), Y(0)); ctx.lineTo(X(0), Y(0)); ctx.fillStyle = g; ctx.fill();
     ctx.beginPath(); c.forEach((p, i) => ctx.lineTo(X(i), Y(p[1]))); ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.stroke();
     circulo(X(c.length - 1), Y(v[v.length - 1]), 4 + Math.sin(T * 5), col);
-  } else { ctx.fillStyle = "#8a94a6"; ctx.font = "600 12px Inter"; ctx.fillText(`${t.n} traders · dinero ficticio`, 12, 110); }
+  } else { ctx.fillStyle = "#8a94a6"; ctx.font = "600 12px Inter, sans-serif"; ctx.fillText(`${t.n} traders · dinero ficticio`, 12, 110); }
 }
 function pantallaMineria(w, h) {
   const m = S && S.mineria || {}, e = m.embudo || {}, act = m.estado === "minando";
   ctx.fillStyle = "#0a0c10"; ctx.fillRect(0, 0, w, h); ctx.strokeStyle = "#2a2f38"; ctx.lineWidth = 4; ctx.strokeRect(0, 0, w, h);
-  ctx.fillStyle = "#ffc24a"; ctx.font = "800 16px JetBrains Mono";
+  ctx.fillStyle = "#ffc24a"; ctx.font = "800 16px JetBrains Mono, monospace";
   ctx.fillText(act ? `MINANDO ${m.simbolo || ""}` : m.estado === "descanso" ? "RONDA TERMINADA · PAUSA" : "MINERÍA EN ESPERA", 14, 26);
   const g = m.generaciones ? (m.generacion || 0) / m.generaciones : 0;
   ctx.fillStyle = "#1c222c"; ctx.fillRect(14, 38, 300, 10); ctx.fillStyle = "#ffc24a"; ctx.fillRect(14, 38, 300 * (act ? g : 0), 10);
-  ctx.fillStyle = "#8a94a6"; ctx.font = "600 11px Inter"; ctx.fillText(act ? `generación ${m.generacion}/${m.generaciones}` : "", 322, 47);
+  ctx.fillStyle = "#8a94a6"; ctx.font = "600 11px Inter, sans-serif"; ctx.fillText(act ? `generación ${m.generacion}/${m.generaciones}` : "", 322, 47);
   const filas = [["evaluadas", e["Generadas"] || 0, "#e9edf3"], ["rentables en muestra", e["Rentables en muestra"] || 0, "#ffc24a"], ["aprobadas", e["Distinta a las del banco"] || 0, "#2ee6a6"]];
-  filas.forEach(([t, v, c], i) => { ctx.fillStyle = c; ctx.font = "800 22px JetBrains Mono"; ctx.fillText(fmt.n(v), 14 + i * 190, 88); ctx.fillStyle = "#8a94a6"; ctx.font = "600 11px Inter"; ctx.fillText(t, 14 + i * 190, 104); });
-  ctx.font = "600 9px JetBrains Mono";
+  filas.forEach(([t, v, c], i) => { ctx.fillStyle = c; ctx.font = "800 22px JetBrains Mono, monospace"; ctx.fillText(fmt.n(v), 14 + i * 190, 88); ctx.fillStyle = "#8a94a6"; ctx.font = "600 11px Inter, sans-serif"; ctx.fillText(t, 14 + i * 190, 104); });
+  ctx.font = "600 9px JetBrains Mono, monospace";
   for (let i = 0; i < 24; i++) { const s = Math.floor(T * (act ? 4 : .3)) + i * 7; ctx.fillStyle = `rgba(255,194,74,${act ? .35 : .1})`; ctx.fillText("E-" + ((s * 2654435761) >>> 0).toString(16).slice(0, 6).toUpperCase(), 14 + (i % 8) * 72, 124 + Math.floor(i / 8) * 11); }
   brillo(.1, 4.6, 1.5, 120, "#ffc24a", act ? .2 : .06);
 }
 function pantallaMacro(w, h) {
   const m = S && S.macro || {}, ind = m.indicadores || {}, fng = m.fear_greed;
   ctx.fillStyle = "#06101a"; ctx.fillRect(0, 0, w, h); ctx.strokeStyle = "#1c3346"; ctx.lineWidth = 4; ctx.strokeRect(0, 0, w, h);
-  ctx.fillStyle = "#5cc0ff"; ctx.font = "900 17px Inter"; ctx.fillText("MACROECONOMÍA", 14, 26);
+  ctx.fillStyle = "#5cc0ff"; ctx.font = "900 17px Inter, sans-serif"; ctx.fillText("MACROECONOMÍA", 14, 26);
   const reg = m.regimen || "SIN DATOS", col = reg === "RISK-ON" ? "#2ee6a6" : reg === "RISK-OFF" ? "#ff5a76" : "#cfd6e0";
   ctx.fillStyle = rgba(col, .15); rr(14, 38, 150, 40, 8); ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
-  ctx.fillStyle = col; ctx.font = "900 22px JetBrains Mono"; ctx.fillText(reg, 24, 66);
+  ctx.fillStyle = col; ctx.font = "900 22px JetBrains Mono, monospace"; ctx.fillText(reg, 24, 66);
   // indicador Fear & Greed (semicírculo con aguja)
   const gx = 90, gy = 170, gr = 62;
   const tramos = [["#ff5a76", 0, 25], ["#ff9a5c", 25, 45], ["#cfd6e0", 45, 55], ["#a8e05f", 55, 75], ["#2ee6a6", 75, 100]];
@@ -1282,36 +1419,81 @@ function pantallaMacro(w, h) {
     const ang = Math.PI + fng.valor / 100 * Math.PI + Math.sin(T * 2) * .01;
     ctx.strokeStyle = "#e9edf3"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(gx + Math.cos(ang) * (gr - 8), gy + Math.sin(ang) * (gr - 8)); ctx.stroke();
     circulo(gx, gy, 5, "#e9edf3");
-    ctx.textAlign = "center"; ctx.fillStyle = "#e9edf3"; ctx.font = "900 20px JetBrains Mono"; ctx.fillText(fng.valor, gx, gy - 18);
-    ctx.font = "700 10px Inter"; ctx.fillStyle = "#8a94a6"; ctx.fillText("FEAR & GREED · " + fng.clase.toUpperCase(), gx, gy + 18); ctx.textAlign = "start";
+    ctx.textAlign = "center"; ctx.fillStyle = "#e9edf3"; ctx.font = "900 20px JetBrains Mono, monospace"; ctx.fillText(fng.valor, gx, gy - 18);
+    ctx.font = "700 10px Inter, sans-serif"; ctx.fillStyle = "#8a94a6"; ctx.fillText("FEAR & GREED · " + fng.clase.toUpperCase(), gx, gy + 18); ctx.textAlign = "start";
   }
   // baldosas de indicadores
   Object.values(ind).slice(0, 8).forEach((d, i) => {
     const x = 190 + (i % 4) * 138, y = 14 + Math.floor(i / 4) * 92, c = d.dia_pct >= 0 ? "#2ee6a6" : "#ff5a76";
     ctx.fillStyle = "#0b1824"; rr(x, y, 130, 84, 6); ctx.fill();
-    ctx.fillStyle = "#8aa4bd"; ctx.font = "700 10px Inter"; ctx.fillText(d.nombre.split(" (")[0].toUpperCase(), x + 8, y + 16);
-    ctx.fillStyle = "#e9edf3"; ctx.font = "800 16px JetBrains Mono"; ctx.fillText(d.valor >= 100 ? fmt.n(d.valor) : NF2.format(d.valor), x + 8, y + 36);
-    ctx.fillStyle = c; ctx.font = "700 11px JetBrains Mono"; ctx.fillText(fmt.pct(d.dia_pct), x + 8, y + 51);
+    ctx.fillStyle = "#8aa4bd"; ctx.font = "700 10px Inter, sans-serif"; ctx.fillText(d.nombre.split(" (")[0].toUpperCase(), x + 8, y + 16);
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 16px JetBrains Mono, monospace"; ctx.fillText(d.valor >= 100 ? fmt.n(d.valor) : NF2.format(d.valor), x + 8, y + 36);
+    ctx.fillStyle = c; ctx.font = "700 11px JetBrains Mono, monospace"; ctx.fillText(fmt.pct(d.dia_pct), x + 8, y + 51);
     const sr = d.serie, lo = Math.min(...sr), hi = Math.max(...sr);
     ctx.strokeStyle = c; ctx.lineWidth = 1.4; ctx.beginPath();
     sr.forEach((v, k) => ctx.lineTo(x + 8 + k * 114 / (sr.length - 1), y + 78 - (v - lo) / (hi - lo || 1) * 20)); ctx.stroke();
   });
-  if (!m.indicadores) { ctx.fillStyle = "#394252"; ctx.font = "700 14px Inter"; ctx.fillText("Esperando datos macro…", 200, 100); }
+  if (!m.indicadores) { ctx.fillStyle = "#394252"; ctx.font = "700 14px Inter, sans-serif"; ctx.fillText("Esperando datos macro…", 200, 100); }
+}
+function pintarZonas(g, w, h, p, pared) {
+  g.fillStyle = pared ? "#0d0904" : "rgba(0,0,0,0)"; g.fillRect(0, 0, w, h);
+  if (!p) { g.fillStyle = "#6f5a3a"; g.font = "700 14px Inter, sans-serif"; g.fillText("Esperando los planes de holding…", 20, h / 2); return; }
+  const sr = p.precios || [], precio = p.precio, top = pared ? 44 : 8, izq = pared ? 14 : 4, der = pared ? 150 : 76, abajo = h - (pared ? 12 : 16);
+  if (pared) {
+    g.fillStyle = "#f7931a"; g.font = "900 17px Inter, sans-serif"; g.fillText(`HOLDING · ${moneda(p.simbolo)} · ZONAS OBJETIVO`, 14, 24);
+    g.fillStyle = p.resultado >= 0 ? "#2ee6a6" : "#ff5a76"; g.font = "800 14px JetBrains Mono, monospace";
+    g.fillText(`${fmt.n(p.valor)} $  ${fmt.pct(p.resultado_pct)}`, 470, 24);
+  }
+  const niveles = [...p.compras.map(z => z.precio), ...p.ventas.map(z => z.precio), p.coste_medio || precio];
+  let lo = Math.min(...sr, precio), hi = Math.max(...sr, precio);
+  const lo0 = lo, hi0 = hi;
+  for (const n of niveles) if (n > lo0 * .88 && n < hi0 * 1.12) { lo = Math.min(lo, n); hi = Math.max(hi, n); }
+  const m = (hi - lo) * .06; lo -= m; hi += m;
+  const X = k => izq + k * (w - izq - der) / Math.max(1, sr.length - 1), Y = v => top + (hi - v) / (hi - lo) * (abajo - top);
+  const fuera = [], etiquetas = [];
+  const banda = (z, col, texto) => {
+    if (z.precio < lo || z.precio > hi) { fuera.push([z.precio > hi ? "▲" : "▼", texto, col]); return; }
+    const y = Y(z.precio);
+    g.fillStyle = rgba(col, z.llena ? .28 : .1); g.fillRect(izq, y - 4, w - izq - der, 8);
+    g.strokeStyle = col; g.lineWidth = 1; g.setLineDash(z.llena ? [] : [5, 4]); g.beginPath(); g.moveTo(izq, y); g.lineTo(w - der, y); g.stroke(); g.setLineDash([]);
+    etiquetas.push([y, `${texto}${z.llena ? " ✓" : ""}`, col]);
+  };
+  p.compras.forEach((z, i) => banda(z, "#2ee6a6", `C${i + 1} ${fmt.precio(z.precio)}`));
+  p.ventas.forEach((z, i) => banda(z, "#ffcf5a", `V${i + 1} ${fmt.precio(z.precio)}`));
+  banda({precio: p.stop, llena: p.cerrado}, "#ff5a76", `STOP ${fmt.precio(p.stop)}`);
+  if (p.coste_medio && p.coste_medio > lo && p.coste_medio < hi) {
+    const y = Y(p.coste_medio); g.strokeStyle = "rgba(255,255,255,.55)"; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(izq, y); g.lineTo(w - der, y); g.stroke(); g.setLineDash([]);
+    g.fillStyle = "#e9edf3"; g.font = `600 ${pared ? 10 : 8}px Inter, sans-serif`; g.fillText("coste medio", izq + 4, y - 4);
+  }
+  if (sr.length > 1) {
+    const gr = g.createLinearGradient(0, top, 0, abajo); gr.addColorStop(0, "rgba(247,147,26,.35)"); gr.addColorStop(1, "rgba(247,147,26,0)");
+    g.beginPath(); sr.forEach((v, k) => g.lineTo(X(k), Y(v))); g.lineTo(X(sr.length - 1), abajo); g.lineTo(X(0), abajo); g.fillStyle = gr; g.fill();
+    g.beginPath(); sr.forEach((v, k) => g.lineTo(X(k), Y(v))); g.strokeStyle = "#f7931a"; g.lineWidth = pared ? 2.4 : 1.8; g.stroke();
+    const ly = Y(precio); g.fillStyle = "#fff"; g.beginPath(); g.arc(X(sr.length - 1), ly, pared ? 4.5 : 3, 0, TAU); g.fill();
+  }
+  const alto = pared ? 13 : 11;
+  fuera.forEach(([f, t, c]) => etiquetas.push([f === "▲" ? top : abajo, `${f} ${t}`, c]));
+  etiquetas.sort((a, b) => a[0] - b[0]);
+  for (let i = 1; i < etiquetas.length; i++) etiquetas[i][0] = Math.max(etiquetas[i][0], etiquetas[i - 1][0] + alto);
+  const exceso = etiquetas.length ? etiquetas[etiquetas.length - 1][0] - (h - 4) : 0;
+  if (exceso > 0) etiquetas.forEach(e => e[0] -= exceso);
+  g.font = `700 ${pared ? 11 : 9}px JetBrains Mono, monospace`;
+  for (const [y, t, c] of etiquetas) { g.fillStyle = c; g.fillText(t, w - der + 6, y + 4); }
 }
 function pantallaRiesgos(w, h) {
   const t = totales();
   ctx.fillStyle = "#0b0a14"; ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = "#b58cff"; ctx.font = "800 15px Inter"; ctx.fillText("RIESGO · EXPOSICIÓN", 14, 24);
+  ctx.fillStyle = "#b58cff"; ctx.font = "800 15px Inter, sans-serif"; ctx.fillText("RIESGO · EXPOSICIÓN", 14, 24);
   const total = Math.max(1, t.largos + t.cortos);
   ctx.fillStyle = "#1c1a2c"; ctx.fillRect(14, 40, 360, 18);
   ctx.fillStyle = "#2ee6a6"; ctx.fillRect(14, 40, 360 * t.largos / total, 18);
   ctx.fillStyle = "#ff5a76"; ctx.fillRect(14 + 360 * t.largos / total, 40, 360 * t.cortos / total, 18);
   if (!t.abiertas) { ctx.fillStyle = "#1c1a2c"; ctx.fillRect(14, 40, 360, 18); }
-  ctx.fillStyle = "#cfd6e0"; ctx.font = "700 12px Inter";
+  ctx.fillStyle = "#cfd6e0"; ctx.font = "700 12px Inter, sans-serif";
   ctx.fillText(`${t.largos} largas · ${t.cortos} cortas · ${t.n - t.abiertas} sin posición`, 14, 78);
-  ctx.fillStyle = t.resultado >= 0 ? "#2ee6a6" : "#ff5a76"; ctx.font = "800 22px JetBrains Mono";
+  ctx.fillStyle = t.resultado >= 0 ? "#2ee6a6" : "#ff5a76"; ctx.font = "800 22px JetBrains Mono, monospace";
   ctx.fillText(t.n ? fmt.pct(t.pct) : "—", 400, 58);
-  ctx.fillStyle = "#8a94a6"; ctx.font = "600 11px Inter"; ctx.fillText("resultado del fondo en papel", 400, 78);
+  ctx.fillStyle = "#8a94a6"; ctx.font = "600 11px Inter, sans-serif"; ctx.fillText("resultado del fondo en papel", 400, 78);
   ctx.fillText(`Banco: ${(S && S.banco || []).length} estrategias`, 14, 100);
 }
 
@@ -1340,7 +1522,7 @@ function crearSuelo() {
   plano(19.8, 12.3, 0, () => { ctx.fillStyle = "rgba(181,140,255,.16)"; rr(0, 0, 900, 380, 30); ctx.fill(); });
   // rótulos en el suelo
   plano(30, 11, 0, () => { ctx.strokeStyle = "rgba(0,0,0,.18)"; ctx.lineWidth = 2; for (let v = 25; v < 1300; v += 50) { ctx.beginPath(); ctx.moveTo(0, v); ctx.lineTo(800, v); ctx.stroke(); } });
-  const rotulos = [["macro", 30.4, 8.7, 105], ["terraza", 30.5, 23.7, 100], ["mineria", .4, 8.7, 105], ["laboratorio", 10.4, 8.7, 88], ["banco", 21.4, 8.7, 105], ["trading", .6, 23.7, 150], ["comite", 18.5, 16.7, 95], ["descanso", 18.5, 23.8, 95]];
+  const rotulos = [["holding", 38.4, 8.7, 100], ["riesgos", 38.5, 23.7, 100], ["macro", 30.4, 8.7, 105], ["terraza", 30.5, 23.7, 100], ["mineria", .4, 8.7, 105], ["laboratorio", 10.4, 8.7, 88], ["banco", 21.4, 8.7, 105], ["trading", .6, 23.7, 150], ["comite", 18.5, 16.7, 95], ["descanso", 18.5, 23.8, 95]];
   for (const [id, x, y, t] of rotulos) {
     const s = SALAS.find(s => s.id === id);
     plano(x, y, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
@@ -1377,6 +1559,8 @@ function dibujar() {
   for (const q of particulas) dinamicos.push({k: q.x + q.y + .5, f: () => dibujarParticula(q)});
   dinamicos.push({k: HOLO.x + HOLO.y, f: holograma});
   dinamicos.push({k: GLOBO.x + GLOBO.y, f: globo});
+  dinamicos.push({k: MONEDA.x + MONEDA.y, f: monedaGigante});
+  dinamicos.push({k: BALIZA.x + BALIZA.y, f: baliza});
   dinamicos.push({k: 62, f: guirnalda});
   dinamicos.push({k: GATO.x + GATO.y + .3, f: gato});
   dinamicos.push({k: ROBOT.x + ROBOT.y, f: dibujarRobot});
@@ -1411,7 +1595,7 @@ function dibujarFlotantes() {
   ctx.textAlign = "center";
   for (const f of flotantes) {
     const [sx, sy] = aPantalla(f.x, f.y, f.z), a = f.t < 2 ? 1 : 1 - (f.t - 2) / .6;
-    ctx.font = `800 ${13 + 3 * cam.zoom}px JetBrains Mono`;
+    ctx.font = `800 ${13 + 3 * cam.zoom}px JetBrains Mono, monospace`;
     ctx.fillStyle = rgba(f.color, a); ctx.fillText(f.texto, sx, sy - f.t * 26 * cam.zoom - 40 * cam.zoom);
   }
   ctx.textAlign = "start";
@@ -1440,6 +1624,7 @@ function dibujarBurbujas() {
       if (!choca) break;
       y = choca[1] - alto - 6;
     }
+    y = Math.max(y, 66);
     puestas.push([x, y, ancho, alto]);
     const ent = clamp((T - b.t0) * 5, 0, 1), sal = clamp((b.t1 - T) * 2, 0, 1), al = Math.min(ent, sal);
     ctx.globalAlpha = al;
@@ -1505,7 +1690,7 @@ let anterior = null, ultimoComentarioLab = -99, proximoCafe = 10, proximaCharla 
 function nuevosEventos(lista) {
   if (visto.size > 4000) {   // se vacía de vez en cuando, sin repetir lo que sigue en pantalla
     visto.clear();
-    for (const l of [S.mineria && S.mineria.actividad, S.papel && S.papel.actividad]) for (const e of l || []) visto.add(e.t + "|" + e.texto);
+    for (const l of [S.mineria && S.mineria.actividad, S.papel && S.papel.actividad, S.holding && S.holding.actividad]) for (const e of l || []) visto.add(e.t + "|" + e.texto);
   }
   const out = [];
   for (const e of lista || []) { const k = e.t + "|" + e.texto; if (!visto.has(k)) { visto.add(k); out.push(e); } }
@@ -1554,20 +1739,38 @@ function procesarMineria(eventos) {
 }
 function procesarPapel(eventos) {
   for (const e of eventos) {
+    if (e.tipo === "freno") { charla([[RIESGOS, e.texto, "malo"], [DIRECTOR, "Recibido. Nadie abre nada hasta que Riesgos diga."]], 3); enfocar(42, 14, 2, 8); continue; }
+    if (e.tipo === "reanuda") { decir(RIESGOS, e.texto, 3, "bueno"); continue; }
     const a = agenteDeTrader(e.id);
+    if (e.tipo === "veto") {
+      const quien = pick(EQUIPO_RIESGO);
+      decir(quien, `Veto a ${e.id} (${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}): ${e.motivo}.`, 2, "malo");
+      if (a) decir(a, pick(["Entendido, me quedo fuera.", "Vale, esperaré a la siguiente señal.", "De acuerdo. Las reglas son las reglas."]), 1);
+      enfocar(42, 14.5, 2.2, 6);
+      continue;
+    }
     if (!a) continue;
     if (a.casa) enfocar(a.casa.x, a.casa.y, 2.4, 6);
     if (e.tipo === "apertura") {
-      decir(a, `Abro ${ladoTxt(e.direccion)} en ${moneda(e.simbolo)} a ${fmt.precio(e.precio)}. ${pick(["Stop puesto.", "Sigo el plan.", "A ver qué pasa."])}`, 2);
+      decir(a, `Abro ${ladoTxt(e.direccion)} en ${moneda(e.simbolo)} a ${fmt.precio(e.precio)}${e.fraccion ? ` con el ${Math.round(e.fraccion * 100)} % de mi capital` : ""}. ${pick(["Stop puesto.", "Sigo el plan.", "Riesgos da el visto bueno."])}`, 2);
       const t = totales();
       if (t.abiertas >= 3 && (t.largos === t.abiertas || t.cortos === t.abiertas)) decir(RIESGOS, `Ojo: ${t.abiertas} posiciones abiertas y todas ${t.largos ? "largas" : "cortas"}. Es casi la misma apuesta.`, 2);
     } else if (e.tipo === "cierre") {
       const r = e.retorno_pct || 0, bien = r > 0;
       const motivo = {stop: "stop", objetivo: "objetivo", tiempo: "tiempo", fin: "fin"}[e.motivo] || e.motivo;
       decir(a, `Cierro ${moneda(e.simbolo)}: ${fmt.pct(r)} (${motivo}). ${bien ? pick(["✅", "Bien.", "Así da gusto."]) : pick(["El stop está para eso.", "Sin dramas: el plan es el plan.", "Toca aceptar la pérdida."])}`, 2, bien ? "bueno" : "malo");
-      if (a.casa) flotante(a.casa.x, a.casa.y - .5, .9, (r > 0 ? "+" : "−") + NF2.format(Math.abs(r * 10)) + " $", bien ? "#2ee6a6" : "#ff5a76");
+      if (a.casa) flotante(a.casa.x, a.casa.y - .5, .9, (r > 0 ? "+" : "−") + NF2.format(Math.abs(r * (S.capital_por_estrategia || 1000) / 100)) + " $", bien ? "#2ee6a6" : "#ff5a76");
       if (r > 1.5) { const otro = pick([...traders.values()].filter(t => t !== a)); if (otro) decir(otro, pick(["¡Buena!", "Eso es seguir el plan.", "👏"]), 1); }
     }
+  }
+}
+function procesarHolding(eventos) {
+  for (const e of eventos) {
+    const h = HOLDERS[e.simbolo === "SOLUSDT" ? 1 : 0];
+    if (e.tipo === "plan") decir(h, e.texto, 1);
+    else if (e.tipo === "compra") { decir(h, `💎 ${e.texto} Más barato, más cantidad.`, 2, "bueno"); flotante(MONEDA.x, MONEDA.y, 1.6, "COMPRA " + moneda(e.simbolo), "#2ee6a6"); enfocar(41, 4.5, 2.2, 6); }
+    else if (e.tipo === "venta") { decir(h, `Recojo beneficios: ${e.texto}`, 2, "oro"); flotante(MONEDA.x, MONEDA.y, 1.6, "VENTA " + moneda(e.simbolo), "#ffcf5a"); confeti(MONEDA.x, MONEDA.y, 1.4); enfocar(41, 4.5, 2.2, 6); }
+    else if (e.tipo === "stop") { charla([[h, `Duele, pero el plan es el plan: ${e.texto}`, "malo"], [RIESGOS, "Para eso está el stop de catástrofe."]], 2); }
   }
 }
 function crearTrader(id, datos) {
@@ -1630,7 +1833,7 @@ function planificar() {
   if (T > proximoCafe) {
     proximoCafe = T + rand(7, 15);
     const candidatos = agentes.filter(a => estaLibre(a) && a.postura === "sentado" && (
-      (a.rol === "trader" && !(a.datos && a.datos.posicion)) || (a.rol === "prueba" && T - actividadLab > 20) || a.rol === "banco" || a.rol === "macro"));
+      (a.rol === "trader" && !(a.datos && a.datos.posicion)) || (a.rol === "prueba" && T - actividadLab > 20) || ["banco", "macro", "holder", "riesgo2"].includes(a.rol)));
     if (candidatos.length) mandarDescanso(pick(candidatos), rand(25, 55));
   }
   if (T > proximaCharla) { proximaCharla = T + rand(16, 28); charlaDeFondo(); }
@@ -1657,6 +1860,22 @@ function charlaDeFondo() {
   if (sim) opciones.push(() => [`¿Habéis visto ${moneda(sim)}? ${fmt.pct(precios[sim].cambio_24h_pct)} en 24 horas.`, pick(["Volatilidad: la mejor amiga del minero.", "Yo solo miro el plan.", "Ni lo miro, que me entran los nervios."])]);
   if (e["Generadas"]) opciones.push(() => [`Llevamos ${fmt.n(e["Generadas"])} estrategias minadas y solo ${e["Distinta a las del banco"] || 0} han llegado al banco.`, "Así es esto: casi todo es ruido."]);
   if (t.n) opciones.push(() => [`Entre todos llevamos ${fmt.pct(t.pct)} en papel.`, t.resultado >= 0 ? "No está mal. Sin euforia." : "Paciencia: aún son pocas operaciones."]);
+  const extra = [];
+  const ph = planesHolding(), r = S && S.papel && S.papel.riesgo;
+  if (ph.length) {
+    const p = pick(ph), sig = p.compras.find(z => !z.llena), obj = p.ventas.find(z => !z.llena);
+    extra.push(() => [HOLDERS[0], `${moneda(p.simbolo)} a ${fmt.precio(p.precio)}.${sig ? ` Si baja a ${fmt.precio(sig.precio)}, compramos más.` : ""}${obj ? ` Si sube a ${fmt.precio(obj.precio)}, vendemos una parte.` : ""}`, "Eso es tener un plan, y no mirar el precio cada cinco minutos."]);
+    extra.push(() => [HOLDERS[1], `El holding va ${fmt.pct(S.holding.resumen ? S.holding.resumen.resultado_pct : 0)}. Manos de diamante 💎🙌`, "Mientras no toque el stop de catástrofe, aquí no se vende por miedo."]);
+  }
+  if (r) {
+    extra.push(() => [pick(EQUIPO_RIESGO), `Ahora mismo hay ${r.posiciones} posiciones abiertas de ${r.max_posiciones} permitidas.`, r.bloqueo ? "Y el freno sigue activado." : "Todo dentro de los límites."]);
+    extra.push(() => [RIESGOS, "Recordad: cada operación arriesga como mucho el 1 % del capital de su trader.", "Por eso los stops lejanos llevan posiciones más pequeñas."]);
+  }
+  if (extra.length && Math.random() < .35) {
+    const [x, l1, l2] = pick(extra)();
+    charla([[x, l1], [b !== x ? b : a, l2]], 0);
+    return;
+  }
   const macro = opcionesMacro();
   if (macro.length && Math.random() < .45) {
     const [l1, l2] = pick(macro)();
@@ -1692,18 +1911,23 @@ function procesarMacro() {
 }
 function comite() {
   const ts = [...traders.values()].filter(a => estaLibre(a)).slice(0, 3);
-  if (!ts.length) return;
+  if (!ts.length && !S.holding) return;
   ts.forEach((a, i) => { a.tarea = "comite"; irA(a, SILLAS_SUR[i + 1].x, SILLAS_SUR[i + 1].y, "sentado", "n"); });
+  if (!RIESGOS.tarea && !RIESGOS.andando) { RIESGOS.tarea = "comite"; irA(RIESGOS, SILLAS_NORTE[0].x, SILLAS_NORTE[0].y, "sentado", "s"); ts.push(RIESGOS); }
   setTimeout(() => {
     const t = totales();
     const lineas = [[DIRECTOR, `Comité. ${t.n} traders, patrimonio ${fmt.n(t.patrimonio)} $ (${fmt.pct(t.pct)}).`],
       [RIESGOS, t.abiertas ? `${t.abiertas} posiciones abiertas: ${t.largos} largas y ${t.cortos} cortas.${t.abiertas >= 3 && (!t.largos || !t.cortos) ? " Demasiado hacia un lado." : " Exposición razonable."}` : "Ninguna posición abierta ahora mismo. Riesgo cero."]];
+    const rv = S.papel && S.papel.riesgo;
+    if (rv && rv.vetos && rv.vetos.length) lineas.push([RIESGOS, `Llevamos ${rv.vetos.length} vetos recientes. El último, a ${rv.vetos[0].id}: ${rv.vetos[0].motivo}.`]);
+    const hr = S.holding && S.holding.resumen;
+    if (hr) lineas.push([HOLDERS[0], `Holding: ${fmt.n(hr.valor)} $ de ${fmt.n(hr.presupuesto)} $ (${fmt.pct(hr.resultado_pct)}). Seguimos el plan de zonas.`]);
     const mc = S.macro;
     if (mc && mc.regimen) lineas.push([MACROS[0], `Macro: ${mc.regimen}.${mc.fear_greed ? ` Fear & Greed ${mc.fear_greed.valor}.` : ""} Recordad que nuestras estrategias no usan estos datos.`]);
-    for (const a of ts) { const d = a.datos || {}; lineas.push([a, `${a.id}: ${fmt.pct((d.resultado || 0) / 10)} desde que llegué, ${(d.operaciones || []).length} operaciones cerradas.`]); }
+    for (const a of ts.filter(x => x.rol === "trader")) { const d = a.datos || {}; lineas.push([a, `${a.id}: ${fmt.pct((d.resultado || 0) / 10)} desde que llegué, ${(d.operaciones || []).length} operaciones cerradas.`]); }
     lineas.push([DIRECTOR, pick(["Perfecto. A seguir con el plan.", "Bien. Nadie toca las reglas a mitad de partido.", "Gracias. Volvemos a las mesas."])]);
     charla(lineas, 2);
-    setTimeout(() => ts.forEach(a => { if (a.tarea === "comite") { a.tarea = null; volverAlPuesto(a); } }), 16000);
+    setTimeout(() => ts.forEach(a => { if (a.tarea === "comite") { a.tarea = null; volverAlPuesto(a); } }), 22000);
   }, 9000);
 }
 
@@ -1730,6 +1954,7 @@ function actualizarHUD() {
     Object.values(mc.indicadores).map(d => `<div class="ind"><span>${esc(d.nombre)}</span><b>${d.valor >= 100 ? fmt.n(d.valor) : NF2.format(d.valor)}</b><span class="${d.dia_pct >= 0 ? "sube" : "baja"}">${fmt.pct(d.dia_pct)}</span></div>`).join("") +
     `<p class="nota">Actualizado a las ${fmt.hora(new Date(mc.actualizado))}.</p>`
     : `<p class="vacio">Aún no hay datos macro. Se actualizan cada 15 minutos con la oficina en marcha.</p>`;
+  actualizarHolding(); actualizarRiesgo();
   // embudo
   const e = m.embudo || {}, base = Math.max(1, e["Generadas"] || 0);
   $("#embudo").innerHTML = ETAPAS.map(k => {
@@ -1750,8 +1975,39 @@ function actualizarHUD() {
   const trozos = Object.entries(pr).map(([s, v]) => `<span><em>${esc(moneda(s))}</em>${fmt.precio(v.precio)} <b class="${v.cambio_24h_pct >= 0 ? "sube" : "baja"}">${fmt.pct(v.cambio_24h_pct)}</b></span>`);
   trozos.push(`<span><em>BANCO</em>${(S.banco || []).length} estrategias</span>`, `<span><em>TRADERS</em>${t.n}</span>`,
     `<span><em>EVALUADAS</em>${fmt.n(e["Generadas"] || 0)}</span>`, `<span><em>MODO</em>paper trading · dinero ficticio</span>`);
+  const hr = S.holding && S.holding.resumen;
+  if (hr) trozos.push(`<span><em>HOLDING</em>${fmt.n(hr.valor)} $ <b class="${hr.resultado >= 0 ? "sube" : "baja"}">${fmt.pct(hr.resultado_pct)}</b></span>`);
+  const rv = S.papel && S.papel.riesgo;
+  if (rv) trozos.push(`<span><em>RIESGO</em><b class="${rv.bloqueo ? "baja" : "sube"}">${rv.bloqueo ? "FRENO ACTIVADO" : "operativa normal"}</b></span>`);
   const html = trozos.join("");
   if ($("#cintaInterior").dataset.html !== html) { $("#cintaInterior").dataset.html = html; $("#cintaInterior").innerHTML = html + html; }
+}
+
+// ============================================== HOLDING Y RIESGO ======
+function actualizarHolding() {
+  const hs = S.holding || {}, ps = planesHolding(), r = hs.resumen;
+  const kh = $("#kHolding");
+  if (r) { kh.className = r.resultado > 0 ? "sube" : r.resultado < 0 ? "baja" : ""; animar(kh, r.resultado, x => `${dineroS(x)}<small>${pctS(r.resultado_pct)}</small>`); }
+  if (!$("#p-holding").classList.contains("activa") && $("#holding").children.length) return;
+  $("#holding").innerHTML = ps.length ? (r ? `<div class="macro-reg"><b class="${r.resultado >= 0 ? "sube" : "baja"}">${dineroS(r.resultado)} · ${pctS(r.resultado_pct)}</b><p>Valor ${fmt.dinero(r.valor)} de ${fmt.n(r.presupuesto)} $ ficticios.</p></div>` : "") +
+    ps.map((p, i) => `<div class="plan"><div class="tit"><b>${esc(moneda(p.simbolo))}</b><span class="${p.resultado >= 0 ? "sube" : "baja"}">${dineroS(p.resultado)} (${pctS(p.resultado_pct)})</span></div>
+      <div class="sub">Precio ${fmt.precio(p.precio)} · ${p.coste_medio ? "coste medio " + fmt.precio(p.coste_medio) + " · " : ""}invertido ${fmt.n(p.invertido)} $ · efectivo ${fmt.n(p.efectivo)} $${p.cerrado ? " · <b class='baja'>stop ejecutado</b>" : ""}</div>
+      <canvas class="grafica" id="gPlan${i}" height="120"></canvas>
+      <div class="zonas">${p.compras.map((z, k) => `<div class="zona c ${z.llena ? "llena" : ""}"><small>Compra ${k + 1} · ${z.pct} %</small>${fmt.precio(z.precio)}${z.llena ? " ✓" : ""}</div>`).join("")}
+      ${p.ventas.map((z, k) => `<div class="zona v ${z.llena ? "llena" : ""}"><small>Venta ${k + 1} · ${z.pct} % de lo que haya</small>${fmt.precio(z.precio)}${z.llena ? " ✓" : ""}</div>`).join("")}
+      <div class="zona ${p.cerrado ? "llena" : ""}" style="border-color:rgba(255,90,118,.5)"><small>Stop de catástrofe</small>${fmt.precio(p.stop)}</div></div></div>`).join("")
+    : `<p class="vacio">Los planes de holding se crean solos cuando arranca el paper trading.</p>`;
+  ps.forEach((p, i) => { const cv = $("#gPlan" + i), l = cv && prepararLienzo(cv); if (l) pintarZonas(l[0], l[1], l[2], p, false); });
+}
+function actualizarRiesgo() {
+  const r = S.papel && S.papel.riesgo;
+  if (!r) { $("#riesgo").innerHTML = `<p class="vacio">El control de riesgos empieza a trabajar con el paper trading.</p>`; return; }
+  const lim = [["Posiciones abiertas", r.posiciones, r.max_posiciones, ""], ["Misma apuesta (activo y dirección)", r.mayor_apuesta, r.max_misma_apuesta, ""],
+    ["Pérdida de hoy", r.perdida_hoy_pct, r.limite_diario_pct, " %"], ["Caída desde el máximo", r.caida_pct, r.max_caida_pct, " %"]];
+  $("#riesgo").innerHTML = `<div class="estado-riesgo ${r.bloqueo ? "mal" : "ok"}">${r.bloqueo ? "● FRENO ACTIVADO" : "● OPERATIVA NORMAL"}${r.bloqueo ? `<small>${esc(r.bloqueo)}</small>` : ""}</div>` +
+    lim.map(([t, v, m, u]) => `<div class="limite"><div class="fila"><span>${esc(t)}</span><b>${u ? NF2.format(v) : v}${u} / ${u ? NF2.format(m) : m}${u}</b></div><div class="barrita"><i style="width:${clamp(v / m, 0, 1) * 100}%"></i></div></div>`).join("") +
+    `<h3 style="margin-top:16px">Reglas</h3>` + r.reglas.map(x => `<div class="regla"><b>${esc(x.nombre)} · ${esc(x.valor)}</b><br>${esc(x.explica)}</div>`).join("") +
+    `<h3 style="margin-top:16px">Últimos vetos</h3>` + (r.vetos.length ? r.vetos.slice(0, 8).map(v => `<div class="veto"><b>${esc(v.id)}</b> · ${esc(moneda(v.simbolo))} ${esc(ladoTxt(v.direccion))} · ${fmt.hora(new Date(v.t))}<br>${esc(v.motivo)}</div>`).join("") : `<p class="vacio" style="padding:10px">Ningún veto todavía.</p>`);
 }
 
 // ============================================== GRÁFICAS Y NÚMEROS ====
@@ -1866,7 +2122,7 @@ $("#plegarRes").onclick = () => { const r = $("#resultados"); r.classList.toggle
 
 // ---- modo cine: la cámara recorre las salas y persigue lo que pasa ----
 let cine = false, cineHasta = 0, cineIdx = -1, camObjetivo = null;
-const PARADAS = [[5, 4.5, 1.8], [15.5, 5, 1.6], [26, 5, 1.7], [34.5, 5, 1.7], [9, 17.5, 1.25], [24, 14, 1.8], [23.5, 20.5, 1.8], [34, 17.5, 1.5], null];
+const PARADAS = [[5, 4.5, 1.8], [15.5, 5, 1.6], [26, 5, 1.7], [34.5, 5, 1.7], [42, 4.5, 1.8], [9, 17.5, 1.25], [24, 14, 1.8], [42, 16, 1.6], [23.5, 20.5, 1.8], [34, 17.5, 1.5], null];
 function objetivoEn(x, y, z, zoom) {
   const movil = vw <= 760, panelW = !movil && !$("#panel").classList.contains("plegado") ? 390 : 0;
   const [ix, iy] = iso(x, y, z);
@@ -1912,7 +2168,7 @@ async function refrescar() {
   const m = S.mineria || {};
   if (primeraVez) {
     primeraVez = false;
-    nuevosEventos(m.actividad); nuevosEventos(S.papel && S.papel.actividad);
+    nuevosEventos(m.actividad); nuevosEventos(S.papel && S.papel.actividad); nuevosEventos(S.holding && S.holding.actividad);
     sincronizarTraders(true);
     anadirChat(null, "Te damos la bienvenida al Trading Floor. Todo lo que ves es real salvo el dinero: es paper trading, con dinero ficticio.");
     if (!(S.banco || []).length && m.estado !== "minando") anadirChat(null, "El banco está vacío. Arranca la minería con ./trading.sh (o trading.bat) y verás llegar estrategias al laboratorio.");
@@ -1922,6 +2178,7 @@ async function refrescar() {
     sincronizarTraders(false);
     procesarMineria(nuevosEventos(m.actividad));
     procesarPapel(nuevosEventos(S.papel && S.papel.actividad));
+    procesarHolding(nuevosEventos(S.holding && S.holding.actividad));
     if (anterior && anterior.mineria && anterior.mineria.estado !== "minando" && m.estado === "minando")
       decir(pick(MINEROS), pick(["¡Nueva ronda! Vuelta al tajo.", "Se acabó el café: a minar.", "Servidores arriba. Vamos."]), 2);
   }
@@ -1983,7 +2240,16 @@ function mostrarFicha(a, abrir = true) {
       const mios = {"^GSPC": ["^GSPC", "^IXIC", "^VIX"], "DX-Y.NYB": ["DX-Y.NYB", "EURUSD=X"], "GC=F": ["GC=F", "CL=F"], "^TNX": ["^TNX"]}[a.ticker] || [];
       html += `<table>${mios.filter(k => ind[k]).map(k => `<tr><td>${esc(ind[k].nombre)}</td><td>${ind[k].valor >= 100 ? fmt.n(ind[k].valor) : NF2.format(ind[k].valor)} <span class="${ind[k].dia_pct >= 0 ? "sube" : "baja"}">${fmt.pct(ind[k].dia_pct)}</span></td></tr>`).join("")}
         ${a.ticker === "^TNX" && S.macro && S.macro.fear_greed ? `<tr><td>Fear &amp; Greed (cripto)</td><td>${S.macro.fear_greed.valor} · ${esc(S.macro.fear_greed.clase)}</td></tr>` : ""}</table>`;
-    } else if (a.rol === "riesgos" || a.rol === "director") {
+    } else if (a.rol === "holder") {
+      html += planesHolding().map(p => `<table><tr><td>${esc(moneda(p.simbolo))}</td><td class="${p.resultado >= 0 ? "sube" : "baja"}">${fmt.n(p.valor)} $ (${fmt.pct(p.resultado_pct)})</td></tr>
+        <tr><td>Próxima compra</td><td>${(p.compras.find(z => !z.llena) || {}).precio ? fmt.precio(p.compras.find(z => !z.llena).precio) : "—"}</td></tr>
+        <tr><td>Próxima venta</td><td>${(p.ventas.find(z => !z.llena) || {}).precio ? fmt.precio(p.ventas.find(z => !z.llena).precio) : "—"}</td></tr></table>`).join("");
+    } else if (a.rol === "riesgo2" || a.rol === "riesgos") {
+      const r = S.papel && S.papel.riesgo;
+      if (r) html += `<table><tr><td>Estado</td><td class="${r.bloqueo ? "baja" : "sube"}">${r.bloqueo ? "FRENO" : "normal"}</td></tr><tr><td>Posiciones abiertas</td><td>${r.posiciones} / ${r.max_posiciones}</td></tr>
+        <tr><td>Pérdida de hoy</td><td>${NF2.format(r.perdida_hoy_pct)} % / ${NF2.format(r.limite_diario_pct)} %</td></tr><tr><td>Caída desde el máximo</td><td>${NF2.format(r.caida_pct)} % / ${NF2.format(r.max_caida_pct)} %</td></tr>
+        <tr><td>Vetos recientes</td><td>${r.vetos.length}</td></tr></table>`;
+    } else if (a.rol === "director") {
       const t = totales();
       html += `<table><tr><td>Patrimonio (ficticio)</td><td>${t.n ? fmt.dinero(t.patrimonio) : "—"}</td></tr><tr><td>Posiciones abiertas</td><td>${t.abiertas} (${t.largos} largas, ${t.cortos} cortas)</td></tr></table>`;
     }
@@ -2062,6 +2328,7 @@ document.querySelectorAll(".pestanas button").forEach(b => b.onclick = () => {
   document.querySelectorAll(".pestanas button, .pagina").forEach(x => x.classList.remove("activa"));
   b.classList.add("activa"); $("#p-" + b.dataset.p).classList.add("activa");
   if (b.dataset.p === "traders" && S) actualizarResultados();
+  if (b.dataset.p === "holding" && S) { $("#holding").innerHTML = ""; actualizarHolding(); }
   if (b.dataset.p === "chat") { sinLeer = 0; $("#nChat").hidden = true; const c = $("#p-chat"); c.scrollTop = c.scrollHeight; }
 });
 $("#traders").addEventListener("click", e => { const el = e.target.closest(".trader"); if (el) { const a = traders.get(el.dataset.id); if (a) mostrarFicha(a); } });

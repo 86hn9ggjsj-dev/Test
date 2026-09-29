@@ -22,6 +22,7 @@ def estado() -> dict:
         "banco": banco.cargar(),
         "papel": almacen.cargar("papel", {}),
         "macro": almacen.cargar("macro", {}),
+        "holding": almacen.cargar("holding", {}),
         "capital_por_estrategia": CAPITAL_POR_ESTRATEGIA,
     }
 

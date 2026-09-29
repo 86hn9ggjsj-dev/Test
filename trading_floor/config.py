@@ -26,3 +26,13 @@ PARTE_EN_MUESTRA = 0.7
 
 # En la minería continua, un símbolo deja de minarse cuando ya tiene tantas estrategias en el banco.
 MAX_POR_SIMBOLO = 8
+
+# Gestión de riesgo del paper trading (ver riesgo.py).
+RIESGO_POR_OPERACION = 0.01  # cada operación arriesga como máximo el 1 % del capital de su trader
+MAX_POSICIONES = 10  # posiciones abiertas a la vez en toda la sala
+MAX_MISMA_APUESTA = 3  # posiciones abiertas en el mismo símbolo y la misma dirección
+LIMITE_PERDIDA_DIARIA = 0.02  # si el día pierde un 2 % del capital, no se abren más posiciones hoy
+MAX_CAIDA = 0.06  # si el resultado cae un 6 % del capital desde su máximo, se pausan las entradas
+
+# Sala de holding: carteras de largo plazo con zonas de compra y de venta (ver holding.py).
+CAPITAL_HOLDING = {"BTCUSDT": 5_000.0, "ETHUSDT": 3_000.0, "SOLUSDT": 2_000.0}

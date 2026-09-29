@@ -50,11 +50,13 @@ def simular(
     coste: float = COSTE_IDA_VUELTA,
     cerrar_al_final: bool = True,
     senal: np.ndarray | None = None,
+    vetadas: set[int] | frozenset[int] = frozenset(),
 ) -> Resultado:
     """Simula la estrategia con entradas en las velas [inicio, fin).
 
     Con cerrar_al_final=False, una operación que sigue viva al acabar los datos se
     marca como "abierta" (lo usa el paper trading); si no, se cierra en la última vela.
+    `vetadas` son velas de entrada que la gestión de riesgo no permitió: esas señales se ignoran.
     """
     fin = len(m) if fin is None else min(fin, len(m))
     inicio = max(inicio, 1)
@@ -68,10 +70,10 @@ def simular(
     k = 0
     while k < len(avisos):
         i = int(avisos[k])
-        if not atr[i] > 0:  # ATR aún sin calcular al principio de los datos
+        e = i + 1
+        if not atr[i] > 0 or e in vetadas:  # ATR aún sin calcular, o entrada vetada por riesgo
             k += 1
             continue
-        e = i + 1
         precio = m.o[e]
         stop = precio - d * est.stop_atr * atr[i]
         objetivo = precio + d * est.objetivo_atr * atr[i]

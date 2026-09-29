@@ -2,8 +2,8 @@
 
 Una versión propia del "fondo gestionado con IA" de los vídeos de Instagram, pero honesta:
 una **minería de estrategias** de verdad, un **embudo de pruebas de robustez**, **paper trading**
-con precios reales y dinero ficticio, una sala de **macroeconomía**, y todo ello visto como una
-**oficina isométrica** animada en el navegador.
+con precios reales y dinero ficticio, **control de riesgos**, una sala de **holding** a largo plazo,
+otra de **macroeconomía**, y todo ello visto como una **oficina isométrica** animada en el navegador.
 
 > Nunca envía órdenes a ningún exchange ni usa dinero real. Los buenos resultados en datos
 > pasados (backtest) no garantizan nada sobre el futuro.
@@ -16,6 +16,7 @@ con precios reales y dinero ficticio, una sala de **macroeconomía**, y todo ell
 | Solo una ronda de minería | `trading.bat minar` | `./trading.sh minar` |
 | Ver las estrategias aprobadas | `trading.bat banco` | `./trading.sh banco` |
 | Resumen macro en la terminal | `trading.bat macro` | `./trading.sh macro` |
+| Ver las carteras de holding | `trading.bat holding` | `./trading.sh holding` |
 | Oficina + paper trading, sin minar | `trading.bat --sin-minar` | `./trading.sh --sin-minar` |
 
 La primera vez instala lo necesario solo (hace falta Python 3). La oficina se abre en
@@ -48,7 +49,22 @@ Telegram de Jarvis, si lo tienes configurado.
 5. **Paper trading** (`papel.py`). Cada estrategia del banco opera desde que llega, con precios
    reales y las mismas reglas que el backtest (`backtest.py`). Las posiciones se valoran a
    precio de mercado vela a vela, de ahí salen el resultado total, el de hoy y el de cada día.
-6. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
+6. **Control de riesgos** (`riesgo.py`). Encima del paper trading:
+   - **Tamaño de cada operación**: arriesga como mucho el 1 % del capital de su trader si salta el
+     stop (con un stop lejano se invierte menos; nunca más del 100 %).
+   - **Vetos**: una entrada nueva se veta si ya hay 10 posiciones abiertas, o 3 iguales (mismo
+     símbolo y dirección), o si está activado un freno.
+   - **Frenos**: si el día pierde un 2 % del capital, no se abren más posiciones hasta mañana; si el
+     resultado cae un 6 % del capital desde su máximo, se pausan las entradas.
+7. **Holding** (`holding.py`). Carteras de largo plazo (por defecto 5.000 $ en BTC, 3.000 $ en ETH y
+   2.000 $ en SOL, ficticios): compra inicial del 25 %, tres zonas de compra por debajo (−10, −20 y
+   −30 %), tres zonas de venta parcial por encima (+30, +60 y +100 %) y un stop de catástrofe al
+   −50 %. Las zonas funcionan como órdenes límite sobre precios reales. Puedes poner las tuyas:
+
+   ```bash
+   ./trading.sh holding --nuevo BTCUSDT --presupuesto 5000 --compras 75000,68000,60000 --ventas 110000,130000,160000 --stop 45000
+   ```
+8. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
    (Yahoo Finance) y el Fear & Greed de cripto (alternative.me). Con ellos se calcula un régimen
    RISK-ON / RISK-OFF. Es contexto para el comité: **las estrategias no usan estos datos**.
 
@@ -79,5 +95,7 @@ reúnen en el comité y se van a la sala de descanso o a la terraza cuando no ha
 | `mineria.py` | Algoritmo genético y embudo; minería continua por rondas |
 | `banco.py`, `almacen.py` | Banco de estrategias y almacén JSON en `~/.trading_floor/` |
 | `papel.py` | Paper trading, curva de resultados y resultado diario |
+| `riesgo.py` | Tamaño de las operaciones, límites, vetos y frenos |
+| `holding.py` | Carteras de largo plazo con zonas de compra y de venta |
 | `macro.py` | Datos macroeconómicos y régimen de mercado |
 | `web.py`, `web/index.html` | Servidor local y la oficina isométrica (canvas, sin librerías) |

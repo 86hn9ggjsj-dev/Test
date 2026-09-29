@@ -6,6 +6,7 @@ Uso:
     python -m trading_floor banco           # ver las estrategias aprobadas
     python -m trading_floor papel           # solo el paper trading
     python -m trading_floor macro           # resumen macroeconómico
+    python -m trading_floor holding         # carteras de largo plazo con zonas de compra y venta
     python -m trading_floor web             # solo la oficina
 """
 
@@ -21,6 +22,39 @@ from .datos import MINUTOS
 
 def _simbolos(texto: str) -> list[str]:
     return [s.strip().upper() for s in texto.split(",") if s.strip()]
+
+
+def _es(x: float, decimales: int = 2) -> str:
+    """Número en formato español: 12.345,67."""
+    return f"{x:,.{decimales}f}".replace(",", "_").replace(".", ",").replace("_", ".")
+
+
+def _precios(texto: str) -> list[float]:
+    return [float(x) for x in texto.replace(" ", "").split(",") if x]
+
+
+def _ver_holding(args) -> None:
+    from . import holding
+
+    if args.borrar:
+        print("Plan borrado." if holding.borrar(args.borrar) else f"No hay plan de {args.borrar.upper()}.")
+        return
+    if args.nuevo:
+        holding.crear(args.nuevo, args.presupuesto, args.compras, args.ventas, args.stop)
+    else:
+        holding.actualizar()
+    from . import almacen
+
+    estado = almacen.cargar("holding", {})
+    for p in estado.get("planes", {}).values():
+        print(f"\n{p['simbolo']}  presupuesto {_es(p['presupuesto'], 0)} $ · valor {_es(p['valor'])} $ "
+              f"({_es(p['resultado_pct'])} %) · precio {_es(p['precio'])}")
+        print("   compras: " + " · ".join(f"{_es(z['precio'])}{' ✓' if z['llena'] else ''}" for z in p["compras"]))
+        print("   ventas:  " + " · ".join(f"{_es(z['precio'])}{' ✓' if z['llena'] else ''}" for z in p["ventas"]))
+        print(f"   stop:    {_es(p['stop'])}{'  (saltó)' if p['cerrado'] else ''}")
+    r = estado.get("resumen")
+    if r:
+        print(f"\nTotal: {_es(r['valor'])} $ de {_es(r['presupuesto'], 0)} $ ({_es(r['resultado_pct'])} %). Dinero ficticio.")
 
 
 def _opciones_mineria(p: argparse.ArgumentParser) -> None:
@@ -45,10 +79,10 @@ def _ver_banco(borrar: str | None) -> None:
     for b in items:
         mu, fu = b["muestra"], b["fuera"]
         print(f"\n{b['id']}  {b['descripcion']}")
-        print(f"   minería:          {mu['retorno_pct']:+.1f} %  · {mu['operaciones']} ops · "
-              f"FB {mu['factor_beneficio']:.2f} · caída máx. {mu['max_dd_pct']:.1f} %")
-        print(f"   fuera de muestra: {fu['retorno_pct']:+.1f} %  · {fu['operaciones']} ops · "
-              f"FB {fu['factor_beneficio']:.2f} · caída máx. {fu['max_dd_pct']:.1f} %")
+        print(f"   minería:          {_es(mu['retorno_pct'], 1)} %  · {mu['operaciones']} ops · "
+              f"FB {_es(mu['factor_beneficio'])} · caída máx. {_es(mu['max_dd_pct'], 1)} %")
+        print(f"   fuera de muestra: {_es(fu['retorno_pct'], 1)} %  · {fu['operaciones']} ops · "
+              f"FB {_es(fu['factor_beneficio'])} · caída máx. {_es(fu['max_dd_pct'], 1)} %")
     print(f"\n{len(items)} estrategias. Recuerda: son resultados sobre datos pasados, no promesas.")
 
 
@@ -77,6 +111,14 @@ def main() -> None:
     p_papel.add_argument("--telegram", action="store_true", help="avisar de cada operación por Telegram")
 
     sub.add_parser("macro", help="resumen macroeconómico (bolsa, VIX, dólar, oro, Fear & Greed...)")
+
+    p_hold = sub.add_parser("holding", help="carteras de largo plazo con zonas de compra y de venta")
+    p_hold.add_argument("--nuevo", metavar="SIMBOLO", help="crea (o rehace) el plan de un símbolo, p. ej. BTCUSDT")
+    p_hold.add_argument("--presupuesto", type=float, default=5000, help="dinero ficticio del plan (por defecto 5000)")
+    p_hold.add_argument("--compras", type=_precios, help="zonas de compra separadas por comas, p. ej. 75000,68000,60000")
+    p_hold.add_argument("--ventas", type=_precios, help="zonas de venta separadas por comas, p. ej. 110000,130000,160000")
+    p_hold.add_argument("--stop", type=float, help="precio del stop de catástrofe")
+    p_hold.add_argument("--borrar", metavar="SIMBOLO", help="borra el plan de un símbolo")
 
     p_web = sub.add_parser("web", help="abrir solo la oficina")
     p_web.add_argument("--puerto", type=int, default=8050)
@@ -109,7 +151,9 @@ def main() -> None:
             if e["fear_greed"]:
                 print(f"Fear & Greed (cripto): {e['fear_greed']['valor']} · {e['fear_greed']['clase']}")
             for i in e["indicadores"].values():
-                print(f"  {i['nombre']:<26} {i['valor']:>12,.2f}   día {i['dia_pct']:+.2f} %   semana {i['semana_pct']:+.2f} %")
+                print(f"  {i['nombre']:<26} {_es(i['valor']):>12}   día {_es(i['dia_pct'])} %   semana {_es(i['semana_pct'])} %")
+        elif args.orden == "holding":
+            _ver_holding(args)
         elif args.orden == "web":
             from .web import servir
 
