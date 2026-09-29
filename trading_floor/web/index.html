@@ -1478,7 +1478,7 @@ function paredes() {
   });
   brillo(.1, 10, 2.1, 60, "#d4ff3a", .3);
   const precios = S && S.papel && S.papel.precios || {};
-  const simbolos = Object.keys(precios).slice(0, 3);
+  const simbolos = Object.keys(precios).filter(k => (precios[k].serie || []).length > 1).slice(0, 3);
   const paneles = [[23.6, 0], [20.5, 1], [17.4, 2], [14.3, 3]];
   for (const [yFin, i] of paneles) {
     caraX(.002, yFin, 2.25, () => {
@@ -1850,7 +1850,7 @@ const DESCARTES = {
 function procesarMineria(eventos) {
   const descartes = [];
   for (const e of eventos) {
-    if (e.tipo === "descarga") decir(pick(MINEROS), `Bajando velas de ${e.simbolo || ""}. ${pick(["¡A picar datos!", "Tres años, hora a hora.", "Vamos allá."])}`);
+    if (e.tipo === "descarga") decir(pick(MINEROS), `Bajando velas de ${e.simbolo || ""}. ${pick(["¡A picar datos!", "Tres años, vela a vela.", "Vamos allá."])}`);
     else if (e.tipo === "generacion") {
       const m = /(\d+) evaluadas, (\d+) rentables en muestra, (\d+) aprobadas/.exec(e.texto);
       if (m && (e.generacion === 1 || e.generacion === e.generaciones || Math.random() < .3)) {
@@ -1993,7 +1993,8 @@ function charlaDeFondo() {
   else { const sentados = agentes.filter(x => estaLibre(x)); if (sentados.length < 2) return; a = pick(sentados); b = pick(sentados.filter(x => x !== a && Math.hypot(x.x - a.x, x.y - a.y) < 6)) || pick(sentados.filter(x => x !== a)); }
   if (!a || !b) return;
   const precios = S && S.papel && S.papel.precios || {}, sims = Object.keys(precios);
-  const sim = sims.length ? pick(sims) : null, e = S && S.mineria && S.mineria.embudo || {}, t = totales();
+  const conCambio = sims.filter(k => precios[k].cambio_24h_pct !== null);
+  const sim = conCambio.length ? pick(conCambio) : null, e = S && S.mineria && S.mineria.embudo || {}, t = totales();
   const opciones = [
     () => ["¿Café?", pick(["Solo, gracias.", "Con leche de avena.", "Un cortado.", "Mejor un té, que llevo tres."])],
     () => ["Recordad que aquí todo es dinero ficticio.", "Paper trading: primero demostrar, luego ya veremos."],
@@ -2141,7 +2142,8 @@ function actualizarHUD() {
   }).join("") : `<p class="vacio">Todavía no hay traders. Llegarán cuando la minería apruebe estrategias.</p>`;
   // cinta de precios
   const pr = S.papel && S.papel.precios || {};
-  const trozos = Object.entries(pr).map(([s, v]) => `<span><em>${esc(moneda(s))}</em>${fmt.precio(v.precio)} <b class="${v.cambio_24h_pct >= 0 ? "sube" : "baja"}">${fmt.pct(v.cambio_24h_pct)}</b></span>`);
+  const trozos = Object.entries(pr).map(([s, v]) => `<span><em>${esc(moneda(s))}</em>${fmt.precio(v.precio)}${v.cambio_24h_pct === null ? "" : ` <b class="${v.cambio_24h_pct >= 0 ? "sube" : "baja"}">${fmt.pct(v.cambio_24h_pct)}</b>`}</span>`);
+  if (S.vivo && Object.keys(S.vivo).length) trozos.unshift(`<span><em style="color:var(--rojo)">●</em><b>EN VIVO</b></span>`);
   trozos.push(`<span><em>BANCO</em>${(S.banco || []).length} estrategias</span>`, `<span><em>TRADERS</em>${t.n}</span>`,
     `<span><em>EVALUADAS</em>${fmt.n(e["Generadas"] || 0)}</span>`, `<span><em>MODO</em>paper trading · dinero ficticio</span>`);
   const hr = S.holding && S.holding.resumen;
@@ -2461,6 +2463,48 @@ function alternarCine(activar = !cine) {
 }
 $("#bCine").onclick = () => alternarCine();
 
+// ============================================== PRECIOS EN VIVO =======
+// El servidor manda el último precio de Binance (cada ~5 s). Aquí se aplica a todo el estado:
+// precios en pantalla, posiciones abiertas, resultados y holding. Las decisiones de los traders
+// no cambian: se siguen tomando al cierre de cada vela.
+function aplicarVivo(E) {
+  const vivo = E.vivo || {}, papel = E.papel = E.papel || {}, coste = E.coste_ida_vuelta || 0, cap = E.capital_por_estrategia || 1000;
+  const precios = papel.precios = papel.precios || {};
+  for (const [sim, v] of Object.entries(vivo)) {
+    const p = precios[sim];
+    if (p) {
+      const base24 = p.precio / (1 + p.cambio_24h_pct / 100);
+      p.cambio_24h_pct = (v / base24 - 1) * 100; p.precio = v; p.serie = [...(p.serie || []), v];
+    } else precios[sim] = {precio: v, cambio_24h_pct: null, serie: []};
+  }
+  let delta = 0;
+  for (const d of Object.values(papel.estrategias || {})) {
+    const pos = d.posicion, v = vivo[d.simbolo];
+    if (!pos || !v) continue;
+    const dir = d.direccion === "largo" ? 1 : -1, f = pos.fraccion ?? 1;
+    const nuevo = f * (dir * (v / pos.entrada - 1) - coste) * 100;
+    const antes = d.patrimonio ?? cap, ahora = antes / (1 + pos.retorno_pct / 100) * (1 + nuevo / 100);
+    pos.retorno_pct = nuevo; d.patrimonio = ahora; d.resultado = ahora - cap;
+    d.hoy = (d.hoy || 0) + ahora - antes; d.semana = (d.semana || 0) + ahora - antes; delta += ahora - antes;
+  }
+  const r = papel.resumen;
+  if (r && r.inicial) {
+    r.patrimonio += delta; r.resultado += delta; r.hoy += delta;
+    r.resultado_pct = r.resultado / r.inicial * 100; r.hoy_pct = r.hoy / r.inicial * 100;
+    if (papel.curva && papel.curva.length) papel.curva = [...papel.curva, [new Date().toISOString(), r.resultado]];
+  }
+  const hs = E.holding;
+  if (hs && hs.planes) {
+    let valor = 0, total = 0;
+    for (const p of Object.values(hs.planes)) {
+      const v = vivo[p.simbolo];
+      if (v) { p.precio = v; p.valor = p.efectivo + p.unidades * v; p.resultado = p.valor - p.presupuesto; p.resultado_pct = (p.valor / p.presupuesto - 1) * 100; p.precios = [...(p.precios || []), v]; }
+      valor += p.valor; total += p.presupuesto;
+    }
+    if (hs.resumen && total) Object.assign(hs.resumen, {valor, resultado: valor - total, resultado_pct: (valor / total - 1) * 100});
+  }
+}
+
 // ======================================================= DATOS ========
 let fallos = 0, primeraVez = true;
 async function refrescar() {
@@ -2468,6 +2512,7 @@ async function refrescar() {
     const r = await fetch("/api/estado", {cache: "no-store"});
     if (!r.ok) throw new Error(r.status);
     S = await r.json();
+    aplicarVivo(S);
     fallos = 0; $("#sinConexion").hidden = true;
   } catch (err) {
     if (++fallos >= 3) $("#sinConexion").hidden = false;

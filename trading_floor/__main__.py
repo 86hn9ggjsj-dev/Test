@@ -60,7 +60,7 @@ def _ver_holding(args) -> None:
 def _opciones_mineria(p: argparse.ArgumentParser) -> None:
     p.add_argument("--simbolos", type=_simbolos, default=SIMBOLOS,
                    help=f"pares de Binance separados por comas (por defecto {','.join(SIMBOLOS)})")
-    p.add_argument("--intervalo", default=INTERVALO, choices=list(MINUTOS), help="tamaño de vela (por defecto 1h)")
+    p.add_argument("--intervalo", default=INTERVALO, choices=list(MINUTOS), help=f"tamaño de vela (por defecto {INTERVALO})")
     p.add_argument("--estrategias", type=int, default=2000, help="estrategias a probar por símbolo (por defecto 2000)")
     p.add_argument("--generaciones", type=int, default=10, help="generaciones del algoritmo genético (por defecto 10)")
     p.add_argument("--dias", type=int, default=DIAS_HISTORICO, help="días de histórico (por defecto 3 años)")
@@ -105,6 +105,7 @@ def main() -> None:
 
     p_banco = sub.add_parser("banco", help="ver o borrar estrategias aprobadas")
     p_banco.add_argument("--borrar", metavar="ID", help="borra una estrategia del banco")
+    p_banco.add_argument("--vaciar", action="store_true", help="vacía el banco entero (sus traders dejan la sala)")
 
     p_papel = sub.add_parser("papel", help="paper trading con las estrategias del banco")
     p_papel.add_argument("--segundos", type=float, default=60, help="cada cuánto revisar el mercado")
@@ -138,7 +139,13 @@ def main() -> None:
                     minar(simbolo, args.intervalo, args.estrategias, args.generaciones, args.dias)
                 print("\nListo. Mira las aprobadas con:  python -m trading_floor banco")
         elif args.orden == "banco":
-            _ver_banco(args.borrar)
+            if args.vaciar:
+                from . import almacen
+
+                almacen.guardar("banco", [])
+                print("Banco vaciado. La minería lo volverá a llenar.")
+            else:
+                _ver_banco(args.borrar)
         elif args.orden == "papel":
             from .papel import operar
 

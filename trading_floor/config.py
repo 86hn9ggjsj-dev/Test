@@ -9,7 +9,7 @@ DATA_DIR = Path(os.environ.get("TRADING_FLOOR_DIR", Path.home() / ".trading_floo
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 SIMBOLOS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "DOGEUSDT"]
-INTERVALO = "1h"
+INTERVALO = "30m"  # los traders deciden al cierre de cada vela de media hora
 DIAS_HISTORICO = 3 * 365
 
 # Costes por lado (al entrar y al salir): comisión "taker" típica de un exchange de cripto

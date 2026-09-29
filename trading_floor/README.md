@@ -31,7 +31,7 @@ Telegram de Jarvis, si lo tienes configurado.
  estrategias                               sobreviven   trader con 1.000 $ ficticios
 ```
 
-1. **Datos.** Velas de 1 hora de los últimos 3 años de Binance (API pública, sin claves) de BTC,
+1. **Datos.** Velas de 30 minutos de los últimos 3 años de Binance (API pública, sin claves) de BTC,
    ETH, SOL, BNB, XRP y DOGE, guardadas en `~/.trading_floor/datos/`.
 2. **Minería** (`mineria.py`). Una estrategia es "entra en largo o en corto cuando se cumplan
    1-3 condiciones" (RSI, medias, cruces, rupturas, Bollinger, MACD, momento, volatilidad) más
