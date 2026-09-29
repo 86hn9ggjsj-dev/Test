@@ -2,7 +2,8 @@ import { AbsoluteFill, Audio, OffthreadVideo, staticFile, useCurrentFrame } from
 import datos from "../gen/bot.json";
 import { Arriba, etiqueta, Linea, Progreso, Revela, salida, sans, serif } from "../Premium/ui";
 import { ORO, Subtitulos } from "../Viral/Subtitulos";
-import { C, golpeZoom, lerp, SANS, suave } from "../Viral/util";
+import { fondoEn, Pantallas, PANTALLAS } from "./Pantallas";
+import { golpeZoom, lerp, suave } from "../Viral/util";
 
 export const BOT_FPS = datos.fps;
 export const BOT_FRAMES = Math.round(datos.duracion * datos.fps);
@@ -22,10 +23,11 @@ const planoEn = (t: number) => (datos.planos.find((p) => t >= p.s && t < p.e) ??
 const Y_SUB: Record<Tipo, number> = { medio: 0.66, captura: 0.76, tabla: 0.66 };
 const ySubtitulo = (ini: number, fin: number) => {
   const solape = (p: { s: number; e: number }) => Math.min(fin, p.e) - Math.max(ini, p.s);
+  if (PANTALLAS.some((p) => solape(p) > 0.12)) return 0.76;
   const captura = datos.planos.find((p) => p.tipo === "captura" && solape(p) > 0.12);
   return Y_SUB[(captura ?? datos.planos.reduce((a, p) => (solape(p) > solape(a) ? p : a))).tipo as Tipo];
 };
-const CORTES = [...datos.escenas.map((e) => e.s), ...datos.planos.map((p) => p.s)];
+const CORTES = [...datos.escenas.map((e) => e.s), ...datos.planos.map((p) => p.s), ...PANTALLAS.map((p) => p.s), ...PANTALLAS.map((p) => p.e)];
 
 // Reencuadre alterno en cada jump cut de la toma continua
 const ENCUADRE = datos.piezas.map((_, k) => (k % 2 ? 1.08 : 1));
@@ -58,11 +60,13 @@ export const Bot: React.FC = () => {
       <AbsoluteFill style={{ background: "radial-gradient(ellipse 75% 65% at 50% 45%, transparent 55%, rgba(0,0,0,0.38) 100%)" }} />
       <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.42) 16%, rgba(0,0,0,0.15) 28%, transparent 38%)" }} />
 
-      <Intro t={t} />
-      <Ventaja1 t={t} />
-      <Ventaja2 t={t} />
-      <Ventaja3 t={t} />
-      <Cta t={t} />
+      {/* Las tarjetas ceden el sitio a las pantallas de motion graphics */}
+      <AbsoluteFill style={{ opacity: 1 - fondoEn(t) }}>
+        <Ventaja1 t={t} />
+        <Ventaja2 t={t} />
+        <Ventaja3 t={t} />
+      </AbsoluteFill>
+      <Pantallas t={t} />
 
       <Subtitulos t={t} palabras={datos.palabras} cortes={CORTES} claves={CLAVES} duracion={datos.duracion} y={ySubtitulo} estilo="premium" />
       <Progreso t={t} duracion={datos.duracion} />
@@ -74,35 +78,6 @@ export const Bot: React.FC = () => {
 const Fila: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div style={{ display: "flex", alignItems: "baseline", gap: 16 }}>{children}</div>
 );
-
-const Visto: React.FC = () => (
-  <svg width={30} height={30} viewBox="0 0 24 24" style={{ filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.6))" }}>
-    <path d="M4 12.5l5 5L20 6.5" fill="none" stroke={ORO} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const Intro: React.FC<{ t: number }> = ({ t }) => {
-  const fin = esc("v1").s;
-  if (t >= fin) return null;
-  return (
-    <Arriba t={t} t0={0.02} fin={fin}>
-      <Revela t={t} t0={0.05} fin={fin}>
-        <div style={etiqueta}>Trading automático</div>
-      </Revela>
-      <Revela t={t} t0={0.12} fin={fin}>
-        <Fila>
-          <span style={sans(60)}>Las</span>
-          <span style={serif(120)}>3</span>
-          <span style={sans(60)}>ventajas</span>
-        </Fila>
-      </Revela>
-      <Linea t={t} t0={EV.tres} fin={fin} ancho={260} />
-      <Revela t={t} t0={EV.tres + 0.3} fin={fin}>
-        <div style={{ ...sans(34), fontWeight: 600 }}>de tener un bot de trading</div>
-      </Revela>
-    </Arriba>
-  );
-};
 
 const Ventaja: React.FC<{ t: number; t0: number; fin: number; numero: string; children: React.ReactNode; pie?: React.ReactNode; tPie?: number }> = ({
   t,
@@ -132,97 +107,29 @@ const Ventaja: React.FC<{ t: number; t0: number; fin: number; numero: string; ch
   );
 };
 
-const Ventaja1: React.FC<{ t: number }> = ({ t }) => {
-  const e = esc("v1");
-  return (
-    <Ventaja t={t} t0={e.s} fin={e.e} numero="01" tPie={EV.auto1} pie={<div style={{ ...sans(34), fontWeight: 600 }}>Opera 100 % en automático</div>}>
-      <Fila>
-        <span style={sans(58)}>Libertad de</span>
-        <span style={serif(100)}>tiempo</span>
-      </Fila>
-    </Ventaja>
-  );
-};
+const Ventaja1: React.FC<{ t: number }> = ({ t }) => (
+  <Ventaja t={t} t0={esc("v1").s} fin={EV.p_reloj_s} numero="01">
+    <Fila>
+      <span style={sans(58)}>Libertad de</span>
+      <span style={serif(100)}>tiempo</span>
+    </Fila>
+  </Ventaja>
+);
 
-const Ventaja2: React.FC<{ t: number }> = ({ t }) => {
-  const e = esc("v2");
-  if (t < e.s - 0.05 || t >= e.e) return null;
-  if (t < EV.gestiona) {
-    return (
-      <Ventaja t={t} t0={e.s} fin={EV.gestiona} numero="02" tPie={EV.psicologica} pie={<div style={{ ...sans(34), fontWeight: 600 }}>La gestión psicológica</div>}>
-        <Fila>
-          <span style={sans(50)}>El error del</span>
-          <span style={serif(100)}>99 %</span>
-          <span style={sans(50)}>de traders</span>
-        </Fila>
-      </Ventaja>
-    );
-  }
-  const items: [string, number][] = [
-    ["Cada operación", EV.operacion],
-    ["Cierres", EV.cierras],
-    ["Stops", EV.stops],
-  ];
-  return (
-    <Arriba t={t} t0={EV.gestiona} fin={e.e}>
-      <Revela t={t} t0={EV.gestiona + 0.03} fin={e.e}>
-        <div style={etiqueta}>El bot gestiona por ti</div>
-      </Revela>
-      <div style={{ display: "flex", gap: 30, marginTop: 6 }}>
-        {items.map(([texto, t0]) => (
-          <Revela key={texto} t={t} t0={t0} fin={e.e}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Visto />
-              <span style={{ ...sans(36), fontWeight: 600 }}>{texto}</span>
-            </div>
-          </Revela>
-        ))}
-      </div>
-    </Arriba>
-  );
-};
+const Ventaja2: React.FC<{ t: number }> = ({ t }) => (
+  <Ventaja t={t} t0={esc("v2").s} fin={EV.p_noventa_s} numero="02">
+    <Fila>
+      <span style={sans(54)}>Adiós a la</span>
+      <span style={serif(96)}>psicología</span>
+    </Fila>
+  </Ventaja>
+);
 
-const Ventaja3: React.FC<{ t: number }> = ({ t }) => {
-  const e = esc("v3");
-  if (t < e.s - 0.05 || t >= EV.tablaPlano) return null;
-  if (t < EV.proporcional) {
-    return (
-      <Ventaja t={t} t0={e.s} fin={EV.proporcional} numero="03" tPie={EV.capital} pie={<div style={{ ...sans(34), fontWeight: 600 }}>incluso con poco capital</div>}>
-        <span style={serif(110)}>Rentabilidad</span>
-      </Ventaja>
-    );
-  }
-  // Barras 1K / 10K / 100K: el beneficio crece con lo invertido
-  const barras: [string, number][] = [
-    ["1K", 40],
-    ["10K", 70],
-    ["100K", 100],
-  ];
-  return (
-    <Arriba t={t} t0={EV.proporcional} fin={EV.tablaPlano}>
-      <Revela t={t} t0={EV.proporcional + 0.03} fin={EV.tablaPlano}>
-        <div style={etiqueta}>Directamente</div>
-      </Revela>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 34 }}>
-        <Revela t={t} t0={EV.proporcional + 0.1} fin={EV.tablaPlano}>
-          <span style={serif(96)}>proporcional</span>
-        </Revela>
-        <div style={{ display: "flex", alignItems: "flex-end", gap: 12, height: 100, paddingBottom: 10 }}>
-          {barras.map(([txt, h], k) => {
-            const v = lerp(t, EV.proporcional + 0.25 + 0.15 * k, EV.proporcional + 0.75 + 0.15 * k, 0, 1, salida) *
-              (1 - lerp(t, EV.tablaPlano - 0.3, EV.tablaPlano, 0, 1));
-            return (
-              <div key={txt} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                <div style={{ width: 26, height: h * v, borderRadius: 4, background: ORO, boxShadow: "0 2px 10px rgba(0,0,0,0.5)" }} />
-                <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: 18, color: C.blanco, opacity: v }}>{txt}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </Arriba>
-  );
-};
+const Ventaja3: React.FC<{ t: number }> = ({ t }) => (
+  <Ventaja t={t} t0={esc("v3").s} fin={EV.p_prop_s} numero="03" tPie={EV.capital} pie={<div style={{ ...sans(34), fontWeight: 600 }}>incluso con poco capital</div>}>
+    <span style={serif(110)}>Rentabilidad</span>
+  </Ventaja>
+);
 
 // Coordenadas medidas sobre el fotograma a 1080x1920
 const NotasCaptura: React.FC<{ t: number }> = ({ t }) => {
@@ -286,25 +193,6 @@ const NotasTabla: React.FC<{ t: number }> = ({ t }) => {
         }}
       />
     </AbsoluteFill>
-  );
-};
-
-const Cta: React.FC<{ t: number }> = ({ t }) => {
-  const e = esc("cta");
-  if (t < e.s - 0.05) return null;
-  return (
-    <Arriba t={t} t0={e.s}>
-      <Revela t={t} t0={e.s + 0.03}>
-        <div style={etiqueta}>¿Quieres más información?</div>
-      </Revela>
-      <Revela t={t} t0={e.s + 0.1}>
-        <Fila>
-          <span style={sans(58)}>Escríbeme por</span>
-          <span style={serif(100)}>privado</span>
-        </Fila>
-      </Revela>
-      <Linea t={t} t0={EV.privado} ancho={240} />
-    </Arriba>
   );
 };
 

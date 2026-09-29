@@ -75,6 +75,20 @@ ev = {
     "privado": t_pal("privado"),
 }
 
+# Pantallas de motion graphics a pantalla completa (el video queda detrás, desenfocado)
+PANTALLAS = {
+    "intro": (0.0, 2.45),
+    "reloj": (t_pal("Puedes") - 0.08, t_pal("nada") + 0.45),
+    "auto": (t_pal("Opera") - 0.08, t_pal("automático", 0) + 0.5),
+    "noventa": (ev["n99"] - 0.45, ev["psicologica"] + 0.7),
+    "gestion": (ev["gestiona"] - 0.25, esc["v3"]["s"] - 0.05),
+    "prop": (ev["proporcional"] - 0.45, ev["tablaPlano"] - 0.1),
+    "cta": (esc["cta"]["s"], m.dur),
+}
+for k, (a, b) in PANTALLAS.items():
+    ev[f"p_{k}_s"], ev[f"p_{k}_e"] = a, b
+ev.update(grafico=t_pal("gráfico"), pendiente=t_pal("pendiente", 0), mueves=t_pal("mueves"))
+
 m.video_base(FF, FUENTE, GEN / "bot_base.mp4")
 voz_ed = m.voz(FF, FUENTE, GEN / "bot_voz.wav")
 
@@ -96,6 +110,14 @@ for k in range(3):
     poner(sfx, toque(), ev["cantidades"] + 0.15 * k, 0.6)
 poner(sfx, campana(), ev["cantidades"] + 0.9, 0.8)  # resaltado del beneficio en la tabla
 poner(sfx, toque(), ev["privado"], 0.9)
+for k, (a, b) in PANTALLAS.items():
+    if a > 0:
+        poner(sfx, soplo(0.6), a - 0.3, 0.8)
+poner(sfx, campana(), 0.25, 0.7)                        # "3" de la intro
+poner(sfx, campana(), ev["auto1"] + 0.6, 0.8)           # anillo al 100 %
+poner(sfx, campana(), ev["n99"] + 0.9, 0.7)             # el punto dorado entre 100
+poner(sfx, toque(), ev["mueves"], 0.8)                  # stop a breakeven
+poner(sfx, campana(), PANTALLAS["prop"][0] + 1.4, 0.7)  # barra de 100.000 €
 
 INTENSIDAD = {"intro": (1, 0, 1, 0), "v1": (1, 1, 1, 1), "v2": (1, 1, 1, 1), "v3": (1, 1, 1, 1), "cta": (1, 1, 1, 1)}
 musica = musica_energetica(len(sfx), escenas, INTENSIDAD)
