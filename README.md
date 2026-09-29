@@ -102,3 +102,17 @@ Para el modo voz: `pip install -r requirements-voz.txt`. En Linux puede que nece
 - Tus datos (memoria, alertas, estado de la vigilancia) se guardan en `~/.jarvis/`.
 - Jarvis nunca envía correos ni ejecuta comandos sin preguntarte antes.
 - Si el modelo principal rechaza una petición, la API reintenta automáticamente con un modelo alternativo.
+
+## Vídeos con Remotion
+
+En la carpeta `video/` hay un proyecto de [Remotion](https://www.remotion.dev/) para crear
+vídeos con React. Necesita **Node.js 18 o superior**.
+
+```bash
+cd video
+npm install        # solo la primera vez
+npm run dev        # abre Remotion Studio en el navegador
+npm run render     # genera out/intro.mp4
+```
+
+Las composiciones se registran en `video/src/Root.tsx`.
