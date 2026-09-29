@@ -190,3 +190,33 @@ def mezclar(voz_ed, musica, sfx_pista, dur, destino, ff, duck=-18, nivel_musica=
                     f"loudnorm=I=-14:TP=-1:LRA=11:measured_I={m['input_i']}:measured_TP={m['input_tp']}:"
                     f"measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true",
                     "-ar", str(SR), "-c:a", "pcm_s16le", str(destino)], check=True)
+
+
+# ---------------------------------------------------------------- SFX suaves (estilo premium)
+def toque():
+    """Toque de interfaz corto y limpio, sin el 'pop' de dibujo animado."""
+    n = int(0.08 * SR)
+    t = np.arange(n) / SR
+    x = (np.sin(2 * np.pi * 1400 * t) + 0.35 * np.sin(2 * np.pi * 2800 * t)) * np.exp(-t * 60)
+    x += lp(rng.standard_normal(n), 3000) * np.exp(-t * 300) * 0.15
+    return x * env(n, 0.002, 0.01) * 0.25
+
+
+def campana():
+    """Campanilleo tenue con cola de aire (ecos cortos), para los momentos clave."""
+    n = int(1.4 * SR)
+    t = np.arange(n) / SR
+    x = sum(a * np.sin(2 * np.pi * f * t) for f, a in ((1318.5, 0.5), (1975.5, 0.3), (2637.0, 0.12))) * np.exp(-t * 3.5)
+    x *= env(n, 0.005, 0.2)
+    y = x.copy()
+    for ms, g in ((60, 0.35), (130, 0.2), (210, 0.1)):
+        d = int(ms / 1000 * SR)
+        y[d:] += x[:-d] * g
+    return lp(y, 7000) * 0.18
+
+
+def soplo(d=0.5):
+    """Soplido de aire suave para transiciones (whoosh sin agudos)."""
+    n = int(d * SR)
+    ruido = lp(rng.standard_normal(n), 1800)
+    return bp(ruido, 150, 1800) * np.sin(np.linspace(0, np.pi, n)) ** 2 * 0.35

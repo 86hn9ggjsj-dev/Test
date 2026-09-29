@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 
-from sonido import SR, click, ding, env, hat, kick, lp, mezclar, nota, pad, pop, riser, whoosh
+from sonido import SR, campana, env, hat, kick, lp, mezclar, nota, pad, soplo, toque
 
 FF = sys.argv[1]
 RAIZ = Path(__file__).resolve().parent.parent
@@ -145,22 +145,22 @@ def poner(x, t, g=1.0, pista=sfx):
         pista[i:i + len(x)] += x[: len(pista) - i] * g
 
 
-poner(pop(), ev["dia"], 0.8)
-poner(pop(), ev["segundo"], 0.6)
-poner(pop(), ev["t85"], 0.8)
-poner(whoosh(0.35), ev["captura"] - 0.15, 0.6)
+poner(toque(), ev["dia"], 1.0)
+poner(toque(), ev["segundo"], 0.7)
+poner(campana(), ev["t85"], 1.0)
+poner(soplo(0.5), ev["captura"] - 0.25, 0.8)
 for k in range(4):
-    poner(click(), ev["cuatro"] + 0.12 * k, 1.1)
-poner(ding(), ev["veis"], 0.8)
-poner(whoosh(0.4), esc["eso"]["s"] - 0.2, 0.6)
-poner(pop(), ev["dos"], 0.8)
-poner(pop(), ev["dos"] + 0.25, 0.8)
-poner(whoosh(0.35), ev["tablaPlano"] - 0.15, 0.6)
-poner(pop(), ev["tabla"], 0.8)
-poner(riser(0.6), ev["treintayuno"] - 0.6, 0.5)
-poner(ding(), ev["treintayuno"] + 0.05, 0.7)
-poner(whoosh(0.4), esc["cta"]["s"] - 0.2, 0.6)
-poner(pop(), ev["comentarios"], 0.9)
+    poner(toque(), ev["cuatro"] + 0.12 * k, 0.6)
+poner(campana(), ev["veis"], 0.8)
+poner(soplo(0.5), esc["eso"]["s"] - 0.25, 0.7)
+poner(toque(), ev["dos"], 0.8)
+poner(toque(), ev["dos"] + 0.25, 0.8)
+poner(soplo(0.5), ev["tablaPlano"] - 0.25, 0.7)
+poner(toque(), ev["tabla"], 0.8)
+poner(soplo(0.8), ev["treintayuno"] - 0.7, 0.6)
+poner(campana(), ev["treintayuno"], 1.0)
+poner(soplo(0.5), esc["cta"]["s"] - 0.25, 0.7)
+poner(toque(), ev["comentarios"], 0.9)
 
 # ---------------------------------------------------------------- música (energética, mayor, 120 BPM)
 musica = np.zeros(N)
