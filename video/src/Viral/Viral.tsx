@@ -43,7 +43,21 @@ const TINTE: Record<string, string> = {
   emociones: "#b23cff",
   manana: "#2f7bff",
 };
-const GRAFICO = ["calma", "entrada", "contra", "stop", "vuelve", "beneficio"];
+const CORTES = TL.escenas.map((e) => e.s);
+const CLAVES: Record<string, string> = {
+  estrategia: C.verde,
+  entras: C.verde,
+  vuelve: C.verde,
+  beneficio: C.verde,
+  tranquilo: C.azul,
+  problema: C.rojo,
+  contra: C.rojo,
+  dudas: C.rojo,
+  stop: C.rojo,
+  emociones: C.rojo,
+  mañana: C.amarillo,
+  mismo: C.rojo,
+};
 const T_PROBLEMA_HOOK = palabra(38, true).s;
 const T_PROBLEMA = palabra(38).s;
 
@@ -142,7 +156,7 @@ export const Viral: React.FC = () => {
       </AbsoluteFill>
 
       <AbsoluteFill style={{ backgroundColor: esc.id === "vuelve" ? C.verde : "#fff", opacity: destello * 0.7 }} />
-      <Subtitulos t={t} />
+      <Subtitulos t={t} palabras={TL.palabras} cortes={CORTES} claves={CLAVES} duracion={TL.duracion} />
       <Progreso t={t} />
     </AbsoluteFill>
   );

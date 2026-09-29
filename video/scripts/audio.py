@@ -11,7 +11,9 @@ from pathlib import Path
 
 import numpy as np
 import soundfile as sf
-from scipy.signal import butter, sosfilt
+
+from sonido import (SR, click, ding, dudas, env, glitch, hat, impacto, kick, lp, mezclar, nota, pad, pop,
+                    riser, silencios, whoosh)
 
 FF = sys.argv[1]
 RAIZ = Path(__file__).resolve().parent.parent
@@ -19,8 +21,6 @@ GEN_AUDIO = RAIZ / "public/gen"
 GEN_SRC = RAIZ / "src/gen"
 GEN_AUDIO.mkdir(parents=True, exist_ok=True)
 GEN_SRC.mkdir(parents=True, exist_ok=True)
-SR = 48000
-rng = np.random.default_rng(7)
 
 # ---------------------------------------------------------------- voz
 subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(RAIZ / "input/voz.mp3"),
@@ -35,24 +35,6 @@ for p in palabras:
     if p["w"] == "probablemente":
         p["s"] = 20.05
 
-
-def silencios(x, umbral_rel=38, minimo=0.15):
-    hop = SR // 100
-    n = len(x) // hop
-    db = 20 * np.log10(np.sqrt(np.mean(x[: n * hop].reshape(n, hop) ** 2, axis=1)) + 1e-9)
-    mudo = db < db.max() - umbral_rel
-    res, i = [], 0
-    while i < n:
-        if mudo[i]:
-            j = i
-            while j < n and mudo[j]:
-                j += 1
-            if (j - i) / 100 >= minimo:
-                res.append((i / 100, j / 100))
-            i = j
-        else:
-            i += 1
-    return res
 
 
 # Pausas dramáticas que se conservan más largas (inicio de la frase siguiente -> hueco)
@@ -139,104 +121,6 @@ def t_pal(idx, hook=False):
 
 esc = {e["id"]: e for e in escenas}
 
-# ---------------------------------------------------------------- SFX sintetizados
-def env(n, att, rel):
-    e = np.ones(n)
-    a, r = int(att * SR), int(rel * SR)
-    if a:
-        e[:a] = np.linspace(0, 1, a) ** 2
-    if r:
-        e[-r:] *= np.linspace(1, 0, r) ** 2
-    return e
-
-
-def bp(x, lo, hi):
-    return sosfilt(butter(2, [lo, hi], "band", fs=SR, output="sos"), x)
-
-
-def lp(x, f):
-    return sosfilt(butter(2, f, "low", fs=SR, output="sos"), x)
-
-
-def hp(x, f):
-    return sosfilt(butter(2, f, "high", fs=SR, output="sos"), x)
-
-
-def whoosh(d=0.45, subida=True):
-    n = int(d * SR)
-    ruido = rng.standard_normal(n)
-    bloques = 24
-    out = np.zeros(n)
-    for k in range(bloques):
-        c = 400 + 3600 * ((k / bloques) if subida else 1 - k / bloques)
-        seg = bp(ruido, c * 0.6, min(c * 1.6, 20000))
-        v = np.zeros(n)
-        a, b = k * n // bloques, (k + 1) * n // bloques
-        v[a:b] = 1
-        out += seg * v
-    curva = np.sin(np.linspace(0, np.pi, n)) ** 1.5
-    return out * curva * 0.5
-
-
-def pop():
-    n = int(0.09 * SR)
-    t = np.arange(n) / SR
-    f = 950 * np.exp(-t * 28) + 260
-    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 45) * 0.55
-
-
-def click():
-    n = int(0.03 * SR)
-    t = np.arange(n) / SR
-    return (np.sin(2 * np.pi * 2300 * t) * np.exp(-t * 180) + hp(rng.standard_normal(n), 3000) * np.exp(-t * 400)) * 0.35
-
-
-def impacto(d=1.2):
-    n = int(d * SR)
-    t = np.arange(n) / SR
-    f = 32 + 70 * np.exp(-t * 9)
-    sub = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 3.2)
-    golpe = lp(rng.standard_normal(n), 900) * np.exp(-t * 25)
-    return np.tanh((sub * 1.4 + golpe * 0.9) * 1.6) * 0.8
-
-
-def riser(d=1.0):
-    n = int(d * SR)
-    t = np.arange(n) / SR
-    f = 180 * (8 ** (t / d))
-    tono = np.sin(2 * np.pi * np.cumsum(f) / SR) * 0.25
-    ruido = hp(rng.standard_normal(n), 2500) * 0.35
-    return (tono + ruido) * (t / d) ** 2.2
-
-
-def ding():
-    n = int(0.9 * SR)
-    t = np.arange(n) / SR
-    x = sum(a * np.sin(2 * np.pi * f * t) for f, a in ((1568, 0.5), (3136, 0.2), (2349, 0.15))) * np.exp(-t * 6)
-    d = int(0.085 * SR)
-    y = np.zeros(n)
-    y[d:] = (np.sin(2 * np.pi * 2093 * t[: n - d]) * 0.5) * np.exp(-t[: n - d] * 5)
-    return (x + y) * 0.35
-
-
-def glitch(d=0.3):
-    n = int(d * SR)
-    out = np.zeros(n)
-    k = 0
-    while k < n:
-        m = int(rng.uniform(0.012, 0.035) * SR)
-        t = np.arange(min(m, n - k)) / SR
-        if rng.random() < 0.7:
-            out[k:k + len(t)] = np.sign(np.sin(2 * np.pi * rng.uniform(120, 1800) * t)) * 0.18
-        k += m
-    return out
-
-
-def dudas():
-    n = int(0.5 * SR)
-    t = np.arange(n) / SR
-    f = 520 + 90 * np.sin(2 * np.pi * 9 * t) - 180 * t
-    return np.sin(2 * np.pi * np.cumsum(f) / SR) * env(n, 0.02, 0.2) * 0.18
 
 
 sfx_pista = np.zeros(int(DUR * SR) + SR * 2)
@@ -273,31 +157,7 @@ poner(whoosh(0.6), DUR - 0.5, 0.9)                          # vuelta al inicio (
 N = len(sfx_pista)
 musica = np.zeros(N)
 BEAT = 60 / 100
-nota = lambda m: 440 * 2 ** ((m - 69) / 12)
 ACORDES = [[45, 57, 60, 64], [41, 53, 57, 60], [38, 50, 53, 57], [40, 52, 56, 59]]  # Am F Dm E
-
-
-def pad(freqs, d):
-    n = int(d * SR)
-    t = np.arange(n) / SR
-    x = np.zeros(n)
-    for f in freqs:
-        for det in (-0.12, 0.0, 0.13):
-            for h in range(1, 6):
-                x += np.sin(2 * np.pi * f * 2 ** (det / 12) * h * t + rng.uniform(0, 6)) / h
-    return lp(x, 1300) * env(n, 0.25, 0.3) * 0.035
-
-
-def kick():
-    n = int(0.35 * SR)
-    t = np.arange(n) / SR
-    f = 48 + 110 * np.exp(-t * 30)
-    return np.tanh(np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 9) * 2.2) * 0.7
-
-
-def hat():
-    n = int(0.05 * SR)
-    return hp(rng.standard_normal(n), 7000) * np.exp(-np.arange(n) / SR * 90) * 0.18
 
 
 def poner_m(x, t, g=1.0):
@@ -332,35 +192,7 @@ for k, e in enumerate(escenas):
 musica = lp(musica, 9000)
 
 # ---------------------------------------------------------------- mezcla con ducking
-voz_p = np.zeros(N)
-voz_p[: len(voz_ed)] = voz_ed
-voz_p *= 10 ** (-3 / 20) / np.max(np.abs(voz_p))
-hop = SR // 100
-nb = N // hop
-rms = np.sqrt(np.mean(voz_p[: nb * hop].reshape(nb, hop) ** 2, axis=1))
-activo = (rms > 0.01).astype(float)
-suave = np.zeros(nb)
-for i in range(1, nb):  # ataque rápido, release lento
-    c = 0.5 if activo[i] > suave[i - 1] else 0.06
-    suave[i] = suave[i - 1] + c * (activo[i] - suave[i - 1])
-duck_db = -18 * suave  # -18 dB bajo la voz
-gan = np.repeat(10 ** (duck_db / 20), hop)
-gan = np.pad(gan, (0, N - len(gan)), mode="edge")
-musica *= 0.55 * gan
-mezcla = voz_p + musica + sfx_pista * 0.5
-mezcla = mezcla[: int(DUR * SR)]
-mezcla[-int(0.3 * SR):] *= np.linspace(1, 0, int(0.3 * SR))
-sf.write(GEN_AUDIO / "premezcla.wav", np.stack([mezcla, mezcla], 1).astype(np.float32), SR, subtype="FLOAT")
-
-# Normalización a -14 LUFS (dos pasadas)
-r = subprocess.run([FF, "-hide_banner", "-i", str(GEN_AUDIO / "premezcla.wav"), "-af",
-                    "loudnorm=I=-14:TP=-1:LRA=11:print_format=json", "-f", "null", "-"],
-                   capture_output=True, text=True)
-m = json.loads(r.stderr[r.stderr.rindex("{"): r.stderr.rindex("}") + 1])
-subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(GEN_AUDIO / "premezcla.wav"), "-af",
-                f"loudnorm=I=-14:TP=-1:LRA=11:measured_I={m['input_i']}:measured_TP={m['input_tp']}:"
-                f"measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true",
-                "-ar", str(SR), "-c:a", "pcm_s16le", str(GEN_AUDIO / "mezcla.wav")], check=True)
+mezclar(voz_ed, musica, sfx_pista, DUR, GEN_AUDIO / "mezcla.wav", FF)
 
 json.dump({"duracion": round(DUR, 3), "palabras": pal_out, "escenas": escenas},
           open(GEN_SRC / "timeline.json", "w"), ensure_ascii=False, indent=1)

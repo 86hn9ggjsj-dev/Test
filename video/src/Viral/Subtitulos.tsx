@@ -1,49 +1,54 @@
+import { useMemo } from "react";
 import { AbsoluteFill } from "remotion";
-import { ANCHO, C, pop, SAFE, texto, TL, Y_SUBS } from "./util";
+import { ALTO, ANCHO, C, pop, SAFE, texto, Y_SUBS } from "./util";
 
-type Palabra = (typeof TL.palabras)[number];
-
-const limpia = (w: string) => w.toLowerCase().replace(/[.,¿?¡!]/g, "");
-const CLAVE: Record<string, string> = {
-  estrategia: C.verde,
-  entras: C.verde,
-  vuelve: C.verde,
-  beneficio: C.verde,
-  tranquilo: C.azul,
-  problema: C.rojo,
-  contra: C.rojo,
-  dudas: C.rojo,
-  stop: C.rojo,
-  emociones: C.rojo,
-  mañana: C.amarillo,
-  mismo: C.rojo,
+export type Palabra = { w: string; s: number; e: number; hook: boolean };
+type Props = {
+  t: number;
+  palabras: Palabra[];
+  // Tiempos en los que un bloque no puede continuar (cambios de escena)
+  cortes: number[];
+  claves: Record<string, string>;
+  duracion: number;
+  // Altura del centro del subtítulo (fracción de la pantalla) para un bloque visible entre ini y fin
+  y?: (ini: number, fin: number) => number;
 };
 
-// Bloques de 1-3 palabras, una línea, cortando en puntuación, pausas y cambios de escena
-const cambiaEscena = (a: number, b: number) => TL.escenas.some((e) => e.s > a && e.s <= b);
-const bloques: Palabra[][] = [];
-for (const p of TL.palabras) {
-  const actual = bloques[bloques.length - 1];
-  const ultima = actual?.[actual.length - 1];
-  const chars = actual ? actual.map((w) => w.w).join(" ").length + p.w.length + 1 : 0;
-  const nuevo =
-    !actual ||
-    actual.length >= 3 ||
-    chars > 17 ||
-    /[.,]$/.test(ultima!.w) ||
-    p.s - ultima!.e > 0.3 ||
-    p.hook !== ultima!.hook ||
-    cambiaEscena(ultima!.s, p.s) ||
-    CLAVE[limpia(p.w)] === C.rojo && actual.length >= 2;
-  if (nuevo) bloques.push([p]);
-  else actual.push(p);
-}
+export const limpia = (w: string) => w.toLowerCase().replace(/[.,¿?¡!]/g, "");
 
-export const Subtitulos: React.FC<{ t: number }> = ({ t }) => {
-  const idx = bloques.findIndex((b, k) => {
-    const ini = b[0].s - 0.04;
-    const sig = bloques[k + 1]?.[0].s ?? TL.duracion;
-    const fin = Math.min(sig - 0.04, b[b.length - 1].e + 0.6);
+// Bloques de 1-3 palabras, una línea, cortando en puntuación, pausas y cambios de escena
+const agrupar = (palabras: Palabra[], cortes: number[], claves: Record<string, string>) => {
+  const bloques: Palabra[][] = [];
+  for (const p of palabras) {
+    const actual = bloques[bloques.length - 1];
+    const ultima = actual?.[actual.length - 1];
+    const chars = actual ? actual.map((w) => w.w).join(" ").length + p.w.length + 1 : 0;
+    const nuevo =
+      !actual ||
+      actual.length >= 3 ||
+      chars > 17 ||
+      /[.,?]$/.test(ultima!.w) ||
+      p.s - ultima!.e > 0.3 ||
+      p.hook !== ultima!.hook ||
+      cortes.some((c) => c > ultima!.s && c <= p.s) ||
+      (claves[limpia(p.w)] === C.rojo && actual.length >= 2);
+    if (nuevo) bloques.push([p]);
+    else actual.push(p);
+  }
+  return bloques;
+};
+
+const yPorDefecto = () => Y_SUBS / ALTO;
+
+export const Subtitulos: React.FC<Props> = ({ t, palabras, cortes, claves, duracion, y = yPorDefecto }) => {
+  const bloques = useMemo(() => agrupar(palabras, cortes, claves), [palabras, cortes, claves]);
+  const intervalo = (k: number) => {
+    const b = bloques[k];
+    const sig = bloques[k + 1]?.[0].s ?? duracion;
+    return [b[0].s - 0.04, Math.min(sig - 0.04, b[b.length - 1].e + 0.6)];
+  };
+  const idx = bloques.findIndex((_, k) => {
+    const [ini, fin] = intervalo(k);
     return t >= ini && t < fin;
   });
   if (idx < 0) return null;
@@ -58,7 +63,7 @@ export const Subtitulos: React.FC<{ t: number }> = ({ t }) => {
       <div
         style={{
           position: "absolute",
-          top: Y_SUBS,
+          top: y(...(intervalo(idx) as [number, number])) * ALTO,
           left: SAFE.lados,
           right: SAFE.lados,
           transform: `translateY(-50%) translateY(${(1 - p) * 24}px) scale(${0.7 + 0.3 * p})`,
@@ -72,7 +77,7 @@ export const Subtitulos: React.FC<{ t: number }> = ({ t }) => {
         {b.map((w, k) => {
           const fin = b[k + 1]?.s ?? w.e + 0.25;
           const activa = t >= w.s - 0.02 && t < fin;
-          const color = CLAVE[limpia(w.w)];
+          const color = claves[limpia(w.w)];
           const pw = pop(t, w.s - 0.02, 320);
           const extra = activa ? (color ? 0.16 : 0.08) * pw : 0;
           const escala = 1 + extra;
