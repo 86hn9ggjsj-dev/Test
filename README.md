@@ -102,3 +102,56 @@ Para el modo voz: `pip install -r requirements-voz.txt`. En Linux puede que nece
 - Tus datos (memoria, alertas, estado de la vigilancia) se guardan en `~/.jarvis/`.
 - Jarvis nunca envía correos ni ejecuta comandos sin preguntarte antes.
 - Si el modelo principal rechaza una petición, la API reintenta automáticamente con un modelo alternativo.
+
+## Vídeos con Remotion
+
+En la carpeta `video/` hay un proyecto de [Remotion](https://www.remotion.dev/) para crear
+vídeos con React. Necesita **Node.js 18 o superior**.
+
+```bash
+cd video
+npm install        # solo la primera vez
+npm run dev        # abre Remotion Studio en el navegador
+npm run render     # genera out/intro.mp4
+```
+
+Las composiciones se registran en `video/src/Root.tsx`.
+
+### Video viral a partir de una voz en off
+
+La composición `Viral` (1080x1920, 60 fps) convierte `video/input/voz.mp3` en un video vertical
+con subtítulos karaoke, gráfico animado, motion graphics, música y efectos sintetizados.
+
+```bash
+cd video
+# 1. Transcripción por palabra (faster-whisper) -> input/palabras.json
+# 2. Audio: jump cuts, hook, música, SFX, ducking y -14 LUFS
+python scripts/audio.py <ruta-a-ffmpeg>
+# 3. Render
+npx remotion render Viral out/viral.mp4 --video-bitrate=10M --audio-codec=aac
+```
+
+### Editar un video grabado
+
+La composición `Reto` (1080x1920, 30 fps) edita un video a cámara: jump cuts, grading, subtítulos que esquivan la cara y las capturas, anotaciones sobre
+las capturas y la tabla, música, SFX y CTA final.
+
+```bash
+cd video
+# input/reto.mp4 (no se versiona) + input/reto_palabras.json (Whisper)
+python scripts/reto.py <ruta-a-ffmpeg>
+npx remotion render Reto out/reto.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
+### Video "3 ventajas de un bot"
+
+```bash
+cd video
+python scripts/bot.py <ruta-a-ffmpeg>
+npx remotion render Bot out/bot_raw.mp4 --video-bitrate=12M --audio-codec=aac
+# Acelerar a 1,1x (imagen y voz) para más ritmo:
+ffmpeg -i out/bot_raw.mp4 -filter_complex "[0:v]setpts=PTS/1.1[v];[0:a]atempo=1.1[a]" -map "[v]" -map "[a]" out/bot.mp4
+```
+
+`scripts/sonido.py` reúne la síntesis de música y SFX y la mezcla con ducking y -14 LUFS que
+usan ambos pipelines.
