@@ -204,7 +204,7 @@ def ciclo(estado: dict) -> list[dict]:
     pnl: list[pd.Series] = []
     for id_, t in traders.items():
         cerradas, posicion = [], None
-        t["hoy"] = 0.0
+        t["hoy"] = t["semana"] = 0.0
         sim = sims[id_]
         if sim:
             est, m, inicio, res = sim
@@ -216,6 +216,8 @@ def ciclo(estado: dict) -> list[dict]:
             pnl.append(curva)
             antes = curva[curva.index <= medianoche]
             t["hoy"] = round(float(curva.iloc[-1] - (antes.iloc[-1] if len(antes) else 0.0)), 2)
+            hace_semana = curva[curva.index <= curva.index[-1] - pd.Timedelta(days=7)]
+            t["semana"] = round(float(curva.iloc[-1] - (hace_semana.iloc[-1] if len(hace_semana) else 0.0)), 2)
             for e, s, pe, ps, r, motivo, f in zip(res.entradas, res.salidas, res.precio_entrada,
                                                  res.precio_salida, res.retornos, res.motivos, fracciones):
                 op = {

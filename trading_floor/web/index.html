@@ -40,6 +40,27 @@ canvas#lienzo.sobre{cursor:pointer}
 .pastilla.on{border-color:rgba(46,230,166,.6);color:var(--verde)}
 .pastilla.off{border-color:rgba(255,90,118,.6);color:var(--rojo)}
 .pastilla.neutral{color:var(--suave)}
+.podio{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:8px;align-items:end;margin:6px 0 14px}
+.podio .p{border:1px solid var(--borde);border-radius:14px;padding:10px 8px;text-align:center;background:var(--panel2);cursor:pointer}
+.podio .p .med{font-size:24px;line-height:1}
+.podio .p .av{margin:6px auto}
+.podio .p b{display:block;font-size:13px}
+.podio .p small{display:block;font-size:10px;color:var(--suave)}
+.podio .p .v{font:800 13px var(--mono);margin-top:4px}
+.podio .p1{border-color:rgba(255,207,90,.6);background:linear-gradient(180deg,rgba(255,207,90,.14),rgba(255,207,90,.02));padding-top:16px;box-shadow:0 0 30px rgba(255,207,90,.12)}
+.podio .p2{border-color:rgba(200,210,225,.45)} .podio .p3{border-color:rgba(205,127,50,.5)}
+.fila-rk{display:grid;grid-template-columns:26px 30px 1fr auto;gap:8px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--borde);cursor:pointer;font-size:12px}
+.fila-rk:hover{background:var(--panel2)}
+.fila-rk .pos{font:800 12px var(--mono);color:var(--suave);text-align:center}
+.fila-rk .av{width:28px;height:28px;font-size:11px}
+.fila-rk .v{font:800 12px var(--mono);text-align:right}
+.fila-rk .v small{display:block;font:500 10px Inter,sans-serif;color:var(--suave)}
+.sala{border:1px solid var(--borde);border-radius:12px;padding:10px 12px;margin-bottom:10px;background:var(--panel2);cursor:pointer}
+.sala .cab2{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px}
+.sala .cab2 small{margin-left:auto;color:var(--suave);font-weight:500;font-size:11px}
+.sala p{margin:6px 0 0;font-size:12px;color:#c9d0db}
+.luz{width:10px;height:10px;border-radius:50%;flex:none}
+.luz.ok{background:var(--verde);box-shadow:0 0 10px var(--verde)} .luz.aviso{background:var(--ambar);box-shadow:0 0 10px var(--ambar)} .luz.alerta{background:var(--rojo);box-shadow:0 0 12px var(--rojo);animation:latido 1s infinite}
 .plan{border:1px solid var(--borde);border-radius:14px;padding:12px;margin-bottom:12px;background:var(--panel2)}
 .plan .tit{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .plan .tit b{font:800 16px var(--mono)}
@@ -103,6 +124,7 @@ canvas#lienzo.sobre{cursor:pointer}
 #chat.f-holding .msg:not(.c-holding){display:none}
 #chat.f-comite .msg:not(.c-comite){display:none}
 #chat.f-charla .msg:not(.c-charla){display:none}
+#chat.f-supervision .msg:not(.c-supervision){display:none}
 .msg.bueno .txt{border-color:rgba(46,230,166,.35)}
 .msg.malo .txt{border-color:rgba(255,90,118,.35)}
 .msg.oro .txt{border-color:rgba(255,207,90,.55);background:rgba(255,207,90,.07)}
@@ -234,13 +256,15 @@ canvas.grafica{display:block;width:100%}
     <button data-p="chat" class="activa">Chat<span class="num" id="nChat" hidden>0</span></button>
     <button data-p="embudo">Embudo</button>
     <button data-p="traders">Resultados</button>
+    <button data-p="ranking">Ranking</button>
+    <button data-p="salas">Salas</button>
     <button data-p="holding">Holding</button>
     <button data-p="riesgo">Riesgo</button>
     <button data-p="macro">Macro</button>
     <button data-p="info">¿Qué es?</button>
   </nav>
   <section class="pagina activa" id="p-chat">
-    <div class="canales"><button data-c="todo" class="activo">Todo</button><button data-c="operaciones">Operaciones</button><button data-c="riesgos">Riesgos</button><button data-c="mineria">Minería</button><button data-c="analisis">Análisis</button><button data-c="macro">Macro</button><button data-c="holding">Holding</button><button data-c="comite">Comité</button><button data-c="charla">Charla</button></div>
+    <div class="canales"><button data-c="todo" class="activo">Todo</button><button data-c="operaciones">Operaciones</button><button data-c="riesgos">Riesgos</button><button data-c="mineria">Minería</button><button data-c="analisis">Análisis</button><button data-c="macro">Macro</button><button data-c="holding">Holding</button><button data-c="comite">Comité</button><button data-c="charla">Charla</button><button data-c="supervision">Supervisión</button></div>
     <div id="chat"></div></section>
   <section class="pagina" id="p-embudo"><h3>Embudo de esta sesión</h3><div id="embudo"></div>
     <p class="nota">Cada estrategia pasa las pruebas en orden y se descarta en la primera que falla. Por eso casi ninguna llega al final: si pruebas miles al azar, muchas parecen buenas por pura suerte.</p></section>
@@ -251,6 +275,12 @@ canvas.grafica{display:block;width:100%}
     <h3 style="margin-top:14px">Resultado por día</h3>
     <canvas class="grafica" id="gDias" height="96"></canvas>
     <h3 style="margin-top:16px">Ranking de traders</h3><div id="traders"></div></section>
+  <section class="pagina" id="p-ranking">
+    <div style="display:flex;align-items:center;margin-bottom:6px"><h3 style="margin:0">Ranking de traders</h3>
+      <div class="rangos" id="criterios" style="flex-wrap:wrap;justify-content:flex-end"><button data-c="total" class="activo">Total</button><button data-c="hoy">Hoy</button><button data-c="semana">Semana</button><button data-c="acierto">Acierto</button><button data-c="backtest">Backtest</button></div></div>
+    <div id="ranking"></div>
+    <p class="nota">Total, hoy y semana: resultados en papel (dinero ficticio) desde que cada trader llegó a la sala. Backtest: cómo lo hizo su estrategia fuera de muestra, con datos pasados.</p></section>
+  <section class="pagina" id="p-salas"><h3>Supervisión de las salas</h3><div id="salas"></div></section>
   <section class="pagina" id="p-holding"><h3>Sala de holding</h3><div id="holding"></div>
     <p class="nota">Carteras de largo plazo con dinero ficticio: una compra inicial, órdenes de compra escalonadas por debajo, ventas parciales por encima y un stop de catástrofe. Crea tu propio plan con <code>trading holding --nuevo BTCUSDT --compras 75000,68000 --ventas 110000,130000</code>.</p></section>
   <section class="pagina" id="p-riesgo"><h3>Control de riesgos</h3><div id="riesgo"></div></section>
@@ -266,6 +296,8 @@ canvas.grafica{display:block;width:100%}
     <p><b>Holding.</b> Carteras de largo plazo (BTC, ETH y SOL) que compran y mantienen siguiendo un plan de zonas: compran más si el precio baja a sus zonas de compra y venden una parte en sus zonas objetivo.</p>
     <p><b>Control de riesgos.</b> Decide cuánto invierte cada operación (arriesgando como mucho un 1 % del capital del trader) y veta entradas si hay demasiadas posiciones, demasiadas iguales, o si el día o la caída acumulada pierden demasiado.</p>
     <p><b>Macroeconomía.</b> Cuatro analistas siguen la bolsa, el VIX, el dólar, el oro, el petróleo, los bonos y el sentimiento cripto, y deciden si el mercado está en modo RISK-ON (apetito por el riesgo) o RISK-OFF.</p>
+    <p><b>Supervisión.</b> Cada sala tiene su supervisor, que la patrulla y sabe cómo va. La supervisión general hace rondas por toda la oficina preguntando a cada uno, y acude corriendo si una sala se pone en rojo. El estado de cada sala está en la pestaña «Salas».</p>
+    <p><b>Ranking.</b> Los traders se ordenan por su resultado en papel (total, hoy, semana o acierto) o por cómo lo hizo su estrategia en el backtest. Los tres mejores llevan corona o medalla en la oficina.</p>
     <p><b>Comité, descanso y terraza.</b> De vez en cuando se reúnen para repasar el riesgo, y cuando no hay trabajo se van a por café.</p>
     <p class="nota">Todo es <b>paper trading</b>: nunca se envía ninguna orden real. Los resultados de un backtest no garantizan nada sobre el futuro.</p>
     <p class="nota">Arrastra para moverte, rueda o pellizca para hacer zoom y haz clic en cualquier persona para ver qué hace.</p>
@@ -640,6 +672,25 @@ for (const y of [12.2, 15.2, 18.2, 21.2])
     MESAS.push(mesa);
   }
 planta(17.4, 11.6, true); planta(17.4, 23.4);
+estatico(14.2 + 11.4, () => {
+  caja(14.1, 11.26, 0, .2, .1, .55, "#222");
+  caja(11, 11.18, .55, 6.4, .12, 1.25, "#101217");
+  caraY(11.05, 11.3 + .002, 1.75, () => pantallaRanking(630, 115));
+  brillo(14.2, 11.4, 1.2, 120, "#ffcf5a", .18);
+});
+function pantallaRanking(w, h) {
+  ctx.fillStyle = "#0a0906"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#ffcf5a"; ctx.font = "900 15px Inter, sans-serif"; ctx.fillText("🏆 RANKING · SALA DE TRADING", 12, 20);
+  const rk = rankingPapel("total").slice(0, 5);
+  if (!rk.length) { ctx.fillStyle = "#6f5a3a"; ctx.font = "700 13px Inter, sans-serif"; ctx.fillText("Sin traders todavía", 12, 60); return; }
+  rk.forEach((f, i) => {
+    const y = 40 + i * 16;
+    ctx.fillStyle = ["#ffcf5a", "#d8dee8", "#cd7f32", "#8a94a6", "#8a94a6"][i]; ctx.font = "800 12px JetBrains Mono, monospace"; ctx.fillText(`${i + 1}.`, 12, y);
+    ctx.fillStyle = "#e9edf3"; ctx.font = "700 12px Inter, sans-serif"; ctx.fillText(`${f.a.nombre} · ${f.a.id} · ${moneda(f.d.simbolo)}`, 38, y);
+    ctx.fillStyle = f.total >= 0 ? "#2ee6a6" : "#ff5a76"; ctx.font = "800 12px JetBrains Mono, monospace"; ctx.textAlign = "right";
+    ctx.fillText(dineroS(f.total), 520, y); ctx.fillStyle = "#8a94a6"; ctx.fillText(`hoy ${dineroS(f.hoy)}`, 620, y); ctx.textAlign = "start";
+  });
+}
 function colorTrader(a) {
   const p = a.datos && a.datos.posicion;
   if (!p) return "#5cc0ff";
@@ -999,6 +1050,8 @@ const ROLES = {
   riesgos: {puesto: "Riesgos", camisa: "#6a4bc4", pantalon: "#2a2440", accesorio: null, tono: "#b58cff"},
   macro: {puesto: "Macroeconomía", camisa: "#1f8fa3", pantalon: "#23303d", accesorio: "gafas_pasta"},
   holder: {puesto: "Holding", camisa: "#f7931a", pantalon: "#2b2b30", accesorio: null},
+  supervisor: {puesto: "Supervisión", camisa: "#2c313c", pantalon: "#1d2128", accesorio: "tablet"},
+  general: {puesto: "Supervisión general", camisa: "#f1ece2", pantalon: "#2b2f38", accesorio: "general", tono: "#ffcf5a"},
   riesgo2: {puesto: "Control de riesgos", camisa: "#8a2c45", pantalon: "#241820", accesorio: "gafas_pasta", tono: "#ff7a95"},
   trader: {puesto: "Trader", camisa: null, pantalon: "#2b3140", accesorio: "cascos"},
 };
@@ -1063,6 +1116,26 @@ const EXPLICA_MACRO = {
 };
 const MACROS = [["Rocío", "Bolsa"], ["Adrián", "Divisas"], ["Laia", "Materias primas"], ["Samuel", "Tipos y sentimiento"]].map(([n, area], i) =>
   empleado({nombre: n, rol: "macro", area, ticker: MACRO_TICKERS[i], puesto: "Macro y análisis · " + area, explica: EXPLICA_MACRO[MACRO_TICKERS[i]] + " Ojo: es contexto para el comité, las estrategias no usan estos datos. Además, hace el radar de señales: avisa a los traders cuando a su estrategia le falta poco para entrar."}, PUESTOS_MACRO[i]));
+const SALAS_SUP = [
+  {id: "mineria", nombre: "Minería", sup: "Tomás", color: "#ffc24a", casa: [5, 7.8], ruta: [[2, 2.2], [7.5, 2.2], [5, 7.8], [8.8, 8.2]]},
+  {id: "laboratorio", nombre: "Laboratorio", sup: "Elena", color: "#5cc0ff", casa: [15.5, 5.2], ruta: [[12, 1.5], [19.5, 1.5], [15.5, 5.2], [20, 8.2]]},
+  {id: "banco", nombre: "Cámara del banco", sup: "Raúl", color: "#ffcf5a", casa: [23.5, 8], ruta: [[23.5, 8], [28.5, 7.6], [29.2, 2.5]]},
+  {id: "macro", nombre: "Macro y análisis", sup: "Sofía", color: "#5cc0ff", casa: [35, 7.8], ruta: [[32, 1.8], [36.8, 7.6], [35, 7.8]]},
+  {id: "holding", nombre: "Holding", sup: "Diego", color: "#f7931a", casa: [41.5, 7.6], ruta: [[44.6, 2], [41, 2], [41.5, 7.6]]},
+  {id: "trading", nombre: "Sala de trading", sup: "Clara", color: "#d4ff3a", casa: [9, 11.6], ruta: [[3, 14.5], [16, 14.5], [16, 20.5], [3, 20.5], [9, 23.5], [9, 11.6]]},
+  {id: "riesgos", nombre: "Control de riesgos", sup: "Pablo", color: "#ff5a76", casa: [42, 17.2], ruta: [[39.5, 12], [44.6, 17.6], [42, 22.6], [42, 17.2]]},
+];
+const SUPERVISORES = SALAS_SUP.map(s => {
+  const a = new Agente({nombre: s.sup, rol: "supervisor", sala: s, puesto: "Supervisión · " + s.nombre, proximaRonda: rand(4, 14), puntoRonda: 0,
+    explica: `Supervisa ${s.nombre.toLowerCase()}: la patrulla, vigila sus números y se los cuenta a la supervisión general en cada ronda. Si algo se pone en rojo, da la alarma.`});
+  a.tono = s.color; a.x = s.casa[0]; a.y = s.casa[1]; a.mira = "s";
+  agentes.push(a);
+  return a;
+});
+const GENERAL = new Agente({nombre: "Marta", rol: "general", proxima: 8, urgente: null,
+  explica: "Supervisión general de toda la oficina: hace rondas preguntando a cada supervisor cómo va su sala, y si una sala se pone en rojo acude corriendo. Lleva el estado de todas las salas (pestaña «Salas»)."});
+GENERAL.x = 19.6; GENERAL.y = 12.3; GENERAL.mira = "s";
+agentes.push(GENERAL);
 const NOMBRES_TRADERS = ["Lucía", "Mateo", "Aitana", "Leo", "Martina", "Unai", "Alba", "Gael", "Carla", "Nico", "Emma", "Izan", "Olivia", "Teo", "Lola", "Enzo", "Jana", "Biel", "Ainhoa", "Rayan", "Candela", "Omar", "Valeria", "Joel"];
 const traders = new Map();
 
@@ -1077,6 +1150,11 @@ function persona(a) {
   const bote = a.andando ? Math.abs(Math.cos(a.fase * 10)) * 1.3 : corre ? Math.abs(Math.cos(T * 14 + a.semilla)) * 1.8 : 0;
   const teclea = sentado && a.tecleando;
   ctx.fillStyle = "rgba(0,0,0,.22)"; ctx.beginPath(); ctx.ellipse(fx, fy, 8, 3.8, 0, 0, TAU); ctx.fill();
+  if (a.rol === "general") {
+    ctx.strokeStyle = `rgba(255,207,90,${.55 + Math.sin(T * 4) * .25})`; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.ellipse(fx, fy, 13 + Math.sin(T * 4) * 1.5, 6.5, 0, 0, TAU); ctx.stroke();
+    brillo(a.x, a.y, .1, 22, "#ffcf5a", .35);
+  }
   const cadera = fy - (sentado ? 10 : 12) - bote;
   if (!sentado) {
     ctx.fillStyle = a.pantalon;
@@ -1110,6 +1188,13 @@ function persona(a) {
   }
   if (a.rol === "minero") { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(fx - tw / 2, top + 7, tw, 2); }
   if (a.rol === "prueba" && frente) { ctx.fillStyle = "#cfd6df"; ctx.fillRect(fx - .5, top + 1, 1, th); }
+  if (a.accesorio === "tablet") {
+    ctx.fillStyle = a.tono; ctx.fillRect(fx - tw / 2 + 2, top, 2, th); ctx.fillRect(fx + tw / 2 - 4, top, 2, th);
+    if (!sentado) { ctx.fillStyle = "#101217"; ctx.fillRect(fx + tw / 2 - 1, top + 4, 6, 8); ctx.fillStyle = rgba(a.tono, .9); ctx.fillRect(fx + tw / 2, top + 5, 4, 6); }
+  } else if (a.accesorio === "general") {
+    ctx.fillStyle = "#ffcf5a"; ctx.beginPath(); for (let k = 0; k < 10; k++) { const r = k % 2 ? 1.4 : 3.2, an = k * Math.PI / 5 - Math.PI / 2; ctx.lineTo(fx - 3 + Math.cos(an) * r, top + 5 + Math.sin(an) * r); } ctx.fill();
+    ctx.fillStyle = "#101217"; ctx.fillRect(fx + tw / 2 - 1, top + 4, 6, 8); ctx.fillStyle = "#ffcf5a"; ctx.fillRect(fx + tw / 2, top + 5, 4, 6);
+  }
   // cabeza
   const hy = top - 6.8;
   ctx.fillStyle = shade(a.piel, .9); ctx.fillRect(fx - 2, top - 2.5, 4, 3);
@@ -1143,6 +1228,18 @@ function persona(a) {
     ctx.strokeStyle = "#16181d"; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(fx, hy, 7.2, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke();
     circulo(fx - 6.8, hy + .5, 2.2, "#16181d"); circulo(fx + 6.8, hy + .5, 2.2, "#16181d");
     if (frente) { ctx.beginPath(); ctx.moveTo(fx - 6.5, hy + 2); ctx.quadraticCurveTo(fx - 5, hy + 6, fx - 1.5, hy + 5); ctx.stroke(); }
+  }
+  const pos = a.rol === "trader" ? posicionRanking.get(a.id) : undefined;
+  if (pos !== undefined) {
+    const cy = hy - 12 + Math.sin(T * 3 + a.semilla) * 1.2;
+    if (pos === 0) {
+      ctx.fillStyle = "#ffcf5a"; ctx.beginPath(); ctx.moveTo(fx - 7, cy + 4); ctx.lineTo(fx - 7, cy - 3); ctx.lineTo(fx - 3.5, cy + 1); ctx.lineTo(fx, cy - 5); ctx.lineTo(fx + 3.5, cy + 1); ctx.lineTo(fx + 7, cy - 3); ctx.lineTo(fx + 7, cy + 4); ctx.closePath(); ctx.fill();
+      circulo(fx, cy - 5, 1.3, "#ff5a76"); brillo(a.x, a.y, 1.5, 26, "#ffcf5a", .7);
+    } else {
+      const c = pos === 1 ? "#d8dee8" : "#cd7f32";
+      ctx.fillStyle = "#5cc0ff"; ctx.fillRect(fx - 2, cy - 6, 4, 5); circulo(fx, cy + 1, 3.6, c);
+      ctx.fillStyle = "#101217"; ctx.font = "800 5px Inter, sans-serif"; ctx.textAlign = "center"; ctx.fillText(pos + 1, fx, cy + 3); ctx.textAlign = "start";
+    }
   }
   // zona clicable (en pantalla) para el ratón
   a.caja = [fx - 9, hy - 10, fx + 9, fy + 2];
@@ -1713,7 +1810,7 @@ function procesarChat() {
   proximaLinea = T + 1.5;
 }
 function iniciales(n) { return n.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase(); }
-const NOMBRE_CANAL = {operaciones: "operaciones", riesgos: "riesgos", mineria: "minería", analisis: "análisis", macro: "macro", holding: "holding", comite: "comité", charla: "charla"};
+const NOMBRE_CANAL = {supervision: "supervisión", operaciones: "operaciones", riesgos: "riesgos", mineria: "minería", analisis: "análisis", macro: "macro", holding: "holding", comite: "comité", charla: "charla"};
 function anadirChat(a, texto, clase = "", canal = "charla", para = null) {
   const caja = $("#chat");
   const el = document.createElement("div");
@@ -1884,6 +1981,7 @@ function planificar() {
     if (candidatos.length) mandarDescanso(pick(candidatos), rand(25, 55));
   }
   if (T > proximaCharla) { proximaCharla = T + rand(16, 28); charlaDeFondo(); }
+  planificarSupervision();
   if (Date.now() >= proximoComiteMs) { proximoComiteMs = siguienteComite(); comite(); }
   if (T > proximoRadar) { proximoRadar = T + rand(24, 40); radarDeSenales(); }
   ascensor = clamp(ascensor + (T < ascensorHasta ? .05 : -.04), 0, 1);
@@ -2025,7 +2123,7 @@ function actualizarHUD() {
     Object.values(mc.indicadores).map(d => `<div class="ind"><span>${esc(d.nombre)}</span><b>${d.valor >= 100 ? fmt.n(d.valor) : NF2.format(d.valor)}</b><span class="${d.dia_pct >= 0 ? "sube" : "baja"}">${fmt.pct(d.dia_pct)}</span></div>`).join("") +
     `<p class="nota">Actualizado a las ${fmt.hora(new Date(mc.actualizado))}.</p>`
     : `<p class="vacio">Aún no hay datos macro. Se actualizan cada 15 minutos con la oficina en marcha.</p>`;
-  actualizarHolding(); actualizarRiesgo();
+  actualizarHolding(); actualizarRiesgo(); actualizarRanking(); actualizarSalas();
   // embudo
   const e = m.embudo || {}, base = Math.max(1, e["Generadas"] || 0);
   $("#embudo").innerHTML = ETAPAS.map(k => {
@@ -2052,6 +2150,145 @@ function actualizarHUD() {
   if (rv) trozos.push(`<span><em>RIESGO</em><b class="${rv.bloqueo ? "baja" : "sube"}">${rv.bloqueo ? "FRENO ACTIVADO" : "operativa normal"}</b></span>`);
   const html = trozos.join("");
   if ($("#cintaInterior").dataset.html !== html) { $("#cintaInterior").dataset.html = html; $("#cintaInterior").innerHTML = html + html; }
+}
+
+// ========================================== RANKING Y SUPERVISIÓN =====
+let posicionRanking = new Map(), criterioRanking = "total", liderAnterior = null;
+function rankingPapel(criterio) {
+  const filas = [...traders.values()].map(a => {
+    const d = a.datos || {}, ops = d.operaciones || [], r = ops.map(o => o.retorno_pct);
+    return {a, d, total: d.resultado || 0, hoy: d.hoy || 0, semana: d.semana || 0, ops: ops.length,
+      acierto: ops.length ? r.filter(x => x > 0).length / ops.length * 100 : 0, mejor: r.length ? Math.max(...r) : 0};
+  });
+  return filas.sort((x, y) => (y[criterio] - x[criterio]) || (y.total - x.total) || (y.ops - x.ops));
+}
+function rankingBacktest() {
+  return (S && S.banco || []).map(b => ({b, a: traders.get(b.id), v: b.fuera ? b.fuera.retorno_pct : 0}))
+    .sort((x, y) => (y.b.fuera ? y.b.fuera.ret_dd : 0) - (x.b.fuera ? x.b.fuera.ret_dd : 0));
+}
+function actualizarRanking() {
+  const rk = rankingPapel("total");
+  posicionRanking = new Map(rk.filter(f => Math.abs(f.total) > .004 && f.total > 0).slice(0, 3).map((f, i) => [f.a.id, i]));
+  const lider = rk.length && rk[0].total > .004 ? rk[0] : null;
+  if (lider && anterior && liderAnterior && lider.a.id !== liderAnterior)
+    enCanal("supervision", () => decir(SUPERVISORES[5], `Nuevo número 1 del ranking: ${lider.a.nombre} (${lider.a.id}, ${moneda(lider.d.simbolo)}) con ${dineroS(lider.total)}. 👑`, 2, "oro"));
+  if (lider) liderAnterior = lider.a.id;
+  const el = $("#ranking");
+  if (criterioRanking === "backtest") {
+    const bt = rankingBacktest();
+    el.innerHTML = bt.length ? bt.map((f, i) => `<div class="fila-rk" data-id="${esc(f.b.id)}"><span class="pos">${i + 1}</span>
+      <div class="av" style="background:${f.a ? f.a.camisa : "#394252"}">${f.a ? esc(iniciales(f.a.nombre)) : "·"}</div>
+      <div style="min-width:0"><b>${f.a ? esc(f.a.nombre) + " · " : ""}${esc(f.b.id)}</b><div class="d" style="font-size:11px;color:var(--suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(moneda(f.b.estrategia.simbolo))} ${esc(ladoTxt(f.b.estrategia.direccion))} · FB ${NF2.format(f.b.fuera.factor_beneficio)} · caída ${NF2.format(f.b.fuera.max_dd_pct)} %</div></div>
+      <div class="v ${f.v >= 0 ? "sube" : "baja"}">${pctS(f.v)}<small>fuera de muestra</small></div></div>`).join("") : `<p class="vacio">El banco está vacío.</p>`;
+    return;
+  }
+  const filas = rankingPapel(criterioRanking);
+  if (!filas.length) { el.innerHTML = `<p class="vacio">Todavía no hay traders en la sala.</p>`; return; }
+  const valor = f => criterioRanking === "acierto" ? `${NF0.format(f.acierto)} %` : dineroS(f[criterioRanking]);
+  const sub = f => criterioRanking === "acierto" ? `${f.ops} ops` : criterioRanking === "total" ? `hoy ${dineroS(f.hoy)}` : `total ${dineroS(f.total)}`;
+  const clase = f => criterioRanking === "acierto" ? "" : f[criterioRanking] > 0 ? "sube" : f[criterioRanking] < 0 ? "baja" : "";
+  const top = filas.slice(0, 3), orden = [top[1], top[0], top[2]], medallas = ["🥈", "🥇", "🥉"], clases = ["p2", "p1", "p3"];
+  el.innerHTML = `<div class="podio">${orden.map((f, k) => f ? `<div class="p ${clases[k]}" data-id="${esc(f.a.id)}"><div class="med">${medallas[k]}</div>
+      <div class="av" style="background:${f.a.camisa}">${esc(iniciales(f.a.nombre))}</div><b>${esc(f.a.nombre)}</b><small>${esc(f.a.id)} · ${esc(moneda(f.d.simbolo))}</small>
+      <div class="v ${clase(f)}">${valor(f)}</div></div>` : "<div></div>").join("")}</div>` +
+    filas.map((f, i) => `<div class="fila-rk" data-id="${esc(f.a.id)}"><span class="pos">${i + 1}</span><div class="av" style="background:${f.a.camisa}">${esc(iniciales(f.a.nombre))}</div>
+      <div style="min-width:0"><b>${esc(f.a.nombre)}</b> <span style="color:var(--suave)">${esc(f.a.id)}</span><div style="font-size:11px;color:var(--suave)">${esc(moneda(f.d.simbolo))} ${esc(ladoTxt(f.d.direccion))} · ${f.ops} ops · acierto ${NF0.format(f.acierto)} %</div></div>
+      <div class="v ${clase(f)}">${valor(f)}<small>${sub(f)}</small></div></div>`).join("");
+}
+$("#criterios").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  criterioRanking = b.dataset.c;
+  document.querySelectorAll("#criterios button").forEach(x => x.classList.toggle("activo", x === b));
+  if (S) actualizarRanking();
+});
+$("#ranking").addEventListener("click", e => {
+  const el = e.target.closest("[data-id]"); if (!el) return;
+  const a = traders.get(el.dataset.id); if (a) mostrarFicha(a);
+});
+
+function estadoSalas() {
+  const m = S.mineria || {}, e = m.embudo || {}, t = totales(), r = S.papel && S.papel.riesgo, mc = S.macro || {}, banco = S.banco || [];
+  const viva = m.actualizado && (Date.now() - new Date(m.actualizado).getTime()) < 120000, out = {};
+  const ap = e["Distinta a las del banco"] || 0, cand = e["Rentables en muestra"] || 0;
+  if (m.actividad && m.actividad[0] && m.actividad[0].tipo === "error") out.mineria = ["alerta", m.actividad[0].texto];
+  else if (m.estado === "minando" && viva) out.mineria = ["ok", `Minando ${moneda(m.simbolo)}, generación ${m.generacion}/${m.generaciones}. En la sesión: ${fmt.n(e["Generadas"] || 0)} evaluadas y ${ap} aprobadas.`];
+  else if (m.estado === "descanso") out.mineria = ["ok", `Ronda terminada; la siguiente empieza a las ${m.proxima ? fmt.hora(new Date(m.proxima)) : "—"}. ${fmt.n(e["Generadas"] || 0)} evaluadas en la sesión.`];
+  else out.mineria = ["aviso", "La minería está parada: sin ella no llegan estrategias nuevas."];
+  out.laboratorio = cand ? [cand >= 60 && !ap ? "aviso" : "ok", `De ${fmt.n(cand)} candidatas, ${fmt.n(e["Fuera de muestra"] || 0)} aguantaron fuera de muestra y ${ap} lo superaron todo (${NF2.format(ap / cand * 100)} %).${cand >= 60 && !ap ? " Ninguna aprobada todavía." : ""}`]
+    : ["ok", "Sin candidatas todavía en esta sesión."];
+  const porActivo = {};
+  for (const b of banco) { const k = moneda(b.estrategia.simbolo); porActivo[k] = (porActivo[k] || 0) + 1; }
+  out.banco = banco.length ? ["ok", `${banco.length} estrategias en la cámara: ${Object.entries(porActivo).map(([k, v]) => `${v} de ${k}`).join(", ")}.`] : ["aviso", "La cámara está vacía."];
+  const vix = mc.indicadores && mc.indicadores["^VIX"], vieja = mc.actualizado && Date.now() - new Date(mc.actualizado).getTime() > 3600000;
+  out.macro = !mc.regimen ? ["aviso", "Sin datos macro todavía."] : [vieja ? "aviso" : mc.regimen === "RISK-OFF" ? "aviso" : "ok",
+    `${mc.regimen}. ${vix ? `VIX ${NF2.format(vix.valor)}. ` : ""}${mc.fear_greed ? `Fear & Greed ${mc.fear_greed.valor} (${mc.fear_greed.clase.toLowerCase()}).` : ""}${vieja ? " Ojo: datos de hace más de una hora." : ""}`];
+  const ph = planesHolding(), hr = S.holding && S.holding.resumen;
+  if (!ph.length) out.holding = ["aviso", "Sin planes de holding todavía."];
+  else {
+    const stop = ph.find(p => p.cerrado), mal = ph.find(p => p.resultado_pct < -10), btc = ph.find(p => p.simbolo === "BTCUSDT") || ph[0];
+    const sig = btc.compras.find(z => !z.llena), obj = btc.ventas.find(z => !z.llena);
+    out.holding = [stop ? "alerta" : mal ? "aviso" : "ok", `${hr ? `Valor ${fmt.n(hr.valor)} $ (${fmt.pct(hr.resultado_pct)}). ` : ""}${stop ? `Saltó el stop de ${moneda(stop.simbolo)}. ` : ""}${moneda(btc.simbolo)}: ${sig ? `compra en ${fmt.precio(sig.precio)}` : "compras hechas"}, ${obj ? `venta en ${fmt.precio(obj.precio)}` : "ventas hechas"}.`];
+  }
+  const lider = rankingPapel("total")[0];
+  out.trading = [r && r.bloqueo ? "alerta" : t.hoy < 0 ? "aviso" : "ok", t.n ? `${t.n} traders, ${t.abiertas} posiciones abiertas, hoy ${dineroS(t.hoy)} y en total ${dineroS(t.resultado)}.${lider && lider.total > 0 ? ` Líder: ${lider.a.nombre} (${dineroS(lider.total)}).` : ""}` : "Sala vacía: esperando estrategias del banco."];
+  if (!r) out.riesgos = ["ok", "Esperando al paper trading."];
+  else {
+    const uso = Math.max(r.posiciones / r.max_posiciones, r.mayor_apuesta / r.max_misma_apuesta, r.perdida_hoy_pct / r.limite_diario_pct, r.caida_pct / r.max_caida_pct);
+    out.riesgos = [r.bloqueo ? "alerta" : uso >= .7 ? "aviso" : "ok", `${r.posiciones}/${r.max_posiciones} posiciones, pérdida de hoy ${NF2.format(r.perdida_hoy_pct)} % (límite ${NF2.format(r.limite_diario_pct)} %), caída ${NF2.format(r.caida_pct)} % (límite ${NF2.format(r.max_caida_pct)} %).${r.bloqueo ? " FRENO: " + r.bloqueo + "." : ""}`];
+  }
+  return out;
+}
+let estadosPrevios = null;
+function actualizarSalas() {
+  const est = estadoSalas();
+  const cuenta = {ok: 0, aviso: 0, alerta: 0};
+  for (const k in est) cuenta[est[k][0]]++;
+  $("#salas").innerHTML = `<div class="sala" data-sup="general"><div class="cab2"><span class="luz ${cuenta.alerta ? "alerta" : cuenta.aviso ? "aviso" : "ok"}"></span>Supervisión general<small>Marta</small></div>
+      <p>${cuenta.ok} salas en verde, ${cuenta.aviso} en amarillo y ${cuenta.alerta} en rojo.</p></div>` +
+    SALAS_SUP.map((sala, i) => `<div class="sala" data-sup="${i}"><div class="cab2"><span class="luz ${est[sala.id][0]}"></span>${esc(sala.nombre)}<small>${esc(sala.sup)}</small></div><p>${esc(est[sala.id][1])}</p></div>`).join("");
+  if (estadosPrevios) for (const sala of SALAS_SUP) {
+    if (est[sala.id][0] === "alerta" && estadosPrevios[sala.id][0] !== "alerta") {
+      const sup = SUPERVISORES[SALAS_SUP.indexOf(sala)];
+      enCanal("supervision", () => decir(sup, `⚠ Alerta en ${sala.nombre.toLowerCase()}: ${est[sala.id][1]}`, 3, "malo", GENERAL));
+      GENERAL.urgente = sala.id;
+    }
+  }
+  estadosPrevios = est;
+}
+$("#salas").addEventListener("click", e => {
+  const el = e.target.closest("[data-sup]"); if (!el) return;
+  mostrarFicha(el.dataset.sup === "general" ? GENERAL : SUPERVISORES[+el.dataset.sup]);
+});
+let indiceRonda = -1;
+function rondaGeneral(urgente) {
+  let i = urgente ? SALAS_SUP.findIndex(x => x.id === urgente) : -1;
+  if (i < 0) { indiceRonda = (indiceRonda + 1) % SALAS_SUP.length; i = indiceRonda; }
+  const sala = SALAS_SUP[i], sup = SUPERVISORES[i];
+  GENERAL.tarea = "ronda"; sup.tarea = "reunion"; sup.ruta = []; sup.andando = false;
+  GENERAL.velocidad = urgente ? 3 : 1.8;
+  if (urgente) enCanal("supervision", () => decir(GENERAL, `Voy para ${sala.nombre.toLowerCase()}.`, 3, "", sup));
+  enfocar(sup.x, sup.y, 2.2, 10);
+  irA(GENERAL, sup.x + .8, sup.y + .2, "de_pie", "o", () => {
+    GENERAL.velocidad = 1.8; sup.mira = "e";
+    const [estado, texto] = estadoSalas()[sala.id];
+    const cierre = estado === "ok" ? pick(["Perfecto, sigue así.", "Bien. Paso a la siguiente sala.", "Todo en orden. Gracias."])
+      : estado === "aviso" ? pick(["Vigílalo y me avisas si empeora.", "Apuntado. Lo sigo de cerca.", "Vale. Lo comento en el comité."])
+      : pick(["Esto es prioridad. Aviso a Dirección.", "Entendido. Nadie toca nada hasta que esté resuelto."]);
+    enCanal("supervision", () => charla([[GENERAL, `${sup.nombre}, ¿cómo va ${sala.nombre.toLowerCase()}?`, "", sup],
+      [sup, `${{ok: "🟢", aviso: "🟡", alerta: "🔴"}[estado]} ${texto}`, estado === "alerta" ? "malo" : estado === "ok" ? "bueno" : "", GENERAL],
+      [GENERAL, cierre, "", sup]], estado === "alerta" ? 3 : 1));
+    setTimeout(() => { GENERAL.tarea = null; sup.tarea = null; GENERAL.proxima = T + rand(25, 40); }, 9000);
+  });
+}
+function planificarSupervision() {
+  for (const sup of SUPERVISORES) {
+    if (sup.tarea || sup.andando || T < sup.proximaRonda) continue;
+    sup.proximaRonda = T + rand(9, 18);
+    sup.puntoRonda = (sup.puntoRonda + 1) % sup.sala.ruta.length;
+    const [x, y] = sup.sala.ruta[sup.puntoRonda];
+    irA(sup, x, y, "de_pie", "s");
+  }
+  if (!GENERAL.tarea && !GENERAL.andando && S && (GENERAL.urgente || T > GENERAL.proxima)) { const u = GENERAL.urgente; GENERAL.urgente = null; rondaGeneral(u); }
 }
 
 // ============================================== HOLDING Y RIESGO ======
@@ -2316,6 +2553,11 @@ function mostrarFicha(a, abrir = true) {
       const mios = {"^GSPC": ["^GSPC", "^IXIC", "^VIX"], "DX-Y.NYB": ["DX-Y.NYB", "EURUSD=X"], "GC=F": ["GC=F", "CL=F"], "^TNX": ["^TNX"]}[a.ticker] || [];
       html += `<table>${mios.filter(k => ind[k]).map(k => `<tr><td>${esc(ind[k].nombre)}</td><td>${ind[k].valor >= 100 ? fmt.n(ind[k].valor) : NF2.format(ind[k].valor)} <span class="${ind[k].dia_pct >= 0 ? "sube" : "baja"}">${fmt.pct(ind[k].dia_pct)}</span></td></tr>`).join("")}
         ${a.ticker === "^TNX" && S.macro && S.macro.fear_greed ? `<tr><td>Fear &amp; Greed (cripto)</td><td>${S.macro.fear_greed.valor} · ${esc(S.macro.fear_greed.clase)}</td></tr>` : ""}</table>`;
+    } else if (a.rol === "supervisor" || a.rol === "general") {
+      const est = estadoSalas();
+      const salas = a.rol === "general" ? SALAS_SUP : [a.sala];
+      html += `<table>${salas.map(x => `<tr><td>${esc(x.nombre)}</td><td class="${est[x.id][0] === "ok" ? "sube" : est[x.id][0] === "alerta" ? "baja" : ""}">${{ok: "🟢 bien", aviso: "🟡 atención", alerta: "🔴 alerta"}[est[x.id][0]]}</td></tr>`).join("")}</table>`;
+      if (a.rol === "supervisor") html += `<div class="desc">${esc(est[a.sala.id][1])}</div>`;
     } else if (a.rol === "holder") {
       html += planesHolding().map(p => `<table><tr><td>${esc(moneda(p.simbolo))}</td><td class="${p.resultado >= 0 ? "sube" : "baja"}">${fmt.n(p.valor)} $ (${fmt.pct(p.resultado_pct)})</td></tr>
         <tr><td>Próxima compra</td><td>${(p.compras.find(z => !z.llena) || {}).precio ? fmt.precio(p.compras.find(z => !z.llena).precio) : "—"}</td></tr>

@@ -84,6 +84,11 @@ por canal: operaciones, riesgos, minería, análisis, macro, holding, comité y 
 reúne cada 15 minutos (con cuenta atrás arriba), y cuando no hay trabajo se van a la sala de
 descanso, a la terraza o al gimnasio.
 
+- **Supervisión**: cada sala tiene su supervisor, que la patrulla y conoce sus números; la
+  supervisión general hace rondas preguntándoles y acude corriendo si una sala se pone en rojo.
+  La pestaña «Salas» muestra el semáforo de cada una.
+- **Ranking**: podio y clasificación de traders por resultado total, de hoy, de la semana o por
+  acierto (en papel), o por cómo lo hizo su estrategia en el backtest. El número 1 lleva corona.
 - Arrastra para moverte, rueda o pellizca para hacer zoom, haz clic en cualquiera para ver su ficha.
 - 🎬 activa el **modo cine**: la cámara recorre las salas y persigue lo que va pasando.
 - ◐ cambia entre día, noche y automático (según tu hora).
