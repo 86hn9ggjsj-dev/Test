@@ -116,3 +116,17 @@ npm run render     # genera out/intro.mp4
 ```
 
 Las composiciones se registran en `video/src/Root.tsx`.
+
+### Video viral a partir de una voz en off
+
+La composición `Viral` (1080x1920, 60 fps) convierte `video/input/voz.mp3` en un video vertical
+con subtítulos karaoke, gráfico animado, motion graphics, música y efectos sintetizados.
+
+```bash
+cd video
+# 1. Transcripción por palabra (faster-whisper) -> input/palabras.json
+# 2. Audio: jump cuts, hook, música, SFX, ducking y -14 LUFS
+python scripts/audio.py <ruta-a-ffmpeg>
+# 3. Render
+npx remotion render Viral out/viral.mp4 --video-bitrate=10M --audio-codec=aac
+```
