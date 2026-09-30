@@ -288,39 +288,50 @@ def minar_a_demanda(simbolos: list[str], intervalo: str = INTERVALO, estrategias
         if not pedido:
             parar.wait(2)
             continue
-
-        def seguir() -> bool:
-            return not parar.is_set() and control.cargar()["busqueda"] == pedido
-
-        scalping = pedido.get("tipo") == "scalping"
-        vela, historia = (SCALPING_INTERVALO, SCALPING_DIAS) if scalping else (intervalo, dias)
-        cupo = MAX_SCALPERS_POR_SIMBOLO if scalping else MAX_POR_SIMBOLO
-        lista = [x.upper() for x in pedido.get("simbolos") or (SCALPING_SIMBOLOS if scalping else simbolos)]
-        estado.datos["embudo"] = {e: 0 for e in ETAPAS}  # el embudo de la pantalla es el de esta búsqueda
-        que = "scalping (velas de 5 minutos) de " if scalping else ""
-        estado.evento(f"¡A buscar! Búsqueda de {que}{', '.join(x.replace('USDT', '') for x in lista)} pedida por el jefe.",
-                      "busqueda", simbolos=lista, tipo="scalping" if scalping else "trading")
-        nuevas = 0
-        for n, simbolo in enumerate(lista, 1):
-            if not seguir():
-                break
-            estado.datos["ciclo"] = {"activos": [x.replace("USDT", "") for x in lista], "n": n,
-                                     "tipo": "scalping" if scalping else "trading"}
-            en_banco = banco.ocupacion(simbolo, vela)
-            if en_banco >= cupo:
-                estado.evento(f"{simbolo.replace('USDT', '')} ya tiene sus {cupo} mesas de {'scalping' if scalping else 'trading'} ocupadas; me lo salto.")
-                continue
-            try:
-                nuevas += len(minar(simbolo, vela, estrategias, generaciones, historia, estado=estado, seguir=seguir))
-            except (OSError, ValueError) as e:  # sin conexión, símbolo raro...
-                estado.evento(f"No he podido minar {simbolo}: {e}", "error")
-        parada = not seguir() and not parar.is_set()
-        control.terminar_busqueda(pedido)
-        estado.datos.update(estado="esperando", simbolo=None, ciclo=None)
-        texto = "Búsqueda parada" if parada else "Búsqueda terminada"
-        if nuevas:
-            texto += f": {nuevas} estrategia{'s' if nuevas > 1 else ''} nueva{'s' if nuevas > 1 else ''} en el banco, ya operando con su trader."
-        else:
-            texto += ": ninguna ha superado las seis pruebas esta vez. Es lo normal; prueba otra búsqueda cuando quieras."
-        estado.evento(texto, "fin_busqueda", nuevas=nuevas)
+        try:
+            _buscar(pedido, simbolos, intervalo, estrategias, generaciones, dias, parar, estado)
+        except Exception as e:  # un fallo inesperado no debe cerrar la oficina: se avisa y se vuelve a esperar
+            estado.evento(f"La búsqueda ha fallado ({type(e).__name__}: {e}). Vuelvo a esperar.", "error")
+            control.terminar_busqueda(pedido)
+            estado.datos.update(estado="esperando", simbolo=None, ciclo=None)
+            estado.guardar(forzar=True)
     estado.terminar()
+
+
+def _buscar(pedido: dict, simbolos: list[str], intervalo: str, estrategias: int, generaciones: int, dias: int,
+            parar: threading.Event, estado: EstadoMineria) -> None:
+    """Un ciclo de búsqueda pedido con el botón (trading o scalping)."""
+    def seguir() -> bool:
+        return not parar.is_set() and control.cargar()["busqueda"] == pedido
+
+    scalping = pedido.get("tipo") == "scalping"
+    vela, historia = (SCALPING_INTERVALO, SCALPING_DIAS) if scalping else (intervalo, dias)
+    cupo = MAX_SCALPERS_POR_SIMBOLO if scalping else MAX_POR_SIMBOLO
+    lista = [x.upper() for x in pedido.get("simbolos") or (SCALPING_SIMBOLOS if scalping else simbolos)]
+    estado.datos["embudo"] = {e: 0 for e in ETAPAS}  # el embudo de la pantalla es el de esta búsqueda
+    que = "scalping (velas de 5 minutos) de " if scalping else ""
+    estado.evento(f"¡A buscar! Búsqueda de {que}{', '.join(x.replace('USDT', '') for x in lista)} pedida por el jefe.",
+                  "busqueda", simbolos=lista, sala="scalping" if scalping else "trading")
+    nuevas = 0
+    for n, simbolo in enumerate(lista, 1):
+        if not seguir():
+            break
+        estado.datos["ciclo"] = {"activos": [x.replace("USDT", "") for x in lista], "n": n,
+                                 "tipo": "scalping" if scalping else "trading"}
+        en_banco = banco.ocupacion(simbolo, vela)
+        if en_banco >= cupo:
+            estado.evento(f"{simbolo.replace('USDT', '')} ya tiene sus {cupo} mesas de {'scalping' if scalping else 'trading'} ocupadas; me lo salto.")
+            continue
+        try:
+            nuevas += len(minar(simbolo, vela, estrategias, generaciones, historia, estado=estado, seguir=seguir))
+        except (OSError, ValueError) as e:  # sin conexión, símbolo raro...
+            estado.evento(f"No he podido minar {simbolo}: {e}", "error")
+    parada = not seguir() and not parar.is_set()
+    control.terminar_busqueda(pedido)
+    estado.datos.update(estado="esperando", simbolo=None, ciclo=None)
+    texto = "Búsqueda parada" if parada else "Búsqueda terminada"
+    if nuevas:
+        texto += f": {nuevas} estrategia{'s' if nuevas > 1 else ''} nueva{'s' if nuevas > 1 else ''} en el banco, ya operando con su trader."
+    else:
+        texto += ": ninguna ha superado las seis pruebas esta vez. Es lo normal; prueba otra búsqueda cuando quieras."
+    estado.evento(texto, "fin_busqueda", nuevas=nuevas)

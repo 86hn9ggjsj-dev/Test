@@ -42,6 +42,8 @@ canvas#lienzo.sobre{cursor:pointer}
 .menu-buscar button:disabled{opacity:.4;cursor:default}
 .menu-buscar button small{color:var(--suave);font:600 11px var(--mono)}
 .menu-buscar button.todos{color:var(--neon);font-weight:800}
+.menu-buscar p.sep{margin-top:10px;padding-top:10px;border-top:1px solid var(--borde)}
+.menu-buscar p.sep b{color:#ff4fd8}
 .pastilla{font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid var(--borde);background:var(--panel2);white-space:nowrap}
 .pastilla.papel{border-color:rgba(212,255,58,.5);color:var(--neon)}
 .pastilla.minando{border-color:rgba(255,194,74,.6);color:var(--ambar)}
@@ -83,6 +85,11 @@ canvas#lienzo.sobre{cursor:pointer}
 .zona.c{border-color:rgba(46,230,166,.45)} .zona.v{border-color:rgba(255,207,90,.5)}
 .zona.llena{border-style:solid;background:rgba(255,255,255,.05)}
 .zona.seca{opacity:.45}
+.mini-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.mini-kpis div{border:1px solid var(--borde);border-radius:12px;padding:8px 10px;background:var(--panel2)}
+.mini-kpis small{display:block;font-size:10px;color:var(--suave);text-transform:uppercase;letter-spacing:.08em}
+.mini-kpis b{font:800 15px var(--mono)}
+.mini-kpis b span{font-size:11px;color:var(--suave)}
 .pasos{margin:4px 0 0;padding-left:18px;font-size:12px;color:#c9d0db}
 .pasos li{margin:3px 0}
 .reserva{margin-top:8px;font-size:11px}
@@ -266,7 +273,9 @@ canvas.grafica{display:block;width:100%}
 #sinConexion{position:fixed;left:50%;top:76px;transform:translateX(-50%);z-index:8;background:rgba(255,90,118,.14);border:1px solid rgba(255,90,118,.5);color:#ffd3db;padding:8px 14px;border-radius:10px;font-size:13px}
 #sinConexion[hidden]{display:none}
 
-@media (max-width:1720px){.kpi.opc2,.pastilla.reloj{display:none}}
+@media (max-width:1720px){.kpi.opc2,.pastilla.reloj{display:none}.marca small{display:none}}
+@media (max-width:1600px){#pFng,.pastilla.papel{display:none}}
+@media (max-width:1180px){.marca > div:not(.logo){display:none}}
 @media (max-width:1250px){.kpi.opc{display:none}}
 @media (max-width:1000px){#pFng{display:none}}
 @media (max-width:1400px){#pComite{display:none}}
@@ -287,6 +296,84 @@ canvas.grafica{display:block;width:100%}
   #ayuda{display:none}
   #ficha{top:62px;left:8px;right:8px;width:auto;max-height:calc(58vh - 80px)}
 }
+
+/* ---------- vista «Mi fondo» ---------- */
+.vistas{display:flex;background:var(--panel2);border:1px solid var(--borde);border-radius:999px;padding:3px;flex:none}
+.vistas button{border:0;background:none;color:var(--suave);font:700 12px Inter,sans-serif;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.vistas button.activa{background:var(--neon);color:#0a0d12}
+body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-fondo #ayuda,body.en-fondo #plegar,body.en-fondo #ficha{display:none!important}
+#dash{--d-sup:#10151d;--d-ink:#e9edf3;--d-ink2:#c3c8d1;--d-mute:#898781;--d-grid:rgba(255,255,255,.07);position:fixed;top:60px;left:0;right:0;bottom:0;overflow:auto;background:var(--fondo);z-index:8;padding:22px 24px 40px;transition:opacity .3s}
+#dash.recargando .d-rejilla,#dash.recargando .d-kpis{opacity:.6}
+.d-cab{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+.d-hero small{display:block;color:var(--d-ink2);font-size:13px;margin-bottom:4px}
+.d-hero > b{display:block;font:800 52px/1.05 Inter,system-ui,sans-serif;letter-spacing:-.02em;color:var(--d-ink)}
+.d-deltas{display:flex;gap:10px 22px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--d-ink2)}
+.d-deltas span{display:flex;flex-direction:column;gap:2px}
+.d-deltas b{font:700 13px var(--mono);color:var(--d-ink);font-variant-numeric:tabular-nums}
+.d-deltas .sube{color:#2ee6a6}.d-deltas .baja{color:#ff5a76}
+.d-mover{background:var(--d-sup);border:1px solid var(--borde);border-radius:14px;padding:12px 14px;max-width:420px}
+.d-mover label{font-size:11px;color:var(--d-mute);text-transform:uppercase;letter-spacing:.1em}
+.d-fila{display:flex;gap:8px;align-items:center;margin:6px 0}
+.d-fila input{width:120px;background:#0a0e14;border:1px solid var(--borde);border-radius:9px;color:var(--d-ink);font:700 14px var(--mono);padding:7px 9px}
+.d-fila span{color:var(--d-mute)}
+.d-fila button{border:1px solid var(--borde);background:var(--panel2);color:var(--d-ink);border-radius:9px;padding:7px 12px;font:700 12px Inter,sans-serif;cursor:pointer}
+.d-fila button:hover{border-color:var(--neon);color:var(--neon)}
+.d-mover small{display:block;font-size:11px;color:var(--d-mute);line-height:1.4}
+.d-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.d-kpi{background:var(--d-sup);border:1px solid var(--borde);border-radius:12px;padding:10px 12px}
+.d-kpi small{display:block;font-size:11px;color:var(--d-ink2)}
+.d-kpi b{display:block;font:700 20px Inter,system-ui,sans-serif;color:var(--d-ink);margin-top:3px}
+.d-kpi em{display:block;font-style:normal;font-size:11px;color:var(--d-mute);margin-top:2px}
+.d-filtro{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.d-filtro span{font-size:12px;color:var(--d-ink2);margin-right:6px}
+.d-filtro button{border:1px solid var(--borde);background:none;color:var(--d-ink2);border-radius:999px;padding:5px 12px;font:700 12px Inter,sans-serif;cursor:pointer}
+.d-filtro button.activo{background:var(--d-ink);color:#0a0d12;border-color:var(--d-ink)}
+.d-rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;transition:opacity .3s}
+.d-tarjeta{background:var(--d-sup);border:1px solid var(--borde);border-radius:14px;padding:14px 16px;min-width:0}
+.d-tarjeta.ancha{grid-column:1/-1}
+.d-tarjeta h4{margin:0;font-size:14px;color:var(--d-ink)}
+.d-sub{margin:3px 0 10px;font-size:12px;color:var(--d-mute)}
+.d-graf{position:relative;min-width:0}
+.d-graf svg{display:block;width:100%;overflow:visible}
+.d-graf svg text{font:11px Inter,system-ui,sans-serif;fill:var(--d-mute)}
+.d-graf svg text.fin{fill:var(--d-ink);font-weight:700}
+.d-leyenda{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--d-ink2);margin:0 0 8px}
+.d-leyenda i{display:inline-block;width:14px;height:2px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.d-leyenda i.caja{height:10px;width:10px;border-radius:3px}
+.d-vertabla{margin-top:8px;border:0;background:none;color:var(--d-mute);font:600 11px Inter,sans-serif;cursor:pointer;padding:0;text-decoration:underline}
+.d-tabla{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+.d-tabla th{font-weight:600;color:var(--d-mute);text-align:left;padding:5px 6px;border-bottom:1px solid var(--borde);white-space:nowrap}
+.d-tabla td{padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--d-ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.d-tabla td.num,.d-tabla th.num{text-align:right;font-family:var(--mono)}
+.d-tabla .sube{color:#2ee6a6}.d-tabla .baja{color:#ff5a76}
+.d-scroll{max-height:320px;overflow:auto}
+.d-reparto{display:flex;gap:2px;height:22px;margin:6px 0 12px}
+.d-reparto div{height:100%;min-width:2px}
+.d-reparto div:first-child{border-radius:4px 0 0 4px}.d-reparto div:last-child{border-radius:0 4px 4px 0}
+.d-expo{display:grid;grid-template-columns:60px 1fr 1fr;gap:4px 0;align-items:center;font-size:12px;color:var(--d-ink2)}
+.d-expo .izq{display:flex;justify-content:flex-end;border-right:1px solid #383835;padding-right:0}
+.d-expo .der{display:flex}
+.d-expo .barra{height:14px;background:#8a94a6}
+.d-expo .izq .barra{border-radius:4px 0 0 4px}.d-expo .der .barra{border-radius:0 4px 4px 0}
+.d-expo small{color:var(--d-mute);padding:0 6px;font-family:var(--mono);align-self:center;white-space:nowrap}
+.d-meses td.celda{text-align:center;font-family:var(--mono);color:#fff;border:2px solid var(--d-sup);border-radius:6px}
+.d-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.d-stats div{border:1px solid var(--borde);border-radius:10px;padding:8px 10px}
+.d-stats small{display:block;font-size:11px;color:var(--d-mute)}
+.d-stats b{font:700 16px Inter,system-ui,sans-serif;color:var(--d-ink)}
+.d-nota{font-size:12px;color:var(--d-mute);margin-top:18px;max-width:900px}
+#dTip{position:fixed;z-index:30;pointer-events:none;background:#0a0e14;border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--d-ink2);box-shadow:0 10px 30px rgba(0,0,0,.5);min-width:150px}
+#dTip .t{color:var(--d-mute);font-size:11px;margin-bottom:4px}
+#dTip .f{display:flex;align-items:center;gap:8px;margin-top:2px}
+#dTip .f i{width:12px;height:2px;border-radius:2px;flex:none}
+#dTip .f b{font:700 12px var(--mono);color:var(--d-ink)}
+@media (max-width:760px){
+  .vistas button span{display:none}
+  #dash{top:54px;padding:14px 12px 30px}
+  .d-hero > b{font-size:38px}
+  .d-rejilla{grid-template-columns:1fr}
+  .d-stats{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
@@ -297,6 +384,9 @@ canvas.grafica{display:block;width:100%}
     <div class="logo">TF</div>
     <div><b>TRADING FLOOR</b><small>minería de estrategias · paper trading</small></div>
   </div>
+  <nav class="vistas" aria-label="Vista">
+    <button type="button" data-v="oficina" class="activa">🏢 <span>Oficina</span></button><button type="button" data-v="fondo">📊 <span>Mi fondo</span></button>
+  </nav>
   <div class="kpis">
     <div class="kpi principal"><small>Patrimonio</small><b id="kPatrimonio">—</b></div>
     <div class="kpi principal"><small>Resultado total</small><b id="kResultado">—</b></div>
@@ -319,6 +409,43 @@ canvas.grafica{display:block;width:100%}
   </div>
 </header>
 
+<main id="dash" hidden aria-label="Mi fondo">
+  <div class="d-cab">
+    <div class="d-hero">
+      <small>Patrimonio de tu fondo · dinero ficticio</small>
+      <b id="dPatr">—</b>
+      <div class="d-deltas" id="dDeltas"></div>
+    </div>
+    <div class="d-mover">
+      <label for="dImporte">Importe</label>
+      <div class="d-fila"><input id="dImporte" type="number" min="100" step="100" value="1000" inputmode="decimal"><span>$</span>
+        <button type="button" data-m="aportar">＋ Aportar</button><button type="button" data-m="retirar">− Retirar</button></div>
+      <small id="dMovido">Al aportar recibes participaciones al valor liquidativo de ese momento; al retirar, vendes las tuyas. El valor liquidativo no cambia.</small>
+    </div>
+  </div>
+  <div class="d-kpis" id="dKpis"></div>
+  <div class="d-filtro" role="group" aria-label="Periodo de las gráficas">
+    <span>Periodo de las gráficas</span>
+    <button type="button" data-r="7">7 días</button><button type="button" data-r="30" class="activo">30 días</button><button type="button" data-r="90">90 días</button><button type="button" data-r="0">Todo</button>
+  </div>
+  <div class="d-rejilla">
+    <section class="d-tarjeta ancha" id="cVl"><h4>Rentabilidad en el periodo: tu fondo frente a BTC</h4><p class="d-sub">Valor liquidativo del fondo y precio de BTC, los dos en % desde el inicio del periodo.</p><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cCaida"><h4>Caída desde el máximo</h4><p class="d-sub">Cuánto está el valor liquidativo por debajo de su máximo anterior.</p><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cAreas"><h4>Resultado acumulado por área</h4><p class="d-sub">Lo que ha ganado o perdido cada parte del fondo desde el inicio, en $.</p><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cDias"><h4>Rentabilidad de cada día</h4><p class="d-sub">Cambio del valor liquidativo día a día.</p><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cReparto"><h4>Dónde está tu dinero</h4><p class="d-sub">Capital asignado a cada área y liquidez sin invertir.</p><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cExpo"><h4>Exposición por activo</h4><p class="d-sub">Dinero en posiciones abiertas: a la derecha largos, a la izquierda cortos.</p><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cMeses"><h4>Rentabilidad de cada mes</h4><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cOps"><h4>Operaciones de los traders</h4><div class="d-graf"></div></section>
+    <section class="d-tarjeta ancha" id="cAbiertas"><h4>Posiciones abiertas</h4><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cRanking"><h4>Mejores y peores estrategias</h4><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cMovs"><h4>Aportaciones y reembolsos</h4><div class="d-graf"></div></section>
+    <section class="d-tarjeta ancha" id="cUltimas"><h4>Últimas operaciones cerradas</h4><div class="d-graf"></div></section>
+  </div>
+  <p class="d-nota">Funciona como un fondo de verdad (participaciones, valor liquidativo, aportaciones y reembolsos, métricas de riesgo), pero con dinero ficticio y operaciones simuladas con precios reales. Rentabilidades pasadas no garantizan resultados futuros.</p>
+  <div id="dTip" role="tooltip" hidden></div>
+</main>
+
 <aside id="panel">
   <div class="barra-pestanas">
   <button class="flecha" id="tabAnt" type="button" aria-label="Pestaña anterior" title="Pestaña anterior">‹</button>
@@ -327,6 +454,7 @@ canvas.grafica{display:block;width:100%}
     <button data-p="embudo">Embudo</button>
     <button data-p="traders">Resultados</button>
     <button data-p="ranking">Ranking</button>
+    <button data-p="scalping">Scalping</button>
     <button data-p="salas">Salas</button>
     <button data-p="holding">Holding</button>
     <button data-p="riesgo">Riesgo</button>
@@ -357,6 +485,8 @@ canvas.grafica{display:block;width:100%}
       <div class="rangos" id="criterios" style="flex-wrap:wrap;justify-content:flex-end"><button data-c="total" class="activo">Total</button><button data-c="hoy">Hoy</button><button data-c="semana">Semana</button><button data-c="acierto">Acierto</button><button data-c="backtest">Backtest</button></div></div>
     <div id="ranking"></div>
     <p class="nota">Total, hoy y semana: resultados en papel (dinero ficticio) desde que cada trader llegó a la sala. Backtest: cómo lo hizo su estrategia fuera de muestra, con datos pasados.</p></section>
+  <section class="pagina" id="p-scalping"><h3>Sala de scalping</h3><div id="scalping"></div>
+    <p class="nota">Operaciones cortas con velas de 5 minutos en BTC, ETH y SOL. Se asume que los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta, frente al 0,14 % de la sala de trading). Aun así, las comisiones se comen buena parte de lo que se gana: fíjate en «comisiones pagadas». Mismo embudo de seis pruebas que el resto; dinero ficticio.</p></section>
   <section class="pagina" id="p-salas"><h3>Ir a una sala</h3>
     <div class="ira"></div>
     <h3>Supervisión de las salas</h3><div id="salas"></div></section>
@@ -373,6 +503,9 @@ canvas.grafica{display:block;width:100%}
     <p><b>Sala de trading.</b> Cada estrategia del banco es un trader con 1.000 $ ficticios que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
     <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). En cuanto entra en el banco, un trader se sienta en una mesa con ella. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 48 mesas (8 por activo).</p>
     <p><b>Radar de señales.</b> El equipo de análisis mira, para cada trader, cuántas condiciones de su estrategia se cumplen ahora mismo y le avisa cuando le falta una para entrar (con la hora del próximo cierre de vela, soporte, resistencia y ATR).</p>
+    <p><b>Mi fondo.</b> Todo es tu fondo de inversión (con dinero ficticio): tú aportas capital y recibes participaciones; el valor liquidativo sube o baja solo con los resultados de trading, scalping y holding, así que un trader nuevo no cambia tu patrimonio. En la pestaña «Mi fondo» (arriba) tienes tu dashboard: rentabilidad frente a BTC, caídas, volatilidad, Sharpe, reparto del dinero, exposición, meses, operaciones y aportaciones o reembolsos.</p>
+    <p><b>Scalping.</b> Una sala aparte con operaciones cortas en velas de 5 minutos (BTC, ETH y SOL, 12 mesas). Los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta) y pasan el mismo embudo de seis pruebas. Aun así, las comisiones pesan mucho: la sala muestra cuánto se paga.</p>
+    <p><b>Sin repetidas.</b> Una estrategia no entra en el banco si es la misma idea que otra (mismas condiciones con otros números), si entra en los mismos momentos o si está en el mercado a la vez la mayor parte del tiempo. Si tenías repetidas de antes, pídele por el chat «quita las repetidas».</p>
     <p><b>Holding.</b> Carteras de largo plazo (BTC, ETH y SOL) sin stop loss: si el precio baja, promedian comprando más cada −8 % (y si se acaba el presupuesto, meten capital de la reserva); si sube, venden una parte en sus puntos de salida (+30, +60 y +100 % sobre el coste medio). Siempre se queda una parte en cartera.</p>
     <p><b>Control de riesgos.</b> Decide cuánto invierte cada operación (arriesgando como mucho un 1 % del capital del trader) y veta entradas si hay demasiadas posiciones, demasiadas iguales, o si el día o la caída acumulada pierden demasiado.</p>
     <p><b>Macroeconomía.</b> Cuatro analistas siguen la bolsa, el VIX, el dólar, el oro, el petróleo, los bonos y el sentimiento cripto, y deciden si el mercado está en modo RISK-ON (apetito por el riesgo) o RISK-OFF.</p>
@@ -393,7 +526,7 @@ canvas.grafica{display:block;width:100%}
   <button id="bNoche" title="Día / noche / automático">◐</button>
 </div>
 <section id="resultados">
-  <div class="cab"><span>Resultado total · papel</span>
+  <div class="cab"><span>Traders · resultado en papel</span>
     <div class="rangos" data-grafica="tarjeta"><button data-r="24">24H</button><button data-r="168" class="activo">7D</button><button data-r="720">30D</button></div>
     <button id="plegarRes" title="Plegar" style="margin-left:6px">▾</button></div>
   <div class="gordo" id="rTotal">—</div>
@@ -426,7 +559,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 function hash(s) { let h = 2166136261; for (const c of String(s)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
 const nf = (d) => new Intl.NumberFormat("es-ES", {minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: "always"});
-const NF0 = nf(0), NF2 = nf(2);
+const NF0 = nf(0), NF1 = nf(1), NF2 = nf(2);
 const fmt = {
   n: x => NF0.format(x),
   dinero: x => NF2.format(x) + " $",
@@ -454,7 +587,8 @@ function rgba(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >
 
 // ------------------------------------------------ proyección isométrica --
 const TW = 64, TH = 32, ZH = 34;       // ancho y alto de una baldosa; píxeles por unidad de altura
-const W = 46, D = 24;                  // tamaño de la planta en baldosas
+const W = 54, D = 24;                  // tamaño de la planta en baldosas
+const X_ALA = 46;                      // desde aquí, el ala nueva (scalping) solo tiene la fila de arriba y el pasillo
 const ALTO_MURO = 2.4;
 const iso = (x, y, z = 0) => [(x - y) * TW / 2, (x + y) * TH / 2 - z * ZH];
 
@@ -507,7 +641,8 @@ const SALAS = [
   {id: "banco", nombre: "CÁMARA", x0: 21, y0: 0, x1: 30, y1: 9, a: "#241f16", b: "#2b251a", rotulo: "rgba(255,207,90,.09)"},
   {id: "macro", nombre: "MACRO", x0: 30, y0: 0, x1: 38, y1: 9, a: "#0f2230", b: "#122838", rotulo: "rgba(92,192,255,.1)"},
   {id: "holding", nombre: "HOLDING", x0: 38, y0: 0, x1: 46, y1: 9, a: "#231b0c", b: "#2a2010", rotulo: "rgba(247,147,26,.12)"},
-  {id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 46, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
+  {id: "scalping", nombre: "SCALPING", x0: 46, y0: 0, x1: 54, y1: 9, a: "#160f22", b: "#1b1229", rotulo: "rgba(255,79,216,.11)"},
+  {id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 54, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
   {id: "riesgos", nombre: "RIESGOS", x0: 38, y0: 11, x1: 46, y1: 24, a: "#1c1216", b: "#22161b", rotulo: "rgba(255,90,118,.1)"},
   {id: "terraza", nombre: "TERRAZA", x0: 30, y0: 11, x1: 38, y1: 24, a: "#8a6a48", b: "#7f6141", rotulo: "rgba(40,20,0,.14)"},
   {id: "trading", nombre: "SALA DE TRADING", x0: 0, y0: 11, x1: 18, y1: 24, a: "#eceee8", b: "#e2e5dd", rotulo: "rgba(0,0,0,.075)"},
@@ -809,6 +944,44 @@ for (const y of [12.2, 14.2, 16.2, 18.2, 20.2, 22.2])
     MESAS.push(mesa);
   }
 planta(17.4, 11.6, true); planta(17.4, 23.4);
+
+// ---- SALA DE SCALPING: 12 mesas (4 por activo), cinta de precios en vivo ----
+const MESAS_SCALP = [];
+for (const y of [1.2, 3.2, 5.2])
+  for (const x of [46.5, 48.5, 50.5, 52.5]) {
+    const mesa = {trader: null, scalping: true};
+    mesa.asiento = puesto({x, y, w: 1.5, color: "#3a2b55", colorSilla: "#4a2d5e", pintar: (w, h, i) => pantallaTrader(mesa, w, h, i),
+      brilla: () => mesa.trader ? colorTrader(mesa.trader) : null});
+    MESAS_SCALP.push(mesa);
+  }
+planta(53.6, 8.5, true);
+const cinta_vivo = {};   // últimos precios en vivo (cada ~5 s) de cada activo, para la cinta de scalping
+function pantallaScalping(w, h) {
+  ctx.fillStyle = "#0b0612"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#ff4fd8"; ctx.font = "900 17px Inter, sans-serif"; ctx.fillText("SCALPING · CINTA EN VIVO", 14, 24);
+  const g = S && S.papel && S.papel.grupos && S.papel.grupos.scalping;
+  ctx.fillStyle = "#c9b8da"; ctx.font = "700 11px JetBrains Mono, monospace"; ctx.textAlign = "right";
+  ctx.fillText(g ? `${g.traders} scalpers · ${g.operaciones_hoy} ops hoy · comisiones ${fmt.n(g.comisiones)} $` : "Sin scalpers todavía", w - 14, 24);
+  ctx.textAlign = "start";
+  const sims = (S && S.scalping && S.scalping.simbolos) || ["BTCUSDT", "ETHUSDT", "SOLUSDT"];
+  sims.forEach((sim, i) => {
+    const serie = cinta_vivo[sim] || [], x0 = 14 + i * (w - 28) / sims.length, ancho = (w - 28) / sims.length - 14;
+    const v = serie.length ? serie[serie.length - 1] : null, v0 = serie.length ? serie[0] : null, sube = v !== null && v >= v0;
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 14px JetBrains Mono, monospace"; ctx.fillText(moneda(sim), x0, 52);
+    ctx.fillStyle = sube ? "#2ee6a6" : "#ff5a76"; ctx.fillText(v === null ? "—" : fmt.precio(v), x0 + 50, 52);
+    if (serie.length > 1) {
+      const lo = Math.min(...serie), hi = Math.max(...serie);
+      ctx.strokeStyle = sube ? "#2ee6a6" : "#ff5a76"; ctx.lineWidth = 2; ctx.beginPath();
+      serie.forEach((p, k) => ctx.lineTo(x0 + k * ancho / (serie.length - 1), 150 - (p - lo) / (hi - lo || 1) * 80));
+      ctx.stroke();
+      ctx.fillStyle = "#8a7aa0"; ctx.font = "600 9px Inter, sans-serif"; ctx.fillText("últimos minutos (cada 5 s)", x0, 170);
+    }
+    const ts = Object.values(S && S.papel && S.papel.estrategias || {}).filter(t => t.grupo === "scalping" && t.simbolo === sim);
+    ctx.fillStyle = "#c9b8da"; ctx.font = "700 10px Inter, sans-serif";
+    ctx.fillText(`${ts.length} scalpers · ${ts.filter(t => t.posicion).length} dentro`, x0, 192);
+  });
+}
+
 estatico(14.2 + 11.4, () => {
   caja(14.1, 11.26, 0, .2, .1, .55, "#222");
   caja(11, 11.18, .55, 6.4, .12, 1.25, "#101217");
@@ -845,7 +1018,8 @@ function pantallaTrader(mesa, w, h, i) {
   const d = a.datos || {}, col = colorTrader(a);
   ctx.fillStyle = rgba(col, .16); ctx.fillRect(0, 0, w, h);
   if (i === 0) {
-    const serie = S && S.papel && S.papel.precios && S.papel.precios[d.simbolo] && S.papel.precios[d.simbolo].serie;
+    const fuente = S && S.papel && (d.grupo === "scalping" ? S.papel.precios_scalping : S.papel.precios);
+    const serie = fuente && fuente[d.simbolo] && fuente[d.simbolo].serie;
     if (serie && serie.length > 1) {
       const lo = Math.min(...serie), hi = Math.max(...serie);
       ctx.strokeStyle = col; ctx.lineWidth = 1.1; ctx.beginPath();
@@ -1188,7 +1362,9 @@ SITIOS.push({x: 40.5, y: 20.3, mira: "e", postura: "sentado", tipo: "crisis"}, {
 SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
 
 // ---- tabiques ----
-muroH(9, 0, 46, [[4, 6], [15, 17], [25, 27], [33, 35], [41, 43]], 1, "#d4ff3a");
+muroH(9, 0, 54, [[4, 6], [15, 17], [25, 27], [33, 35], [41, 43], [49, 51]], 1, "#d4ff3a");
+muroV(46, 0, 9, [], 1, "#ff4fd8");
+bloquear(X_ALA, 11, W, D);   // fuera del edificio
 muroV(38, 0, 9, [], 1, "#f7931a");
 muroH(11, 38, 46, [[41, 43]], 1, "#ff5a76");
 muroV(38, 11, 24, [], 1, "#ff5a76");
@@ -1332,6 +1508,7 @@ const SALAS_SUP = [
   {id: "holding", nombre: "Holding", sup: "Diego", color: "#f7931a", casa: [41.5, 7.6], ruta: [[44.6, 2], [41, 2], [41.5, 7.6]]},
   {id: "trading", nombre: "Sala de trading", sup: "Clara", color: "#d4ff3a", casa: [9.5, 11.6], ruta: [[2.5, 13.6], [16.6, 13.6], [16.6, 21.6], [2.5, 21.6], [8.5, 23.6], [9.5, 11.6]]},
   {id: "riesgos", nombre: "Control de riesgos", sup: "Pablo", color: "#ff5a76", casa: [42, 17.2], ruta: [[39.5, 12], [44.6, 17.6], [42, 22.6], [42, 17.2]]},
+  {id: "scalping", nombre: "Scalping", sup: "Álex", color: "#ff4fd8", casa: [50, 8.3], ruta: [[46.5, 8.2], [53.5, 8.2], [52.2, 6.6], [48.2, 6.6], [50, 8.3]]},
 ];
 const SUPERVISORES = SALAS_SUP.map(s => {
   const a = new Agente({nombre: s.sup, rol: "supervisor", sala: s, puesto: "Supervisión · " + s.nombre, proximaRonda: rand(4, 14), puntoRonda: 0,
@@ -1345,7 +1522,8 @@ const GENERAL = new Agente({nombre: "Marta", rol: "general", proxima: 8, urgente
 GENERAL.x = 19.6; GENERAL.y = 12.3; GENERAL.mira = "s";
 agentes.push(GENERAL);
 const NOMBRES_TRADERS = ["Lucía", "Mateo", "Aitana", "Leo", "Martina", "Unai", "Alba", "Gael", "Carla", "Nico", "Emma", "Izan", "Olivia", "Teo", "Lola", "Enzo", "Jana", "Biel", "Ainhoa", "Rayan", "Candela", "Omar", "Valeria", "Joel",
-  "Vera", "Álvaro", "Marcos", "Rubén", "Nora", "Lara", "Sergio", "Aroa", "Gonzalo", "Ane", "Rodrigo", "Mía", "Jorge", "Carlota", "Asier", "Daniela", "Víctor", "Blanca", "Eric", "Luna", "Andrea", "Mario", "Inés", "Pau"];
+  "Vera", "Álvaro", "Marcos", "Rubén", "Nora", "Lara", "Sergio", "Aroa", "Gonzalo", "Ane", "Rodrigo", "Mía", "Jorge", "Carlota", "Asier", "Daniela", "Víctor", "Blanca", "Eric", "Luna", "Andrea", "Mario", "Inés", "Pau",
+  "Kai", "Nil", "Zoe", "Iris", "Ian", "Alma", "Dylan", "Leire", "Thiago", "Maya", "Óliver", "Cloe"];
 const traders = new Map();
 
 // ---- dibujo de una persona (en coordenadas del mundo) ----
@@ -1842,6 +2020,10 @@ function paredes() {
   // HOLDING: gráfico de zonas objetivo
   caraY(38.25, .002, 2.34, () => cacheado("zonas", 750, 205, 1, () => pintarZonas(ctx, 750, 205, planEnPared(), true)));
   brillo(42, .3, 1.6, 170, "#f7931a", .2);
+  // SCALPING: cinta de precios en vivo
+  caraY(46.25, .002, 2.34, () => cacheado("scalping", 750, 205, 1, () => pantallaScalping(750, 205)));
+  brillo(50, .3, 1.6, 170, "#ff4fd8", .22);
+  for (const x of [47, 49, 51, 53]) brillo(x, 4.2, 2.2, 60, "#ff4fd8", .1 + noche * .1);
   // MACRO: gran panel de indicadores
   caraY(30.25, .002, 2.32, () => cacheado("macro", 750, 200, 1, () => pantallaMacro(750, 200)));
   brillo(34, .3, 1.6, 170, "#5cc0ff", .22);
@@ -1899,6 +2081,12 @@ function grafico(sim, p, w, h) {
     ctx.beginPath(); s.forEach((v, k) => ctx.lineTo(x(k), y(v))); ctx.strokeStyle = col; ctx.lineWidth = 2.2; ctx.stroke();
     const k = s.length - 1; circulo(x(k), y(s[k]), 4 + Math.sin(T * 5), col);
   }
+}
+function grupoVivo(g) {   // cifras de una sala con los precios en vivo (trading o scalping)
+  const ts = Object.values(S && S.papel && S.papel.estrategias || {}).filter(t => (t.grupo || "trading") === g), est = (S && S.papel && S.papel.grupos || {})[g] || {};
+  return {n: ts.length, abiertas: ts.filter(t => t.posicion).length, resultado: ts.reduce((a, t) => a + (t.resultado || 0), 0),
+    hoy: ts.reduce((a, t) => a + (t.hoy || 0), 0), operaciones: est.operaciones || 0, operaciones_hoy: est.operaciones_hoy || 0,
+    aciertos_pct: est.aciertos_pct, comisiones: est.comisiones || 0, traders: ts};
 }
 function totales() {
   const ts = Object.values(S && S.papel && S.papel.estrategias || {});
@@ -2100,7 +2288,8 @@ function crearSuelo() {
   ctx = c.getContext("2d");
   ctx.setTransform(esc, 0, 0, esc, -minX * esc, -minY * esc);
   // grosor del forjado
-  caja(0, 0, -.35, W, D, .35, "#15181e", {izq: "#1b1f27", der: "#12151a"});
+  caja(0, 0, -.35, W, 11, .35, "#15181e", {izq: "#1b1f27", der: "#12151a"});
+  caja(0, 11, -.35, X_ALA, D - 11, .35, "#15181e", {izq: "#1b1f27", der: "#12151a"});
   for (const s of SALAS) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
     cuad(iso(x, y), iso(x + 1, y), iso(x + 1, y + 1), iso(x, y + 1), (x + y) % 2 ? s.a : s.b);
   }
@@ -2117,7 +2306,7 @@ function crearSuelo() {
   plano(19.8, 12.3, 0, () => { ctx.fillStyle = "rgba(181,140,255,.16)"; rr(0, 0, 900, 380, 30); ctx.fill(); });
   // rótulos en el suelo
   plano(30, 11, 0, () => { ctx.strokeStyle = "rgba(0,0,0,.18)"; ctx.lineWidth = 2; for (let v = 25; v < 1300; v += 50) { ctx.beginPath(); ctx.moveTo(0, v); ctx.lineTo(800, v); ctx.stroke(); } });
-  const rotulos = [["holding", 38.4, 8.7, 100], ["riesgos", 38.5, 23.7, 100], ["macro", 30.4, 8.7, 105], ["terraza", 30.5, 23.7, 100], ["mineria", .4, 8.7, 105], ["laboratorio", 10.4, 8.7, 88], ["banco", 21.4, 8.7, 105], ["trading", .6, 23.7, 150], ["comite", 18.5, 16.7, 95], ["descanso", 18.5, 23.8, 95]];
+  const rotulos = [["scalping", 46.4, 8.7, 100], ["holding", 38.4, 8.7, 100], ["riesgos", 38.5, 23.7, 100], ["macro", 30.4, 8.7, 105], ["terraza", 30.5, 23.7, 100], ["mineria", .4, 8.7, 105], ["laboratorio", 10.4, 8.7, 88], ["banco", 21.4, 8.7, 105], ["trading", .6, 23.7, 150], ["comite", 18.5, 16.7, 95], ["descanso", 18.5, 23.8, 95]];
   for (const [id, x, y, t] of rotulos) {
     const s = SALAS.find(s => s.id === id);
     plano(x, y, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
@@ -2391,7 +2580,7 @@ function crearTrader(id, datos) {
   const usados = new Set([...traders.values()].map(t => t.nombre));
   let n = hash(id) % NOMBRES_TRADERS.length;
   for (let k = 0; k < NOMBRES_TRADERS.length && usados.has(NOMBRES_TRADERS[n]); k++) n = (n + 1) % NOMBRES_TRADERS.length;
-  return new Agente({nombre: NOMBRES_TRADERS[n], rol: "trader", id, datos, puesto: "Trader · " + id});
+  return new Agente({nombre: NOMBRES_TRADERS[n], rol: "trader", id, datos, puesto: (datos.grupo === "scalping" ? "Scalper · " : "Trader · ") + id});
 }
 function sincronizarTraders(inicial) {
   const ests = S.papel && S.papel.estrategias || {};
@@ -2399,7 +2588,7 @@ function sincronizarTraders(inicial) {
   for (const id of ids) {
     const a = traders.get(id);
     if (a) { a.datos = ests[id]; continue; }
-    const mesa = MESAS.find(m => !m.trader);
+    const mesa = (ests[id].grupo === "scalping" ? MESAS_SCALP : MESAS).find(m => !m.trader);
     if (!mesa) continue;
     const nuevo = crearTrader(id, ests[id]);
     nuevo.casa = mesa.asiento; nuevo.mesa = mesa; mesa.trader = nuevo;
@@ -2563,6 +2752,9 @@ function comite() {
     if (rv && rv.vetos && rv.vetos.length) lineas.push([RIESGOS, `Llevamos ${rv.vetos.length} vetos recientes. El último, a ${rv.vetos[0].id}: ${rv.vetos[0].motivo}.`]);
     const hr = S.holding && S.holding.resumen;
     if (hr) lineas.push([HOLDERS[0], `Holding: ${fmt.n(hr.valor)} $ de ${fmt.n(hr.aportado || hr.presupuesto)} $ aportados (${fmt.pct(hr.resultado_pct)}). Seguimos el plan: promediar si baja y salir por partes si sube.`]);
+    const gs = grupoVivo("scalping");
+    if (gs.n) lineas.push([SUPERVISORES[7], `Scalping: ${gs.n} scalpers, ${gs.operaciones_hoy} operaciones hoy, ${dineroS(gs.hoy)} hoy y ${fmt.n(gs.comisiones)} $ pagados en comisiones.`]);
+    if (S.fondo) lineas.push([GENERAL, `El fondo del jefe vale ${fmt.n(S.fondo.patrimonio)} $: ${fmt.pct(S.fondo.rentabilidad_pct)} desde el inicio, con un valor liquidativo de ${NF2.format(S.fondo.vl)} $.`]);
     const mc = S.macro;
     if (mc && mc.regimen) lineas.push([MACROS[0], `Macro: ${mc.regimen}.${mc.fear_greed ? ` Fear & Greed ${mc.fear_greed.valor}.` : ""} Recordad que nuestras estrategias no usan estos datos.`]);
     for (const a of ts.filter(x => x.rol === "trader")) { const d = a.datos || {}; lineas.push([a, `${a.id}: ${fmt.pct((d.resultado || 0) / 10)} desde que llegué, ${(d.operaciones || []).length} operaciones cerradas.`]); }
@@ -2603,7 +2795,7 @@ function actualizarHUD() {
     Object.values(mc.indicadores).map(d => `<div class="ind"><span>${esc(d.nombre)}</span><b>${d.valor >= 100 ? fmt.n(d.valor) : NF2.format(d.valor)}</b><span class="${d.dia_pct >= 0 ? "sube" : "baja"}">${fmt.pct(d.dia_pct)}</span></div>`).join("") +
     `<p class="nota">Actualizado a las ${fmt.hora(new Date(mc.actualizado))}.</p>`
     : `<p class="vacio">Aún no hay datos macro. Se actualizan cada 15 minutos con la oficina en marcha.</p>`;
-  actualizarHolding(); actualizarRiesgo(); actualizarRanking(); actualizarSalas();
+  actualizarHolding(); actualizarRiesgo(); actualizarRanking(); actualizarSalas(); actualizarScalping();
   // embudo
   const e = m.embudo || {}, base = Math.max(1, e["Generadas"] || 0);
   $("#embudo").innerHTML = ETAPAS.map(k => {
@@ -2702,7 +2894,8 @@ function estadoSalas() {
     : ["ok", "Sin candidatas todavía en esta sesión."];
   const porActivo = {};
   for (const b of banco) { const k = moneda(b.estrategia.simbolo); porActivo[k] = (porActivo[k] || 0) + 1; }
-  out.banco = banco.length ? ["ok", `${banco.length} estrategias en la cámara: ${Object.entries(porActivo).map(([k, v]) => `${v} de ${k}`).join(", ")}.`] : ["aviso", "La cámara está vacía."];
+  const rep = (S.repetidas || []).reduce((n, g) => n + g[1].length, 0);
+  out.banco = banco.length ? [rep ? "aviso" : "ok", `${banco.length} estrategias en la cámara: ${Object.entries(porActivo).map(([k, v]) => `${v} de ${k}`).join(", ")}.${rep ? ` ${rep} repetidas: pide «quita las repetidas».` : ""}`] : ["aviso", "La cámara está vacía."];
   const vix = mc.indicadores && mc.indicadores["^VIX"], vieja = mc.actualizado && Date.now() - new Date(mc.actualizado).getTime() > 3600000;
   out.macro = !mc.regimen ? ["aviso", "Sin datos macro todavía."] : [vieja ? "aviso" : mc.regimen === "RISK-OFF" ? "aviso" : "ok",
     `${mc.regimen}. ${vix ? `VIX ${NF2.format(vix.valor)}. ` : ""}${mc.fear_greed ? `Fear & Greed ${mc.fear_greed.valor} (${mc.fear_greed.clase.toLowerCase()}).` : ""}${vieja ? " Ojo: datos de hace más de una hora." : ""}`];
@@ -2713,8 +2906,9 @@ function estadoSalas() {
     const btc = ph.find(p => p.simbolo === "BTCUSDT") || ph[0], sig = proximaCompra(btc), obj = proximaSalida(btc);
     out.holding = [seco ? "alerta" : reserva || mal ? "aviso" : "ok", `${hr ? `Valor ${fmt.n(hr.valor)} $ (${fmt.pct(hr.resultado_pct)}). ` : ""}${seco ? `${moneda(seco.simbolo)} ya no tiene dinero ni reserva para promediar. ` : reserva ? `${moneda(reserva.simbolo)} está usando la reserva. ` : ""}${moneda(btc.simbolo)}: ${sig ? `compra en ${fmt.precio(sig.precio)}` : "sin compras pendientes"}, ${obj ? `salida en ${fmt.precio(obj.precio)}` : "salidas hechas"}.`];
   }
-  const lider = rankingPapel("total")[0];
-  out.trading = [r && r.bloqueo ? "alerta" : t.hoy < 0 ? "aviso" : "ok", t.n ? `${t.n} traders, ${t.abiertas} posiciones abiertas, hoy ${dineroS(t.hoy)} y en total ${dineroS(t.resultado)}.${lider && lider.total > 0 ? ` Líder: ${lider.a.nombre} (${dineroS(lider.total)}).` : ""}` : "Sala vacía: esperando estrategias del banco."];
+  const lider = rankingPapel("total")[0], gt = grupoVivo("trading"), gs = grupoVivo("scalping");
+  out.trading = [r && r.bloqueo ? "alerta" : gt.hoy < 0 ? "aviso" : "ok", gt.n ? `${gt.n} traders, ${gt.abiertas} posiciones abiertas, hoy ${dineroS(gt.hoy)} y en total ${dineroS(gt.resultado)}.${lider && lider.total > 0 ? ` Líder: ${lider.a.nombre} (${dineroS(lider.total)}).` : ""}` : "Sala vacía: pulsa «Buscar estrategias»."];
+  out.scalping = [r && r.bloqueo ? "alerta" : !gs.n ? "aviso" : gs.hoy < 0 ? "aviso" : "ok", gs.n ? `${gs.n} scalpers, ${gs.abiertas} dentro, hoy ${dineroS(gs.hoy)} y en total ${dineroS(gs.resultado)}. Comisiones pagadas: ${fmt.n(gs.comisiones)} $.` : "Sala vacía: pulsa «Buscar estrategias» → Scalping."];
   if (!r) out.riesgos = ["ok", "Esperando al paper trading."];
   else {
     const uso = Math.max(r.posiciones / r.max_posiciones, r.mayor_apuesta / r.max_misma_apuesta, r.perdida_hoy_pct / r.limite_diario_pct, r.caida_pct / r.max_caida_pct);
@@ -2775,6 +2969,29 @@ function planificarSupervision() {
   }
   if (!GENERAL.tarea && !GENERAL.andando && S && (GENERAL.urgente || T > GENERAL.proxima)) { const u = GENERAL.urgente; GENERAL.urgente = null; rondaGeneral(u); }
 }
+
+// ============================================== SCALPING ==============
+function actualizarScalping() {
+  if (!$("#p-scalping").classList.contains("activa") && $("#scalping").children.length) return;
+  const g = grupoVivo("scalping"), sc = S.scalping || {simbolos: [], max_por_simbolo: 4};
+  const clase = x => x > 0.004 ? "sube" : x < -0.004 ? "baja" : "";
+  const fila = t => {
+    const a = [...traders.values()].find(x => x.datos === t), p = t.posicion, r = t.resultado || 0;
+    return `<div class="trader" data-id="${esc(a ? a.id : "")}"><div class="av" style="background:${a ? a.camisa : "#4a2d5e"}">${esc(iniciales(a ? a.nombre : "?"))}</div>
+      <div style="min-width:0"><div class="n">${esc(a ? a.nombre : "")} · ${esc(a ? a.id : "")}</div><div class="d">${esc(moneda(t.simbolo))} ${esc(ladoTxt(t.direccion))} · ${p ? `dentro, ${fmt.pct(p.retorno_pct)}` : t.radar ? `radar ${t.radar.cumplidas}/${t.radar.total}` : "esperando señal"} · comisiones ${fmt.n(t.comisiones || 0)} $</div></div>
+      <div class="r ${clase(r)}">${dineroS(r)}<small>hoy ${dineroS(t.hoy || 0)} · ${(t.operaciones || []).length} ops</small></div></div>`;
+  };
+  $("#scalping").innerHTML = `<div class="mini-kpis">
+      <div><small>Scalpers</small><b>${g.n}<span>/${sc.simbolos.length * sc.max_por_simbolo}</span></b></div>
+      <div><small>Resultado</small><b class="${clase(g.resultado)}">${dineroS(g.resultado)}</b></div>
+      <div><small>Hoy</small><b class="${clase(g.hoy)}">${dineroS(g.hoy)}</b></div>
+      <div><small>Operaciones hoy</small><b>${g.operaciones_hoy}</b></div>
+      <div><small>Acierto</small><b>${g.aciertos_pct == null ? "—" : NF1.format(g.aciertos_pct) + " %"}</b></div>
+      <div><small>Comisiones pagadas</small><b>${fmt.n(g.comisiones)} $</b></div></div>
+    ${g.n ? g.traders.sort((a, b) => (b.resultado || 0) - (a.resultado || 0)).map(fila).join("")
+      : `<p class="vacio">Todavía no hay scalpers. Pulsa «🔍 Buscar estrategias» arriba y elige «Scalping»: las que superen las seis pruebas se sientan aquí y operan con velas de 5 minutos.</p>`}`;
+}
+$("#scalping").addEventListener("click", e => { const el = e.target.closest(".trader"); if (el) { const a = traders.get(el.dataset.id); if (a) mostrarFicha(a); } });
 
 // ============================================== HOLDING Y RIESGO ======
 function actualizarHolding() {
@@ -2891,18 +3108,29 @@ function actualizarResultados() {
   const clase = x => x > 0.004 ? "sube" : x < -0.004 ? "baja" : "";
   const kr = $("#kResultado"), kh = $("#kHoy"), rt = $("#rTotal"), rh = $("#rHoy");
   kr.className = clase(t.resultado); kh.className = clase(t.hoy); rt.className = "gordo " + clase(t.resultado); rh.className = "chip " + clase(t.hoy);
+  if (vistaFondo && F) { const d = $("#dPatr"); if (d && S.fondo) d.textContent = fmt.dinero(S.fondo.patrimonio); }
+  const f = S.fondo;
+  if (f) {   // cabecera = tu fondo: aportado + resultado de todas las áreas (un trader nuevo no cambia el patrimonio)
+    kr.className = clase(f.resultado); kh.className = clase(f.hoy);
+    animar($("#kPatrimonio"), f.patrimonio, x => fmt.dinero(x));
+    const kp = $("#kPatrimonio").parentElement;
+    kp.querySelector("small").textContent = "Patrimonio del fondo";
+    kp.title = `Has aportado ${fmt.n(f.aportado)} $ ficticios. El patrimonio sube o baja solo con los resultados de trading, scalping y holding. Detalles en «Mi fondo».`;
+    kr.parentElement.querySelector("small").textContent = "Resultado del fondo";
+    animar(kr, f.resultado, x => `${dineroS(x)}<small>${pctS(f.rentabilidad_pct)}</small>`);
+    animar(kh, f.hoy, x => `${dineroS(x)}<small>${pctS(f.hoy_pct)}</small>`);
+  }
   if (t.n) {
-    animar($("#kPatrimonio"), t.patrimonio, x => fmt.dinero(x));
-    const kp = $("#kPatrimonio").parentElement, cap = S.capital_por_estrategia || 1000;   // el capital de cada trader nuevo no es ganancia
-    kp.querySelector("small").textContent = `Patrimonio · ${t.n} × ${fmt.n(cap)} $`;
-    kp.title = `${t.n} traders × ${fmt.n(cap)} $ ficticios = ${fmt.n(t.n * cap)} $ de capital puesto. Cada trader nuevo suma su capital al patrimonio (no es ganancia). Lo que se gana o se pierde es el «Resultado total».`;
-    animar(kr, t.resultado, x => `${dineroS(x)}<small>${pctS(t.pct)}</small>`);
-    animar(kh, t.hoy, x => `${dineroS(x)}<small>${pctS(t.hoyPct)}</small>`);
+    if (!f) {
+      animar($("#kPatrimonio"), t.patrimonio, x => fmt.dinero(x));
+      animar(kr, t.resultado, x => `${dineroS(x)}<small>${pctS(t.pct)}</small>`);
+      animar(kh, t.hoy, x => `${dineroS(x)}<small>${pctS(t.hoyPct)}</small>`);
+    }
     animar(rt, t.resultado, x => `${dineroS(x)}<small>${pctS(t.pct)}</small>`);
     animar(rh, t.hoy, x => `<em>HOY</em>${dineroS(x)} · ${pctS(t.hoyPct)}`);
     animar($("#rPatr"), t.patrimonio, x => `<em>PATRIMONIO</em>${fmt.n(x)} $`);
   } else {
-    for (const id of ["#kPatrimonio", "#kResultado", "#kHoy", "#rTotal"]) $(id).textContent = "—";
+    for (const id of f ? ["#rTotal"] : ["#kPatrimonio", "#kResultado", "#kHoy", "#rTotal"]) $(id).textContent = "—";
     $("#rHoy").innerHTML = "<em>HOY</em>—"; $("#rPatr").innerHTML = "<em>PATRIMONIO</em>—";
   }
   $("#rTraders").textContent = t.n; $("#rAbiertas").textContent = t.abiertas;
@@ -2922,7 +3150,7 @@ $("#plegarRes").onclick = () => { const r = $("#resultados"); r.classList.toggle
 
 // ---- modo cine: la cámara recorre las salas y persigue lo que pasa ----
 let cine = false, cineHasta = 0, cineIdx = -1, camObjetivo = null;
-const PARADAS = [[5, 4.5, 1.8], [15.5, 5, 1.6], [26, 5, 1.7], [34.5, 5, 1.7], [42, 4.5, 1.8], [9, 17.5, 1.25], [24, 14, 1.8], [42, 16, 1.6], [23.5, 20.5, 1.8], [34, 17.5, 1.5], null];
+const PARADAS = [[5, 4.5, 1.8], [15.5, 5, 1.6], [26, 5, 1.7], [34.5, 5, 1.7], [42, 4.5, 1.8], [50, 4.5, 1.8], [9, 17.5, 1.25], [24, 14, 1.8], [42, 16, 1.6], [23.5, 20.5, 1.8], [34, 17.5, 1.5], null];
 function objetivoEn(x, y, z, zoom) {
   const movil = vw <= 760, panelW = !movil && !$("#panel").classList.contains("plegado") ? 390 : 0;
   const [ix, iy] = iso(x, y, z);
@@ -2936,7 +3164,7 @@ function enfocar(x, y, zoom = 2, segundos = 6) {
 // Botones «Ir a una sala»: la cámara vuela hasta allí (sin activar el modo cine).
 const CENTRO_SALA = {mineria: [5, 4.5, 1.8, "Minería", "#ffc24a"], laboratorio: [15.5, 5, 1.6, "Laboratorio", "#5cc0ff"], banco: [26, 5, 1.7, "Cámara", "#ffcf5a"],
   macro: [34.5, 5, 1.7, "Macro", "#5cc0ff"], holding: [42, 4.5, 1.8, "Holding", "#f7931a"], trading: [9, 17.5, 1.2, "Trading", "#d4ff3a"],
-  comite: [24, 14, 1.8, "Comité", "#b58cff"], riesgos: [42, 16, 1.6, "Riesgos", "#ff5a76"], descanso: [23.5, 20.5, 1.8, "Descanso", "#ff8a5c"],
+  scalping: [50, 4.5, 1.8, "Scalping", "#ff4fd8"], comite: [24, 14, 1.8, "Comité", "#b58cff"], riesgos: [42, 16, 1.6, "Riesgos", "#ff5a76"], descanso: [23.5, 20.5, 1.8, "Descanso", "#ff8a5c"],
   terraza: [34, 17.5, 1.5, "Terraza", "#2ee6a6"]};
 let vuelo = null;
 function irASala(id) {
@@ -3041,9 +3269,9 @@ function mostrarPropuesta(p, quien) {
   };
 }
 // ---- botón «Buscar estrategias»: la minería solo trabaja cuando lo pulsas ----
-function porSimbolo() {   // estrategias del banco por activo
-  const cuenta = {};
-  for (const b of S.banco || []) cuenta[b.estrategia.simbolo] = (cuenta[b.estrategia.simbolo] || 0) + 1;
+function porSimbolo(tipo = "trading") {   // estrategias del banco por activo (de trading o de scalping)
+  const cuenta = {}, vela = S.scalping && S.scalping.intervalo || "5m";
+  for (const b of S.banco || []) if ((b.estrategia.intervalo === vela) === (tipo === "scalping")) cuenta[b.estrategia.simbolo] = (cuenta[b.estrategia.simbolo] || 0) + 1;
   return cuenta;
 }
 function mesasLibres() {
@@ -3053,7 +3281,7 @@ function mesasLibres() {
 function pintarBotonBuscar() {
   const b = $("#bBuscar"), activa = !!(S && S.control && S.control.busqueda), m = S && S.mineria || {}, c = m.ciclo;
   b.classList.toggle("activa", activa);
-  const avance = activa && c && m.estado === "minando" ? ` · ${esc(moneda(m.simbolo || ""))} ${c.n}/${c.activos.length} · gen ${m.generacion || 0}/${m.generaciones || 0}` : "";
+  const avance = activa && c && m.estado === "minando" ? ` · ${c.tipo === "scalping" ? "scalping " : ""}${esc(moneda(m.simbolo || ""))} ${c.n}/${c.activos.length} · gen ${m.generacion || 0}/${m.generaciones || 0}` : "";
   b.innerHTML = activa ? `⏹ <span>Parar búsqueda${avance}</span>` : "🔍 <span>Buscar estrategias</span>";
   b.title = activa ? "Ciclo de búsqueda en marcha: se para solo al terminar. Pulsa para cortarlo antes."
     : "Cada pulsación hace un ciclo de búsqueda y se para sola al terminar. Las estrategias que superen las seis pruebas se ponen a operar, cada una con su trader.";
@@ -3076,9 +3304,14 @@ $("#bBuscar").addEventListener("click", e => {
   const menu = $("#menuBuscar");
   if (!menu.hidden) { cerrarMenuBuscar(); return; }
   const max = S.max_por_simbolo || 8, cuenta = porSimbolo(), sims = S.simbolos || [], libres = mesasLibres();
+  const sc = S.scalping || {simbolos: [], max_por_simbolo: 4}, cs = porSimbolo("scalping");
+  const libresScalping = sc.simbolos.reduce((n, x) => n + Math.max(0, sc.max_por_simbolo - (cs[x] || 0)), 0);
   menu.innerHTML = `<p><b>Cada pulsación hace un ciclo</b>: el equipo prueba unas 2.000 estrategias por activo (varios minutos cada uno) y <b>se para solo al terminar</b>. Las que superen las seis pruebas entran al banco y se ponen a operar, cada una con su trader.</p>
     <button class="todos" data-s="" ${libres ? "" : "disabled"}>Todos los activos con mesas libres <small>${libres} libres</small></button>
-    ${sims.map(x => `<button data-s="${esc(moneda(x))}" ${(cuenta[x] || 0) >= max ? "disabled" : ""}>${esc(moneda(x))} <small>${cuenta[x] || 0}/${max} traders${(cuenta[x] || 0) >= max ? " · lleno" : ""}</small></button>`).join("")}`;
+    ${sims.map(x => `<button data-s="${esc(moneda(x))}" ${(cuenta[x] || 0) >= max ? "disabled" : ""}>${esc(moneda(x))} <small>${cuenta[x] || 0}/${max} traders${(cuenta[x] || 0) >= max ? " · lleno" : ""}</small></button>`).join("")}
+    <p class="sep"><b>Scalping</b> · velas de 5 minutos, comisión de maker (0,06 % ida y vuelta)</p>
+    <button class="todos" data-s="" data-t="scalping" ${libresScalping ? "" : "disabled"}>Todos los de scalping <small>${libresScalping} libres</small></button>
+    ${sc.simbolos.map(x => `<button data-s="${esc(moneda(x))}" data-t="scalping" ${(cs[x] || 0) >= sc.max_por_simbolo ? "disabled" : ""}>${esc(moneda(x))} <small>${cs[x] || 0}/${sc.max_por_simbolo} scalpers${(cs[x] || 0) >= sc.max_por_simbolo ? " · lleno" : ""}</small></button>`).join("")}`;
   menu.hidden = false; $("#bBuscar").setAttribute("aria-expanded", "true");
 });
 $("#menuBuscar").addEventListener("click", e => {
@@ -3086,7 +3319,7 @@ $("#menuBuscar").addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b || b.disabled) return;
   cerrarMenuBuscar();
-  decisionDirecta({accion: "buscar_estrategias", objetivo: b.dataset.s});
+  decisionDirecta({accion: "buscar_estrategias", objetivo: b.dataset.s, tipo: b.dataset.t || ""});
 });
 document.addEventListener("click", cerrarMenuBuscar);
 document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarMenuBuscar(); });
@@ -3102,7 +3335,12 @@ function hablarCon(a) {
 // precios en pantalla, posiciones abiertas, resultados y holding. Las decisiones de los traders
 // no cambian: se siguen tomando al cierre de cada vela.
 function aplicarVivo(E) {
-  const vivo = E.vivo || {}, papel = E.papel = E.papel || {}, coste = E.coste_ida_vuelta || 0, cap = E.capital_por_estrategia || 1000;
+  const vivo = E.vivo || {}, papel = E.papel = E.papel || {}, cap = E.capital_por_estrategia || 1000;
+  for (const [sim, v] of Object.entries(vivo)) {   // cinta de la sala de scalping: ~10 minutos de precios en vivo
+    const c = cinta_vivo[sim] = cinta_vivo[sim] || [];
+    if (c[c.length - 1] !== v || c.length < 2) c.push(v);
+    if (c.length > 120) c.shift();
+  }
   const precios = papel.precios = papel.precios || {};
   for (const [sim, v] of Object.entries(vivo)) {
     const p = precios[sim];
@@ -3116,6 +3354,7 @@ function aplicarVivo(E) {
     const pos = d.posicion, v = vivo[d.simbolo];
     if (!pos || !v) continue;
     const dir = d.direccion === "largo" ? 1 : -1, f = pos.fraccion ?? 1;
+    const coste = d.grupo === "scalping" ? (E.coste_scalping || 0) : (E.coste_ida_vuelta || 0);
     const nuevo = f * (dir * (v / pos.entrada - 1) - coste) * 100;
     const antes = d.patrimonio ?? cap, ahora = antes / (1 + pos.retorno_pct / 100) * (1 + nuevo / 100);
     pos.retorno_pct = nuevo; d.patrimonio = ahora; d.resultado = ahora - cap;
@@ -3138,6 +3377,15 @@ function aplicarVivo(E) {
     }
     if (hs.resumen && total) Object.assign(hs.resumen, {valor, resultado: valor - total, resultado_pct: (valor / total - 1) * 100});
   }
+  const f = E.fondo;
+  if (f && f.participaciones) {   // el fondo con los precios en vivo: aportado + resultado de trading, scalping y holding
+    const res = (papel.resumen ? papel.resumen.resultado : 0) + (hs && hs.resumen ? hs.resumen.resultado : 0);
+    const cambio = f.aportado + res - f.patrimonio;
+    f.patrimonio += cambio; f.resultado = f.patrimonio - f.aportado; f.hoy += cambio;
+    f.vl = f.patrimonio / f.participaciones;
+    f.rentabilidad_pct = (f.vl / f.vl_inicial - 1) * 100;
+    f.hoy_pct = f.hoy / (f.patrimonio - f.hoy) * 100;
+  }
 }
 
 // ======================================================= DATOS ========
@@ -3159,6 +3407,8 @@ async function refrescar() {
     nuevosEventos(m.actividad); nuevosEventos(S.papel && S.papel.actividad); nuevosEventos(S.holding && S.holding.actividad);
     sincronizarTraders(true);
     anadirChat(null, "Te damos la bienvenida al Trading Floor. Todo lo que ves es real salvo el dinero: es paper trading, con dinero ficticio.");
+    const rep = (S.repetidas || []).reduce((n, g) => n + g[1].length, 0);
+    if (rep) anadirChat(null, `Hay ${rep} estrategias repetidas en el banco (la misma idea con otros números). Escribe «quita las repetidas» y te propongo retirarlas; de cada idea se queda la que mejor lo hizo fuera de muestra.`);
     if (!(S.banco || []).length && m.estado !== "minando") anadirChat(null, "El banco está vacío. Pulsa «🔍 Buscar estrategias», arriba, y el equipo de minería se pondrá a buscar. Las que superen las seis pruebas se ponen a operar solas, cada una con su trader.");
   } else {
     const nuevaSesion = anterior && anterior.mineria && anterior.mineria.inicio !== m.inicio;
@@ -3318,7 +3568,7 @@ function encuadrar() {
   const margenIzq = !movil && !$("#resultados").classList.contains("plegado") ? 170 : 0;
   const arriba = movil ? 58 : 66, abajo = movil ? (!$("#panel").classList.contains("plegado") ? vh * .42 + 44 : 44) : 44;
   const areaW = vw - panelW - 24 - margenIzq, areaH = vh - arriba - abajo;
-  const minX = -D * TW / 2, maxX = W * TW / 2, minY = -ALTO_MURO * ZH - 10, maxY = (W + D) * TH / 2 + 10;
+  const minX = -D * TW / 2, maxX = W * TW / 2, minY = -ALTO_MURO * ZH - 10, maxY = (X_ALA + D) * TH / 2 + 10;
   cam.zoom = clamp(Math.min(areaW / (maxX - minX), areaH / (maxY - minY)), .25, 3);
   const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
   cam.x = cx - ((12 + margenIzq + areaW / 2) - vw / 2) / cam.zoom;
@@ -3379,6 +3629,266 @@ $("#plegar").onclick = () => {
 };
 setTimeout(() => { $("#ayuda").style.opacity = 0; }, 9000);
 
+// ========================================== MI FONDO (dashboard) ======
+// Colores validados (categóricos 1-3 en todas las parejas, también con daltonismo) sobre la superficie #10151d:
+// áreas = azul/naranja/aguamarina; el fondo va destacado en el lima de la marca y BTC en gris de contexto.
+const COL = {fondo: "#d4ff3a", btc: "#898781", trading: "#3987e5", scalping: "#d95926", holding: "#199e70", liquidez: "#5b606b",
+  bueno: "#0ca30c", malo: "#d03b3b", superficie: "#10151d", rejilla: "rgba(255,255,255,.07)", eje: "#383835"};
+const AREAS_F = [["trading", "Sala de trading"], ["scalping", "Scalping"], ["holding", "Holding"]];
+let vistaFondo = false, F = null, rangoFondo = 30, cargandoFondo = false;
+const tablasAbiertas = new Set();
+function cambiarVista(v) {
+  vistaFondo = v === "fondo";
+  document.querySelectorAll(".vistas button").forEach(b => b.classList.toggle("activa", b.dataset.v === v));
+  $("#dash").hidden = !vistaFondo;
+  document.body.classList.toggle("en-fondo", vistaFondo);
+  if (vistaFondo) { if (F) pintarFondo(); cargarFondo(); }
+}
+document.querySelectorAll(".vistas button").forEach(b => b.onclick = () => cambiarVista(b.dataset.v));
+async function cargarFondo() {
+  if (cargandoFondo) return;
+  cargandoFondo = true; $("#dash").classList.add("recargando");   // se mantiene lo anterior, un poco apagado, mientras llega lo nuevo
+  try {
+    const r = await fetch("/api/fondo", {cache: "no-store"}), d = await r.json();
+    if (!d.error) { F = d; pintarFondo(); }
+    else if (!F) $("#dPatr").textContent = "Calculando…";
+  } catch (err) { /* sin conexión: se queda lo último */ }
+  finally { cargandoFondo = false; $("#dash").classList.remove("recargando"); }
+}
+setInterval(() => { if (vistaFondo && !document.hidden) cargarFondo(); }, 30000);
+addEventListener("resize", () => { if (vistaFondo && F) pintarFondo(); });
+document.querySelectorAll(".d-filtro button").forEach(b => b.onclick = () => {
+  rangoFondo = +b.dataset.r;
+  document.querySelectorAll(".d-filtro button").forEach(x => x.classList.toggle("activo", x === b));
+  if (F) pintarFondo();
+});
+document.querySelectorAll(".d-mover button").forEach(b => b.onclick = async () => {
+  const importe = +$("#dImporte").value;
+  let r;
+  try {
+    const resp = await fetch("/api/decision", {method: "POST", headers: {"Content-Type": "application/json", "X-Trading-Floor": "1"},
+      body: JSON.stringify({propuesta: {accion: b.dataset.m, valor: importe}})});
+    r = await resp.json();
+  } catch (err) { r = {ok: false, texto: "No he podido hablar con el Trading Floor: ¿sigue en marcha?"}; }
+  const aviso = $("#dMovido"); aviso.textContent = r.texto; aviso.style.color = r.ok ? "#2ee6a6" : "#ff5a76";
+  if (r.ok) { enCanal("jefe", () => decir(GENERAL, r.texto, 3, "bueno", YO)); cargarFondo(); refrescar(); }
+});
+
+// ---- utilidades de las gráficas ----
+const pctF = x => x == null ? "—" : (x > 0 ? "+" : x < 0 ? "−" : "") + NF2.format(Math.abs(x)) + " %";
+const dineroF = x => x == null ? "—" : (x < 0 ? "−" : "") + fmt.n(Math.abs(x)) + " $";
+const claseF = x => x > 0 ? "sube" : x < 0 ? "baja" : "";
+const fechaF = ms => new Date(ms).toLocaleString("es-ES", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"});
+const diaF = ms => new Date(ms).toLocaleDateString("es-ES", {day: "numeric", month: "short"});
+function marcas(lo, hi, n = 4) {
+  const bruto = (hi - lo) / n || 1, e = Math.pow(10, Math.floor(Math.log10(bruto))), f = bruto / e;
+  const paso = (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * e, out = [];
+  for (let v = Math.ceil(lo / paso) * paso; v <= hi + paso * 1e-6; v += paso) out.push(+v.toFixed(10));
+  return out;
+}
+function tip(ev, html) {
+  const t = $("#dTip");
+  if (!html) { t.hidden = true; return; }
+  t.innerHTML = html; t.hidden = false;
+  const w = t.offsetWidth, h = t.offsetHeight;
+  t.style.left = Math.min(innerWidth - w - 8, ev.clientX + 14) + "px";
+  t.style.top = Math.max(64, Math.min(innerHeight - h - 8, ev.clientY - h - 10)) + "px";
+}
+function filaTip(color, valor, nombre) { return `<div class="f"><i style="background:${color}"></i><b>${esc(valor)}</b> ${esc(nombre)}</div>`; }
+function tablaHtml(cabeceras, filas, numericas = []) {
+  return `<div class="d-scroll"><table class="d-tabla"><thead><tr>${cabeceras.map((c, i) => `<th class="${numericas.includes(i) ? "num" : ""}">${esc(c)}</th>`).join("")}</tr></thead>
+    <tbody>${filas.map(f => `<tr>${f.map((c, i) => `<td class="${numericas.includes(i) ? "num" : ""} ${c && c.clase || ""}">${c && c.color ? `<i style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:${c.color}"></i>` : ""}${esc(c && c.texto !== undefined ? c.texto : c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+function conTabla(id, grafica, tabla) {   // cada gráfica tiene su tabla de datos (para leer los valores sin pasar el ratón)
+  const abierta = tablasAbiertas.has(id);
+  return `${abierta ? tabla : grafica}<button type="button" class="d-vertabla" data-tabla="${id}">${abierta ? "Ver gráfica" : "Ver tabla de datos"}</button>`;
+}
+$("#dash").addEventListener("click", e => {
+  const b = e.target.closest("[data-tabla]"); if (!b) return;
+  const id = b.dataset.tabla; tablasAbiertas.has(id) ? tablasAbiertas.delete(id) : tablasAbiertas.add(id);
+  pintarFondo();
+});
+
+/** Gráfica de líneas con cruz que sigue al ratón. series: [{nombre, color, puntos: [[ms, valor]], grosor}] */
+function lineasSvg(el, series, {formato = v => fmt.n(v), alto = 230, area = false, cero = false, minimo = 0} = {}) {
+  const W = Math.max(280, el.clientWidth || 600), H = alto, m = {l: 58, r: 70, t: 10, b: 24};
+  const xs = series[0].puntos.map(p => p[0]);
+  const vals = series.flatMap(s => s.puntos.map(p => p[1])).filter(v => v != null && isFinite(v));
+  if (xs.length < 2 || !vals.length) { el.innerHTML = `<p class="vacio">Todavía no hay datos suficientes para este periodo.</p>`; return; }
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (cero) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
+  if (hi - lo < minimo) { const c = (hi + lo) / 2; lo = c - minimo / 2; hi = c + minimo / 2; if (cero && hi > 0 && Math.max(...vals) <= 0) { hi = 0; lo = -minimo; } }
+  if (hi - lo < 1e-9) { hi += Math.abs(hi) * .01 + 1e-6; lo -= Math.abs(lo) * .01 + 1e-6; }
+  const pad = (hi - lo) * .08; lo -= pad; if (!(cero && hi <= 0)) hi += pad;
+  const x0 = xs[0], x1 = xs[xs.length - 1];
+  const X = t => m.l + (t - x0) / Math.max(1, x1 - x0) * (W - m.l - m.r), Y = v => m.t + (hi - v) / (hi - lo) * (H - m.t - m.b);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img">`;
+  for (const v of marcas(lo, hi, 4)) svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${Math.abs(v) < 1e-12 ? COL.eje : COL.rejilla}" stroke-width="1"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${esc(formato(v))}</text>`;
+  const nx = Math.min(5, xs.length);
+  for (let k = 0; k < nx; k++) { const t = x0 + (x1 - x0) * k / (nx - 1); svg += `<text x="${X(t)}" y="${H - 6}" text-anchor="${k === 0 ? "start" : k === nx - 1 ? "end" : "middle"}">${esc(diaF(t))}</text>`; }
+  for (const s of series) {
+    const pts = s.puntos.filter(p => p[1] != null && isFinite(p[1]));
+    if (pts.length < 2) continue;
+    const d = pts.map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
+    if (area) svg += `<path d="${d}L${X(pts[pts.length - 1][0])},${Y(Math.max(lo, Math.min(hi, 0)))}L${X(pts[0][0])},${Y(Math.max(lo, Math.min(hi, 0)))}Z" fill="${s.color}" opacity=".1"/>`;
+    svg += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.grosor || 2}" stroke-linejoin="round" stroke-linecap="round"/>`;
+    const u = pts[pts.length - 1];
+    svg += `<circle cx="${X(u[0])}" cy="${Y(u[1])}" r="4" fill="${s.color}" stroke="${COL.superficie}" stroke-width="2"/>`;
+    if (s.etiqueta !== false) svg += `<text class="fin" x="${X(u[0]) + 8}" y="${Y(u[1]) + 4}">${esc(formato(u[1]))}</text>`;
+  }
+  svg += `<line class="cruz" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="rgba(255,255,255,.35)" stroke-width="1" visibility="hidden"/>`;
+  svg += `<rect class="caza" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/></svg>`;
+  el.innerHTML = (series.length > 1 ? `<div class="d-leyenda">${series.map(s => `<span><i style="background:${s.color}"></i>${esc(s.nombre)}</span>`).join("")}</div>` : "") + svg;
+  const caja = el.querySelector("svg"), cruz = el.querySelector(".cruz");
+  const mover = ev => {
+    const r = caja.getBoundingClientRect(), t = x0 + ((ev.clientX - r.left) * W / r.width - m.l) / (W - m.l - m.r) * (x1 - x0);
+    let i = 0; while (i < xs.length - 1 && Math.abs(xs[i + 1] - t) < Math.abs(xs[i] - t)) i++;
+    cruz.setAttribute("x1", X(xs[i])); cruz.setAttribute("x2", X(xs[i])); cruz.setAttribute("visibility", "visible");
+    tip(ev, `<div class="t">${esc(fechaF(xs[i]))}</div>` + series.map(s => filaTip(s.color, s.puntos[i] && s.puntos[i][1] != null ? formato(s.puntos[i][1]) : "—", s.nombre)).join(""));
+  };
+  caja.querySelector(".caza").addEventListener("pointermove", mover);
+  caja.querySelector(".caza").addEventListener("pointerleave", ev => { cruz.setAttribute("visibility", "hidden"); tip(ev, null); });
+}
+function barraRedonda(x, base, fin, w, r = 4) {   // columna con el extremo de datos redondeado y la base recta
+  const h = Math.abs(fin - base); r = Math.min(r, h, w / 2);
+  if (fin < base) return `M${x},${base}V${fin + r}Q${x},${fin} ${x + r},${fin}H${x + w - r}Q${x + w},${fin} ${x + w},${fin + r}V${base}Z`;
+  return `M${x},${base}V${fin - r}Q${x},${fin} ${x + r},${fin}H${x + w - r}Q${x + w},${fin} ${x + w},${fin - r}V${base}Z`;
+}
+/** Columnas por encima/debajo de cero (verde gana, rojo pierde) con tooltip en cada una. puntos: [[ms, valor %]] */
+function columnasSvg(el, puntos, alto = 170) {
+  if (!puntos.length) { el.innerHTML = `<p class="vacio">Todavía no hay días completos en este periodo.</p>`; return; }
+  const W = Math.max(280, el.clientWidth || 600), H = alto, m = {l: 50, r: 10, t: 10, b: 24};
+  const vals = puntos.map(p => p[1]), ext = Math.max(...vals.map(Math.abs), 1e-6) * 1.1;
+  const Y = v => m.t + (ext - v) / (2 * ext) * (H - m.t - m.b), banda = (W - m.l - m.r) / puntos.length, ancho = Math.max(2, Math.min(24, banda - 2));
+  let svg = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img">`;
+  for (const v of marcas(-ext, ext, 4)) svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${Math.abs(v) < 1e-12 ? COL.eje : COL.rejilla}"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${esc(pctF(v))}</text>`;
+  puntos.forEach(([t, v], i) => {
+    const x = m.l + i * banda + (banda - ancho) / 2;
+    svg += `<path d="${barraRedonda(x, Y(0), Y(v), ancho)}" fill="${v >= 0 ? COL.bueno : COL.malo}"/>`;
+    svg += `<rect class="caza" data-i="${i}" x="${m.l + i * banda}" y="${m.t}" width="${banda}" height="${H - m.t - m.b}" fill="transparent"/>`;
+  });
+  const cada = Math.ceil(puntos.length / 6);
+  puntos.forEach(([t], i) => { if (i % cada === 0) svg += `<text x="${m.l + i * banda + banda / 2}" y="${H - 6}" text-anchor="middle">${esc(diaF(t))}</text>`; });
+  el.innerHTML = svg + "</svg>";
+  el.querySelectorAll(".caza").forEach(r => {
+    r.addEventListener("pointermove", ev => { const [t, v] = puntos[+r.dataset.i]; tip(ev, `<div class="t">${esc(diaF(t))}</div>` + filaTip(v >= 0 ? COL.bueno : COL.malo, pctF(v), v >= 0 ? "sube" : "baja")); });
+    r.addEventListener("pointerleave", ev => tip(ev, null));
+  });
+}
+
+// ---- pintar el dashboard ----
+function pintarFondo() {
+  const R = F.resumen, M = F.metricas || {}, cols = Object.fromEntries(F.columnas.map((c, i) => [c, i]));
+  const vivo = S && S.fondo;   // la cabecera lleva los precios en vivo; el dashboard, el último cálculo completo
+  const patrimonio = vivo ? vivo.patrimonio : R.patrimonio;
+  $("#dPatr").textContent = fmt.dinero(patrimonio);
+  $("#dDeltas").innerHTML = `<span>Hoy <b class="${claseF(R.hoy_pct)}">${pctF(vivo ? vivo.hoy_pct : R.hoy_pct)}</b></span>
+    <span>Desde el inicio <b class="${claseF(R.rentabilidad_pct)}">${pctF(vivo ? vivo.rentabilidad_pct : R.rentabilidad_pct)}</b></span>
+    <span>BTC en el mismo tiempo <b class="${claseF(F.btc_pct)}">${pctF(F.btc_pct)}</b></span>
+    <span>Valor liquidativo <b>${NF2.format(vivo ? vivo.vl : R.vl)} $</b></span>
+    <span>Participaciones <b>${fmt.n(R.participaciones)}</b></span>
+    <span>Inicio del fondo <b>${esc(new Date(R.inicio).toLocaleDateString("es-ES", {day: "numeric", month: "short", year: "numeric"}))}</b></span>`;
+  const kpi = (t, v, e) => `<div class="d-kpi"><small>${esc(t)}</small><b>${v}</b>${e ? `<em>${esc(e)}</em>` : ""}</div>`;
+  $("#dKpis").innerHTML = [
+    kpi("Aportado neto", fmt.n(R.aportado) + " $"),
+    kpi("Resultado", dineroF(vivo ? vivo.resultado : R.resultado), "trading + scalping + holding"),
+    kpi("Últimos 30 días", pctF(M.r30d_pct), M.r30d_pct == null ? "el fondo tiene menos de 30 días" : ""),
+    kpi("Rentabilidad anualizada", pctF(M.anualizada_pct), M.anualizada_pct == null ? "se calcula a partir de 30 días" : ""),
+    kpi("Volatilidad anual", M.volatilidad_pct == null ? "—" : NF1.format(M.volatilidad_pct) + " %", "cuánto se mueve el VL"),
+    kpi("Ratio de Sharpe", M.sharpe == null ? "—" : NF2.format(M.sharpe), "rentabilidad por unidad de riesgo"),
+    kpi("Caída máxima", pctF(M.caida_max_pct), `ahora ${pctF(M.caida_actual_pct)}`),
+    kpi("Liquidez", fmt.n(F.reparto.liquidez) + " $", "sin asignar a ningún área"),
+    kpi("Comisiones pagadas", fmt.dinero(F.operaciones.comisiones), "traders y scalpers"),
+    kpi("Días en positivo", M.dias_positivos_pct == null ? "—" : NF1.format(M.dias_positivos_pct) + " %", `mejor ${M.mejor_dia ? pctF(M.mejor_dia[1]) : "—"} · peor ${M.peor_dia ? pctF(M.peor_dia[1]) : "—"}`),
+  ].join("");
+  // series del periodo elegido
+  const desde = rangoFondo ? Date.now() - rangoFondo * 864e5 : -Infinity;
+  let filas = F.serie.filter(f => Date.parse(f[0]) >= desde);
+  if (filas.length < 2) filas = F.serie.slice(-2);
+  const ms = filas.map(f => Date.parse(f[0])), base = filas[0];
+  const rel = (f, c) => f[cols[c]] == null || base[cols[c]] == null ? null : (f[cols[c]] / base[cols[c]] - 1) * 100;
+  // 1) VL frente a BTC
+  const sVl = [{nombre: "Tu fondo (valor liquidativo)", color: COL.fondo, grosor: 2.5, puntos: filas.map((f, i) => [ms[i], rel(f, "vl")])},
+               {nombre: "BTC", color: COL.btc, puntos: filas.map((f, i) => [ms[i], rel(f, "btc_vl")])}];
+  const diarias = [];   // un punto por día (el último de cada día) para las tablas
+  filas.forEach((f, i) => { const d = new Date(ms[i]).toDateString(); if (diarias.length && diarias[diarias.length - 1].d === d) diarias[diarias.length - 1] = {d, i}; else diarias.push({d, i}); });
+  const gVl = $("#cVl .d-graf");
+  gVl.innerHTML = conTabla("vl", "<div class='g'></div>", tablaHtml(["Día", "Fondo", "BTC", "Valor liquidativo"],
+    diarias.map(({i}) => [diaF(ms[i]), {texto: pctF(rel(filas[i], "vl")), clase: claseF(rel(filas[i], "vl"))}, {texto: pctF(rel(filas[i], "btc_vl")), clase: claseF(rel(filas[i], "btc_vl"))}, NF2.format(filas[i][cols.vl])]).reverse(), [1, 2, 3]));
+  if (!tablasAbiertas.has("vl")) lineasSvg(gVl.querySelector(".g"), sVl, {formato: pctF, alto: 260, minimo: 1});
+  // 2) caída desde el máximo
+  const gC = $("#cCaida .d-graf");
+  gC.innerHTML = conTabla("caida", "<div class='g'></div>", tablaHtml(["Día", "Caída"], diarias.map(({i}) => [diaF(ms[i]), pctF(filas[i][cols.caida_pct])]).reverse(), [1]));
+  if (!tablasAbiertas.has("caida")) lineasSvg(gC.querySelector(".g"), [{nombre: "Caída", color: COL.malo, puntos: filas.map((f, i) => [ms[i], f[cols.caida_pct]])}], {formato: pctF, area: true, cero: true, alto: 190, minimo: .5});
+  // 3) resultado por área
+  const gA = $("#cAreas .d-graf");
+  gA.innerHTML = conTabla("areas", "<div class='g'></div>", tablaHtml(["Día", ...AREAS_F.map(a => a[1])],
+    diarias.map(({i}) => [diaF(ms[i]), ...AREAS_F.map(([k]) => ({texto: dineroF(filas[i][cols[k]]), clase: claseF(filas[i][cols[k]])}))]).reverse(), [1, 2, 3]));
+  if (!tablasAbiertas.has("areas")) lineasSvg(gA.querySelector(".g"), AREAS_F.map(([k, n]) => ({nombre: n, color: COL[k], puntos: filas.map((f, i) => [ms[i], f[cols[k]]])})), {formato: dineroF, cero: true, alto: 210, minimo: 20});
+  // 4) rentabilidad de cada día (a partir del último VL de cada día)
+  const porDia = [];
+  F.serie.forEach(f => { const t = Date.parse(f[0]), d = new Date(t).toDateString(); if (porDia.length && porDia[porDia.length - 1].d === d) porDia[porDia.length - 1] = {d, t, v: f[cols.vl]}; else porDia.push({d, t, v: f[cols.vl]}); });
+  const dias = porDia.slice(1).map((x, k) => [x.t, (x.v / porDia[k].v - 1) * 100]).filter(p => p[0] >= desde);
+  const gD = $("#cDias .d-graf");
+  gD.innerHTML = conTabla("dias", "<div class='g'></div>", tablaHtml(["Día", "Rentabilidad"], dias.map(([t, v]) => [diaF(t), {texto: pctF(v), clase: claseF(v)}]).reverse(), [1]));
+  if (!tablasAbiertas.has("dias")) columnasSvg(gD.querySelector(".g"), dias);
+  // 5) reparto
+  const rep = F.reparto, partes = [["trading", "Sala de trading"], ["scalping", "Scalping"], ["holding", "Holding"], ["liquidez", "Liquidez"]]
+    .map(([k, n]) => ({k, n, v: Math.max(0, rep[k] || 0)})), totalRep = partes.reduce((a, p) => a + p.v, 0) || 1;
+  $("#cReparto .d-graf").innerHTML = `<div class="d-reparto">${partes.filter(p => p.v > 0).map(p => `<div data-k="${p.k}" style="flex:${p.v};background:${COL[p.k]}"></div>`).join("")}</div>` +
+    tablaHtml(["Área", "Capital", "Parte"], partes.map(p => [{texto: p.n, color: COL[p.k]}, fmt.dinero(rep[p.k] || 0), NF1.format(p.v / totalRep * 100) + " %"]), [1, 2]) +
+    (rep.liquidez < 0 ? `<p class="d-sub" style="color:#ff5a76">Hay más capital asignado que patrimonio: aporta más o retira traders.</p>` : "");
+  $("#cReparto .d-reparto").querySelectorAll("div").forEach(d => {
+    const p = partes.find(x => x.k === d.dataset.k);
+    d.addEventListener("pointermove", ev => tip(ev, filaTip(COL[p.k], `${fmt.dinero(p.v)} · ${NF1.format(p.v / totalRep * 100)} %`, p.n)));
+    d.addEventListener("pointerleave", ev => tip(ev, null));
+  });
+  // 6) exposición
+  const expo = F.exposicion || [], maxE = Math.max(1, ...expo.map(e => Math.max(e.largo, e.corto)));
+  $("#cExpo .d-graf").innerHTML = expo.length ? `<div class="d-expo">${expo.map(e => `<span>${esc(moneda(e.simbolo))}</span>
+      <div class="izq">${e.corto ? `<small>${fmt.n(e.corto)} $</small><div class="barra" style="width:${e.corto / maxE * 80}%"></div>` : ""}</div>
+      <div class="der">${e.largo ? `<div class="barra" style="width:${e.largo / maxE * 80}%"></div><small>${fmt.n(e.largo)} $</small>` : ""}</div>`).join("")}</div>
+    <p class="d-sub" style="margin-top:10px">Incluye las posiciones abiertas de los traders y las monedas del holding.</p>`
+    : `<p class="vacio">Ahora mismo no hay dinero en posiciones abiertas.</p>`;
+  // 7) meses
+  const meses = F.mensual || [], anios = [...new Set(meses.map(m => m[0]))];
+  const NOMBRES_MES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  $("#cMeses .d-graf").innerHTML = meses.length ? `<div class="d-scroll"><table class="d-tabla d-meses"><thead><tr><th>Año</th>${NOMBRES_MES.map(n => `<th class="num">${n}</th>`).join("")}</tr></thead><tbody>${anios.map(a => `<tr><td>${a}</td>${NOMBRES_MES.map((_, k) => {
+      const x = meses.find(m => m[0] === a && m[1] === k + 1);
+      if (!x) return "<td></td>";
+      const fuerza = Math.min(1, Math.abs(x[2]) / 5) * .75 + .2;
+      return `<td class="celda" style="background:${rgba(x[2] >= 0 ? COL.bueno : COL.malo, fuerza)}">${esc(pctF(x[2]))}</td>`;
+    }).join("")}</tr>`).join("")}</tbody></table></div>` : `<p class="vacio">Aún no hay meses.</p>`;
+  // 8) operaciones
+  const O = F.operaciones;
+  const st = (t, v) => `<div><small>${esc(t)}</small><b>${v}</b></div>`;
+  $("#cOps .d-graf").innerHTML = `<div class="d-stats">${[st("Cerradas", fmt.n(O.cerradas)), st("Acierto", O.aciertos_pct == null ? "—" : NF1.format(O.aciertos_pct) + " %"),
+    st("Factor de beneficio", O.factor_beneficio == null ? "—" : NF2.format(O.factor_beneficio)), st("Media por operación", dineroF(O.media)),
+    st("Mejor", dineroF(O.mejor)), st("Peor", dineroF(O.peor))].join("")}</div>
+    <p class="d-sub" style="margin-top:10px">Coste por operación (ida y vuelta): ${NF2.format(O.coste_ida_vuelta_pct)} % en trading, ${NF2.format(O.coste_scalping_pct)} % en scalping. Comisiones pagadas: ${fmt.dinero(O.comisiones)}.</p>`;
+  // 9) posiciones abiertas
+  const ab = F.abiertas || [];
+  $("#cAbiertas .d-graf").innerHTML = ab.length ? tablaHtml(["Estrategia", "Sala", "Activo", "Lado", "Entrada", "Desde", "Invertido", "Ahora", "Stop", "Objetivo"],
+    ab.map(p => [p.id, p.grupo === "scalping" ? "Scalping" : "Trading", moneda(p.simbolo), ladoTxt(p.direccion), fmt.precio(p.entrada), fechaF(Date.parse(p.entrada_t)),
+      fmt.dinero(p.nocional), {texto: pctF(p.retorno_pct), clase: claseF(p.retorno_pct)}, p.stop ? fmt.precio(p.stop) : "—", p.objetivo ? fmt.precio(p.objetivo) : "—"]), [4, 6, 7, 8, 9])
+    : `<p class="vacio">No hay posiciones abiertas: los traders esperan a que se cumplan sus condiciones.</p>`;
+  // 10) ranking
+  const rk = [...(F.mejores || []), ...(F.peores || []).filter(x => !(F.mejores || []).some(y => y.id === x.id))];
+  $("#cRanking .d-graf").innerHTML = rk.length ? tablaHtml(["Estrategia", "Sala", "Activo", "Operaciones", "Resultado"],
+    rk.map(r => [r.id, r.grupo === "scalping" ? "Scalping" : "Trading", `${moneda(r.simbolo)} ${ladoTxt(r.direccion)}`, r.operaciones, {texto: dineroF(r.resultado), clase: claseF(r.resultado)}]), [3, 4])
+    : `<p class="vacio">Todavía no hay estrategias operando.</p>`;
+  // 11) movimientos
+  $("#cMovs .d-graf").innerHTML = tablaHtml(["Fecha", "Movimiento", "Importe", "VL", "Participaciones"], (F.movimientos || []).map(m => [
+    new Date(m.t).toLocaleDateString("es-ES"), m.tipo === "aportacion" ? (m.nota || "Aportación") : "Reembolso",
+    {texto: (m.tipo === "aportacion" ? "+" : "−") + fmt.dinero(m.importe), clase: m.tipo === "aportacion" ? "sube" : "baja"}, m.vl ? NF2.format(m.vl) : "—", m.participaciones ? fmt.n(m.participaciones) : "—"]), [2, 3, 4]);
+  // 12) últimas operaciones
+  const ul = F.ultimas || [];
+  $("#cUltimas .d-graf").innerHTML = ul.length ? tablaHtml(["Cierre", "Estrategia", "Sala", "Activo", "Lado", "Entrada", "Salida", "Motivo", "Resultado"],
+    ul.map(o => [fechaF(Date.parse(o.salida_t)), o.id, o.grupo === "scalping" ? "Scalping" : "Trading", moneda(o.simbolo), ladoTxt(o.direccion), fmt.precio(o.entrada), fmt.precio(o.salida), o.motivo,
+      {texto: pctF(o.retorno_pct), clase: claseF(o.retorno_pct)}]), [5, 6, 8])
+    : `<p class="vacio">Todavía no se ha cerrado ninguna operación.</p>`;
+}
+
 // ========================================================== BUCLE =====
 let ultimo = performance.now(), acumulado = 0;
 function bucle(ahora) {
@@ -3388,7 +3898,7 @@ function bucle(ahora) {
   for (const a of agentes) moverAgente(a, dt);
   moverPaquetes(dt); moverParticulas(dt); robot(dt); procesarChat(); moverCamara(dt); pasoAnimaciones(ahora);
   acumulado += dt; if (acumulado > .5) { acumulado = 0; planificar(); }
-  if (!document.hidden) dibujar();
+  if (!document.hidden && !vistaFondo) dibujar();   // con «Mi fondo» abierto no se pinta la oficina (ahorra CPU)
   $("#pReloj").textContent = fmt.hora(new Date());
   const falta = Math.max(0, Math.round((proximoComiteMs - Date.now()) / 1000));
   $("#pComite").textContent = `Comité en ${String(Math.floor(falta / 60)).padStart(2, "0")}:${String(falta % 60).padStart(2, "0")}`;

@@ -59,7 +59,11 @@ def cargar(papel: dict | None = None, holding: dict | None = None) -> dict:
         inicio = ((min(inicios) - pd.Timedelta(hours=1)) if inicios else pd.Timestamp.now(tz="UTC")).floor("h")
         f = {"inicio": inicio.isoformat(), "movimientos": [
             {"t": inicio.isoformat(), "tipo": "aportacion", "importe": FONDO_CAPITAL_INICIAL, "nota": "capital inicial"}]}
-        almacen.guardar("fondo", f)
+        # Si ya hay traders o carteras pero aún no se han calculado sus curvas (primer arranque de esta versión),
+        # no se guarda: así el fondo empieza con el primer resultado y no «hoy».
+        hay_actividad = bool(papel.get("estrategias")) or bool(holding.get("planes"))
+        if inicios or not hay_actividad:
+            almacen.guardar("fondo", f)
         return f
 
 

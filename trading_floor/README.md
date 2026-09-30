@@ -47,8 +47,12 @@ Telegram de Jarvis, si lo tienes configurado.
    - **Monte Carlo**: barajando 1.000 veces sus operaciones, ¿el peor 5 % sigue en positivo?
    - **Estabilidad**: ¿siguen ganando las variantes con parámetros vecinos?
    - **Test del mono**: en datos no vistos, ¿gana al 90 % de "monos" que entran al azar?
-4. **Banco** (`banco.py`). Guarda las supervivientes que no se parecen demasiado a otra del
-   banco (máximo 8 por activo: 6 activos × 8 = las 48 mesas de la sala de trading).
+4. **Banco** (`banco.py`). Guarda las supervivientes (máximo 8 por activo: 6 activos × 8 = las 48 mesas
+   de la sala de trading) **sin repetidas**: no entra una estrategia que sea la misma idea que otra
+   del banco (mismas condiciones con otros números; se mira antes de las pruebas), que entre casi en
+   los mismos momentos (más del 30 % de sus entradas) o que esté dentro del mercado a la vez la mayor
+   parte del tiempo. Las repetidas de versiones anteriores se quitan con «quita las repetidas» en el
+   chat o `trading banco --limpiar-repetidas` (se queda la mejor fuera de muestra de cada idea).
 5. **Paper trading** (`papel.py`). En cuanto una estrategia entra en el banco, un trader se sienta en
    una mesa con ella y 1.000 $ ficticios. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen
    **todas** sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra;
@@ -61,8 +65,9 @@ Telegram de Jarvis, si lo tienes configurado.
 6. **Control de riesgos** (`riesgo.py`). Encima del paper trading:
    - **Tamaño de cada operación**: arriesga como mucho el 1 % del capital de su trader si salta el
      stop (con un stop lejano se invierte menos; nunca más del 100 %).
-   - **Vetos**: una entrada nueva se veta si ya hay 16 posiciones abiertas, o 3 iguales (mismo
-     símbolo y dirección), o si está activado un freno.
+   - **Vetos**: una entrada nueva se veta si ya había 16 posiciones abiertas en la sala de trading (6 en
+     la de scalping) o 3 iguales (mismo símbolo y dirección) en ese momento, o si está activado un freno.
+     Se evalúa con las posiciones que estaban abiertas justo cuando llega la señal.
    - **Frenos**: si el día pierde un 2 % del capital, no se abren más posiciones hasta mañana; si el
      resultado cae un 6 % del capital desde su máximo, se pausan las entradas.
 7. **Holding** (`holding.py`). Carteras de largo plazo (por defecto 5.000 $ en BTC, 3.000 $ en ETH y
@@ -81,7 +86,21 @@ Telegram de Jarvis, si lo tienes configurado.
    ```bash
    ./trading.sh holding --nuevo BTCUSDT --presupuesto 5000 --paso 10 --tramo 15 --reserva 50 --salidas 30,60,100
    ```
-8. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
+8. **Scalping** (misma minería y paper trading, con velas de 5 minutos). Una sala aparte con 12 mesas
+   (4 para BTC, 4 para ETH y 4 para SOL, los más líquidos). Se mina con 120 días de velas de 5 minutos y
+   el mismo embudo de seis pruebas. Como los scalpers trabajan con órdenes límite, pagan comisión de
+   «maker» (0,02 % por lado en Binance Futures) más un poco de deslizamiento: 0,06 % ida y vuelta, frente
+   al 0,14 % de la sala de trading. Con la comisión de «taker» casi ninguna estrategia de 5 minutos
+   sobrevive; con la de «maker» sí algunas. La sala enseña cuánto se paga en comisiones.
+9. **Tu fondo** (`fondo.py`). Todo junto funciona como un fondo de inversión, con dinero ficticio:
+   aportas capital (100.000 $ al empezar) y recibes participaciones a 10 $. El **valor liquidativo**
+   (patrimonio / participaciones) solo sube o baja con los resultados de trading, scalping y holding;
+   aportar o retirar dinero no lo cambia. Así la cabecera muestra tu patrimonio de verdad y un trader
+   nuevo ya no «suma» 1.000 $. Calcula rentabilidad (hoy, 7 y 30 días, año, anualizada), volatilidad,
+   Sharpe, caída máxima, mejor y peor día, rentabilidad mensual, la comparación con haber comprado BTC,
+   el reparto del dinero por área, la liquidez y la exposición por activo. Puedes aportar o retirar
+   (como mucho la liquidez) desde el dashboard o por el chat («aporta 5000», «retira 2000»).
+10. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
    (Yahoo Finance) y el Fear & Greed de cripto (alternative.me). Con ellos se calcula un régimen
    RISK-ON / RISK-OFF. Es contexto para el comité: **las estrategias no usan estos datos**.
 
@@ -89,6 +108,12 @@ Un ejemplo real de embudo (2.000 estrategias de BTC): 362 parecían rentables, 1
 fuera de muestra y 3 entraron en el banco. Así es esto: casi todo es ruido.
 
 ## La oficina
+
+Arriba a la izquierda eliges la vista: **🏢 Oficina** o **📊 Mi fondo**, tu dashboard personal con
+todas las gráficas y los datos del fondo (rentabilidad frente a BTC, caída desde el máximo, resultado
+por área, rentabilidad de cada día y de cada mes, dónde está tu dinero, exposición por activo,
+operaciones, posiciones abiertas, mejores y peores estrategias, últimas operaciones y aportaciones).
+Cada gráfica tiene su «tabla de datos» y el filtro de periodo (7, 30, 90 días o todo) está encima.
 
 Todo lo que pasa en la oficina sale del estado real: los cubos de la cinta son estrategias
 pasando pruebas, los lingotes de la cámara son las estrategias del banco, las pantallas de los
@@ -136,7 +161,8 @@ descanso, a la terraza o al gimnasio.
 | `robustez.py` | Las seis pruebas del laboratorio |
 | `mineria.py` | Algoritmo genético y embudo; minería continua por rondas |
 | `banco.py`, `almacen.py` | Banco de estrategias y almacén JSON en `~/.trading_floor/` |
-| `papel.py` | Paper trading, curva de resultados y resultado diario |
+| `papel.py` | Paper trading, curva de resultados, resultado diario y resumen de cada sala |
+| `fondo.py` | Tu fondo: participaciones, valor liquidativo, aportaciones, métricas y comparación con BTC |
 | `riesgo.py` | Tamaño de las operaciones, límites, vetos y frenos |
 | `holding.py` | Carteras de largo plazo sin stop: promedian a la baja y salen por partes sobre el coste medio |
 | `macro.py` | Datos macroeconómicos y régimen de mercado |
