@@ -1,12 +1,12 @@
 """Trading Floor: minería de estrategias + paper trading (dinero ficticio) + oficina isométrica.
 
 Uso:
-    python -m trading_floor                 # todo: oficina en el navegador, minería 24/7 y paper trading
-    python -m trading_floor minar           # una ronda de minería (BTC, ETH y SOL)
+    python -m trading_floor                 # todo: oficina en el navegador, paper trading y minería (con el botón)
+    python -m trading_floor minar           # una ronda de minería desde la terminal
     python -m trading_floor banco           # ver las estrategias aprobadas
     python -m trading_floor papel           # solo el paper trading
     python -m trading_floor macro           # resumen macroeconómico
-    python -m trading_floor holding         # carteras de largo plazo con zonas de compra y venta
+    python -m trading_floor holding         # carteras de largo plazo: promedian a la baja, sin stop
     python -m trading_floor web             # solo la oficina
 """
 
@@ -29,7 +29,7 @@ def _es(x: float, decimales: int = 2) -> str:
     return f"{x:,.{decimales}f}".replace(",", "_").replace(".", ",").replace("_", ".")
 
 
-def _precios(texto: str) -> list[float]:
+def _numeros(texto: str) -> list[float]:
     return [float(x) for x in texto.replace(" ", "").split(",") if x]
 
 
@@ -40,21 +40,30 @@ def _ver_holding(args) -> None:
         print("Plan borrado." if holding.borrar(args.borrar) else f"No hay plan de {args.borrar.upper()}.")
         return
     if args.nuevo:
-        holding.crear(args.nuevo, args.presupuesto, args.compras, args.ventas, args.stop)
+        simbolo = args.nuevo.upper()
+        holding.crear(simbolo if simbolo.endswith("USDT") else simbolo + "USDT", args.presupuesto, args.paso,
+                      args.tramo, args.reserva, args.salidas)
     else:
         holding.actualizar()
     from . import almacen
 
     estado = almacen.cargar("holding", {})
     for p in estado.get("planes", {}).values():
-        print(f"\n{p['simbolo']}  presupuesto {_es(p['presupuesto'], 0)} $ · valor {_es(p['valor'])} $ "
+        print(f"\n{p['simbolo']}  aportado {_es(p['aportado'], 0)} $ · valor {_es(p['valor'])} $ "
               f"({_es(p['resultado_pct'])} %) · precio {_es(p['precio'])}")
-        print("   compras: " + " · ".join(f"{_es(z['precio'])}{' ✓' if z['llena'] else ''}" for z in p["compras"]))
-        print("   ventas:  " + " · ".join(f"{_es(z['precio'])}{' ✓' if z['llena'] else ''}" for z in p["ventas"]))
-        print(f"   stop:    {_es(p['stop'])}{'  (saltó)' if p['cerrado'] else ''}")
+        medio = _es(p["coste_medio"]) if p.get("coste_medio") else "—"
+        print(f"   coste medio {medio} · reserva usada {_es(p['reserva_usada'], 0)} de {_es(p['reserva'], 0)} $ · "
+              f"efectivo {_es(p['efectivo'])} $ · sin stop")
+        compras = [z for z in p["compras"] if not z.get("sin_dinero")]
+        print(f"   próximas compras (cada −{_es(p['paso_pct'], 1)} %): "
+              + (" · ".join(_es(z["precio"]) for z in compras) or "sin dinero ni reserva"))
+        print("   puntos de salida: " + " · ".join(
+            f"+{_es(z['sobre_coste_pct'], 0)} % → {_es(z['precio']) if z['precio'] else '—'} (vende {_es(z['pct'], 0)} %)"
+            f"{' ✓' if z['llena'] else ''}" for z in p["ventas"]))
     r = estado.get("resumen")
     if r:
-        print(f"\nTotal: {_es(r['valor'])} $ de {_es(r['presupuesto'], 0)} $ ({_es(r['resultado_pct'])} %). Dinero ficticio.")
+        print(f"\nTotal: {_es(r['valor'])} $ de {_es(r['aportado'], 0)} $ aportados ({_es(r['resultado_pct'])} %). "
+              "Dinero ficticio.")
 
 
 def _opciones_mineria(p: argparse.ArgumentParser) -> None:
@@ -93,7 +102,9 @@ def main() -> None:
     )
     parser.add_argument("--puerto", type=int, default=8050, help="puerto de la oficina web (por defecto 8050)")
     parser.add_argument("--sin-minar", action="store_true", help="no minar; solo oficina y paper trading")
-    parser.add_argument("--pausa", type=float, default=15, help="minutos de descanso entre rondas de minería")
+    parser.add_argument("--minar-siempre", action="store_true",
+                        help="minar por rondas sin parar (por defecto solo busca cuando pulsas «Buscar estrategias»)")
+    parser.add_argument("--pausa", type=float, default=15, help="minutos de descanso entre rondas (con --minar-siempre)")
     parser.add_argument("--telegram", action="store_true", help="avisar de cada operación por Telegram (bot de Jarvis)")
     _opciones_mineria(parser)
     sub = parser.add_subparsers(dest="orden")
@@ -113,12 +124,14 @@ def main() -> None:
 
     sub.add_parser("macro", help="resumen macroeconómico (bolsa, VIX, dólar, oro, Fear & Greed...)")
 
-    p_hold = sub.add_parser("holding", help="carteras de largo plazo con zonas de compra y de venta")
+    p_hold = sub.add_parser("holding", help="carteras de largo plazo: promedian a la baja y salen por partes, sin stop")
     p_hold.add_argument("--nuevo", metavar="SIMBOLO", help="crea (o rehace) el plan de un símbolo, p. ej. BTCUSDT")
     p_hold.add_argument("--presupuesto", type=float, default=5000, help="dinero ficticio del plan (por defecto 5000)")
-    p_hold.add_argument("--compras", type=_precios, help="zonas de compra separadas por comas, p. ej. 75000,68000,60000")
-    p_hold.add_argument("--ventas", type=_precios, help="zonas de venta separadas por comas, p. ej. 110000,130000,160000")
-    p_hold.add_argument("--stop", type=float, help="precio del stop de catástrofe")
+    p_hold.add_argument("--paso", type=float, help="%% de caída desde la última compra para volver a comprar (por defecto 8)")
+    p_hold.add_argument("--tramo", type=float, help="tamaño de cada compra, en %% del presupuesto (por defecto 12,5)")
+    p_hold.add_argument("--reserva", type=float, help="capital extra si se acaba el presupuesto, en %% (por defecto 50)")
+    p_hold.add_argument("--salidas", type=_numeros,
+                        help="puntos de salida en %% sobre el coste medio, separados por comas (por defecto 30,60,100)")
     p_hold.add_argument("--borrar", metavar="SIMBOLO", help="borra el plan de un símbolo")
 
     p_web = sub.add_parser("web", help="abrir solo la oficina")
@@ -169,7 +182,7 @@ def main() -> None:
             parar.wait()
         else:
             from .macro import vigilar
-            from .mineria import minar_continuo
+            from .mineria import minar_a_demanda, minar_continuo
             from .papel import operar
             from .web import servir
 
@@ -178,9 +191,11 @@ def main() -> None:
             threading.Thread(target=vigilar, args=(15, parar), daemon=True).start()
             if args.sin_minar:
                 parar.wait()
-            else:
+            elif args.minar_siempre:
                 minar_continuo(args.simbolos, args.intervalo, args.estrategias, args.generaciones,
                                args.dias, args.pausa, parar)
+            else:
+                minar_a_demanda(args.simbolos, args.intervalo, args.estrategias, args.generaciones, args.dias, parar)
     except KeyboardInterrupt:
         parar.set()
         print("\nTrading Floor detenido.")

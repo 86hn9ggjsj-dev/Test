@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import datetime as dt
 import threading
+import time
 
 import numpy as np
 import pandas as pd
@@ -146,7 +147,8 @@ def ciclo(estado: dict) -> list[dict]:
                 "simbolo": clave[0], "direccion": est.direccion, "descripcion": b["descripcion"],
                 "operaciones": [], "posicion": None, "aprobadas": [], "vetadas": [],
             }
-            evento("alta", f"{b['id']} entra en la sala de trading con {_precio(CAPITAL_POR_ESTRATEGIA)} $ ficticios",
+            evento("alta", f"{b['id']} ha superado las pruebas y se pone en marcha: un trader nuevo la opera desde "
+                           f"la próxima vela con {_precio(CAPITAL_POR_ESTRATEGIA)} $ ficticios",
                    id=b["id"], simbolo=clave[0], direccion=est.direccion)
 
     # 2) Simulación con la gestión de riesgo: cada entrada nueva se aprueba o se veta una sola vez.
@@ -315,8 +317,12 @@ def operar(segundos: float = 60, telegram: bool = False, parar: threading.Event 
 
             for ev in actualizar():
                 print(f"[holding {dt.datetime.now():%H:%M}] {ev['texto']}", flush=True)
-                if telegram and ev["tipo"] in ("compra", "venta", "stop"):
+                if telegram and ev["tipo"] in ("compra", "venta", "aportacion"):
                     _telegram(f"💎 {ev['texto']}")
         except Exception as e:
             print(f"[holding] Error en el ciclo (lo reintento): {e}", flush=True)
-        parar.wait(segundos)
+        # Espera al siguiente ciclo, pero si entra una estrategia en el banco se pone en marcha ya.
+        fin = time.monotonic() + segundos
+        while not parar.is_set() and not banco.nueva.is_set() and time.monotonic() < fin:
+            parar.wait(min(1.0, max(0.0, fin - time.monotonic())))
+        banco.nueva.clear()

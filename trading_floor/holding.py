@@ -1,8 +1,15 @@
-"""Sala de holding: comprar y mantener a largo plazo siguiendo un plan de zonas (dinero ficticio).
+"""Sala de holding: comprar y mantener a largo plazo con un plan adaptativo (dinero ficticio).
 
-Un plan tiene una compra inicial, zonas de compra escalonadas por debajo (órdenes límite que se
-llenan si el precio baja hasta ellas), zonas de venta por encima para asegurar beneficio y un
-stop de catástrofe. Se simula con las velas reales de Binance desde que se crea el plan.
+Reglas del plan (sin stop loss: nunca se vende por miedo):
+- Compra inicial de una parte del presupuesto.
+- Promediar a la baja: cada vez que el precio cae un `paso_pct` desde la última compra (o desde la
+  última salida), se compra otro tramo. Si se acaba el presupuesto, entra capital de la reserva.
+- Puntos de salida sobre el coste medio: al subir un +X % por encima del coste medio se vende una
+  parte de la posición. Como dependen del coste medio, se mueven solos cuando se promedia.
+- Si el precio vuelve por debajo del coste medio, los puntos de salida se rearman para la
+  siguiente subida. Siempre queda una parte de la posición (el núcleo).
+
+Se simula con las velas reales de Binance (1 hora) desde que se crea el plan.
 """
 
 from __future__ import annotations
@@ -18,9 +25,10 @@ from .datos import velas
 from .mercado import Mercado
 
 ENTRADA_INICIAL_PCT = 25.0
-COMPRAS_DEFECTO = [(-.10, 25.0), (-.20, 25.0), (-.30, 25.0)]  # (distancia al precio inicial, % del presupuesto)
-VENTAS_DEFECTO = [(.30, 20.0), (.60, 25.0), (1.00, 25.0)]  # (distancia, % de lo que se tenga en ese momento)
-STOP_DEFECTO = -.50
+PASO_PCT = 8.0  # caída desde la última compra que dispara otra compra
+TRAMO_PCT = 12.5  # tamaño de cada compra de promedio, en % del presupuesto
+RESERVA_PCT = 50.0  # capital extra (en % del presupuesto) que se puede añadir si se acaba el dinero
+SALIDAS = [(30.0, 20.0), (60.0, 25.0), (100.0, 25.0)]  # (+% sobre el coste medio, % de la posición que se vende)
 COSTE = COMISION + DESLIZAMIENTO
 
 
@@ -28,127 +36,178 @@ def _ahora() -> str:
     return dt.datetime.now().astimezone().isoformat(timespec="seconds")
 
 
-def _redondear(x: float) -> float:
-    return round(x, 0) if x >= 1000 else round(x, 2) if x >= 10 else round(x, 4)
-
-
 def _precio(x: float) -> str:
     return f"{x:,.2f}".replace(",", "_").replace(".", ",").replace("_", ".")
 
 
-def nuevo_plan(simbolo: str, presupuesto: float, precio: float, compras: list[float] | None = None,
-               ventas: list[float] | None = None, stop: float | None = None) -> dict:
-    """Crea un plan. Sin zonas explícitas usa escalones en −10/−20/−30 % y +30/+60/+100 %."""
-    if compras:
-        pct = (100 - ENTRADA_INICIAL_PCT) / len(compras)
-        zonas_compra = [{"precio": _redondear(p), "pct": pct} for p in sorted(compras, reverse=True)]
+def _pct(x: float) -> str:
+    return f"{x:g}".replace(".", ",")
+
+
+def nuevo_plan(simbolo: str, presupuesto: float, precio: float, paso_pct: float | None = None,
+               tramo_pct: float | None = None, reserva_pct: float | None = None,
+               salidas_pct: list[float] | None = None) -> dict:
+    """Crea un plan adaptativo. Lo que no se indique usa los valores por defecto."""
+    if salidas_pct:
+        partes = [20.0, 25.0, 25.0, 15.0]
+        salidas = [{"sobre_coste_pct": float(g), "vende_pct": partes[min(i, 3)]} for i, g in enumerate(sorted(salidas_pct))]
     else:
-        zonas_compra = [{"precio": _redondear(precio * (1 + d)), "pct": pct} for d, pct in COMPRAS_DEFECTO]
-    if ventas:
-        pcts = [20.0, 25.0, 25.0, 30.0]
-        zonas_venta = [{"precio": _redondear(p), "pct": pcts[min(i, 3)]} for i, p in enumerate(sorted(ventas))]
-    else:
-        zonas_venta = [{"precio": _redondear(precio * (1 + d)), "pct": pct} for d, pct in VENTAS_DEFECTO]
+        salidas = [{"sobre_coste_pct": g, "vende_pct": v} for g, v in SALIDAS]
     return {
+        "tipo": "adaptativo",
         "simbolo": simbolo.upper(),
         "presupuesto": float(presupuesto),
         "creado": _ahora(),
         "precio_inicio": float(precio),
         "entrada_inicial_pct": ENTRADA_INICIAL_PCT,
-        "compras": zonas_compra,
-        "ventas": zonas_venta,
-        "stop": _redondear(stop if stop is not None else precio * (1 + STOP_DEFECTO)),
+        "paso_pct": float(paso_pct or PASO_PCT),
+        "tramo_pct": float(tramo_pct or TRAMO_PCT),
+        "reserva_pct": float(RESERVA_PCT if reserva_pct is None else reserva_pct),
+        "salidas": salidas,
     }
 
 
+def _desde_plan_antiguo(plan: dict) -> dict:
+    """Los planes de zonas fijas con stop se convierten al plan adaptativo (misma fecha y presupuesto)."""
+    nuevo = nuevo_plan(plan["simbolo"], plan["presupuesto"], plan["precio_inicio"])
+    nuevo["creado"] = plan["creado"]
+    return nuevo
+
+
 def simular_plan(plan: dict, m: Mercado) -> dict:
-    """Ejecuta el plan sobre las velas desde su creación. Devuelve el estado de la cartera."""
+    """Ejecuta el plan vela a vela desde su creación. Devuelve el estado de la cartera."""
     inicio = int(np.searchsorted(m.tiempo, pd.Timestamp(plan["creado"]), side="right"))
-    fills = []  # (vela, orden, tipo, índice de zona, precio)
-    for i, z in enumerate(plan["compras"]):
-        toca = np.flatnonzero(m.l[inicio:] <= z["precio"])
-        if len(toca):
-            k = inicio + int(toca[0])
-            fills.append((k, 0, "compra", i, min(m.o[k], z["precio"])))
-    for i, z in enumerate(plan["ventas"]):
-        toca = np.flatnonzero(m.h[inicio:] >= z["precio"])
-        if len(toca):
-            k = inicio + int(toca[0])
-            fills.append((k, 2, "venta", i, max(m.o[k], z["precio"])))
-    toca = np.flatnonzero(m.l[inicio:] <= plan["stop"])
-    if len(toca):
-        k = inicio + int(toca[0])
-        fills.append((k, 1, "stop", 0, min(m.o[k], plan["stop"])))
+    presupuesto, paso = plan["presupuesto"], plan["paso_pct"] / 100
+    reserva = presupuesto * plan["reserva_pct"] / 100
+    tramo = presupuesto * plan["tramo_pct"] / 100
+    efectivo, reserva_usada, unidades, coste_base, realizado = presupuesto, 0.0, 0.0, 0.0, 0.0
+    operaciones: list[dict] = []
+    hechas: set[int] = set()
 
-    efectivo, unidades, coste_base, realizado = plan["presupuesto"], 0.0, 0.0, 0.0
-    operaciones = []
+    def t(k: int) -> str:
+        return m.tiempo[min(max(k, 0), len(m) - 1)].isoformat()
 
-    def comprar(importe: float, precio: float, k: int, texto: str) -> None:
-        nonlocal efectivo, unidades, coste_base
+    def comprar(importe: float, precio: float, k: int, motivo: str) -> None:
+        nonlocal efectivo, reserva_usada, unidades, coste_base
+        if importe > efectivo:
+            extra = min(importe - efectivo, reserva - reserva_usada)
+            if extra > 1:
+                reserva_usada += extra
+                efectivo += extra
+                operaciones.append({"t": t(k), "tipo": "aportacion", "motivo": "reserva", "importe": round(extra, 2),
+                                    "reserva_usada": round(reserva_usada, 2), "reserva": round(reserva, 2)})
         importe = min(importe, efectivo)
-        if importe <= 0:
+        if importe <= 1:
             return
         u = importe * (1 - COSTE) / precio
-        efectivo -= importe; unidades += u; coste_base += importe
-        operaciones.append({"t": m.tiempo[min(k, len(m) - 1)].isoformat(), "tipo": "compra", "zona": texto,
-                            "precio": float(precio), "unidades": u, "importe": round(importe, 2)})
+        efectivo -= importe
+        unidades += u
+        coste_base += importe
+        operaciones.append({"t": t(k), "tipo": "compra", "motivo": motivo, "precio": float(precio), "unidades": u,
+                            "importe": round(importe, 2), "coste_medio": coste_base / unidades})
 
-    def vender(u: float, precio: float, k: int, tipo: str, texto: str) -> None:
+    def vender(parte: float, precio: float, k: int, motivo: str) -> None:
         nonlocal efectivo, unidades, coste_base, realizado
+        u = unidades * parte
         if u <= 0:
             return
         medio = coste_base / unidades
         ingreso = u * precio * (1 - COSTE)
         realizado += ingreso - u * medio
-        efectivo += ingreso; coste_base -= u * medio; unidades -= u
-        operaciones.append({"t": m.tiempo[k].isoformat(), "tipo": tipo, "zona": texto, "precio": float(precio),
-                            "unidades": u, "importe": round(ingreso, 2)})
+        efectivo += ingreso
+        coste_base -= u * medio
+        unidades -= u
+        operaciones.append({"t": t(k), "tipo": "venta", "motivo": motivo, "precio": float(precio), "unidades": u,
+                            "importe": round(ingreso, 2), "coste_medio": medio})
 
-    comprar(plan["presupuesto"] * plan["entrada_inicial_pct"] / 100, plan["precio_inicio"], inicio - 1, "entrada inicial")
-    cerrado = False
-    valores = np.full(len(m) - inicio + 1, np.nan)
-    ultimo = inicio - 1
-    for k, _, tipo, i, precio in sorted(fills):
-        valores[ultimo - inicio + 1 : k - inicio + 1] = efectivo + unidades * m.c[ultimo:k]
-        ultimo = k
-        if tipo == "compra":
-            comprar(plan["presupuesto"] * plan["compras"][i]["pct"] / 100, precio, k, f"zona de compra {i + 1}")
-        elif tipo == "venta":
-            vender(unidades * plan["ventas"][i]["pct"] / 100, precio, k, "venta", f"zona de venta {i + 1}")
-        else:
-            vender(unidades, precio, k, "stop", "stop de catástrofe")
-            cerrado = True
-            break
-    valores[ultimo - inicio + 1 :] = efectivo + unidades * m.c[ultimo:]
+    comprar(presupuesto * plan["entrada_inicial_pct"] / 100, plan["precio_inicio"], inicio - 1, "entrada inicial")
+    referencia = plan["precio_inicio"]  # última compra o última salida: de ahí se mide la caída
+    valores = [efectivo + unidades * plan["precio_inicio"]]
+    for k in range(inicio, len(m)):
+        # 1) Promediar a la baja (puede saltar varios escalones si el precio cae de golpe).
+        while efectivo + (reserva - reserva_usada) > 1:
+            objetivo = referencia * (1 - paso)
+            if m.l[k] > objetivo:
+                break
+            comprar(tramo, min(m.o[k], objetivo), k, "promedio")
+            referencia = objetivo
+            hechas.clear()
+        # 2) Puntos de salida sobre el coste medio.
+        if unidades > 0:
+            medio = coste_base / unidades
+            for i, s in enumerate(plan["salidas"]):
+                nivel = medio * (1 + s["sobre_coste_pct"] / 100)
+                if i not in hechas and m.h[k] >= nivel:
+                    vender(s["vende_pct"] / 100, max(m.o[k], nivel), k, f"salida {i + 1}")
+                    hechas.add(i)
+                    referencia = nivel
+            # 3) Si vuelve por debajo del coste medio, se rearman las salidas.
+            if hechas and m.c[k] < medio:
+                hechas.clear()
+        valores.append(efectivo + unidades * m.c[k])
+
     precio = float(m.c[-1])
+    aportado = presupuesto + reserva_usada
     valor = efectivo + unidades * precio
-    serie = pd.Series(valores, index=m.tiempo[inicio - 1 :]).dropna()
+    medio = coste_base / unidades if unidades else None
+    queda = efectivo + (reserva - reserva_usada)
+    siguiente = referencia * (1 - paso)
     cada = max(1, 240 // m.minutos)  # un punto cada 4 horas para las gráficas
-    llenas = {(o["zona"]) for o in operaciones}
     return {
         **plan,
-        "cerrado": cerrado,
         "precio": precio,
         "efectivo": round(efectivo, 2),
         "unidades": unidades,
-        "coste_medio": round(coste_base / unidades, 6) if unidades else None,
+        "coste_medio": round(medio, 6) if medio else None,
         "invertido": round(coste_base, 2),
+        "aportado": round(aportado, 2),
+        "reserva": round(reserva, 2),
+        "reserva_usada": round(reserva_usada, 2),
         "valor": round(valor, 2),
-        "resultado": round(valor - plan["presupuesto"], 2),
-        "resultado_pct": round((valor / plan["presupuesto"] - 1) * 100, 3),
+        "resultado": round(valor - aportado, 2),
+        "resultado_pct": round((valor / aportado - 1) * 100, 3),
         "realizado": round(realizado, 2),
         "operaciones": operaciones,
-        "compras": [{**z, "llena": f"zona de compra {i + 1}" in llenas} for i, z in enumerate(plan["compras"])],
-        "ventas": [{**z, "llena": f"zona de venta {i + 1}" in llenas} for i, z in enumerate(plan["ventas"])],
+        "stop": None,
+        "compras": [{"precio": round(siguiente * (1 - paso) ** j, 6), "pct": plan["tramo_pct"],
+                     "llena": False, "sin_dinero": queda < tramo * (j + 1) * .99} for j in range(3)],
+        "ventas": [{"precio": round(medio * (1 + s["sobre_coste_pct"] / 100), 6) if medio else None,
+                    "pct": s["vende_pct"], "sobre_coste_pct": s["sobre_coste_pct"], "llena": i in hechas}
+                   for i, s in enumerate(plan["salidas"])],
         "precios": [float(x) for x in m.c[-30 * 1440 // m.minutos :: cada]],
-        "valores": [round(float(x), 2) for x in serie.iloc[::cada]],
+        "precios_desde": m.tiempo[max(0, len(m) - 30 * 1440 // m.minutos)].isoformat(),
+        "precios_paso_min": cada * m.minutos,
+        "valores": [round(float(x), 2) for x in valores[::cada]],
     }
+
+
+def _texto(moneda: str, op: dict, plan: dict) -> str:
+    if op["tipo"] == "aportacion":
+        return (f"{moneda}: se acabó el presupuesto, meto {_precio(op['importe'])} $ de la reserva "
+                f"({_precio(op['reserva_usada'])} de {_precio(op['reserva'])} $ usados).")
+    if op["tipo"] == "compra":
+        return (f"{moneda}: baja un {_pct(plan['paso_pct'])} % desde la última compra, promedio con "
+                f"{_precio(op['importe'])} $ a {_precio(op['precio'])}. Coste medio ahora: {_precio(op['coste_medio'])}.")
+    i = int(op["motivo"].split()[-1]) - 1
+    s = plan["salidas"][i]
+    return (f"{moneda}: punto de salida {i + 1} (+{_pct(s['sobre_coste_pct'])} % sobre el coste medio), vendo el "
+            f"{_pct(s['vende_pct'])} % de la posición a {_precio(op['precio'])} ({_precio(op['importe'])} $).")
+
+
+def _base(plan: dict) -> dict:
+    claves = ("tipo", "simbolo", "presupuesto", "creado", "precio_inicio", "entrada_inicial_pct",
+              "paso_pct", "tramo_pct", "reserva_pct", "salidas")
+    return {k: plan[k] for k in claves}
 
 
 def ciclo(estado: dict) -> list[dict]:
     """Actualiza la sala de holding. Crea los planes de ejemplo la primera vez."""
     planes = estado.setdefault("planes", {})
     eventos: list[dict] = []
+
+    def evento(tipo: str, simbolo: str, texto: str) -> None:
+        eventos.append({"t": _ahora(), "tipo": tipo, "simbolo": simbolo, "texto": texto})
+
     if not estado.get("iniciado"):
         estado["iniciado"] = True
         for simbolo, presupuesto in CAPITAL_HOLDING.items():
@@ -156,28 +215,31 @@ def ciclo(estado: dict) -> list[dict]:
                 m = Mercado(velas(simbolo, "1h"), simbolo, "1h")
                 planes[simbolo] = nuevo_plan(simbolo, presupuesto, float(m.c[-1]))
     for simbolo, plan in list(planes.items()):
-        base = {k: plan[k] for k in ("simbolo", "presupuesto", "creado", "precio_inicio", "entrada_inicial_pct", "stop")}
-        base["compras"] = [{"precio": z["precio"], "pct": z["pct"]} for z in plan["compras"]]
-        base["ventas"] = [{"precio": z["precio"], "pct": z["pct"]} for z in plan["ventas"]]
-        m = Mercado(velas(simbolo, "1h"), simbolo, "1h")
-        nuevo = simular_plan(base, m)
         moneda = simbolo.replace("USDT", "")
-        if not plan.get("operaciones"):
-            eventos.append({"t": _ahora(), "tipo": "plan", "simbolo": simbolo, "texto":
-                            f"Plan de holding de {moneda}: {_precio(base['presupuesto'])} $ ficticios. Compro el "
-                            f"{base['entrada_inicial_pct']:g} % a {_precio(base['precio_inicio'])} y dejo órdenes en "
-                            + " / ".join(_precio(z["precio"]) for z in base["compras"]) + "."})
-        for op in nuevo["operaciones"][len(plan.get("operaciones", [])):]:
-            if op["zona"] == "entrada inicial":
-                continue
-            verbo = {"compra": "compro", "venta": "vendo", "stop": "salta el stop y vendo todo"}[op["tipo"]]
-            eventos.append({"t": _ahora(), "tipo": op["tipo"], "simbolo": simbolo, "zona": op["zona"], "texto":
-                            f"{moneda}: {op['zona']} tocada, {verbo} a {_precio(op['precio'])} ({_precio(op['importe'])} $)."})
+        if plan.get("tipo") != "adaptativo":
+            plan = {"operaciones": plan.get("operaciones", []), **_desde_plan_antiguo(plan), "migrado": True}
+            evento("plan", simbolo, f"Plan de {moneda} actualizado: ya no tiene stop. Promedia a la baja cada "
+                                    f"{_pct(PASO_PCT)} % y sale por partes sobre el coste medio (recalculado desde su inicio).")
+        base = _base(plan)
+        nuevo = simular_plan(base, Mercado(velas(simbolo, "1h"), simbolo, "1h"))
+        anteriores = [] if plan.get("migrado") else plan.get("operaciones", [])
+        if not plan.get("operaciones") and not plan.get("migrado"):
+            salidas = "/".join(f"+{_pct(s['sobre_coste_pct'])}" for s in base["salidas"])
+            evento("plan", simbolo, f"Plan de holding de {moneda}: {_precio(base['presupuesto'])} $ ficticios y "
+                                    f"{_precio(nuevo['reserva'])} $ de reserva. Compro el {_pct(base['entrada_inicial_pct'])} % "
+                                    f"a {_precio(base['precio_inicio'])}; promediaré cada −{_pct(base['paso_pct'])} % y "
+                                    f"saldré por partes a {salidas} % sobre el coste medio. Sin stop.")
+        if not plan.get("migrado"):
+            for op in nuevo["operaciones"][len(anteriores):]:
+                if op.get("motivo") != "entrada inicial":
+                    evento(op["tipo"], simbolo, _texto(moneda, op, base))
         planes[simbolo] = nuevo
-    total = sum(p["presupuesto"] for p in planes.values())
+    aportado = sum(p["aportado"] for p in planes.values())
     valor = sum(p["valor"] for p in planes.values())
-    estado["resumen"] = {"presupuesto": total, "valor": round(float(valor), 2), "resultado": round(float(valor - total), 2),
-                         "resultado_pct": round(float(valor / total - 1) * 100, 3) if total else 0.0}
+    estado["resumen"] = {"presupuesto": round(float(sum(p["presupuesto"] for p in planes.values())), 2),
+                         "aportado": round(float(aportado), 2), "valor": round(float(valor), 2),
+                         "resultado": round(float(valor - aportado), 2),
+                         "resultado_pct": round(float(valor / aportado - 1) * 100, 3) if aportado else 0.0}
     estado["actividad"] = (eventos[::-1] + estado.get("actividad", []))[:40]
     estado["actualizado"] = _ahora()
     return eventos
@@ -190,16 +252,17 @@ def actualizar() -> list[dict]:
     return eventos
 
 
-def crear(simbolo: str, presupuesto: float, compras: list[float] | None, ventas: list[float] | None,
-          stop: float | None) -> dict:
+def crear(simbolo: str, presupuesto: float, paso_pct: float | None = None, tramo_pct: float | None = None,
+          reserva_pct: float | None = None, salidas_pct: list[float] | None = None) -> dict:
     estado = almacen.cargar("holding", {})
     estado["iniciado"] = True
-    m = Mercado(velas(simbolo, "1h"), simbolo.upper(), "1h")
-    plan = nuevo_plan(simbolo, presupuesto, float(m.c[-1]), compras, ventas, stop)
-    estado.setdefault("planes", {})[plan["simbolo"]] = plan
+    simbolo = simbolo.upper()
+    m = Mercado(velas(simbolo, "1h"), simbolo, "1h")
+    estado.setdefault("planes", {})[simbolo] = nuevo_plan(simbolo, presupuesto, float(m.c[-1]), paso_pct, tramo_pct,
+                                                          reserva_pct, salidas_pct)
     ciclo(estado)
     almacen.guardar("holding", estado)
-    return estado["planes"][plan["simbolo"]]
+    return estado["planes"][simbolo]
 
 
 def borrar(simbolo: str) -> bool:

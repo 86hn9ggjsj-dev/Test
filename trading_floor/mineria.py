@@ -10,6 +10,7 @@ from __future__ import annotations
 import datetime as dt
 import threading
 import time
+from typing import Callable
 
 import numpy as np
 
@@ -120,8 +121,12 @@ def _embudo(est: Estrategia, m: Mercado, corte: int, rng: np.random.Generator, m
 
 def minar(simbolo: str, intervalo: str = INTERVALO, estrategias: int = 2000, generaciones: int = 10,
           dias: int = DIAS_HISTORICO, semilla: int | None = None,
-          estado: EstadoMineria | None = None) -> list[dict]:
-    """Una ronda de minería sobre un símbolo. Devuelve las estrategias aprobadas."""
+          estado: EstadoMineria | None = None, seguir: Callable[[], bool] | None = None) -> list[dict]:
+    """Una ronda de minería sobre un símbolo. Devuelve las estrategias aprobadas.
+
+    `seguir` se consulta antes de cada generación: si devuelve False, la ronda se deja ahí.
+    """
+    seguir = seguir or (lambda: not control.cargar()["mineria_pausada"])
     rng = np.random.default_rng(semilla)
     estado = estado or EstadoMineria()
     simbolo = simbolo.upper()
@@ -146,8 +151,8 @@ def minar(simbolo: str, intervalo: str = INTERVALO, estrategias: int = 2000, gen
     poblacion = [aleatoria(rng, simbolo, intervalo) for _ in range(tam)]
 
     for g in range(1, generaciones + 1):
-        if control.cargar()["mineria_pausada"]:
-            estado.evento("Minería pausada por el jefe: dejo la ronda aquí.", "pausa")
+        if not seguir():
+            estado.evento("Me pide el jefe que pare: dejo la búsqueda aquí.", "pausa")
             break
         estado.datos["generacion"] = g
         for est in poblacion:
@@ -224,4 +229,52 @@ def minar_continuo(simbolos: list[str], intervalo: str = INTERVALO, estrategias:
         fin = time.time() + pausa_min * 60
         while time.time() < fin and not parar.is_set() and not control.cargar()["mineria_pausada"]:
             parar.wait(5)
+    estado.terminar()
+
+
+def minar_a_demanda(simbolos: list[str], intervalo: str = INTERVALO, estrategias: int = 2000,
+                    generaciones: int = 10, dias: int = DIAS_HISTORICO,
+                    parar: threading.Event | None = None) -> None:
+    """La minería de la oficina: espera a que el jefe pulse «Buscar estrategias» y entonces hace una
+    búsqueda (una ronda por cada activo pedido que tenga mesas libres). Luego vuelve a esperar."""
+    parar = parar or threading.Event()
+    estado = EstadoMineria()
+    if control.cargar()["busqueda"]:  # una búsqueda a medias de la vez anterior no se retoma sola
+        control.terminar_busqueda(control.cargar()["busqueda"])
+    estado.datos["estado"] = "esperando"
+    estado.evento("Minería en espera: solo busco estrategias cuando pulses «Buscar estrategias».", "espera")
+    while not parar.is_set():
+        pedido = control.cargar()["busqueda"]
+        if not pedido:
+            parar.wait(2)
+            continue
+
+        def seguir() -> bool:
+            return not parar.is_set() and control.cargar()["busqueda"] == pedido
+
+        lista = [x.upper() for x in pedido.get("simbolos") or simbolos]
+        estado.datos["embudo"] = {e: 0 for e in ETAPAS}  # el embudo de la pantalla es el de esta búsqueda
+        estado.evento(f"¡A buscar! Búsqueda pedida por el jefe: {', '.join(x.replace('USDT', '') for x in lista)}.",
+                      "busqueda", simbolos=lista)
+        nuevas = 0
+        for simbolo in lista:
+            if not seguir():
+                break
+            en_banco = sum(b["estrategia"]["simbolo"] == simbolo for b in banco.cargar())
+            if en_banco >= MAX_POR_SIMBOLO:
+                estado.evento(f"{simbolo.replace('USDT', '')} ya tiene sus {MAX_POR_SIMBOLO} mesas ocupadas; me lo salto.")
+                continue
+            try:
+                nuevas += len(minar(simbolo, intervalo, estrategias, generaciones, dias, estado=estado, seguir=seguir))
+            except (OSError, ValueError) as e:  # sin conexión, símbolo raro...
+                estado.evento(f"No he podido minar {simbolo}: {e}", "error")
+        parada = not seguir() and not parar.is_set()
+        control.terminar_busqueda(pedido)
+        estado.datos.update(estado="esperando", simbolo=None)
+        texto = "Búsqueda parada" if parada else "Búsqueda terminada"
+        if nuevas:
+            texto += f": {nuevas} estrategia{'s' if nuevas > 1 else ''} nueva{'s' if nuevas > 1 else ''} en el banco, ya operando con su trader."
+        else:
+            texto += ": ninguna ha superado las seis pruebas esta vez. Es lo normal; prueba otra búsqueda cuando quieras."
+        estado.evento(texto, "fin_busqueda", nuevas=nuevas)
     estado.terminar()

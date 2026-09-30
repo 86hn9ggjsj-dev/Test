@@ -14,7 +14,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from . import almacen, banco, chat, control
-from .config import CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, SIMBOLOS
+from .config import CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, MAX_POR_SIMBOLO, SIMBOLOS
 
 PAGINA = Path(__file__).resolve().parent / "web" / "index.html"
 
@@ -53,6 +53,8 @@ def estado() -> dict:
         "macro": almacen.cargar("macro", {}),
         "holding": holding,
         "capital_por_estrategia": CAPITAL_POR_ESTRATEGIA,
+        "simbolos": SIMBOLOS,
+        "max_por_simbolo": MAX_POR_SIMBOLO,
     }
 
 
@@ -86,6 +88,8 @@ class _Manejador(BaseHTTPRequestHandler):
                 respuesta = {"ok": True, "texto": control.aplicar(datos.get("propuesta") or {})}
             except (ValueError, TypeError) as e:
                 respuesta = {"ok": False, "texto": str(e)}
+            except Exception as e:  # sin conexión al rehacer un plan de holding, etc.
+                respuesta = {"ok": False, "texto": f"No se ha podido aplicar: {e}"}
         else:
             self.send_error(404)
             return

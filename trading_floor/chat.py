@@ -43,7 +43,7 @@ PLANTILLA = {
     "Samuel": "macro y análisis (tipos y sentimiento)",
     "Sofía": "supervisora de macro y análisis",
     "Paula": "holding de BTC y ETH",
-    "Íñigo": "holding de SOL y stops de catástrofe",
+    "Íñigo": "holding de SOL y gestión de la reserva de capital",
     "Diego": "supervisor del holding",
     "Clara": "supervisora de la sala de trading",
 }
@@ -52,10 +52,14 @@ SISTEMA = """Eres la voz de los empleados del Trading Floor, una oficina de trad
 funciona en el ordenador del usuario. El usuario es el jefe y te escribe por el chat.
 
 Qué es la oficina: la minería genera estrategias de trading y las prueba con 3 años de velas reales de \
-Binance; el laboratorio las pasa por pruebas de robustez; las que sobreviven van al banco y cada una es \
-un trader con 1.000 $ FICTICIOS que opera en papel (paper trading) con precios reales, decidiendo al \
-cierre de cada vela. Hay control de riesgos, una sala de holding a largo plazo (BTC, ETH, SOL) con zonas \
-de compra y de venta, y una sala de macroeconomía. Nunca se envía ninguna orden a ningún exchange.
+Binance, pero SOLO cuando el jefe pulsa «Buscar estrategias» (o lo pide por el chat): no mina por su cuenta. \
+El laboratorio las pasa por pruebas de robustez; las que sobreviven van al banco y al momento se ponen en \
+marcha con un trader propio con 1.000 $ FICTICIOS que opera en papel (paper trading) con precios reales. \
+Cada 30 minutos, al cierre de la vela, el trader mira si se cumplen todas las condiciones de su estrategia; \
+si se cumplen, Riesgos aprueba el tamaño o la veta, y la posición sale sola por stop, objetivo o tiempo. \
+Cada estrategia opera de media una vez cada pocos días. Caben 48 traders (8 por activo). Hay control de riesgos, una sala de holding a largo plazo (BTC, ETH, SOL) con un plan \
+adaptativo SIN stop loss (promedia a la baja cada cierto % de caída, usa una reserva de capital si se acaba \
+el presupuesto y vende por partes en puntos de salida sobre el coste medio), y una sala de macroeconomía. Nunca se envía ninguna orden a ningún exchange.
 
 Plantilla (usa exactamente estos nombres en "quien"):
 {plantilla}
@@ -77,9 +81,14 @@ claro en "resumen". NO digas que ya está hecho: el jefe lo aprueba con un botó
 - Parámetros: para acciones de un trader, "objetivo" es el id de su estrategia (E-XXXXXX). Para \
 cambiar_riesgo, "objetivo" es uno de estos límites y "valor" el nuevo valor:
 {riesgo}
+  Para buscar_estrategias: "objetivo" es el activo (BTC, ETH, SOL, BNB, XRP, DOGE) o "" para todos los \
+que tengan mesas libres.
   Para nuevo_plan_holding: "objetivo" es el activo (BTC, ETH, SOL...), "valor" el presupuesto en dólares \
-ficticios, "compras" y "ventas" los precios de las zonas y "stop" el precio del stop de catástrofe (0 si no \
-se indica). Lo que no aplique: objetivo "", valor 0, listas vacías, stop 0.
+ficticios, "paso" el % de caída desde la última compra para volver a comprar, "tramo" el tamaño de cada \
+compra en % del presupuesto, "reserva" el capital extra en % del presupuesto y "salidas" los puntos de salida \
+en % sobre el coste medio (por ejemplo [30, 60, 100]). El holding NO lleva stop loss: si baja, se promedia y \
+como mucho se mete capital de la reserva. Lo que no se indique va a 0 (se usan los valores por defecto: \
+paso 8, tramo 12,5, reserva 50, salidas 30/60/100). Lo que no aplique: objetivo "", valor 0, lista vacía.
 - Si no hay ninguna decisión que proponer, usa la acción "ninguna".
 - Si piden algo que no se puede hacer (obligar a un trader a entrar ahora, cambiar las reglas de una \
 estrategia, operar con dinero real...), explica por qué y ofrece la alternativa más parecida de la lista."""
@@ -102,12 +111,13 @@ ESQUEMA = {
                 "accion": {"type": "string", "enum": ["ninguna", *ACCIONES]},
                 "objetivo": {"type": "string"},
                 "valor": {"type": "number"},
-                "compras": {"type": "array", "items": {"type": "number"}},
-                "ventas": {"type": "array", "items": {"type": "number"}},
-                "stop": {"type": "number"},
+                "paso": {"type": "number"},
+                "tramo": {"type": "number"},
+                "reserva": {"type": "number"},
+                "salidas": {"type": "array", "items": {"type": "number"}},
                 "resumen": {"type": "string"},
             },
-            "required": ["accion", "objetivo", "valor", "compras", "ventas", "stop", "resumen"],
+            "required": ["accion", "objetivo", "valor", "paso", "tramo", "reserva", "salidas", "resumen"],
             "additionalProperties": False,
         },
     },
@@ -154,9 +164,11 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
     m = E.get("mineria", {})
     riesgo = {k: v for k, v in (papel.get("riesgo") or {}).items() if k not in ("reglas", "apuestas")}
     riesgo["vetos"] = (riesgo.get("vetos") or [])[:5]
-    hold = [{k: p.get(k) for k in ("simbolo", "presupuesto", "valor", "resultado_pct", "precio", "coste_medio", "stop", "cerrado")}
-            | {"compras": [(z["precio"], z["llena"]) for z in p.get("compras", [])],
-               "ventas": [(z["precio"], z["llena"]) for z in p.get("ventas", [])]}
+    hold = [{k: p.get(k) for k in ("simbolo", "presupuesto", "reserva", "reserva_usada", "aportado", "valor", "resultado",
+                                   "resultado_pct", "realizado", "precio", "coste_medio", "paso_pct", "tramo_pct")}
+            | {"proximas_compras": [z["precio"] for z in p.get("compras", []) if not z.get("sin_dinero")],
+               "puntos_de_salida": [{"sobre_coste_pct": z.get("sobre_coste_pct"), "precio": z["precio"], "vende_pct": z["pct"],
+                                     "ya_vendido": z["llena"]} for z in p.get("ventas", [])]}
             for p in (E.get("holding") or {}).get("planes", {}).values()]
     mac = E.get("macro") or {}
     return {
@@ -171,7 +183,7 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
                   {k: mac["fear_greed"][k] for k in ("valor", "clase")},
                   "indicadores": {i["nombre"]: [i["valor"], i["dia_pct"]] for i in (mac.get("indicadores") or {}).values()}},
         "precios_en_vivo": E.get("vivo", {}),
-        "decisiones_del_jefe": {"mineria_pausada": ctrl.get("mineria_pausada"), "freno_manual": ctrl.get("freno_manual"),
+        "decisiones_del_jefe": {"busqueda_de_estrategias_en_marcha": ctrl.get("busqueda"), "freno_manual": ctrl.get("freno_manual"),
                                 "traders_pausados": sorted(pausados), "ultimas": ctrl.get("decisiones", [])[:5]},
     }
 
@@ -235,8 +247,13 @@ def _es(x: float, signo: bool = True) -> str:
     return (f"{x:+.2f}" if signo else f"{x:g}").replace(".", ",")
 
 
+def _precio(x: float) -> str:
+    return f"{x:,.2f}".replace(",", "_").replace(".", ",").replace("_", ".")
+
+
 def _propuesta(accion: str, resumen: str, objetivo: str = "", valor: float = 0) -> dict:
-    return {"accion": accion, "objetivo": objetivo, "valor": valor, "compras": [], "ventas": [], "stop": 0, "resumen": resumen}
+    return {"accion": accion, "objetivo": objetivo, "valor": valor, "paso": 0, "tramo": 0, "reserva": 0, "salidas": [],
+            "resumen": resumen}
 
 
 def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> dict:
@@ -251,10 +268,13 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
     def dice(quien, txt, propuesta=None):
         return {"mensajes": [{"quien": quien, "texto": txt}], "propuesta": propuesta}
 
-    if "miner" in t and re.search(r"paus|para|deten", t):
-        return dice("Tomás", "Entendido. Si lo apruebas, paro la minería al terminar la generación en curso.", _propuesta("pausar_mineria", "Pausar la minería"))
-    if "miner" in t and re.search(r"reanud|arranc|activ|sigu|vuelv", t):
-        return dice("Tomás", "Cuando lo apruebes, vuelvo a poner a minar a todo el equipo.", _propuesta("reanudar_mineria", "Reanudar la minería"))
+    if re.search(r"miner|busqueda|mina\b", t) and re.search(r"paus|para|deten|cancel", t):
+        return dice("Tomás", "Entendido. Si lo apruebas, paro la búsqueda al terminar la generación en curso.", _propuesta("parar_busqueda", "Parar la búsqueda de estrategias"))
+    if re.search(r"\bbusc|reanud|arranc|lanza|empie[zc]|\bmina\b|\bminar\b", t) and re.search(r"estrateg|miner|minar|\bmina\b", t):
+        activo = next((a for a in ("btc", "eth", "sol", "bnb", "xrp", "doge") if re.search(rf"\b{a}\b", t)), "")
+        que = activo.upper() or "todos los activos con mesas libres"
+        return dice("Tomás", f"¿Busco estrategias nuevas de {que}? Si alguna supera las seis pruebas, entra al banco y se pone a operar con su trader.",
+                    _propuesta("buscar_estrategias", f"Buscar estrategias de {que}", activo.upper()))
     if "freno" in t and re.search(r"quit|levant|desactiv|suelt", t):
         return dice("Julia", "Si lo apruebas, quito el freno manual y se vuelven a permitir entradas.", _propuesta("quitar_freno", "Quitar el freno manual"))
     if "freno" in t or "para todo" in t:
@@ -271,6 +291,20 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                     _propuesta("cambiar_riesgo", f"Riesgo por operación = {_es(numero, False)} %", "riesgo_por_operacion", numero))
     if "comite" in t:
         return dice("Bruno", "¿Convoco el comité ahora mismo?", _propuesta("convocar_comite", "Convocar el comité"))
+    if "holding" in t or "promedi" in t or "reserva" in t:
+        planes = (E.get("holding") or {}).get("planes", {})
+        if not planes:
+            return dice("Diego", "La sala de holding todavía no tiene planes en marcha.")
+        partes = []
+        for p in planes.values():
+            moneda = p["simbolo"].replace("USDT", "")
+            prox = next((z["precio"] for z in p.get("compras", []) if not z.get("sin_dinero")), None)
+            salida = next((z for z in p.get("ventas", []) if not z.get("llena") and z.get("precio")), None)
+            partes.append(f"{moneda} {_es(p.get('resultado_pct', 0))} %"
+                          + (f", próxima compra a {_precio(prox)}" if prox else ", sin dinero para más compras")
+                          + (f", próxima salida a {_precio(salida['precio'])} (+{_es(salida['sobre_coste_pct'], False)} % sobre coste)"
+                             if salida else ""))
+        return dice("Diego", "Holding sin stop: " + "; ".join(partes) + ".")
     if re.search(r"mejor|ranking|lider|quien gana", t):
         ts = sorted(papel.get("estrategias", {}).items(), key=lambda x: -x[1].get("resultado", 0))
         if ts and ts[0][1].get("resultado", 0) > 0:
@@ -288,9 +322,9 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         return dice("Marta", f"Resultado en papel: {_es(r.get('resultado', 0))} $ (hoy {_es(r.get('hoy', 0))} $). "
                              f"{len(papel.get('estrategias', {}))} traders, minería {m.get('estado', 'parada')}"
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
-    return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «pausa la minería», «reanuda la minería», "
+    return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «para la búsqueda», "
                          "«activa el freno», «quita el freno», «pausa a E-XXXXXX», «riesgo 0,5», «convoca el comité», "
-                         "«¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
+                         "«¿cómo va el holding?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 
 
 def responder(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> dict:
