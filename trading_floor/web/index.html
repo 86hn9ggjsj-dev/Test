@@ -3048,11 +3048,12 @@ function mesasLibres() {
   return (S.simbolos || []).reduce((n, x) => n + Math.max(0, max - (cuenta[x] || 0)), 0);
 }
 function pintarBotonBuscar() {
-  const b = $("#bBuscar"), activa = !!(S && S.control && S.control.busqueda);
+  const b = $("#bBuscar"), activa = !!(S && S.control && S.control.busqueda), m = S && S.mineria || {}, c = m.ciclo;
   b.classList.toggle("activa", activa);
-  b.innerHTML = activa ? "⏹ <span>Parar búsqueda</span>" : "🔍 <span>Buscar estrategias</span>";
-  b.title = activa ? "Para la búsqueda al terminar la generación en curso"
-    : "El equipo de minería busca estrategias nuevas. Las que superen las seis pruebas se ponen a operar solas, cada una con su trader.";
+  const avance = activa && c && m.estado === "minando" ? ` · ${esc(moneda(m.simbolo || ""))} ${c.n}/${c.activos.length} · gen ${m.generacion || 0}/${m.generaciones || 0}` : "";
+  b.innerHTML = activa ? `⏹ <span>Parar búsqueda${avance}</span>` : "🔍 <span>Buscar estrategias</span>";
+  b.title = activa ? "Ciclo de búsqueda en marcha: se para solo al terminar. Pulsa para cortarlo antes."
+    : "Cada pulsación hace un ciclo de búsqueda y se para sola al terminar. Las estrategias que superen las seis pruebas se ponen a operar, cada una con su trader.";
 }
 async function decisionDirecta(propuesta) {
   let r;
@@ -3072,7 +3073,7 @@ $("#bBuscar").addEventListener("click", e => {
   const menu = $("#menuBuscar");
   if (!menu.hidden) { cerrarMenuBuscar(); return; }
   const max = S.max_por_simbolo || 8, cuenta = porSimbolo(), sims = S.simbolos || [], libres = mesasLibres();
-  menu.innerHTML = `<p>El equipo prueba unas 2.000 estrategias por activo (varios minutos cada uno). Las que superen las seis pruebas entran al banco y <b>se ponen a operar solas</b>, cada una con su trader.</p>
+  menu.innerHTML = `<p><b>Cada pulsación hace un ciclo</b>: el equipo prueba unas 2.000 estrategias por activo (varios minutos cada uno) y <b>se para solo al terminar</b>. Las que superen las seis pruebas entran al banco y se ponen a operar, cada una con su trader.</p>
     <button class="todos" data-s="" ${libres ? "" : "disabled"}>Todos los activos con mesas libres <small>${libres} libres</small></button>
     ${sims.map(x => `<button data-s="${esc(moneda(x))}" ${(cuenta[x] || 0) >= max ? "disabled" : ""}>${esc(moneda(x))} <small>${cuenta[x] || 0}/${max} traders${(cuenta[x] || 0) >= max ? " · lleno" : ""}</small></button>`).join("")}`;
   menu.hidden = false; $("#bBuscar").setAttribute("aria-expanded", "true");

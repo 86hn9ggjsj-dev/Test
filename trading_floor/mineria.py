@@ -257,9 +257,10 @@ def minar_a_demanda(simbolos: list[str], intervalo: str = INTERVALO, estrategias
         estado.evento(f"¡A buscar! Búsqueda pedida por el jefe: {', '.join(x.replace('USDT', '') for x in lista)}.",
                       "busqueda", simbolos=lista)
         nuevas = 0
-        for simbolo in lista:
+        for n, simbolo in enumerate(lista, 1):
             if not seguir():
                 break
+            estado.datos["ciclo"] = {"activos": [x.replace("USDT", "") for x in lista], "n": n}
             en_banco = sum(b["estrategia"]["simbolo"] == simbolo for b in banco.cargar())
             if en_banco >= MAX_POR_SIMBOLO:
                 estado.evento(f"{simbolo.replace('USDT', '')} ya tiene sus {MAX_POR_SIMBOLO} mesas ocupadas; me lo salto.")
@@ -270,7 +271,7 @@ def minar_a_demanda(simbolos: list[str], intervalo: str = INTERVALO, estrategias
                 estado.evento(f"No he podido minar {simbolo}: {e}", "error")
         parada = not seguir() and not parar.is_set()
         control.terminar_busqueda(pedido)
-        estado.datos.update(estado="esperando", simbolo=None)
+        estado.datos.update(estado="esperando", simbolo=None, ciclo=None)
         texto = "Búsqueda parada" if parada else "Búsqueda terminada"
         if nuevas:
             texto += f": {nuevas} estrategia{'s' if nuevas > 1 else ''} nueva{'s' if nuevas > 1 else ''} en el banco, ya operando con su trader."
