@@ -2893,6 +2893,9 @@ function actualizarResultados() {
   kr.className = clase(t.resultado); kh.className = clase(t.hoy); rt.className = "gordo " + clase(t.resultado); rh.className = "chip " + clase(t.hoy);
   if (t.n) {
     animar($("#kPatrimonio"), t.patrimonio, x => fmt.dinero(x));
+    const kp = $("#kPatrimonio").parentElement, cap = S.capital_por_estrategia || 1000;   // el capital de cada trader nuevo no es ganancia
+    kp.querySelector("small").textContent = `Patrimonio · ${t.n} × ${fmt.n(cap)} $`;
+    kp.title = `${t.n} traders × ${fmt.n(cap)} $ ficticios = ${fmt.n(t.n * cap)} $ de capital puesto. Cada trader nuevo suma su capital al patrimonio (no es ganancia). Lo que se gana o se pierde es el «Resultado total».`;
     animar(kr, t.resultado, x => `${dineroS(x)}<small>${pctS(t.pct)}</small>`);
     animar(kh, t.hoy, x => `${dineroS(x)}<small>${pctS(t.hoyPct)}</small>`);
     animar(rt, t.resultado, x => `${dineroS(x)}<small>${pctS(t.pct)}</small>`);
