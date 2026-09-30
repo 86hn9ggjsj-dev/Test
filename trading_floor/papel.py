@@ -185,7 +185,7 @@ def ciclo(estado: dict) -> list[dict]:
             if id_ in cambiados:
                 continue  # tras un veto hay que volver a simular a este trader antes de seguir
             est, m, _, res = sims[id_]
-            motivo = riesgo.evaluar_entrada(est.simbolo, est.direccion, abiertas, bloqueo)
+            motivo = riesgo.evaluar_entrada(id_, est.simbolo, est.direccion, abiertas, bloqueo)
             if motivo:
                 traders[id_]["vetadas"].append(te)
                 cambiados.add(id_)
@@ -210,7 +210,16 @@ def ciclo(estado: dict) -> list[dict]:
             est, m, inicio, res = sim
             atr = m.ind("atr", 14)
             d = 1 if est.direccion == "largo" else -1
-            fracciones = [riesgo.fraccion(est.stop_atr, atr[e - 1], pe) for e, pe in zip(res.entradas, res.precio_entrada)]
+            # el tamaño de cada operación se decide al entrar y se guarda: si luego cambias el riesgo
+            # por operación, solo afecta a las operaciones nuevas
+            guardadas = t.setdefault("fracciones", {})
+            riesgo_ahora = riesgo.limites()["riesgo_por_operacion"]
+            fracciones = []
+            for e, pe in zip(res.entradas, res.precio_entrada):
+                clave = m.tiempo[e].isoformat()
+                if clave not in guardadas:
+                    guardadas[clave] = riesgo.fraccion(est.stop_atr, atr[e - 1], pe, riesgo_ahora)
+                fracciones.append(guardadas[clave])
             curva = pd.Series(CAPITAL_POR_ESTRATEGIA * (_curva(res, m, inicio, est.direccion, fracciones) - 1),
                               index=m.tiempo[inicio - 1 :] + pd.Timedelta(minutes=m.minutos))
             pnl.append(curva)

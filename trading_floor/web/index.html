@@ -109,6 +109,35 @@ canvas#lienzo.sobre{cursor:pointer}
 .canales button.activo{background:var(--neon);border-color:var(--neon);color:#0a0d12}
 .msg .para{color:var(--neon);font-weight:700;margin-right:6px}
 .msg .etq{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.06);margin-left:4px}
+#p-chat{display:none;flex-direction:column;padding:0}
+#p-chat.activa{display:flex}
+#p-chat .canales{position:static;margin:0;padding:12px 14px 10px}
+#chatScroll{flex:1;overflow:auto;padding:12px 14px;scrollbar-width:thin}
+#escribir{flex:none;border-top:1px solid var(--borde);padding:10px 12px 12px;background:rgba(8,11,17,.95)}
+#sugerencias{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:8px}
+#sugerencias::-webkit-scrollbar{display:none}
+#sugerencias button{flex:none;border:1px solid var(--borde);background:var(--panel2);border-radius:999px;padding:4px 10px;font-size:11px;color:#c9d0db;cursor:pointer}
+#sugerencias button:hover{border-color:var(--neon);color:var(--texto)}
+#formChat{display:flex;gap:8px}
+#entrada{flex:1;min-width:0;background:rgba(255,255,255,.05);border:1px solid var(--borde);border-radius:12px;padding:10px 12px;color:var(--texto);font:inherit;font-size:13px;outline:none}
+#entrada:focus{border-color:var(--neon)}
+#enviar{flex:none;border:0;border-radius:12px;background:var(--neon);color:#0a0d12;font-weight:800;padding:0 14px;cursor:pointer}
+#enviar:disabled{opacity:.5;cursor:wait}
+#modoChat{font-size:10px;color:var(--suave);margin-top:6px}
+.msg.yo{flex-direction:row-reverse}
+.msg.yo .txt{background:rgba(212,255,58,.1);border-color:rgba(212,255,58,.4);border-radius:13px 4px 13px 13px}
+.msg.yo .cab{text-align:right}
+.escribiendo{font-size:12px;color:var(--suave);margin:0 0 12px 42px}
+.escribiendo i{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--suave);margin-left:3px;animation:latido 1s infinite}
+.escribiendo i:nth-child(2){animation-delay:.2s} .escribiendo i:nth-child(3){animation-delay:.4s}
+.propuesta{border:1px solid rgba(212,255,58,.5);background:rgba(212,255,58,.06);border-radius:14px;padding:10px 12px;margin:0 0 14px 42px}
+.propuesta .t{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--neon);font-weight:800}
+.propuesta p{margin:4px 0 8px;font-size:13px}
+.propuesta .botones{display:flex;gap:8px}
+.propuesta button{border-radius:9px;padding:6px 12px;font-weight:700;font-size:12px;cursor:pointer;border:1px solid var(--borde);background:none}
+.propuesta button.si{background:var(--neon);border-color:var(--neon);color:#0a0d12}
+.propuesta.hecha{opacity:.7;border-style:dashed}
+.ficha-hablar{margin-top:8px;width:100%;border:1px solid var(--neon);background:rgba(212,255,58,.08);color:var(--neon);border-radius:10px;padding:8px;font-weight:700;cursor:pointer}
 .msg{display:flex;gap:10px;margin-bottom:12px;animation:entra .3s ease-out}
 @keyframes entra{from{opacity:0;transform:translateY(6px)}}
 .av{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px;color:#0a0d12;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
@@ -125,6 +154,7 @@ canvas#lienzo.sobre{cursor:pointer}
 #chat.f-comite .msg:not(.c-comite){display:none}
 #chat.f-charla .msg:not(.c-charla){display:none}
 #chat.f-supervision .msg:not(.c-supervision){display:none}
+#chat.f-jefe .msg:not(.c-jefe),#chat:not(.f-jefe):not([class=""]) .propuesta{display:none}
 .msg.bueno .txt{border-color:rgba(46,230,166,.35)}
 .msg.malo .txt{border-color:rgba(255,90,118,.35)}
 .msg.oro .txt{border-color:rgba(255,207,90,.55);background:rgba(255,207,90,.07)}
@@ -264,8 +294,13 @@ canvas.grafica{display:block;width:100%}
     <button data-p="info">¿Qué es?</button>
   </nav>
   <section class="pagina activa" id="p-chat">
-    <div class="canales"><button data-c="todo" class="activo">Todo</button><button data-c="operaciones">Operaciones</button><button data-c="riesgos">Riesgos</button><button data-c="mineria">Minería</button><button data-c="analisis">Análisis</button><button data-c="macro">Macro</button><button data-c="holding">Holding</button><button data-c="comite">Comité</button><button data-c="charla">Charla</button><button data-c="supervision">Supervisión</button></div>
-    <div id="chat"></div></section>
+    <div class="canales"><button data-c="todo" class="activo">Todo</button><button data-c="jefe">Contigo</button><button data-c="operaciones">Operaciones</button><button data-c="riesgos">Riesgos</button><button data-c="mineria">Minería</button><button data-c="analisis">Análisis</button><button data-c="macro">Macro</button><button data-c="holding">Holding</button><button data-c="comite">Comité</button><button data-c="charla">Charla</button><button data-c="supervision">Supervisión</button></div>
+    <div id="chatScroll"><div id="chat" class=""></div></div>
+    <div id="escribir">
+      <div id="sugerencias"><button>¿Cómo vamos hoy?</button><button>¿Quién es el mejor trader?</button><button>@Julia ¿estamos arriesgando mucho?</button><button>@Rocío ¿quién está cerca de entrar?</button><button>Pausa la minería</button><button>Activa el freno</button></div>
+      <form id="formChat" autocomplete="off"><input id="entrada" maxlength="1000" placeholder="Escribe a la oficina… (@Nombre para hablar con alguien)"><button id="enviar" type="submit">Enviar</button></form>
+      <div id="modoChat"></div>
+    </div></section>
   <section class="pagina" id="p-embudo"><h3>Embudo de esta sesión</h3><div id="embudo"></div>
     <p class="nota">Cada estrategia pasa las pruebas en orden y se descarta en la primera que falla. Por eso casi ninguna llega al final: si pruebas miles al azar, muchas parecen buenas por pura suerte.</p></section>
   <section class="pagina" id="p-traders">
@@ -1229,6 +1264,10 @@ function persona(a) {
     circulo(fx - 6.8, hy + .5, 2.2, "#16181d"); circulo(fx + 6.8, hy + .5, 2.2, "#16181d");
     if (frente) { ctx.beginPath(); ctx.moveTo(fx - 6.5, hy + 2); ctx.quadraticCurveTo(fx - 5, hy + 6, fx - 1.5, hy + 5); ctx.stroke(); }
   }
+  if (a.rol === "trader" && S && S.control && (S.control.traders_pausados || []).includes(a.id)) {
+    ctx.fillStyle = "rgba(10,13,19,.85)"; rr(fx + 6, hy - 16, 11, 11, 3); ctx.fill();
+    ctx.fillStyle = "#ffc24a"; ctx.fillRect(fx + 8.5, hy - 14, 2, 7); ctx.fillRect(fx + 12.5, hy - 14, 2, 7);
+  }
   const pos = a.rol === "trader" ? posicionRanking.get(a.id) : undefined;
   if (pos !== undefined) {
     const cy = hy - 12 + Math.sin(T * 3 + a.semilla) * 1.2;
@@ -1810,11 +1849,11 @@ function procesarChat() {
   proximaLinea = T + 1.5;
 }
 function iniciales(n) { return n.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase(); }
-const NOMBRE_CANAL = {supervision: "supervisión", operaciones: "operaciones", riesgos: "riesgos", mineria: "minería", analisis: "análisis", macro: "macro", holding: "holding", comite: "comité", charla: "charla"};
+const NOMBRE_CANAL = {jefe: "contigo", supervision: "supervisión", operaciones: "operaciones", riesgos: "riesgos", mineria: "minería", analisis: "análisis", macro: "macro", holding: "holding", comite: "comité", charla: "charla"};
 function anadirChat(a, texto, clase = "", canal = "charla", para = null) {
   const caja = $("#chat");
   const el = document.createElement("div");
-  el.className = "msg " + (a ? clase + " c-" + canal : "sistema");
+  el.className = "msg " + (a ? clase + " c-" + canal : "sistema") + (a === YO ? " yo" : "");
   const color = a ? a.tono : "#d4ff3a";
   el.innerHTML = `<div class="av" style="background:${color}">${a ? esc(iniciales(a.nombre)) : "TF"}</div>
     <div><div class="cab"><b>${a ? esc(a.nombre) : "Trading Floor"}</b>${para ? `<span class="para">→ ${esc(para.nombre)}</span>` : ""}${a ? esc(a.puesto) + " · " : ""}${fmt.hora(new Date())}${a ? `<span class="etq">${NOMBRE_CANAL[canal] || canal}</span>` : ""}</div><div class="txt">${esc(texto)}</div></div>`;
@@ -1824,6 +1863,8 @@ function anadirChat(a, texto, clase = "", canal = "charla", para = null) {
   if (abajo) caja.parentElement.scrollTop = caja.parentElement.scrollHeight;
   if (!$("#p-chat").classList.contains("activa") || $("#panel").classList.contains("plegado")) { sinLeer++; $("#nChat").hidden = false; $("#nChat").textContent = sinLeer; }
 }
+
+const YO = {nombre: "Tú", puesto: "Jefe", tono: "#d4ff3a", camisa: "#d4ff3a"};
 
 // ======================================================== EL DIRECTOR ==
 // Traduce los cambios del estado real en movimientos, paquetes y charlas.
@@ -2107,9 +2148,14 @@ function actualizarHUD() {
   actualizarResultados();
   $("#kPosiciones").textContent = t.n ? `${t.abiertas} / ${t.n}` : "—";
   $("#kBanco").textContent = (S.banco || []).length;
+  $("#modoChat").textContent = S.chat_modo === "claude"
+    ? "Conversación con Claude: cada mensaje gasta unos céntimos de tu saldo de la API. Las decisiones siempre las apruebas tú."
+    : "Modo básico gratis: entiende órdenes sencillas. Para conversar de verdad, añade tu clave de Claude (ANTHROPIC_API_KEY) al archivo .env.";
+  const ctrl = S.control || {};
   const p = $("#pMineria");
   const viva = m.actualizado && (Date.now() - new Date(m.actualizado).getTime()) < 120000;
-  if (m.estado === "minando" && viva) { p.className = "pastilla minando"; p.textContent = `Minando ${m.simbolo || ""} · gen ${m.generacion || 0}/${m.generaciones || 0}`; }
+  if (ctrl.mineria_pausada) { p.className = "pastilla descanso"; p.textContent = "Minería pausada (por ti)"; }
+  else if (m.estado === "minando" && viva) { p.className = "pastilla minando"; p.textContent = `Minando ${m.simbolo || ""} · gen ${m.generacion || 0}/${m.generaciones || 0}`; }
   else if (m.estado === "descanso") { p.className = "pastilla descanso"; p.textContent = m.proxima ? `Pausa hasta las ${fmt.hora(new Date(m.proxima))}` : "Minería en pausa"; }
   else { p.className = "pastilla"; p.textContent = "Minería parada"; }
   const mc = S.macro || {};
@@ -2212,7 +2258,8 @@ function estadoSalas() {
   const m = S.mineria || {}, e = m.embudo || {}, t = totales(), r = S.papel && S.papel.riesgo, mc = S.macro || {}, banco = S.banco || [];
   const viva = m.actualizado && (Date.now() - new Date(m.actualizado).getTime()) < 120000, out = {};
   const ap = e["Distinta a las del banco"] || 0, cand = e["Rentables en muestra"] || 0;
-  if (m.actividad && m.actividad[0] && m.actividad[0].tipo === "error") out.mineria = ["alerta", m.actividad[0].texto];
+  if (S.control && S.control.mineria_pausada) out.mineria = ["aviso", "Minería pausada por decisión tuya. Reanúdala desde el chat cuando quieras."];
+  else if (m.actividad && m.actividad[0] && m.actividad[0].tipo === "error") out.mineria = ["alerta", m.actividad[0].texto];
   else if (m.estado === "minando" && viva) out.mineria = ["ok", `Minando ${moneda(m.simbolo)}, generación ${m.generacion}/${m.generaciones}. En la sesión: ${fmt.n(e["Generadas"] || 0)} evaluadas y ${ap} aprobadas.`];
   else if (m.estado === "descanso") out.mineria = ["ok", `Ronda terminada; la siguiente empieza a las ${m.proxima ? fmt.hora(new Date(m.proxima)) : "—"}. ${fmt.n(e["Generadas"] || 0)} evaluadas en la sesión.`];
   else out.mineria = ["aviso", "La minería está parada: sin ella no llegan estrategias nuevas."];
@@ -2463,6 +2510,79 @@ function alternarCine(activar = !cine) {
 }
 $("#bCine").onclick = () => alternarCine();
 
+// ========================================== CHAT CON LA OFICINA =======
+let esperandoRespuesta = false;
+function buscarAgente(nombre) {
+  const n = String(nombre || "").trim().toLowerCase();
+  return agentes.find(a => a.nombre && a.nombre.toLowerCase() === n && a.rol) || null;
+}
+const RESPONSABLE = {pausar_mineria: () => SUPERVISORES[0], reanudar_mineria: () => SUPERVISORES[0], activar_freno: () => RIESGOS, quitar_freno: () => RIESGOS,
+  cambiar_riesgo: () => RIESGOS, pausar_trader: () => SUPERVISORES[5], reanudar_trader: () => SUPERVISORES[5], retirar_estrategia: () => SUPERVISORES[5],
+  nuevo_plan_holding: () => SUPERVISORES[4], convocar_comite: () => DIRECTOR};
+function bajarChat() { const c = $("#chatScroll"); c.scrollTop = c.scrollHeight; }
+async function enviarChat(texto) {
+  texto = texto.trim();
+  if (!texto || esperandoRespuesta) return;
+  const m = /^@([\p{L}]+)\s*/u.exec(texto), destino = m && buscarAgente(m[1]);
+  anadirChat(YO, texto, "", "jefe", destino);
+  bajarChat();
+  esperandoRespuesta = true; $("#enviar").disabled = true;
+  const aviso = document.createElement("div");
+  aviso.className = "escribiendo"; aviso.innerHTML = `${esc(destino ? destino.nombre : "La oficina")} está escribiendo<i></i><i></i><i></i>`;
+  $("#chat").appendChild(aviso); bajarChat();
+  let r;
+  try {
+    const nombres = Object.fromEntries([...traders.entries()].map(([id, a]) => [id, a.nombre]));
+    const resp = await fetch("/api/chat", {method: "POST", headers: {"Content-Type": "application/json", "X-Trading-Floor": "1"},
+      body: JSON.stringify({texto: m ? texto.slice(m[0].length) || texto : texto, para: destino ? destino.nombre : null, nombres})});
+    if (!resp.ok) throw new Error(resp.status);
+    r = await resp.json();
+  } catch (err) {
+    r = {mensajes: [{quien: "Marta", texto: "No me llega tu mensaje: ¿sigue en marcha el Trading Floor?"}], propuesta: null};
+  }
+  aviso.remove();
+  esperandoRespuesta = false; $("#enviar").disabled = false;
+  let ultimo = GENERAL;
+  for (const x of r.mensajes || []) {
+    const a = buscarAgente(x.quien) || GENERAL;
+    ultimo = a;
+    enCanal("jefe", () => decir(a, x.texto, 5, "", YO));
+    if (a.x !== undefined) enfocar(a.x, a.y, 2.3, 7);
+  }
+  if (r.propuesta) setTimeout(() => mostrarPropuesta(r.propuesta, ultimo), 1600 * Math.max(1, (r.mensajes || []).length));
+}
+function mostrarPropuesta(p, quien) {
+  const el = document.createElement("div");
+  el.className = "propuesta";
+  el.innerHTML = `<div class="t">Propuesta · decide tú</div><p>${esc(p.resumen || p.accion)}</p>
+    <div class="botones"><button class="si">✓ Aprobar</button><button class="no">✕ Rechazar</button></div>`;
+  $("#chat").appendChild(el); bajarChat();
+  const responsable = (RESPONSABLE[p.accion] || (() => quien))() || quien;
+  el.querySelector(".no").onclick = () => {
+    el.classList.add("hecha"); el.querySelector(".botones").innerHTML = "<small>Rechazada</small>";
+    enCanal("jefe", () => decir(responsable, pick(["Entendido, lo dejamos como está.", "Vale, no toco nada.", "De acuerdo. Seguimos igual."]), 5, "", YO));
+  };
+  el.querySelector(".si").onclick = async () => {
+    el.querySelector(".botones").innerHTML = "<small>Aplicando…</small>";
+    let r;
+    try {
+      const resp = await fetch("/api/decision", {method: "POST", headers: {"Content-Type": "application/json", "X-Trading-Floor": "1"}, body: JSON.stringify({propuesta: p})});
+      r = await resp.json();
+    } catch (err) { r = {ok: false, texto: "No he podido aplicar la decisión: ¿sigue en marcha el Trading Floor?"}; }
+    el.classList.add("hecha");
+    el.querySelector(".botones").innerHTML = `<small>${r.ok ? "✓ Aprobada" : "✕ No se ha podido aplicar"}</small>`;
+    enCanal("jefe", () => decir(responsable, r.ok ? `Hecho: ${r.texto}` : r.texto, 5, r.ok ? "bueno" : "malo", YO));
+    if (r.ok && p.accion === "convocar_comite") comite();
+    refrescar();
+  };
+}
+$("#formChat").addEventListener("submit", e => { e.preventDefault(); const t = $("#entrada").value; $("#entrada").value = ""; enviarChat(t); });
+$("#sugerencias").addEventListener("click", e => { const b = e.target.closest("button"); if (b) enviarChat(b.textContent); });
+function hablarCon(a) {
+  document.querySelector('.pestanas button[data-p="chat"]').click();
+  $("#entrada").value = `@${a.nombre} `; $("#entrada").focus();
+}
+
 // ============================================== PRECIOS EN VIVO =======
 // El servidor manda el último precio de Binance (cada ~5 s). Aquí se aplica a todo el estado:
 // precios en pantalla, posiciones abiertas, resultados y holding. Las decisiones de los traders
@@ -2565,6 +2685,7 @@ function mostrarFicha(a, abrir = true) {
   if (a.rol === "trader") {
     const d = a.datos || {}, b = (S.banco || []).find(x => x.id === a.id) || {};
     const r = d.resultado || 0, pos = d.posicion;
+    if (S.control && (S.control.traders_pausados || []).includes(a.id)) html += `<div class="desc" style="border-color:rgba(255,194,74,.5)">⏸ Pausado por ti: no abrirá posiciones nuevas. Pídele que vuelva desde el chat.</div>`;
     html += `<div class="desc">${esc(d.descripcion || b.descripcion || "")}</div>
       <table><tr><td>Patrimonio (ficticio)</td><td>${fmt.dinero(d.patrimonio || 1000)}</td></tr>
       <tr><td>Resultado</td><td class="${r > 0 ? "sube" : r < 0 ? "baja" : ""}">${r >= 0 ? "+" : "−"}${NF2.format(Math.abs(r))} $</td></tr>
@@ -2618,8 +2739,11 @@ function mostrarFicha(a, abrir = true) {
     }
     if (a.tarea === "descanso") html += `<p class="aviso">Ahora mismo está en la sala de descanso.</p>`;
   }
+  if (a.rol && a !== GATO_AGENTE) html += `<button class="ficha-hablar">💬 Hablar con ${esc(a.nombre)}</button>`;
   f.innerHTML = html;
   f.hidden = false;
+  const bh = f.querySelector(".ficha-hablar");
+  if (bh) bh.onclick = () => hablarCon(a);
   f.querySelector(".cerrar").onclick = () => { f.hidden = true; fichaAbierta = null; };
 }
 
@@ -2692,13 +2816,13 @@ document.querySelectorAll(".pestanas button").forEach(b => b.onclick = () => {
   b.classList.add("activa"); $("#p-" + b.dataset.p).classList.add("activa");
   if (b.dataset.p === "traders" && S) actualizarResultados();
   if (b.dataset.p === "holding" && S) { $("#holding").innerHTML = ""; actualizarHolding(); }
-  if (b.dataset.p === "chat") { sinLeer = 0; $("#nChat").hidden = true; const c = $("#p-chat"); c.scrollTop = c.scrollHeight; }
+  if (b.dataset.p === "chat") { sinLeer = 0; $("#nChat").hidden = true; const c = $("#chatScroll"); c.scrollTop = c.scrollHeight; }
 });
 document.querySelector(".canales").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   document.querySelectorAll(".canales button").forEach(x => x.classList.toggle("activo", x === b));
   $("#chat").className = b.dataset.c === "todo" ? "" : "f-" + b.dataset.c;
-  const c = $("#p-chat"); c.scrollTop = c.scrollHeight;
+  const c = $("#chatScroll"); c.scrollTop = c.scrollHeight;
 });
 $("#traders").addEventListener("click", e => { const el = e.target.closest(".trader"); if (el) { const a = traders.get(el.dataset.id); if (a) mostrarFicha(a); } });
 $("#plegar").onclick = () => {

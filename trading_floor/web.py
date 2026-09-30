@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import re
 import threading
 import time
 import urllib.parse
@@ -12,7 +13,7 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from . import almacen, banco
+from . import almacen, banco, chat, control
 from .config import CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, SIMBOLOS
 
 PAGINA = Path(__file__).resolve().parent / "web" / "index.html"
@@ -42,6 +43,8 @@ def estado() -> dict:
     simbolos = set(SIMBOLOS) | set(papel.get("precios", {})) | set(holding.get("planes", {}))
     return {
         "vivo": precios_en_vivo(simbolos),
+        "control": control.cargar(),
+        "chat_modo": "claude" if chat.hay_clave() else "basico",
         "coste_ida_vuelta": COSTE_IDA_VUELTA,
         "ahora": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
         "mineria": almacen.cargar("mineria", {}),
@@ -62,6 +65,31 @@ class _Manejador(BaseHTTPRequestHandler):
             self._responder(json.dumps(estado(), ensure_ascii=False).encode(), "application/json; charset=utf-8")
         else:
             self.send_error(404)
+
+    def do_POST(self) -> None:  # noqa: N802
+        # Solo desde la propia oficina: el navegador no deja a otras webs mandar esta cabecera.
+        origen = self.headers.get("Origin", "")
+        if self.headers.get("X-Trading-Floor") != "1" or (origen and not re.match(r"^http://(127\.0\.0\.1|localhost)(:\d+)?$", origen)):
+            self.send_error(403)
+            return
+        try:
+            datos = json.loads(self.rfile.read(min(int(self.headers.get("Content-Length", 0)), 100_000)) or b"{}")
+        except ValueError:
+            self.send_error(400)
+            return
+        ruta = self.path.split("?")[0]
+        if ruta == "/api/chat":
+            nombres = {str(k): str(v) for k, v in (datos.get("nombres") or {}).items()}
+            respuesta = chat.responder(str(datos.get("texto", "")), datos.get("para"), estado(), nombres)
+        elif ruta == "/api/decision":
+            try:
+                respuesta = {"ok": True, "texto": control.aplicar(datos.get("propuesta") or {})}
+            except (ValueError, TypeError) as e:
+                respuesta = {"ok": False, "texto": str(e)}
+        else:
+            self.send_error(404)
+            return
+        self._responder(json.dumps(respuesta, ensure_ascii=False).encode(), "application/json; charset=utf-8")
 
     def _responder(self, cuerpo: bytes, tipo: str) -> None:
         self.send_response(200)

@@ -89,6 +89,17 @@ descanso, a la terraza o al gimnasio.
   La pestaña «Salas» muestra el semáforo de cada una.
 - **Ranking**: podio y clasificación de traders por resultado total, de hoy, de la semana o por
   acierto (en papel), o por cómo lo hizo su estrategia en el backtest. El número 1 lleva corona.
+- **Chat contigo (tú eres el jefe)**: escribe en la caja del chat a toda la oficina, o a alguien
+  con `@Nombre`. Te contestan con los datos del momento, y si pides un cambio te lo **proponen**
+  con botones de Aprobar / Rechazar: nada cambia hasta que lo apruebas. Decisiones posibles:
+  pausar o reanudar la minería, activar o quitar un freno manual, pausar, reanudar o retirar a un
+  trader, cambiar los límites de riesgo, rehacer un plan de holding y convocar el comité.
+  - **Modo básico (gratis)**: entiende órdenes sencillas («pausa la minería», «activa el freno»,
+    «pausa a E-XXXXXX», «riesgo 0,5», «¿cómo vamos?», «¿quién es el mejor?»).
+  - **Con Claude (opcional, de pago)**: si pones `ANTHROPIC_API_KEY=...` en el archivo `.env` de la
+    raíz del proyecto, contestan de verdad a cualquier cosa. Cada mensaje cuesta unos céntimos de tu
+    saldo de la API (console.anthropic.com), que va aparte de la suscripción de la app de Claude. Por
+    defecto usa Claude Opus 5.5; con `TRADING_FLOOR_MODELO=claude-sonnet-5-5` en el `.env` sale más barato.
 - Arrastra para moverte, rueda o pellizca para hacer zoom, haz clic en cualquiera para ver su ficha.
 - 🎬 activa el **modo cine**: la cámara recorre las salas y persigue lo que va pasando.
 - ◐ cambia entre día, noche y automático (según tu hora).
@@ -108,4 +119,6 @@ descanso, a la terraza o al gimnasio.
 | `riesgo.py` | Tamaño de las operaciones, límites, vetos y frenos |
 | `holding.py` | Carteras de largo plazo con zonas de compra y de venta |
 | `macro.py` | Datos macroeconómicos y régimen de mercado |
+| `control.py` | Tus decisiones: minería pausada, freno manual, traders pausados, límites de riesgo |
+| `chat.py` | Chat con la oficina: modo básico o con Claude, y propuestas de decisiones |
 | `web.py`, `web/index.html` | Servidor local y la oficina isométrica (canvas, sin librerías) |

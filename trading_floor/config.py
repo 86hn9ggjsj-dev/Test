@@ -5,6 +5,14 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+# Claves opcionales (por ejemplo la de Claude para el chat) en el .env de la raíz del proyecto.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+except ImportError:
+    pass
+
 DATA_DIR = Path(os.environ.get("TRADING_FLOOR_DIR", Path.home() / ".trading_floor"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -36,3 +44,6 @@ MAX_CAIDA = 0.06  # si el resultado cae un 6 % del capital desde su máximo, se 
 
 # Sala de holding: carteras de largo plazo con zonas de compra y de venta (ver holding.py).
 CAPITAL_HOLDING = {"BTCUSDT": 5_000.0, "ETHUSDT": 3_000.0, "SOLUSDT": 2_000.0}
+
+# Chat con la oficina: modelo de Claude si hay ANTHROPIC_API_KEY en el .env (si no, modo básico gratis).
+MODELO_CHAT = os.environ.get("TRADING_FLOOR_MODELO", "claude-opus-5-5")

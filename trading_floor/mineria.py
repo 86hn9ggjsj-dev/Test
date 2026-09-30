@@ -13,7 +13,7 @@ import time
 
 import numpy as np
 
-from . import almacen, banco
+from . import almacen, banco, control
 from .backtest import simular
 from .config import DIAS_HISTORICO, INTERVALO, MAX_POR_SIMBOLO, PARTE_EN_MUESTRA
 from .datos import velas
@@ -146,6 +146,9 @@ def minar(simbolo: str, intervalo: str = INTERVALO, estrategias: int = 2000, gen
     poblacion = [aleatoria(rng, simbolo, intervalo) for _ in range(tam)]
 
     for g in range(1, generaciones + 1):
+        if control.cargar()["mineria_pausada"]:
+            estado.evento("Minería pausada por el jefe: dejo la ronda aquí.", "pausa")
+            break
         estado.datos["generacion"] = g
         for est in poblacion:
             vistas.add(est.id)
@@ -196,9 +199,15 @@ def minar_continuo(simbolos: list[str], intervalo: str = INTERVALO, estrategias:
     estado = EstadoMineria()
     ronda = 0
     while not parar.is_set():
+        if control.cargar()["mineria_pausada"]:
+            if estado.datos["estado"] != "pausada":
+                estado.datos["estado"] = "pausada"
+                estado.evento("Minería en pausa por decisión del jefe. Espero a que la reanudes.", "pausa")
+            parar.wait(5)
+            continue
         ronda += 1
         for simbolo in simbolos:
-            if parar.is_set():
+            if parar.is_set() or control.cargar()["mineria_pausada"]:
                 break
             en_banco = sum(b["estrategia"]["simbolo"] == simbolo.upper() for b in banco.cargar())
             if en_banco >= MAX_POR_SIMBOLO:
@@ -212,5 +221,7 @@ def minar_continuo(simbolos: list[str], intervalo: str = INTERVALO, estrategias:
         proxima = dt.datetime.now().astimezone() + dt.timedelta(minutes=pausa_min)
         estado.datos.update(estado="descanso", proxima=proxima.isoformat(timespec="seconds"))
         estado.evento(f"Ronda {ronda} terminada. Descanso hasta las {proxima:%H:%M}.", "descanso")
-        parar.wait(pausa_min * 60)
+        fin = time.time() + pausa_min * 60
+        while time.time() < fin and not parar.is_set() and not control.cargar()["mineria_pausada"]:
+            parar.wait(5)
     estado.terminar()
