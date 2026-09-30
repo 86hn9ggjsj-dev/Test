@@ -116,6 +116,11 @@ descanso, a la terraza o al gimnasio.
     raíz del proyecto, contestan de verdad a cualquier cosa. Cada mensaje cuesta unos céntimos de tu
     saldo de la API (console.anthropic.com), que va aparte de la suscripción de la app de Claude. Por
     defecto usa Claude Opus 5.5; con `TRADING_FLOOR_MODELO=claude-sonnet-5-5` en el `.env` sale más barato.
+- Cada trabajador tiene su cara, peinado y ropa de su puesto, y se le nota el ánimo: los traders sonríen si
+  su posición va ganando y sudan si va perdiendo. Entre tarea y tarea beben café, hablan por teléfono o se
+  estiran. Las mesas libres muestran un salvapantallas «LIBRE» hasta que llega un trader nuevo.
+- En la pestaña «Salas», «Ir a una sala» lleva la cámara a cada sala; las flechas ‹ › del panel pasan de
+  pestaña y de canal.
 - Arrastra para moverte, rueda o pellizca para hacer zoom, haz clic en cualquiera para ver su ficha.
 - 🎬 activa el **modo cine**: la cámara recorre las salas y persigue lo que va pasando.
 - ◐ cambia entre día, noche y automático (según tu hora).
