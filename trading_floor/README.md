@@ -65,8 +65,9 @@ Telegram de Jarvis, si lo tienes configurado.
 6. **Control de riesgos** (`riesgo.py`). Encima del paper trading:
    - **Tamaño de cada operación**: arriesga como mucho el 1 % del capital de su trader si salta el
      stop (con un stop lejano se invierte menos; nunca más del 100 %).
-   - **Vetos**: una entrada nueva se veta si ya había 16 posiciones abiertas en la sala de trading (6 en
-     la de scalping) o 3 iguales (mismo símbolo y dirección) en ese momento, o si está activado un freno.
+   - **Vetos**: una entrada nueva se veta si ya había 16 posiciones abiertas en la sala de trading (12 en
+     la de scalping, una por mesa: cada sala tiene su propio límite) o 3 iguales (mismo símbolo y
+     dirección, también por sala) en ese momento, o si está activado un freno (los frenos son comunes).
      Se evalúa con las posiciones que estaban abiertas justo cuando llega la señal.
    - **Frenos**: si el día pierde un 2 % del capital, no se abren más posiciones hasta mañana; si el
      resultado cae un 6 % del capital desde su máximo, se pausan las entradas.

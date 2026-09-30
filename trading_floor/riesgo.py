@@ -95,15 +95,21 @@ def evaluar_entrada(id_: str, simbolo: str, direccion: str, abiertas: list[tuple
     return None
 
 
-def estado(resumen: dict | None, curva: list | None, abiertas: list[tuple[str, str]], bloqueo: str | None,
-           vetos: list[dict]) -> dict:
-    """Resumen para la sala de control de riesgos."""
-    lim = limites()
-    inicial = (resumen or {}).get("inicial") or 0
+def _apuestas(abiertas: list[tuple[str, str]]) -> dict[str, int]:
     apuestas: dict[str, int] = {}
     for s, d in abiertas:
         clave = f"{s} {'largo' if d == 'largo' else 'corto'}"
         apuestas[clave] = apuestas.get(clave, 0) + 1
+    return apuestas
+
+
+def estado(resumen: dict | None, curva: list | None, abiertas: list[tuple[str, str]], bloqueo: str | None,
+           vetos: list[dict], abiertas_scalping: list[tuple[str, str]] | None = None) -> dict:
+    """Resumen para la sala de control de riesgos (las posiciones de trading y de scalping, por separado)."""
+    lim = limites()
+    inicial = (resumen or {}).get("inicial") or 0
+    apuestas = _apuestas(abiertas)
+    apuestas_scalping = _apuestas(abiertas_scalping or [])
     return {
         "reglas": reglas(lim),
         "bloqueo": bloqueo,
@@ -112,6 +118,9 @@ def estado(resumen: dict | None, curva: list | None, abiertas: list[tuple[str, s
         "posiciones": len(abiertas),
         "max_posiciones": lim["max_posiciones"],
         "max_posiciones_scalping": lim["max_posiciones_scalping"],
+        "posiciones_scalping": len(abiertas_scalping or []),
+        "mayor_apuesta_scalping": max(apuestas_scalping.values(), default=0),
+        "apuestas_scalping": apuestas_scalping,
         "max_misma_apuesta": lim["max_misma_apuesta"],
         "mayor_apuesta": max(apuestas.values(), default=0),
         "apuestas": apuestas,

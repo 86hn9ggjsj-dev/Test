@@ -341,8 +341,10 @@ def ciclo(estado: dict) -> list[dict]:
                motivo=nuevo_bloqueo)
     elif anterior and not nuevo_bloqueo:
         evento("reanuda", "Se levanta el freno de riesgo: se vuelven a permitir entradas.")
-    abiertas = [(t["simbolo"], t["direccion"]) for t in traders.values() if t["posicion"] and t["grupo"] == "trading"]
-    estado["riesgo"] = riesgo.estado(estado["resumen"], estado["curva"], abiertas, nuevo_bloqueo, vetos)
+    abiertas = {g: [(t["simbolo"], t["direccion"]) for t in traders.values() if t["posicion"] and t["grupo"] == g]
+                for g in ("trading", "scalping")}
+    estado["riesgo"] = riesgo.estado(estado["resumen"], estado["curva"], abiertas["trading"], nuevo_bloqueo, vetos,
+                                     abiertas["scalping"])
     estado["capital_por_estrategia"] = CAPITAL_POR_ESTRATEGIA
     estado["actividad"] = (eventos[::-1] + estado.get("actividad", []))[:ACTIVIDAD_MAX]
     estado["actualizado"] = _ahora()

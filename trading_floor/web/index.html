@@ -273,10 +273,12 @@ canvas.grafica{display:block;width:100%}
 #sinConexion{position:fixed;left:50%;top:76px;transform:translateX(-50%);z-index:8;background:rgba(255,90,118,.14);border:1px solid rgba(255,90,118,.5);color:#ffd3db;padding:8px 14px;border-radius:10px;font-size:13px}
 #sinConexion[hidden]{display:none}
 
-@media (max-width:1720px){.kpi.opc2,.pastilla.reloj{display:none}.marca small{display:none}}
-@media (max-width:1600px){#pFng,.pastilla.papel{display:none}}
-@media (max-width:1180px){.marca > div:not(.logo){display:none}}
-@media (max-width:1250px){.kpi.opc{display:none}}
+/* cabecera: si falta sitio, primero se ocultan las etiquetas informativas y después las cifras secundarias */
+@media (max-width:2150px){.pastilla.reloj,.pastilla.papel,#pFng{display:none}}
+@media (max-width:1900px){.kpi.opc2,#pRegimen{display:none}.marca small{display:none}}
+@media (max-width:1720px){.kpi.opc{display:none}}
+@media (max-width:1560px){.vistas button span{display:none}.marca > div:not(.logo){display:none}}
+
 @media (max-width:1000px){#pFng{display:none}}
 @media (max-width:1400px){#pComite{display:none}}
 @media (max-width:760px){
@@ -391,7 +393,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <div class="kpi principal"><small>Patrimonio</small><b id="kPatrimonio">—</b></div>
     <div class="kpi principal"><small>Resultado total</small><b id="kResultado">—</b></div>
     <div class="kpi"><small>Hoy</small><b id="kHoy">—</b></div>
-    <div class="kpi opc"><small>Posiciones</small><b id="kPosiciones">—</b></div>
+    <div class="kpi opc" title="Posiciones abiertas ahora / máximo permitido, en la sala de trading y en la de scalping (cada una con su límite)"><small>Posiciones · trading | scalping</small><b id="kPosiciones">—</b></div>
     <div class="kpi opc"><small>Holding</small><b id="kHolding">—</b></div>
     <div class="kpi opc opc2"><small>Banco</small><b id="kBanco">—</b></div>
   </div>
@@ -1339,13 +1341,14 @@ function pantallaLimites(w, h) {
   const mal = !!r.bloqueo;
   ctx.fillStyle = mal ? "#ff5a76" : "#2ee6a6"; ctx.font = "900 14px JetBrains Mono, monospace";
   ctx.fillText(mal ? "● FRENO ACTIVADO" : "● OPERATIVA NORMAL", 260, 24);
-  const filas = [["Posiciones abiertas", r.posiciones, r.max_posiciones, ""], ["Misma apuesta", r.mayor_apuesta, r.max_misma_apuesta, ""],
-    ["Pérdida de hoy", r.perdida_hoy_pct, r.limite_diario_pct, " %"], ["Caída desde el máximo", r.caida_pct, r.max_caida_pct, " %"]];
+  const filas = [["Posiciones trading", r.posiciones, r.max_posiciones, ""], ["Posiciones scalping", r.posiciones_scalping || 0, r.max_posiciones_scalping || 12, ""],
+    ["Pérdida de hoy", r.perdida_hoy_pct, r.limite_diario_pct, " %"], ["Misma apuesta", Math.max(r.mayor_apuesta, r.mayor_apuesta_scalping || 0), r.max_misma_apuesta, ""],
+    ["Caída desde máx.", r.caida_pct, r.max_caida_pct, " %"]];
   filas.forEach(([t, v, m, u], k) => {
-    const x = 14 + (k % 2) * 330, y = 48 + Math.floor(k / 2) * 40, f = clamp(v / m, 0, 1), c = f >= 1 ? "#ff5a76" : f > .6 ? "#ffc24a" : "#2ee6a6";
-    ctx.fillStyle = "#8a94a6"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText(t, x, y);
-    ctx.fillStyle = "#e9edf3"; ctx.font = "800 11px JetBrains Mono, monospace"; ctx.fillText(`${u ? NF2.format(v) : v}${u} / ${u ? NF2.format(m) : m}${u}`, x + 190, y);
-    ctx.fillStyle = "#1e1826"; ctx.fillRect(x, y + 7, 300, 10); ctx.fillStyle = c; ctx.fillRect(x, y + 7, 300 * f, 10);
+    const x = 14 + (k % 3) * 220, y = 50 + Math.floor(k / 3) * 42, f = clamp(v / m, 0, 1), c = f >= 1 ? "#ff5a76" : f > .6 ? "#ffc24a" : "#2ee6a6";
+    ctx.fillStyle = "#8a94a6"; ctx.font = "700 10px Inter, sans-serif"; ctx.fillText(t, x, y);
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 10px JetBrains Mono, monospace"; ctx.textAlign = "right"; ctx.fillText(`${u ? NF2.format(v) : v}${u} / ${u ? NF2.format(m) : m}${u}`, x + 200, y); ctx.textAlign = "start";
+    ctx.fillStyle = "#1e1826"; ctx.fillRect(x, y + 7, 200, 10); ctx.fillStyle = c; ctx.fillRect(x, y + 7, 200 * f, 10);
   });
 }
 bloquear(40.8, 19.4, 43.2, 21.2);
@@ -2769,7 +2772,8 @@ function actualizarHUD() {
   pintarBotonBuscar();
   const t = totales(), m = S.mineria || {};
   actualizarResultados();
-  $("#kPosiciones").textContent = t.n ? `${t.abiertas} / ${t.n}` : "—";
+  const rp = S.papel && S.papel.riesgo, gtp = grupoVivo("trading"), gsp = grupoVivo("scalping");
+  $("#kPosiciones").textContent = rp ? `${gtp.abiertas}/${rp.max_posiciones} | ${gsp.abiertas}/${rp.max_posiciones_scalping ?? "—"}` : t.n ? `${t.abiertas}` : "—";
   $("#kBanco").textContent = (S.banco || []).length;
   $("#modoChat").textContent = S.chat_modo === "claude"
     ? "Conversación con Claude: cada mensaje gasta unos céntimos de tu saldo de la API. Las decisiones siempre las apruebas tú."
@@ -3016,8 +3020,9 @@ function actualizarHolding() {
 function actualizarRiesgo() {
   const r = S.papel && S.papel.riesgo;
   if (!r) { $("#riesgo").innerHTML = `<p class="vacio">El control de riesgos empieza a trabajar con el paper trading.</p>`; return; }
-  const lim = [["Posiciones abiertas", r.posiciones, r.max_posiciones, ""], ["Misma apuesta (activo y dirección)", r.mayor_apuesta, r.max_misma_apuesta, ""],
-    ["Pérdida de hoy", r.perdida_hoy_pct, r.limite_diario_pct, " %"], ["Caída desde el máximo", r.caida_pct, r.max_caida_pct, " %"]];
+  const lim = [["Posiciones abiertas · trading", r.posiciones, r.max_posiciones, ""], ["Posiciones abiertas · scalping", r.posiciones_scalping || 0, r.max_posiciones_scalping || 12, ""],
+    ["Misma apuesta · trading", r.mayor_apuesta, r.max_misma_apuesta, ""], ["Misma apuesta · scalping", r.mayor_apuesta_scalping || 0, r.max_misma_apuesta, ""],
+    ["Pérdida de hoy (todo)", r.perdida_hoy_pct, r.limite_diario_pct, " %"], ["Caída desde el máximo (todo)", r.caida_pct, r.max_caida_pct, " %"]];
   $("#riesgo").innerHTML = `<div class="estado-riesgo ${r.bloqueo ? "mal" : "ok"}">${r.bloqueo ? "● FRENO ACTIVADO" : "● OPERATIVA NORMAL"}${r.bloqueo ? `<small>${esc(r.bloqueo)}</small>` : ""}</div>` +
     lim.map(([t, v, m, u]) => `<div class="limite"><div class="fila"><span>${esc(t)}</span><b>${u ? NF2.format(v) : v}${u} / ${u ? NF2.format(m) : m}${u}</b></div><div class="barrita"><i style="width:${clamp(v / m, 0, 1) * 100}%"></i></div></div>`).join("") +
     `<h3 style="margin-top:16px">Reglas</h3>` + r.reglas.map(x => `<div class="regla"><b>${esc(x.nombre)} · ${esc(x.valor)}</b><br>${esc(x.explica)}</div>`).join("") +
