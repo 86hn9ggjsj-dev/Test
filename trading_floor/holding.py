@@ -8,6 +8,9 @@ Reglas del plan (sin stop loss: nunca se vende por miedo):
   parte de la posición. Como dependen del coste medio, se mueven solos cuando se promedia.
 - Si el precio vuelve por debajo del coste medio, los puntos de salida se rearman para la
   siguiente subida. Siempre queda una parte de la posición (el núcleo).
+- Ajustes de capital: cuando cambias el % del fondo dedicado al holding (o aportas/retiras dinero), cada
+  plan recibe o devuelve capital desde ese momento; si hay que devolver más de lo que tiene en efectivo,
+  vende la parte necesaria. Los tramos y la reserva se recalculan con el presupuesto nuevo.
 
 Se simula con las velas reales de Binance (1 hora) desde que se crea el plan.
 """
@@ -66,6 +69,7 @@ def nuevo_plan(simbolo: str, presupuesto: float, precio: float, paso_pct: float 
         "tramo_pct": float(tramo_pct or TRAMO_PCT),
         "reserva_pct": float(RESERVA_PCT if reserva_pct is None else reserva_pct),
         "salidas": salidas,
+        "ajustes": [],
     }
 
 
@@ -85,6 +89,27 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
     efectivo, reserva_usada, unidades, coste_base, realizado = presupuesto, 0.0, 0.0, 0.0, 0.0
     operaciones: list[dict] = []
     hechas: set[int] = set()
+    ajustes = sorted(plan.get("ajustes") or [], key=lambda a: a["t"])
+    pendiente = 0  # siguiente ajuste de capital por aplicar
+
+    def ajustar(aj: dict, precio: float, k: int) -> None:
+        """Capital que entra (+) o sale (−) del plan por el reparto del fondo."""
+        nonlocal presupuesto, reserva, tramo, efectivo, unidades, coste_base, realizado
+        importe = float(aj["importe"])
+        presupuesto += importe
+        reserva, tramo = presupuesto * plan["reserva_pct"] / 100, presupuesto * plan["tramo_pct"] / 100
+        efectivo += importe
+        vendido = 0.0
+        if efectivo < 0 and unidades > 0:   # no llega el efectivo: se vende lo justo
+            u = min(unidades, -efectivo / (precio * (1 - COSTE)))
+            medio_ = coste_base / unidades
+            vendido = u * precio * (1 - COSTE)
+            realizado += vendido - u * medio_
+            efectivo += vendido
+            coste_base -= u * medio_
+            unidades -= u
+        operaciones.append({"t": aj["t"], "tipo": "ajuste", "importe": round(importe, 2), "presupuesto": round(presupuesto, 2),
+                            "vendido": round(vendido, 2), "precio": float(precio)})
 
     def t(k: int) -> str:
         return m.tiempo[min(max(k, 0), len(m) - 1)].isoformat()
@@ -128,6 +153,9 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
     cada = max(1, 240 // m.minutos)  # un punto cada 4 horas para las gráficas
     serie = []  # resultado (valor − dinero aportado) con su hora, para el fondo
     for k in range(inicio, len(m)):
+        while pendiente < len(ajustes) and pd.Timestamp(ajustes[pendiente]["t"]) <= m.tiempo[k]:
+            ajustar(ajustes[pendiente], float(m.o[k]), k)
+            pendiente += 1
         # 1) Promediar a la baja (puede saltar varios escalones si el precio cae de golpe).
         while efectivo + (reserva - reserva_usada) > 1:
             objetivo = referencia * (1 - paso)
@@ -153,6 +181,8 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
             serie.append([(m.tiempo[k] + pd.Timedelta(minutes=m.minutos)).isoformat(),
                           round(float(valores[-1] - presupuesto - reserva_usada), 2)])
 
+    for aj in ajustes[pendiente:]:   # ajustes de ahora mismo (dentro de la vela en curso): al último precio
+        ajustar(aj, float(m.c[-1]), len(m) - 1)
     precio = float(m.c[-1])
     aportado = presupuesto + reserva_usada
     valor = efectivo + unidades * precio
@@ -167,6 +197,7 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
         "coste_medio": round(medio, 6) if medio else None,
         "invertido": round(coste_base, 2),
         "aportado": round(aportado, 2),
+        "presupuesto_actual": round(presupuesto, 2),
         "reserva": round(reserva, 2),
         "reserva_usada": round(reserva_usada, 2),
         "valor": round(valor, 2),
@@ -189,6 +220,11 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
 
 
 def _texto(moneda: str, op: dict, plan: dict) -> str:
+    if op["tipo"] == "ajuste":
+        sube = op["importe"] >= 0
+        return (f"{moneda}: {'entran' if sube else 'salen'} {_precio(abs(op['importe']))} $ por el nuevo reparto del fondo; "
+                f"el plan pasa a {_precio(op['presupuesto'])} $ de presupuesto"
+                + (f" (vendo {_precio(op['vendido'])} $ para devolverlos)." if op.get("vendido") else "."))
     if op["tipo"] == "aportacion":
         return (f"{moneda}: se acabó el presupuesto, meto {_precio(op['importe'])} $ de la reserva "
                 f"({_precio(op['reserva_usada'])} de {_precio(op['reserva'])} $ usados).")
@@ -213,7 +249,7 @@ def _serie_total(planes) -> pd.Series:
 def _base(plan: dict) -> dict:
     claves = ("tipo", "simbolo", "presupuesto", "creado", "precio_inicio", "entrada_inicial_pct",
               "paso_pct", "tramo_pct", "reserva_pct", "salidas")
-    return {k: plan[k] for k in claves}
+    return {**{k: plan[k] for k in claves}, "ajustes": list(plan.get("ajustes") or [])}
 
 
 def ciclo(estado: dict) -> list[dict]:
@@ -257,7 +293,7 @@ def ciclo(estado: dict) -> list[dict]:
     antes = total[total.index <= medianoche] if len(total) else total
     hoy = float(total.iloc[-1] - antes.iloc[-1]) if len(antes) else 0.0
     estado["serie"] = [[t.isoformat(), round(float(v), 2)] for t, v in total.items()]
-    estado["resumen"] = {"presupuesto": round(float(sum(p["presupuesto"] for p in planes.values())), 2),
+    estado["resumen"] = {"presupuesto": round(float(sum(p.get("presupuesto_actual", p["presupuesto"]) for p in planes.values())), 2),
                          "aportado": round(float(aportado), 2), "valor": round(float(valor), 2),
                          "resultado": round(float(valor - aportado), 2),
                          "resultado_pct": round(float(valor / aportado - 1) * 100, 3) if aportado else 0.0,
@@ -287,6 +323,30 @@ def crear(simbolo: str, presupuesto: float, paso_pct: float | None = None, tramo
         ciclo(estado)
         almacen.guardar("holding", estado)
     return estado["planes"][simbolo]
+
+
+def ajustar_total(objetivo: float) -> list[tuple[str, float]]:
+    """Lleva el presupuesto total del holding a `objetivo` $: reparte la diferencia entre los planes según su peso."""
+    with _cerrojo:
+        estado = almacen.cargar("holding", {})
+        if not estado.get("planes"):
+            ciclo(estado)   # la primera vez se crean los planes de ejemplo
+        planes = estado["planes"]
+        actual = {s: p.get("presupuesto_actual", p["presupuesto"]) for s, p in planes.items()}
+        total = sum(actual.values())
+        diferencia = objetivo - total
+        if abs(diferencia) < 1:
+            return []
+        ahora = pd.Timestamp.now(tz="UTC").isoformat()
+        hechos = []
+        for s, p in planes.items():
+            parte = diferencia * (actual[s] / total if total > 0 else 1 / len(planes))
+            parte = max(parte, -actual[s])   # un plan no puede quedarse con presupuesto negativo
+            p.setdefault("ajustes", []).append({"t": ahora, "importe": round(parte, 2)})
+            hechos.append((s, round(parte, 2)))
+        ciclo(estado)
+        almacen.guardar("holding", estado)
+    return hechos
 
 
 def borrar(simbolo: str) -> bool:

@@ -35,6 +35,7 @@ ACCIONES = {
     "cambiar_riesgo": "Cambiar un límite de riesgo",
     "nuevo_plan_holding": "Rehacer un plan de holding (presupuesto, caída para promediar, reserva y puntos de salida)",
     "convocar_comite": "Convocar el comité ahora",
+    "asignar": "Cambiar el reparto del fondo: «objetivo» es el área (trading, scalping u holding) y «valor» el % del fondo que se le dedica; lo que queda es liquidez",
     "aportar": "Aportar dinero (ficticio) a tu fondo: «valor» es el importe en dólares",
     "retirar": "Retirar dinero (ficticio) de tu fondo: «valor» es el importe; como mucho la liquidez disponible",
 }
@@ -61,6 +62,22 @@ def cargar() -> dict:
     c.setdefault("riesgo", {})
     c.setdefault("decisiones", [])
     return c
+
+
+def _repartir(nuevo: dict) -> str:
+    """Aplica un reparto en % (trading, scalping, holding): capital por mesa desde ahora y presupuesto del holding."""
+    from . import fondo, holding
+
+    patrimonio = fondo.calcular(completo=False)["resumen"]["patrimonio"]
+    info = fondo.asignar(nuevo, patrimonio)
+    holding.ajustar_total(info["holding"])
+    aviso = ""
+    if info["liquidez"] < info["holding_pct"] * 0.5:
+        aviso = " Ojo: la reserva del holding (hasta un 50 % más) sale de la liquidez, y queda poca."
+    return (f"Nuevo reparto del fondo: trading {_num(info['trading'])} % ({_dinero(info['trader'])} $ por trader), "
+            f"scalping {_num(info['scalping'])} % ({_dinero(info['scalper'])} $ por scalper), holding {_num(info['holding_pct'])} % "
+            f"({_dinero(info['holding'])} $ de presupuesto) y liquidez {_num(info['liquidez'])} %. Se aplica desde ahora; "
+            f"lo ganado hasta hoy se conserva.{aviso}")
 
 
 def _dinero(x: float, decimales: int = 2) -> str:
@@ -171,6 +188,22 @@ def _aplicar(propuesta: dict) -> str:
         hecho = (f"Nuevo plan de holding para {simbolo.replace('USDT', '')}: {_num(presupuesto)} $ ficticios, "
                  f"promedia cada −{_num(plan['paso_pct'])} %, reserva de {_num(plan['reserva'])} $ y salidas a "
                  + "/".join(f"+{_num(s['sobre_coste_pct'])}" for s in plan["salidas"]) + " % sobre el coste medio. Sin stop.")
+    elif accion == "asignar":
+        from . import fondo
+
+        nuevo = {a: v for a, v in fondo.reparto().items() if a in fondo.AREAS}
+        cambios_ = dict(propuesta.get("reparto") or {})
+        if objetivo:
+            area = objetivo.lower().strip()
+            if area not in fondo.AREAS:
+                raise ValueError("El área tiene que ser trading, scalping u holding.")
+            cambios_[area] = valor
+        if not cambios_:
+            raise ValueError("Dime qué % quieres dedicar a cada área.")
+        for area, pct in cambios_.items():
+            if area in fondo.AREAS:
+                nuevo[area] = float(pct)
+        hecho = _repartir(nuevo)
     elif accion in ("aportar", "retirar"):
         from . import fondo
 
@@ -178,9 +211,11 @@ def _aplicar(propuesta: dict) -> str:
         liquidez = fondo.calcular()["reparto"]["liquidez"] if accion == "retirar" else 0.0
         fondo.mover("aportacion" if accion == "aportar" else "reembolso", importe, liquidez)
         m = fondo.calcular(completo=False)["resumen"]
+        _repartir({a: v for a, v in fondo.reparto().items() if a in fondo.AREAS})   # se mantiene tu reparto en %
         hecho = (f"{'Aportados' if accion == 'aportar' else 'Retirados'} {_dinero(importe)} $ ficticios "
                  f"{'al' if accion == 'aportar' else 'del'} fondo. Patrimonio: {_dinero(m['patrimonio'])} $; "
-                 f"valor liquidativo: {_dinero(m['vl'], 4)} $ por participación.")
+                 f"valor liquidativo: {_dinero(m['vl'], 4)} $ por participación. El capital de cada área se "
+                 "ha reajustado para mantener tu reparto.")
     else:  # convocar_comite: lo hace la oficina al recibir la decisión
         hecho = "Comité convocado."
     c["decisiones"] = ([{"t": dt.datetime.now().astimezone().isoformat(timespec="seconds"), "accion": accion,

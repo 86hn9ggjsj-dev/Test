@@ -101,6 +101,15 @@ Telegram de Jarvis, si lo tienes configurado.
    Sharpe, caída máxima, mejor y peor día, rentabilidad mensual, la comparación con haber comprado BTC,
    el reparto del dinero por área, la liquidez y la exposición por activo. Puedes aportar o retirar
    (como mucho la liquidez) desde el dashboard o por el chat («aporta 5000», «retira 2000»).
+
+   **Tu reparto**: eliges qué % del fondo va a cada área (al principio, trading 48 %, scalping 12 %,
+   holding 10 % y liquidez 30 %). En trading y scalping el % se divide entre sus mesas (48 y 12), así que
+   marca el capital de cada trader; en holding es el presupuesto de las carteras, repartido según su peso.
+   Al cambiarlo, cada área opera con su capital nuevo **desde ese momento** y lo ganado antes se conserva
+   (el resultado de cada trader se calcula por tramos de capital; las carteras de holding reciben o
+   devuelven capital, y si les falta efectivo venden lo justo). Al aportar o retirar dinero se reajusta
+   solo para mantener tus %. Se cambia en «Mi fondo» → «Cambiar el reparto» o por el chat («dedica un
+   20 % al holding»).
 10. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
    (Yahoo Finance) y el Fear & Greed de cripto (alternative.me). Con ellos se calcula un régimen
    RISK-ON / RISK-OFF. Es contexto para el comité: **las estrategias no usan estos datos**.

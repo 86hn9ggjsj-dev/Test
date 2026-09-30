@@ -4,8 +4,11 @@ Funciona como un fondo de verdad:
 - Tú aportas capital y recibes participaciones. El valor liquidativo (VL) es lo que vale cada
   participación: patrimonio del fondo / participaciones. Aportar o retirar dinero no cambia el VL;
   solo lo mueven las ganancias y las pérdidas, así que la rentabilidad del VL es la del fondo.
-- El capital se reparte entre la sala de trading, la de scalping y las carteras de holding; lo que no
-  está asignado es liquidez.
+- El capital se reparte entre la sala de trading, la de scalping y las carteras de holding según el
+  reparto que elijas (en %); lo que no está asignado es liquidez. En trading y scalping, el % se divide
+  entre sus mesas (capital de cada trader); en holding es el presupuesto de las carteras. Al cambiar el
+  reparto, o al aportar o retirar dinero, el capital se reajusta desde ese momento: lo ganado antes se
+  conserva.
 - Patrimonio = dinero aportado − dinero retirado + resultado de todas las áreas.
 
 Se calcula a partir de las curvas de resultado del paper trading (papel.py) y del holding (holding.py),
@@ -23,9 +26,11 @@ import numpy as np
 import pandas as pd
 
 from . import almacen
-from .config import CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, FONDO_CAPITAL_INICIAL, FONDO_VL_INICIAL
+from .config import (CAPITAL_HOLDING, CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, FONDO_CAPITAL_INICIAL,
+                     FONDO_VL_INICIAL, MAX_POR_SIMBOLO, MAX_SCALPERS_POR_SIMBOLO, SCALPING_SIMBOLOS, SIMBOLOS)
 
 AREAS = ("trading", "scalping", "holding")
+MESAS = {"trading": MAX_POR_SIMBOLO * len(SIMBOLOS), "scalping": MAX_SCALPERS_POR_SIMBOLO * len(SCALPING_SIMBOLOS)}
 _cerrojo = threading.RLock()
 _cache: dict = {"t": 0.0, "datos": None}
 
@@ -65,6 +70,62 @@ def cargar(papel: dict | None = None, holding: dict | None = None) -> dict:
         if inicios or not hay_actividad:
             almacen.guardar("fondo", f)
         return f
+
+
+def _reparto_inicial() -> dict:
+    """El reparto de antes de poder elegirlo: 1.000 $ por mesa y el presupuesto de holding de config.py."""
+    return {"trading": round(MESAS["trading"] * CAPITAL_POR_ESTRATEGIA / FONDO_CAPITAL_INICIAL * 100, 2),
+            "scalping": round(MESAS["scalping"] * CAPITAL_POR_ESTRATEGIA / FONDO_CAPITAL_INICIAL * 100, 2),
+            "holding": round(sum(CAPITAL_HOLDING.values()) / FONDO_CAPITAL_INICIAL * 100, 2)}
+
+
+def reparto(f: dict | None = None) -> dict:
+    """Reparto objetivo en % de cada área (la liquidez es lo que queda hasta 100)."""
+    f = almacen.cargar("fondo", {}) if f is None else f
+    r = dict(f.get("reparto") or _reparto_inicial())
+    r["liquidez"] = round(100 - sum(r[a] for a in AREAS), 2)
+    return r
+
+
+def capitales(f: dict | None = None) -> list[tuple[pd.Timestamp, float, float]]:
+    """Capital de cada mesa a lo largo del tiempo: [(desde, trader, scalper)]. Lo usa el paper trading para que,
+    al cambiar el reparto, cada trader opere con su capital nuevo desde ese momento sin perder lo ganado."""
+    f = almacen.cargar("fondo", {}) if f is None else f
+    lista = f.get("capitales") or [{"t": "2000-01-01T00:00:00+00:00", "trader": CAPITAL_POR_ESTRATEGIA,
+                                    "scalper": CAPITAL_POR_ESTRATEGIA}]
+    return sorted((pd.Timestamp(c["t"]), float(c["trader"]), float(c["scalper"])) for c in lista)
+
+
+def capital_mesa(grupo: str, momento: pd.Timestamp | None = None) -> float:
+    """Capital de una mesa (de trading o de scalping) en un momento dado (por defecto, ahora)."""
+    col = 2 if grupo == "scalping" else 1
+    tramos = capitales()
+    valido = [c for c in tramos if momento is None or c[0] <= momento]
+    return (valido[-1] if valido else tramos[0])[col]
+
+
+def asignar(nuevo: dict, patrimonio: float) -> dict:
+    """Guarda un reparto nuevo (en %) y el capital de cada mesa que sale de él desde ahora."""
+    r = {a: round(float(nuevo[a]), 2) for a in AREAS}
+    for a, v in r.items():
+        if not 0 <= v <= 100:
+            raise ValueError(f"El % de {a} tiene que estar entre 0 y 100.")
+    if sum(r.values()) > 100.001:
+        raise ValueError(f"Entre trading, scalping y holding suman {sum(r.values()):g} %: no puede pasar del 100 %."
+                         .replace(f"{sum(r.values()):g}", f"{sum(r.values()):g}".replace(".", ",")))
+    if patrimonio <= 0:
+        raise ValueError("El fondo no tiene patrimonio que repartir.")
+    trader = round(r["trading"] / 100 * patrimonio / MESAS["trading"], 2)
+    scalper = round(r["scalping"] / 100 * patrimonio / MESAS["scalping"], 2)
+    with _cerrojo:
+        f = cargar()
+        f.setdefault("capitales", [{"t": f["inicio"], "trader": CAPITAL_POR_ESTRATEGIA, "scalper": CAPITAL_POR_ESTRATEGIA}])
+        f["reparto"] = r
+        f["capitales"].append({"t": pd.Timestamp.now(tz="UTC").isoformat(), "trader": trader, "scalper": scalper})
+        almacen.guardar("fondo", f)
+    _cache["t"] = _cache_resumen["t"] = 0.0
+    return {**reparto(f), "trader": trader, "scalper": scalper, "holding_pct": r["holding"],
+            "holding": round(r["holding"] / 100 * patrimonio, 2)}
 
 
 def mover(tipo: str, importe: float, liquidez: float) -> dict:
@@ -161,7 +222,7 @@ def _mensual(vl: pd.Series) -> list[list]:
 def _operaciones(traders: dict) -> tuple[dict, list[dict]]:
     ops = [dict(o, id=i, simbolo=t["simbolo"], direccion=t["direccion"], grupo=t.get("grupo", "trading"))
            for i, t in traders.items() for o in t.get("operaciones", [])]
-    ganancias = [CAPITAL_POR_ESTRATEGIA * o["retorno_pct"] / 100 for o in ops]
+    ganancias = [o.get("resultado_usd", CAPITAL_POR_ESTRATEGIA * o["retorno_pct"] / 100) for o in ops]
     positivas, negativas = sum(g for g in ganancias if g > 0), -sum(g for g in ganancias if g < 0)
     stats = {
         "cerradas": len(ops),
@@ -175,8 +236,8 @@ def _operaciones(traders: dict) -> tuple[dict, list[dict]]:
         "coste_scalping_pct": round(COSTE_SCALPING * 100, 3),
     }
     ultimas = sorted(ops, key=lambda o: o["salida_t"], reverse=True)[:25]
-    return stats, [{k: o[k] for k in ("id", "simbolo", "direccion", "grupo", "entrada_t", "salida_t", "entrada", "salida",
-                                       "retorno_pct", "motivo")} for o in ultimas]
+    return stats, [{k: o.get(k) for k in ("id", "simbolo", "direccion", "grupo", "entrada_t", "salida_t", "entrada", "salida",
+                                           "retorno_pct", "resultado_usd", "motivo")} for o in ultimas]
 
 
 def _reparto(papel: dict, holding: dict, patrimonio: float, vivo: dict) -> tuple[dict, list[dict], list[dict]]:
@@ -261,11 +322,15 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
         "hoy_pct": round(float(vl[-1] / base_hoy - 1) * 100, 3),
         "hoy": round(float((vl[-1] - base_hoy) * participaciones[-1]), 2),
         "por_area": {k: round(float(v.iloc[-1]), 2) for k, v in areas.items()},
+        "reparto": reparto(f),
     }
     if not completo:
         return {"resumen": resumen}
-    reparto, exposicion, abiertas = _reparto(papel, holding, resumen["patrimonio"], vivo)
-    resumen["liquidez"] = reparto["liquidez"]
+    en_uso, exposicion, abiertas = _reparto(papel, holding, resumen["patrimonio"], vivo)
+    resumen["liquidez"] = en_uso["liquidez"]
+    objetivo = reparto(f)
+    traders = papel.get("estrategias") or {}
+    ocupadas = {g: sum(1 for t in traders.values() if t.get("grupo", "trading") == g) for g in ("trading", "scalping")}
     ops_stats, ultimas = _operaciones(papel.get("estrategias") or {})
     btc = _btc(indice)
     # series para las gráficas: hora a hora los últimos 30 días y un punto al día antes
@@ -278,7 +343,6 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
               round(float(areas["holding"].iloc[i]), 2), round(float(caida.iloc[i]) * 100, 3),
               round(float(btc.iloc[i] / btc.iloc[0] * FONDO_VL_INICIAL), 4) if btc is not None and btc.iloc[0] > 0 and not np.isnan(btc.iloc[i]) else None]
              for i in idx]
-    traders = papel.get("estrategias") or {}
     ranking = sorted(({"id": i, "simbolo": t["simbolo"], "direccion": t["direccion"], "grupo": t.get("grupo", "trading"),
                        "resultado": t.get("resultado", 0.0), "operaciones": len(t.get("operaciones", []))}
                       for i, t in traders.items()), key=lambda x: -x["resultado"])
@@ -292,7 +356,12 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
         "mensual": _mensual(vl_s),
         "serie": serie,
         "columnas": ["t", "vl", "patrimonio", "aportado", "trading", "scalping", "holding", "caida_pct", "btc_vl"],
-        "reparto": reparto,
+        "reparto": en_uso,
+        "objetivo": {"pct": objetivo, "usd": {a: round(objetivo[a] / 100 * resumen["patrimonio"], 2) for a in (*AREAS, "liquidez")},
+                     "capital_mesa": {"trading": capital_mesa("trading"), "scalping": capital_mesa("scalping")},
+                     "mesas": MESAS, "ocupadas": ocupadas,
+                     "presupuesto_holding": round(sum(p.get("presupuesto_actual", p.get("presupuesto", 0))
+                                                      for p in (holding.get("planes") or {}).values()), 2)},
         "exposicion": exposicion,
         "abiertas": abiertas,
         "operaciones": ops_stats,

@@ -1,6 +1,7 @@
 """Paper trading: las estrategias del banco operan con precios reales y dinero ficticio.
 
-Cada estrategia es un "trader" con CAPITAL_POR_ESTRATEGIA dólares ficticios. En cada ciclo se
+Cada estrategia es un "trader" con el capital ficticio que le toca según el reparto de tu fondo
+(fondo.py; al principio, CAPITAL_POR_ESTRATEGIA dólares). En cada ciclo se
 descargan las velas nuevas y se simula la estrategia desde el momento en que entró en la sala,
 con exactamente las mismas reglas que el backtest (backtest.py). Encima va la gestión de riesgo
 (riesgo.py): decide qué parte del capital usa cada operación y puede vetar entradas nuevas.
@@ -16,7 +17,7 @@ import time
 import numpy as np
 import pandas as pd
 
-from . import almacen, banco, riesgo
+from . import almacen, banco, fondo, riesgo
 from .backtest import simular
 from .config import CAPITAL_POR_ESTRATEGIA, coste_de, dias_de, es_scalping
 from .datos import velas
@@ -68,9 +69,30 @@ def _curva(res, m: Mercado, inicio: int, direccion: str, fracciones: list[float]
     return eq
 
 
+def _por_tramos(eq: np.ndarray, tiempos: pd.DatetimeIndex, tramos: list, col: int) -> tuple[np.ndarray, list]:
+    """Resultado en $ punto a punto cuando el capital del trader cambia con el reparto del fondo: cada tramo aplica
+    su capital a lo que se mueve la curva desde que empieza, y lo ganado antes se conserva.
+    Devuelve el resultado y los tramos [(punto de inicio, capital)]."""
+    previos = [c for c in tramos if c[0] <= tiempos[0]]
+    cortes = [(0, (previos[-1] if previos else tramos[0])[col])]
+    for c in tramos:
+        if c[0] > tiempos[0]:
+            p = min(int(np.searchsorted(tiempos, c[0], side="right")) - 1, len(eq) - 1)
+            if p == cortes[-1][0]:
+                cortes[-1] = (p, c[col])
+            else:
+                cortes.append((p, c[col]))
+    pnl, base = np.zeros(len(eq)), 0.0
+    for k, (ini, cap) in enumerate(cortes):
+        fin = cortes[k + 1][0] if k + 1 < len(cortes) else len(eq) - 1
+        pnl[ini:fin + 1] = base + cap * (eq[ini:fin + 1] / eq[ini] - 1)
+        base = pnl[fin]
+    return pnl, cortes
+
+
 def _resumen(pnl: list[pd.Series], traders: dict) -> tuple[dict, list, list]:
     """Resultado total y de hoy, curva de resultado acumulado y resultado de cada día."""
-    inicial = CAPITAL_POR_ESTRATEGIA * len(traders)
+    inicial = sum(t.get("capital", CAPITAL_POR_ESTRATEGIA) for t in traders.values())
     resultado = sum(t["resultado"] for t in traders.values())
     zona = dt.datetime.now().astimezone().tzinfo
     medianoche = pd.Timestamp(dt.datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0))
@@ -89,7 +111,7 @@ def _resumen(pnl: list[pd.Series], traders: dict) -> tuple[dict, list, list]:
         diarios = [[t.date().isoformat(), round(float(v), 2)] for t, v in cambio.iloc[-14:].items()]
     resumen = {
         "inicial": inicial,
-        "patrimonio": round(inicial + resultado, 2),
+        "patrimonio": round(sum(t.get("patrimonio", CAPITAL_POR_ESTRATEGIA) for t in traders.values()), 2),
         "resultado": round(resultado, 2),
         "resultado_pct": round(resultado / inicial * 100, 3) if inicial else 0.0,
         "hoy": round(hoy, 2),
@@ -114,7 +136,7 @@ def _resumen_grupo(grupo: str, traders: dict, medianoche: pd.Timestamp) -> dict:
     hoy = [o for o in ops if pd.Timestamp(o["salida_t"]) >= medianoche]
     return {
         "traders": len(ts),
-        "capital": CAPITAL_POR_ESTRATEGIA * len(ts),
+        "capital": round(sum(t.get("capital", CAPITAL_POR_ESTRATEGIA) for t in ts), 2),
         "resultado": round(sum(t["resultado"] for t in ts), 2),
         "hoy": round(sum(t.get("hoy", 0.0) for t in ts), 2),
         "operaciones": len(ops),
@@ -184,7 +206,7 @@ def ciclo(estado: dict) -> list[dict]:
             }
             sala = "la sala de scalping (velas de 5 minutos)" if es_scalping(clave[1]) else "la sala de trading"
             evento("alta", f"{b['id']} ha superado las pruebas y se pone en marcha en {sala}: un trader nuevo la "
-                           f"opera desde la próxima vela con {_precio(CAPITAL_POR_ESTRATEGIA)} $ ficticios",
+                           f"opera desde la próxima vela con {_precio(fondo.capital_mesa('scalping' if es_scalping(clave[1]) else 'trading'))} $ ficticios",
                    id=b["id"], simbolo=clave[0], direccion=est.direccion, grupo="scalping" if es_scalping(clave[1]) else "trading")
         t = traders[b["id"]]
         t["intervalo"] = clave[1]
@@ -261,9 +283,13 @@ def ciclo(estado: dict) -> list[dict]:
     # 3) Resultados de cada trader, con el tamaño de cada operación según el riesgo.
     pnl: list[pd.Series] = []
     por_grupo: dict[str, list[pd.Series]] = {"trading": [], "scalping": []}
+    tramos = fondo.capitales()
     for id_, t in traders.items():
         cerradas, posicion = [], None
         t["hoy"] = t["semana"] = 0.0
+        col = 2 if t["grupo"] == "scalping" else 1
+        t["capital"] = t["patrimonio"] = fondo.capital_mesa(t["grupo"])
+        t["resultado"] = t["comisiones"] = 0.0
         sim = sims[id_]
         if sim:
             est, m, inicio, res = sim
@@ -279,8 +305,20 @@ def ciclo(estado: dict) -> list[dict]:
                 if clave not in guardadas:
                     guardadas[clave] = riesgo.fraccion(est.stop_atr, atr[e - 1], pe, riesgo_ahora)
                 fracciones.append(guardadas[clave])
-            curva = pd.Series(CAPITAL_POR_ESTRATEGIA * (_curva(res, m, inicio, est.direccion, fracciones, coste_de(m.intervalo)) - 1),
-                              index=m.tiempo[inicio - 1 :] + pd.Timedelta(minutes=m.minutos))
+            eq = _curva(res, m, inicio, est.direccion, fracciones, coste_de(m.intervalo))
+            tiempos = m.tiempo[inicio - 1 :] + pd.Timedelta(minutes=m.minutos)
+            valores, cortes = _por_tramos(eq, tiempos, tramos, col)
+            curva = pd.Series(valores, index=tiempos)
+            n0 = inicio - 1
+
+            def capital_en(punto: int) -> float:
+                return [c for p, c in cortes if p <= max(punto, 0)][-1]
+
+            ini_ultimo, cap_ultimo = cortes[-1]
+            t["capital"] = round(cap_ultimo, 2)
+            t["patrimonio"] = round(float(cap_ultimo * eq[-1] / eq[ini_ultimo]), 2)
+            t["resultado"] = round(float(valores[-1]), 2)
+            t["comisiones"] = round(sum(capital_en(e - 1 - n0) * f * coste_de(m.intervalo) for e, f in zip(res.entradas, fracciones)), 2)
             pnl.append(curva)
             por_grupo[t["grupo"]].append(curva)
             antes = curva[curva.index <= medianoche]
@@ -296,6 +334,7 @@ def ciclo(estado: dict) -> list[dict]:
                     "salida": float(ps),
                     "fraccion": round(f, 4),
                     "retorno_pct": round(float(f * r) * 100, 3),  # efecto sobre el capital del trader
+                    "resultado_usd": round(float(valores[min(s, n0 + len(valores) - 1) - n0] - valores[e - 1 - n0]), 2),
                     "movimiento_pct": round(float(r) * 100, 3),  # lo que se movió la operación, con costes
                     "motivo": motivo,
                 }
@@ -322,14 +361,6 @@ def ciclo(estado: dict) -> list[dict]:
         t["posicion"] = posicion
         if sim:
             t["radar"] = _radar(sim[0], sim[1])
-        patrimonio = CAPITAL_POR_ESTRATEGIA * float(np.prod([1 + o["retorno_pct"] / 100 for o in cerradas]))
-        if posicion:
-            patrimonio *= 1 + posicion["retorno_pct"] / 100
-        t["patrimonio"] = round(patrimonio, 2)
-        t["resultado"] = round(patrimonio - CAPITAL_POR_ESTRATEGIA, 2)
-        # comisiones y deslizamiento pagados (sobre lo invertido en cada operación), para ver cuánto se come el coste
-        t["comisiones"] = round(sum(CAPITAL_POR_ESTRATEGIA * o["fraccion"] * coste_de(t["intervalo"])
-                                    for o in cerradas + ([posicion] if posicion else [])), 2)
 
     estado["resumen"], estado["curva"], estado["diarios"] = _resumen(pnl, traders)
     estado["grupos"] = {g: _resumen_grupo(g, traders, medianoche) for g in ("trading", "scalping")}
@@ -345,7 +376,8 @@ def ciclo(estado: dict) -> list[dict]:
                 for g in ("trading", "scalping")}
     estado["riesgo"] = riesgo.estado(estado["resumen"], estado["curva"], abiertas["trading"], nuevo_bloqueo, vetos,
                                      abiertas["scalping"])
-    estado["capital_por_estrategia"] = CAPITAL_POR_ESTRATEGIA
+    estado["capital_por_estrategia"] = fondo.capital_mesa("trading")
+    estado["capital_scalper"] = fondo.capital_mesa("scalping")
     estado["actividad"] = (eventos[::-1] + estado.get("actividad", []))[:ACTIVIDAD_MAX]
     estado["actualizado"] = _ahora()
     return eventos
@@ -370,7 +402,7 @@ def operar(segundos: float = 20, telegram: bool = False, parar: threading.Event 
             if traders and vela != ultima_vela:
                 ultima_vela = vela
                 total = sum(t["patrimonio"] for t in traders.values())
-                inicial = CAPITAL_POR_ESTRATEGIA * len(traders)
+                inicial = sum(t.get("capital", CAPITAL_POR_ESTRATEGIA) for t in traders.values())
                 abiertas = sum(1 for t in traders.values() if t["posicion"])
                 print(f"[papel {dt.datetime.now():%H:%M}] Patrimonio {_precio(total)} $ "
                       f"({_pct((total / inicial - 1) * 100)}) · {len(traders)} traders · "

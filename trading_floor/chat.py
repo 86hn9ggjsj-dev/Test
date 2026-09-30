@@ -88,6 +88,8 @@ cambiar_riesgo, "objetivo" es uno de estos límites y "valor" el nuevo valor:
 que tengan mesas libres, y "tipo" es "scalping" si es para la sala de scalping (velas de 5 minutos; solo BTC, \
 ETH y SOL) o "" para la sala de trading. En el resto de acciones, "tipo" es "".
   Para aportar o retirar: "valor" es el importe en dólares ficticios.
+  Para asignar: "objetivo" es el área (trading, scalping u holding) y "valor" el % del fondo que se le dedica \
+(el reparto actual está en «fondo.reparto»; lo que no se asigna es liquidez y entre las tres no pueden pasar del 100 %).
   Para nuevo_plan_holding: "objetivo" es el activo (BTC, ETH, SOL...), "valor" el presupuesto en dólares \
 ficticios, "paso" el % de caída desde la última compra para volver a comprar, "tramo" el tamaño de cada \
 compra en % del presupuesto, "reserva" el capital extra en % del presupuesto y "salidas" los puntos de salida \
@@ -279,6 +281,14 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
 
     if re.search(r"miner|busqueda|mina\b", t) and re.search(r"paus|para|deten|cancel", t):
         return dice("Tomás", "Entendido. Si lo apruebas, paro la búsqueda al terminar la generación en curso.", _propuesta("parar_busqueda", "Parar la búsqueda de estrategias"))
+    area = next((a for a in ("holding", "scalping", "trading") if a in t), None)
+    if numero is not None and area and ("%" in texto or re.search(r"\bdedic|\basign|\bpon\b|\bsube|\bbaja|\bporcentaje|\bpor ciento", t)):
+        f = E.get("fondo") or {}
+        actual = (f.get("reparto") or {}).get(area)
+        return dice("Marta", f"¿Dedico un {_es(numero, False)} % del fondo al {area}"
+                             + (f" (ahora tiene un {_es(actual, False)} %)" if actual is not None else "")
+                             + "? Se aplica desde ahora y lo ganado hasta hoy se conserva; lo que no se asigna queda como liquidez.",
+                    _propuesta("asignar", f"Dedicar un {_es(numero, False)} % del fondo al {area}", area, numero))
     if numero is not None and re.search(r"\baport|\bmete|\bingres|\bdeposit", t):
         return dice("Marta", f"¿Aporto {_es(numero, False)} $ ficticios a tu fondo? Recibirás participaciones al valor liquidativo de ahora.",
                     _propuesta("aportar", f"Aportar {_es(numero, False)} $ al fondo", valor=numero))

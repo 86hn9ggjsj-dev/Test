@@ -349,7 +349,21 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
 .d-tabla td.num,.d-tabla th.num{text-align:right;font-family:var(--mono)}
 .d-tabla .sube{color:#2ee6a6}.d-tabla .baja{color:#ff5a76}
 .d-scroll{max-height:320px;overflow:auto}
-.d-reparto{display:flex;gap:2px;height:22px;margin:6px 0 12px}
+.d-reparto{display:flex;gap:2px;height:22px;margin:6px 0 4px}
+.d-reparto-etq{font-size:11px;color:var(--d-mute);margin-top:10px}
+.d-reparto-caja{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+.d-editor{border:1px solid var(--borde);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.d-editor b{color:var(--d-ink);font-size:13px}
+.d-editor label,.d-editor .d-liq{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--d-ink2)}
+.d-editor i{width:10px;height:10px;border-radius:3px;flex:none}
+.d-editor input{margin-left:auto;width:70px;background:#0a0e14;border:1px solid var(--borde);border-radius:8px;color:var(--d-ink);font:700 13px var(--mono);padding:5px 7px;text-align:right}
+.d-editor span{color:var(--d-mute);width:12px}
+.d-editor .d-liq b{margin-left:auto;font:700 13px var(--mono);padding-right:20px}
+.d-editor .d-liq b.mal{color:#ff5a76}
+.d-editor button{border:1px solid var(--neon);background:rgba(212,255,58,.12);color:var(--neon);border-radius:9px;padding:8px;font:800 12px Inter,sans-serif;cursor:pointer}
+.d-editor button:disabled{opacity:.4;cursor:default}
+.d-editor small{font-size:11px;color:var(--d-mute);line-height:1.4}
+@media (max-width:900px){.d-reparto-caja{grid-template-columns:1fr}}
 .d-reparto div{height:100%;min-width:2px}
 .d-reparto div:first-child{border-radius:4px 0 0 4px}.d-reparto div:last-child{border-radius:0 4px 4px 0}
 .d-expo{display:grid;grid-template-columns:60px 1fr 1fr;gap:4px 0;align-items:center;font-size:12px;color:var(--d-ink2)}
@@ -435,7 +449,18 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <section class="d-tarjeta" id="cCaida"><h4>Caída desde el máximo</h4><p class="d-sub">Cuánto está el valor liquidativo por debajo de su máximo anterior.</p><div class="d-graf"></div></section>
     <section class="d-tarjeta" id="cAreas"><h4>Resultado acumulado por área</h4><p class="d-sub">Lo que ha ganado o perdido cada parte del fondo desde el inicio, en $.</p><div class="d-graf"></div></section>
     <section class="d-tarjeta" id="cDias"><h4>Rentabilidad de cada día</h4><p class="d-sub">Cambio del valor liquidativo día a día.</p><div class="d-graf"></div></section>
-    <section class="d-tarjeta" id="cReparto"><h4>Dónde está tu dinero</h4><p class="d-sub">Capital asignado a cada área y liquidez sin invertir.</p><div class="d-graf"></div></section>
+    <section class="d-tarjeta ancha" id="cReparto"><h4>Dónde está tu dinero · tu reparto</h4><p class="d-sub">Arriba, el reparto que eliges (en % del fondo); abajo, lo que está en uso ahora. En trading y scalping el % se divide entre sus mesas; en holding es el presupuesto de las carteras. Lo que no asignas es liquidez.</p>
+      <div class="d-reparto-caja"><div class="d-graf"></div>
+        <form class="d-editor" id="dEditor" autocomplete="off">
+          <b>Cambiar el reparto</b>
+          <label><i style="background:#3987e5"></i>Sala de trading<input type="number" name="trading" min="0" max="100" step="1"><span>%</span></label>
+          <label><i style="background:#d95926"></i>Scalping<input type="number" name="scalping" min="0" max="100" step="1"><span>%</span></label>
+          <label><i style="background:#199e70"></i>Holding<input type="number" name="holding" min="0" max="100" step="1"><span>%</span></label>
+          <div class="d-liq"><i style="background:#5b606b"></i>Liquidez <b id="dLiq">—</b></div>
+          <p id="dPrevia" class="d-sub"></p>
+          <button type="submit">Aplicar reparto</button>
+          <small id="dRepartoMsg">Se aplica desde ahora: lo ganado hasta hoy se conserva. Al aportar o retirar dinero se reajusta solo para mantener tus %.</small>
+        </form></div></section>
     <section class="d-tarjeta" id="cExpo"><h4>Exposición por activo</h4><p class="d-sub">Dinero en posiciones abiertas: a la derecha largos, a la izquierda cortos.</p><div class="d-graf"></div></section>
     <section class="d-tarjeta" id="cMeses"><h4>Rentabilidad de cada mes</h4><div class="d-graf"></div></section>
     <section class="d-tarjeta" id="cOps"><h4>Operaciones de los traders</h4><div class="d-graf"></div></section>
@@ -502,10 +527,10 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p><b>Minería.</b> Genera estrategias sin parar: combina indicadores (RSI, medias, Bollinger…) al azar y con un algoritmo genético, y las prueba en el 70 % inicial de tres años de velas reales de Binance.</p>
     <p><b>Laboratorio.</b> Las que parecen rentables viajan por la cinta. Cada puesto es una prueba de robustez; si la falla, a la trituradora.</p>
     <p><b>Cámara.</b> Las que lo superan todo se guardan en el banco (cada lingote es una estrategia), salvo que se parezcan demasiado a otra que ya esté dentro.</p>
-    <p><b>Sala de trading.</b> Cada estrategia del banco es un trader con 1.000 $ ficticios que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
+    <p><b>Sala de trading.</b> Cada estrategia del banco es un trader con su capital ficticio (el % del fondo que dedicas al trading, repartido entre sus 48 mesas; al principio, 1.000 $) que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
     <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). En cuanto entra en el banco, un trader se sienta en una mesa con ella. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 48 mesas (8 por activo).</p>
     <p><b>Radar de señales.</b> El equipo de análisis mira, para cada trader, cuántas condiciones de su estrategia se cumplen ahora mismo y le avisa cuando le falta una para entrar (con la hora del próximo cierre de vela, soporte, resistencia y ATR).</p>
-    <p><b>Mi fondo.</b> Todo es tu fondo de inversión (con dinero ficticio): tú aportas capital y recibes participaciones; el valor liquidativo sube o baja solo con los resultados de trading, scalping y holding, así que un trader nuevo no cambia tu patrimonio. En la pestaña «Mi fondo» (arriba) tienes tu dashboard: rentabilidad frente a BTC, caídas, volatilidad, Sharpe, reparto del dinero, exposición, meses, operaciones y aportaciones o reembolsos.</p>
+    <p><b>Mi fondo.</b> Todo es tu fondo de inversión (con dinero ficticio): tú aportas capital y recibes participaciones; el valor liquidativo sube o baja solo con los resultados de trading, scalping y holding, así que un trader nuevo no cambia tu patrimonio. Tú decides el reparto: qué % va a trading (se divide entre sus 48 mesas), a scalping (12 mesas) y a holding; el resto es liquidez. Se cambia en «Mi fondo» o por el chat («dedica un 20 % al holding») y se aplica desde ese momento, sin perder lo ganado. En la pestaña «Mi fondo» (arriba) tienes tu dashboard: rentabilidad frente a BTC, caídas, volatilidad, Sharpe, reparto del dinero, exposición, meses, operaciones y aportaciones o reembolsos.</p>
     <p><b>Scalping.</b> Una sala aparte con operaciones cortas en velas de 5 minutos (BTC, ETH y SOL, 12 mesas). Los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta) y pasan el mismo embudo de seis pruebas. Aun así, las comisiones pesan mucho: la sala muestra cuánto se paga.</p>
     <p><b>Sin repetidas.</b> Una estrategia no entra en el banco si es la misma idea que otra (mismas condiciones con otros números), si entra en los mismos momentos o si está en el mercado a la vez la mayor parte del tiempo. Si tenías repetidas de antes, pídele por el chat «quita las repetidas».</p>
     <p><b>Holding.</b> Carteras de largo plazo (BTC, ETH y SOL) sin stop loss: si el precio baja, promedian comprando más cada −8 % (y si se acaba el presupuesto, meten capital de la reserva); si sube, venden una parte en sus puntos de salida (+30, +60 y +100 % sobre el coste medio). Siempre se queda una parte en cartera.</p>
@@ -2601,7 +2626,7 @@ function sincronizarTraders(inicial) {
       nuevo.x = .6; nuevo.y = 10; nuevo.mira = "e"; ascensorHasta = T + 3;
       const d = ests[id];
       decir(BANQUERA, `${id} ya está en marcha: la opera ${nuevo.nombre}, mesa ${MESAS.indexOf(mesa) + 1}.`, 2, "oro");
-      volverAlPuesto(nuevo, () => enCanal("operaciones", () => decir(nuevo, `Hola, soy ${nuevo.nombre}. Llevo ${id}: ${ladoTxt(d.direccion).toLowerCase()} en ${moneda(d.simbolo)}, con 1.000 $ ficticios. Entraré cuando se cumplan todas sus condiciones.`, 2)));
+      volverAlPuesto(nuevo, () => enCanal("operaciones", () => decir(nuevo, `Hola, soy ${nuevo.nombre}. Llevo ${id}: ${ladoTxt(d.direccion).toLowerCase()} en ${moneda(d.simbolo)}, con ${fmt.n(d.capital || 1000)} $ ficticios. Entraré cuando se cumplan todas sus condiciones.`, 2)));
       decir(DIRECTOR, pick([`¡Te damos la bienvenida! Tu mesa te espera en la sala de trading.`, `Llega ${id} al parqué. A operar en papel.`]), 2);
     }
   }
@@ -3362,7 +3387,7 @@ function aplicarVivo(E) {
     const coste = d.grupo === "scalping" ? (E.coste_scalping || 0) : (E.coste_ida_vuelta || 0);
     const nuevo = f * (dir * (v / pos.entrada - 1) - coste) * 100;
     const antes = d.patrimonio ?? cap, ahora = antes / (1 + pos.retorno_pct / 100) * (1 + nuevo / 100);
-    pos.retorno_pct = nuevo; d.patrimonio = ahora; d.resultado = ahora - cap;
+    pos.retorno_pct = nuevo; d.patrimonio = ahora; d.resultado = (d.resultado || 0) + ahora - antes;
     d.hoy = (d.hoy || 0) + ahora - antes; d.semana = (d.semana || 0) + ahora - antes; delta += ahora - antes;
   }
   const r = papel.resumen;
@@ -3782,6 +3807,40 @@ function columnasSvg(el, puntos, alto = 170) {
 }
 
 // ---- pintar el dashboard ----
+// ---- editor del reparto (se construye una vez; al refrescar no se pisan los números que estés escribiendo) ----
+let repartoTocado = false;
+function pintarEditor() {
+  const f = $("#dEditor"), ob = F.objetivo;
+  if (!ob) return;
+  if (!repartoTocado) for (const k of ["trading", "scalping", "holding"]) f.elements[k].value = Math.round((ob.pct[k] || 0) * 100) / 100;
+  previaReparto();
+}
+function previaReparto() {
+  const f = $("#dEditor"), ob = F && F.objetivo;
+  if (!ob) return;
+  const v = k => Math.max(0, +f.elements[k].value || 0), suma = v("trading") + v("scalping") + v("holding"), liq = 100 - suma;
+  const patr = (S && S.fondo ? S.fondo.patrimonio : F.resumen.patrimonio);
+  $("#dLiq").textContent = NF1.format(liq) + " %"; $("#dLiq").className = liq < 0 ? "mal" : "";
+  f.querySelector("button").disabled = liq < 0 || !repartoTocado;
+  $("#dPrevia").innerHTML = liq < 0 ? "Entre las tres áreas pasan del 100 %."
+    : `Quedaría: ${fmt.n(v("trading") / 100 * patr / (ob.mesas.trading || 48))} $ por trader, ${fmt.n(v("scalping") / 100 * patr / (ob.mesas.scalping || 12))} $ por scalper y ${fmt.n(v("holding") / 100 * patr)} $ para el holding.`
+      + (liq < v("holding") * .5 ? " <span style='color:#ffc24a'>Ojo: la reserva del holding (hasta un 50 % más) sale de la liquidez.</span>" : "");
+}
+$("#dEditor").addEventListener("input", () => { repartoTocado = true; previaReparto(); });
+$("#dEditor").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = $("#dEditor"), reparto = Object.fromEntries(["trading", "scalping", "holding"].map(k => [k, +f.elements[k].value || 0]));
+  f.querySelector("button").disabled = true;
+  let r;
+  try {
+    const resp = await fetch("/api/decision", {method: "POST", headers: {"Content-Type": "application/json", "X-Trading-Floor": "1"},
+      body: JSON.stringify({propuesta: {accion: "asignar", reparto}})});
+    r = await resp.json();
+  } catch (err) { r = {ok: false, texto: "No he podido hablar con el Trading Floor: ¿sigue en marcha?"}; }
+  const m = $("#dRepartoMsg"); m.textContent = r.texto; m.style.color = r.ok ? "#2ee6a6" : "#ff5a76";
+  if (r.ok) { repartoTocado = false; enCanal("jefe", () => decir(GENERAL, r.texto, 3, "bueno", YO)); cargarFondo(); refrescar(); }
+  else previaReparto();
+});
 function pintarFondo() {
   const R = F.resumen, M = F.metricas || {}, cols = Object.fromEntries(F.columnas.map((c, i) => [c, i]));
   const vivo = S && S.fondo;   // la cabecera lleva los precios en vivo; el dashboard, el último cálculo completo
@@ -3837,17 +3896,26 @@ function pintarFondo() {
   const gD = $("#cDias .d-graf");
   gD.innerHTML = conTabla("dias", "<div class='g'></div>", tablaHtml(["Día", "Rentabilidad"], dias.map(([t, v]) => [diaF(t), {texto: pctF(v), clase: claseF(v)}]).reverse(), [1]));
   if (!tablasAbiertas.has("dias")) columnasSvg(gD.querySelector(".g"), dias);
-  // 5) reparto
-  const rep = F.reparto, partes = [["trading", "Sala de trading"], ["scalping", "Scalping"], ["holding", "Holding"], ["liquidez", "Liquidez"]]
-    .map(([k, n]) => ({k, n, v: Math.max(0, rep[k] || 0)})), totalRep = partes.reduce((a, p) => a + p.v, 0) || 1;
-  $("#cReparto .d-graf").innerHTML = `<div class="d-reparto">${partes.filter(p => p.v > 0).map(p => `<div data-k="${p.k}" style="flex:${p.v};background:${COL[p.k]}"></div>`).join("")}</div>` +
-    tablaHtml(["Área", "Capital", "Parte"], partes.map(p => [{texto: p.n, color: COL[p.k]}, fmt.dinero(rep[p.k] || 0), NF1.format(p.v / totalRep * 100) + " %"]), [1, 2]) +
-    (rep.liquidez < 0 ? `<p class="d-sub" style="color:#ff5a76">Hay más capital asignado que patrimonio: aporta más o retira traders.</p>` : "");
-  $("#cReparto .d-reparto").querySelectorAll("div").forEach(d => {
-    const p = partes.find(x => x.k === d.dataset.k);
-    d.addEventListener("pointermove", ev => tip(ev, filaTip(COL[p.k], `${fmt.dinero(p.v)} · ${NF1.format(p.v / totalRep * 100)} %`, p.n)));
+  // 5) reparto: el que eliges (objetivo) y el que está en uso
+  const rep = F.reparto, ob = F.objetivo || {pct: {}, usd: {}, capital_mesa: {}, mesas: {}, ocupadas: {}};
+  const AREAS_R = [["trading", "Sala de trading"], ["scalping", "Scalping"], ["holding", "Holding"], ["liquidez", "Liquidez"]];
+  const barra = (valores, etq) => {
+    const total = AREAS_R.reduce((a, [k]) => a + Math.max(0, valores[k] || 0), 0) || 1;
+    return `<div class="d-reparto-etq">${esc(etq)}</div><div class="d-reparto" data-etq="${esc(etq)}">${AREAS_R.filter(([k]) => (valores[k] || 0) > 0)
+      .map(([k, n]) => `<div data-k="${k}" data-v="${valores[k]}" data-p="${(valores[k] / total * 100).toFixed(1)}" style="flex:${valores[k]};background:${COL[k]}"></div>`).join("")}</div>`;
+  };
+  const detalle = k => k === "trading" || k === "scalping" ? `${ob.ocupadas[k] || 0} de ${ob.mesas[k] || 0} mesas · ${fmt.n(ob.capital_mesa[k] || 0)} $ por mesa`
+    : k === "holding" ? `presupuesto de las carteras: ${fmt.n(ob.presupuesto_holding || 0)} $` : "sin invertir (incluye las mesas vacías)";
+  $("#cReparto .d-graf").innerHTML = barra(ob.usd || {}, "Tu reparto (objetivo)") + barra(rep, "En uso ahora") +
+    tablaHtml(["Área", "Objetivo", "Objetivo $", "En uso $", "Detalle"], AREAS_R.map(([k, n]) => [{texto: n, color: COL[k]},
+      NF1.format((ob.pct || {})[k] || 0) + " %", fmt.dinero((ob.usd || {})[k] || 0), fmt.dinero(rep[k] || 0), detalle(k)]), [1, 2, 3]) +
+    (rep.liquidez < 0 ? `<p class="d-sub" style="color:#ff5a76">Hay más capital en uso que patrimonio: aporta más o baja el reparto.</p>` : "");
+  $("#cReparto .d-graf").querySelectorAll(".d-reparto div").forEach(d => {
+    const n = AREAS_R.find(x => x[0] === d.dataset.k)[1];
+    d.addEventListener("pointermove", ev => tip(ev, `<div class="t">${esc(d.parentElement.dataset.etq)}</div>` + filaTip(COL[d.dataset.k], `${fmt.dinero(+d.dataset.v)} · ${NF1.format(+d.dataset.p)} %`, n)));
     d.addEventListener("pointerleave", ev => tip(ev, null));
   });
+  pintarEditor();
   // 6) exposición
   const expo = F.exposicion || [], maxE = Math.max(1, ...expo.map(e => Math.max(e.largo, e.corto)));
   $("#cExpo .d-graf").innerHTML = expo.length ? `<div class="d-expo">${expo.map(e => `<span>${esc(moneda(e.simbolo))}</span>
