@@ -57,7 +57,10 @@ El laboratorio las pasa por pruebas de robustez; las que sobreviven van al banco
 marcha con un trader propio con 1.000 $ FICTICIOS que opera en papel (paper trading) con precios reales. \
 Cada 30 minutos, al cierre de la vela, el trader mira si se cumplen todas las condiciones de su estrategia; \
 si se cumplen, Riesgos aprueba el tamaño o la veta, y la posición sale sola por stop, objetivo o tiempo. \
-Cada estrategia opera de media una vez cada pocos días. Caben 48 traders (8 por activo). Hay control de riesgos, una sala de holding a largo plazo (BTC, ETH, SOL) con un plan \
+Cada estrategia opera de media una vez cada pocos días. Caben 48 traders (8 por activo) en la sala de \
+trading y 12 en la de scalping (velas de 5 minutos, BTC/ETH/SOL; con comisiones el scalping es muy difícil). \
+Todo forma parte del FONDO del jefe: él aporta capital ficticio y recibe participaciones; el valor liquidativo \
+(VL) sube o baja con los resultados de trading, scalping y holding. Lo que no está asignado es liquidez. Hay control de riesgos, una sala de holding a largo plazo (BTC, ETH, SOL) con un plan \
 adaptativo SIN stop loss (promedia a la baja cada cierto % de caída, usa una reserva de capital si se acaba \
 el presupuesto y vende por partes en puntos de salida sobre el coste medio), y una sala de macroeconomía. Nunca se envía ninguna orden a ningún exchange.
 
@@ -82,7 +85,9 @@ claro en "resumen". NO digas que ya está hecho: el jefe lo aprueba con un botó
 cambiar_riesgo, "objetivo" es uno de estos límites y "valor" el nuevo valor:
 {riesgo}
   Para buscar_estrategias: "objetivo" es el activo (BTC, ETH, SOL, BNB, XRP, DOGE) o "" para todos los \
-que tengan mesas libres.
+que tengan mesas libres, y "tipo" es "scalping" si es para la sala de scalping (velas de 5 minutos; solo BTC, \
+ETH y SOL) o "" para la sala de trading. En el resto de acciones, "tipo" es "".
+  Para aportar o retirar: "valor" es el importe en dólares ficticios.
   Para nuevo_plan_holding: "objetivo" es el activo (BTC, ETH, SOL...), "valor" el presupuesto en dólares \
 ficticios, "paso" el % de caída desde la última compra para volver a comprar, "tramo" el tamaño de cada \
 compra en % del presupuesto, "reserva" el capital extra en % del presupuesto y "salidas" los puntos de salida \
@@ -115,9 +120,10 @@ ESQUEMA = {
                 "tramo": {"type": "number"},
                 "reserva": {"type": "number"},
                 "salidas": {"type": "array", "items": {"type": "number"}},
+                "tipo": {"type": "string", "enum": ["", "scalping"]},
                 "resumen": {"type": "string"},
             },
-            "required": ["accion", "objetivo", "valor", "paso", "tramo", "reserva", "salidas", "resumen"],
+            "required": ["accion", "objetivo", "valor", "paso", "tramo", "reserva", "salidas", "tipo", "resumen"],
             "additionalProperties": False,
         },
     },
@@ -183,6 +189,9 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
                   {k: mac["fear_greed"][k] for k in ("valor", "clase")},
                   "indicadores": {i["nombre"]: [i["valor"], i["dia_pct"]] for i in (mac.get("indicadores") or {}).values()}},
         "precios_en_vivo": E.get("vivo", {}),
+        "fondo": E.get("fondo"),
+        "salas": (papel.get("grupos") or {}),
+        "estrategias_repetidas": E.get("repetidas", []),
         "decisiones_del_jefe": {"busqueda_de_estrategias_en_marcha": ctrl.get("busqueda"), "freno_manual": ctrl.get("freno_manual"),
                                 "traders_pausados": sorted(pausados), "ultimas": ctrl.get("decisiones", [])[:5]},
     }
@@ -251,9 +260,9 @@ def _precio(x: float) -> str:
     return f"{x:,.2f}".replace(",", "_").replace(".", ",").replace("_", ".")
 
 
-def _propuesta(accion: str, resumen: str, objetivo: str = "", valor: float = 0) -> dict:
+def _propuesta(accion: str, resumen: str, objetivo: str = "", valor: float = 0, tipo: str = "") -> dict:
     return {"accion": accion, "objetivo": objetivo, "valor": valor, "paso": 0, "tramo": 0, "reserva": 0, "salidas": [],
-            "resumen": resumen}
+            "tipo": tipo, "resumen": resumen}
 
 
 def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> dict:
@@ -270,11 +279,29 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
 
     if re.search(r"miner|busqueda|mina\b", t) and re.search(r"paus|para|deten|cancel", t):
         return dice("Tomás", "Entendido. Si lo apruebas, paro la búsqueda al terminar la generación en curso.", _propuesta("parar_busqueda", "Parar la búsqueda de estrategias"))
-    if re.search(r"\bbusc|reanud|arranc|lanza|empie[zc]|\bmina\b|\bminar\b", t) and re.search(r"estrateg|miner|minar|\bmina\b", t):
+    if numero is not None and re.search(r"\baport|\bmete|\bingres|\bdeposit", t):
+        return dice("Marta", f"¿Aporto {_es(numero, False)} $ ficticios a tu fondo? Recibirás participaciones al valor liquidativo de ahora.",
+                    _propuesta("aportar", f"Aportar {_es(numero, False)} $ al fondo", valor=numero))
+    if numero is not None and re.search(r"\bretir|\bsaca|\breembols", t) and "repetid" not in t:
+        return dice("Marta", f"¿Retiro {_es(numero, False)} $ ficticios del fondo? Solo se puede retirar la liquidez que no está invertida.",
+                    _propuesta("retirar", f"Retirar {_es(numero, False)} $ del fondo", valor=numero))
+    if "fondo" in t or "rentabilidad" in t or "valor liquidativo" in t:
+        f = E.get("fondo") or {}
+        if not f:
+            return dice("Marta", "El fondo todavía se está calculando. Dame un momento.")
+        return dice("Marta", f"Tu fondo vale {_precio(f['patrimonio'])} $ de {_precio(f['aportado'])} $ aportados: "
+                             f"{_es(f['rentabilidad_pct'])} % desde el inicio y {_es(f['hoy_pct'])} % hoy. Valor liquidativo: "
+                             f"{_precio(f['vl'])} $ por participación. Tienes todos los detalles en la pestaña «Mi fondo».")
+    if re.search(r"repetid|duplicad", t) and re.search(r"quit|limpi|elimin|borr|retir|fuera", t):
+        return dice("Irene", "Propongo retirar las estrategias repetidas (misma idea con otros números). De cada grupo me quedo "
+                             "con la que mejor lo hizo fuera de muestra.", _propuesta("limpiar_repetidas", "Retirar las estrategias repetidas"))
+    if re.search(r"\bbusc|reanud|arranc|lanza|empie[zc]|\bmina\b|\bminar\b", t) and re.search(r"estrateg|miner|minar|\bmina\b|scalp", t):
         activo = next((a for a in ("btc", "eth", "sol", "bnb", "xrp", "doge") if re.search(rf"\b{a}\b", t)), "")
-        que = activo.upper() or "todos los activos con mesas libres"
-        return dice("Tomás", f"¿Busco estrategias nuevas de {que}? Si alguna supera las seis pruebas, entra al banco y se pone a operar con su trader.",
-                    _propuesta("buscar_estrategias", f"Buscar estrategias de {que}", activo.upper()))
+        scalp = "scalp" in t
+        que = (activo.upper() or "todos los activos con mesas libres") + (" (scalping, velas de 5 minutos)" if scalp else "")
+        return dice("Tomás", f"¿Busco estrategias nuevas de {que}? Es un ciclo: se para solo al terminar. Si alguna supera las "
+                             "seis pruebas, entra al banco y se pone a operar con su trader.",
+                    _propuesta("buscar_estrategias", f"Buscar estrategias de {que}", activo.upper(), tipo="scalping" if scalp else ""))
     if "freno" in t and re.search(r"quit|levant|desactiv|suelt", t):
         return dice("Julia", "Si lo apruebas, quito el freno manual y se vuelven a permitir entradas.", _propuesta("quitar_freno", "Quitar el freno manual"))
     if "freno" in t or "para todo" in t:
@@ -322,7 +349,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         return dice("Marta", f"Resultado en papel: {_es(r.get('resultado', 0))} $ (hoy {_es(r.get('hoy', 0))} $). "
                              f"{len(papel.get('estrategias', {}))} traders, minería {m.get('estado', 'parada')}"
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
-    return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «para la búsqueda», "
+    return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «para la búsqueda», «quita las repetidas», "
                          "«activa el freno», «quita el freno», «pausa a E-XXXXXX», «riesgo 0,5», «convoca el comité», "
                          "«¿cómo va el holding?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 

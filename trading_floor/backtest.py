@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from .config import CAPITAL_BACKTEST, COSTE_IDA_VUELTA
+from .config import CAPITAL_BACKTEST, coste_de
 from .estrategia import Estrategia
 from .mercado import Mercado
 
@@ -47,7 +47,7 @@ def simular(
     m: Mercado,
     inicio: int = 1,
     fin: int | None = None,
-    coste: float = COSTE_IDA_VUELTA,
+    coste: float | None = None,
     cerrar_al_final: bool = True,
     senal: np.ndarray | None = None,
     vetadas: set[int] | frozenset[int] = frozenset(),
@@ -58,6 +58,7 @@ def simular(
     marca como "abierta" (lo usa el paper trading); si no, se cierra en la última vela.
     `vetadas` son velas de entrada que la gestión de riesgo no permitió: esas señales se ignoran.
     """
+    coste = coste_de(est.intervalo) if coste is None else coste
     fin = len(m) if fin is None else min(fin, len(m))
     inicio = max(inicio, 1)
     if senal is None:

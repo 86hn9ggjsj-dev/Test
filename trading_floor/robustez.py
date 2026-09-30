@@ -19,7 +19,7 @@ from collections.abc import Iterator
 import numpy as np
 
 from .backtest import simular
-from .config import COSTE_IDA_VUELTA
+from .config import coste_de
 from .estrategia import Estrategia, vecina
 from .mercado import Mercado
 
@@ -75,7 +75,7 @@ def pruebas(est: Estrategia, m: Mercado, corte: int, rng: np.random.Generator) -
         {"fuera": fuera},
     )
 
-    caro = simular(est, m, coste=2 * COSTE_IDA_VUELTA).metricas
+    caro = simular(est, m, coste=2 * coste_de(est.intervalo)).metricas
     yield (
         "Costes x2",
         caro["retorno_pct"] > 0 and caro["factor_beneficio"] >= 1.05,

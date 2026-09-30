@@ -8,21 +8,24 @@ valores dentro de un rango razonable. Nada de esto toca dinero real.
 from __future__ import annotations
 
 import datetime as dt
+import threading
 
 from . import almacen, banco
-from .config import SIMBOLOS
+from .config import SCALPING_SIMBOLOS, SIMBOLOS
 
 # límites de riesgo que se pueden cambiar: nombre -> (texto, mínimo, máximo, unidad)
 RIESGO_EDITABLE = {
     "riesgo_por_operacion": ("riesgo por operación", 0.1, 3.0, "%"),
-    "max_posiciones": ("posiciones abiertas a la vez", 1, 24, ""),
+    "max_posiciones": ("posiciones abiertas a la vez en la sala de trading", 1, 48, ""),
+    "max_posiciones_scalping": ("posiciones abiertas a la vez en scalping", 1, 12, ""),
     "max_misma_apuesta": ("posiciones iguales (mismo activo y dirección)", 1, 10, ""),
     "limite_perdida_diaria": ("freno por pérdida diaria", 0.5, 10.0, "%"),
     "max_caida": ("pausa por caída desde el máximo", 1.0, 30.0, "%"),
 }
 
 ACCIONES = {
-    "buscar_estrategias": "Buscar estrategias nuevas ahora (una búsqueda en todos los activos con mesas libres, o en el que se diga)",
+    "buscar_estrategias": "Buscar estrategias nuevas ahora: un ciclo de búsqueda en todos los activos con mesas libres o en el que se diga; con tipo «scalping», para la sala de scalping (velas de 5 minutos)",
+    "limpiar_repetidas": "Retirar las estrategias repetidas del banco (misma idea con otros números): se queda la mejor de cada grupo",
     "parar_busqueda": "Parar la búsqueda de estrategias en curso",
     "activar_freno": "Activar el freno manual (no se abren posiciones nuevas)",
     "quitar_freno": "Quitar el freno manual",
@@ -32,15 +35,21 @@ ACCIONES = {
     "cambiar_riesgo": "Cambiar un límite de riesgo",
     "nuevo_plan_holding": "Rehacer un plan de holding (presupuesto, caída para promediar, reserva y puntos de salida)",
     "convocar_comite": "Convocar el comité ahora",
+    "aportar": "Aportar dinero (ficticio) a tu fondo: «valor» es el importe en dólares",
+    "retirar": "Retirar dinero (ficticio) de tu fondo: «valor» es el importe; como mucho la liquidez disponible",
 }
+
+
+_cerrojo = threading.RLock()  # la oficina y la minería escriben aquí desde hilos distintos
 
 
 def terminar_busqueda(pedido: dict) -> None:
     """La minería quita el pedido al acabar (si no lo ha cambiado nadie mientras tanto)."""
-    c = cargar()
-    if c["busqueda"] == pedido:
-        c["busqueda"] = None
-        almacen.guardar("control", c)
+    with _cerrojo:
+        c = cargar()
+        if c["busqueda"] == pedido:
+            c["busqueda"] = None
+            almacen.guardar("control", c)
 
 
 def cargar() -> dict:
@@ -54,12 +63,21 @@ def cargar() -> dict:
     return c
 
 
+def _dinero(x: float, decimales: int = 2) -> str:
+    return f"{x:,.{decimales}f}".replace(",", "_").replace(".", ",").replace("_", ".")
+
+
 def _num(x: float) -> str:
     return f"{x:g}".replace(".", ",")
 
 
 def aplicar(propuesta: dict) -> str:
     """Ejecuta una decisión ya aprobada. Devuelve un texto con lo que se ha hecho."""
+    with _cerrojo:
+        return _aplicar(propuesta)
+
+
+def _aplicar(propuesta: dict) -> str:
     accion = propuesta.get("accion")
     objetivo = str(propuesta.get("objetivo") or "").strip()
     valor = propuesta.get("valor")
@@ -67,17 +85,32 @@ def aplicar(propuesta: dict) -> str:
         raise ValueError(f"Acción desconocida: {accion}")
     c = cargar()
     if accion == "buscar_estrategias":
+        scalping = str(propuesta.get("tipo") or "").lower() == "scalping"
+        validos = SCALPING_SIMBOLOS if scalping else SIMBOLOS
         simbolo = objetivo.upper()
         if simbolo and not simbolo.endswith("USDT"):
             simbolo += "USDT"
-        if simbolo and simbolo not in SIMBOLOS:
-            raise ValueError(f"Solo se buscan estrategias de {', '.join(x.replace('USDT', '') for x in SIMBOLOS)}.")
+        if simbolo and simbolo not in validos:
+            raise ValueError(f"Solo se buscan estrategias {'de scalping ' if scalping else ''}de "
+                             f"{', '.join(x.replace('USDT', '') for x in validos)}.")
         if c["busqueda"]:
             raise ValueError("Ya hay una búsqueda en marcha. Espera a que termine o párala.")
         c["busqueda"] = {"pedida": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
-                         "simbolos": [simbolo] if simbolo else []}
+                         "simbolos": [simbolo] if simbolo else [], "tipo": "scalping" if scalping else "trading"}
         c["mineria_pausada"] = False
-        hecho = f"Buscando estrategias nuevas de {simbolo.replace('USDT', '') if simbolo else 'todos los activos con mesas libres'}."
+        hecho = (f"Buscando estrategias {'de scalping ' if scalping else ''}nuevas de "
+                 f"{simbolo.replace('USDT', '') if simbolo else 'todos los activos con mesas libres'}.")
+    elif accion == "limpiar_repetidas":
+        grupos = banco.repetidas()
+        if not grupos:
+            raise ValueError("No hay estrategias repetidas en el banco.")
+        sobran = [b for _, resto in grupos for b in resto]
+        for b in sobran:
+            banco.borrar(b["id"])
+        ids = {b["id"] for b in sobran}
+        c["traders_pausados"] = [i for i in c["traders_pausados"] if i not in ids]
+        hecho = (f"Retiradas {len(sobran)} estrategias repetidas ({', '.join(sorted(ids))}); de cada idea se queda "
+                 "la que mejor lo hizo fuera de muestra.")
     elif accion == "parar_busqueda":
         if not c["busqueda"]:
             raise ValueError("No hay ninguna búsqueda en marcha.")
@@ -138,6 +171,16 @@ def aplicar(propuesta: dict) -> str:
         hecho = (f"Nuevo plan de holding para {simbolo.replace('USDT', '')}: {_num(presupuesto)} $ ficticios, "
                  f"promedia cada −{_num(plan['paso_pct'])} %, reserva de {_num(plan['reserva'])} $ y salidas a "
                  + "/".join(f"+{_num(s['sobre_coste_pct'])}" for s in plan["salidas"]) + " % sobre el coste medio. Sin stop.")
+    elif accion in ("aportar", "retirar"):
+        from . import fondo
+
+        importe = float(valor or 0)
+        liquidez = fondo.calcular()["reparto"]["liquidez"] if accion == "retirar" else 0.0
+        fondo.mover("aportacion" if accion == "aportar" else "reembolso", importe, liquidez)
+        m = fondo.calcular(completo=False)["resumen"]
+        hecho = (f"{'Aportados' if accion == 'aportar' else 'Retirados'} {_dinero(importe)} $ ficticios "
+                 f"{'al' if accion == 'aportar' else 'del'} fondo. Patrimonio: {_dinero(m['patrimonio'])} $; "
+                 f"valor liquidativo: {_dinero(m['vl'], 4)} $ por participación.")
     else:  # convocar_comite: lo hace la oficina al recibir la decisión
         hecho = "Comité convocado."
     c["decisiones"] = ([{"t": dt.datetime.now().astimezone().isoformat(timespec="seconds"), "accion": accion,

@@ -35,12 +35,43 @@ PARTE_EN_MUESTRA = 0.7
 # En la minería continua, un símbolo deja de minarse cuando ya tiene tantas estrategias en el banco.
 MAX_POR_SIMBOLO = 8  # 6 activos x 8 = las 48 mesas de la sala de trading
 
+# Sala de scalping: operaciones cortas con velas de 5 minutos, en los activos más líquidos.
+SCALPING_INTERVALO = "5m"
+SCALPING_DIAS = 120  # historia para minar scalping: 120 días de velas de 5 minutos
+SCALPING_SIMBOLOS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+MAX_SCALPERS_POR_SIMBOLO = 4  # 3 activos x 4 = las 12 mesas de la sala de scalping
+# Los scalpers trabajan con órdenes límite: pagan comisión de «maker» (0,02 % en Binance Futures) en vez de la de
+# «taker» (0,05 %). Se añade un poco de deslizamiento para no ser optimistas: 0,06 % ida y vuelta, frente al 0,14 %.
+COMISION_SCALPING = 0.0002
+DESLIZAMIENTO_SCALPING = 0.0001
+COSTE_SCALPING = 2 * (COMISION_SCALPING + DESLIZAMIENTO_SCALPING)
+
+
+def es_scalping(intervalo: str) -> bool:
+    return intervalo == SCALPING_INTERVALO
+
+
+def coste_de(intervalo: str) -> float:
+    """Coste de ida y vuelta (comisiones + deslizamiento) según la sala."""
+    return COSTE_SCALPING if es_scalping(intervalo) else COSTE_IDA_VUELTA
+
+
+def dias_de(intervalo: str) -> int:
+    """Historia que se descarga para cada tipo de vela."""
+    return SCALPING_DIAS if es_scalping(intervalo) else DIAS_HISTORICO
+
+
 # Gestión de riesgo del paper trading (ver riesgo.py).
 RIESGO_POR_OPERACION = 0.01  # cada operación arriesga como máximo el 1 % del capital de su trader
 MAX_POSICIONES = 16  # posiciones abiertas a la vez en toda la sala
-MAX_MISMA_APUESTA = 3  # posiciones abiertas en el mismo símbolo y la misma dirección
+MAX_POSICIONES_SCALPING = 6  # posiciones abiertas a la vez en la sala de scalping
+MAX_MISMA_APUESTA = 3  # posiciones abiertas en el mismo símbolo y la misma dirección (en cada sala)
 LIMITE_PERDIDA_DIARIA = 0.02  # si el día pierde un 2 % del capital, no se abren más posiciones hoy
 MAX_CAIDA = 0.06  # si el resultado cae un 6 % del capital desde su máximo, se pausan las entradas
+
+# Tu fondo (fondo.py): capital ficticio que aportas al empezar y valor inicial de cada participación.
+FONDO_CAPITAL_INICIAL = 100_000.0
+FONDO_VL_INICIAL = 10.0
 
 # Sala de holding: carteras de largo plazo sin stop, que promedian a la baja (ver holding.py).
 CAPITAL_HOLDING = {"BTCUSDT": 5_000.0, "ETHUSDT": 3_000.0, "SOLUSDT": 2_000.0}

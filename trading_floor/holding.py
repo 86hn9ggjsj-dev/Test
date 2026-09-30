@@ -15,6 +15,7 @@ Se simula con las velas reales de Binance (1 hora) desde que se crea el plan.
 from __future__ import annotations
 
 import datetime as dt
+import threading
 
 import numpy as np
 import pandas as pd
@@ -30,6 +31,7 @@ TRAMO_PCT = 12.5  # tamaño de cada compra de promedio, en % del presupuesto
 RESERVA_PCT = 50.0  # capital extra (en % del presupuesto) que se puede añadir si se acaba el dinero
 SALIDAS = [(30.0, 20.0), (60.0, 25.0), (100.0, 25.0)]  # (+% sobre el coste medio, % de la posición que se vende)
 COSTE = COMISION + DESLIZAMIENTO
+_cerrojo = threading.RLock()  # el ciclo de holding y los planes que pides desde el chat no deben pisarse
 
 
 def _ahora() -> str:
@@ -123,6 +125,8 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
     comprar(presupuesto * plan["entrada_inicial_pct"] / 100, plan["precio_inicio"], inicio - 1, "entrada inicial")
     referencia = plan["precio_inicio"]  # última compra o última salida: de ahí se mide la caída
     valores = [efectivo + unidades * plan["precio_inicio"]]
+    cada = max(1, 240 // m.minutos)  # un punto cada 4 horas para las gráficas
+    serie = []  # resultado (valor − dinero aportado) con su hora, para el fondo
     for k in range(inicio, len(m)):
         # 1) Promediar a la baja (puede saltar varios escalones si el precio cae de golpe).
         while efectivo + (reserva - reserva_usada) > 1:
@@ -145,6 +149,9 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
             if hechas and m.c[k] < medio:
                 hechas.clear()
         valores.append(efectivo + unidades * m.c[k])
+        if (k - inicio) % cada == 0 or k == len(m) - 1:
+            serie.append([(m.tiempo[k] + pd.Timedelta(minutes=m.minutos)).isoformat(),
+                          round(float(valores[-1] - presupuesto - reserva_usada), 2)])
 
     precio = float(m.c[-1])
     aportado = presupuesto + reserva_usada
@@ -152,7 +159,6 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
     medio = coste_base / unidades if unidades else None
     queda = efectivo + (reserva - reserva_usada)
     siguiente = referencia * (1 - paso)
-    cada = max(1, 240 // m.minutos)  # un punto cada 4 horas para las gráficas
     return {
         **plan,
         "precio": precio,
@@ -178,6 +184,7 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
         "precios_desde": m.tiempo[max(0, len(m) - 30 * 1440 // m.minutos)].isoformat(),
         "precios_paso_min": cada * m.minutos,
         "valores": [round(float(x), 2) for x in valores[::cada]],
+        "serie": serie,
     }
 
 
@@ -192,6 +199,15 @@ def _texto(moneda: str, op: dict, plan: dict) -> str:
     s = plan["salidas"][i]
     return (f"{moneda}: punto de salida {i + 1} (+{_pct(s['sobre_coste_pct'])} % sobre el coste medio), vendo el "
             f"{_pct(s['vende_pct'])} % de la posición a {_precio(op['precio'])} ({_precio(op['importe'])} $).")
+
+
+def _serie_total(planes) -> pd.Series:
+    """Resultado de todas las carteras de holding juntas, cada 4 horas."""
+    series = [pd.Series([v for _, v in p["serie"]], index=pd.to_datetime([t for t, _ in p["serie"]], utc=True))
+              for p in planes if p.get("serie")]
+    if not series:
+        return pd.Series(dtype=float)
+    return pd.concat(series, axis=1).sort_index().ffill().fillna(0).sum(axis=1)
 
 
 def _base(plan: dict) -> dict:
@@ -236,38 +252,47 @@ def ciclo(estado: dict) -> list[dict]:
         planes[simbolo] = nuevo
     aportado = sum(p["aportado"] for p in planes.values())
     valor = sum(p["valor"] for p in planes.values())
+    total = _serie_total(planes.values())
+    medianoche = pd.Timestamp(dt.datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0))
+    antes = total[total.index <= medianoche] if len(total) else total
+    hoy = float(total.iloc[-1] - antes.iloc[-1]) if len(antes) else 0.0
+    estado["serie"] = [[t.isoformat(), round(float(v), 2)] for t, v in total.items()]
     estado["resumen"] = {"presupuesto": round(float(sum(p["presupuesto"] for p in planes.values())), 2),
                          "aportado": round(float(aportado), 2), "valor": round(float(valor), 2),
                          "resultado": round(float(valor - aportado), 2),
-                         "resultado_pct": round(float(valor / aportado - 1) * 100, 3) if aportado else 0.0}
+                         "resultado_pct": round(float(valor / aportado - 1) * 100, 3) if aportado else 0.0,
+                         "hoy": round(hoy, 2)}
     estado["actividad"] = (eventos[::-1] + estado.get("actividad", []))[:40]
     estado["actualizado"] = _ahora()
     return eventos
 
 
 def actualizar() -> list[dict]:
-    estado = almacen.cargar("holding", {})
-    eventos = ciclo(estado)
-    almacen.guardar("holding", estado)
+    with _cerrojo:
+        estado = almacen.cargar("holding", {})
+        eventos = ciclo(estado)
+        almacen.guardar("holding", estado)
     return eventos
 
 
 def crear(simbolo: str, presupuesto: float, paso_pct: float | None = None, tramo_pct: float | None = None,
           reserva_pct: float | None = None, salidas_pct: list[float] | None = None) -> dict:
-    estado = almacen.cargar("holding", {})
-    estado["iniciado"] = True
     simbolo = simbolo.upper()
     m = Mercado(velas(simbolo, "1h"), simbolo, "1h")
-    estado.setdefault("planes", {})[simbolo] = nuevo_plan(simbolo, presupuesto, float(m.c[-1]), paso_pct, tramo_pct,
-                                                          reserva_pct, salidas_pct)
-    ciclo(estado)
-    almacen.guardar("holding", estado)
+    with _cerrojo:
+        estado = almacen.cargar("holding", {})
+        estado["iniciado"] = True
+        estado.setdefault("planes", {})[simbolo] = nuevo_plan(simbolo, presupuesto, float(m.c[-1]), paso_pct, tramo_pct,
+                                                              reserva_pct, salidas_pct)
+        ciclo(estado)
+        almacen.guardar("holding", estado)
     return estado["planes"][simbolo]
 
 
 def borrar(simbolo: str) -> bool:
-    estado = almacen.cargar("holding", {})
-    estado["iniciado"] = True
-    borrado = estado.get("planes", {}).pop(simbolo.upper(), None) is not None
-    almacen.guardar("holding", estado)
+    with _cerrojo:
+        estado = almacen.cargar("holding", {})
+        estado["iniciado"] = True
+        borrado = estado.get("planes", {}).pop(simbolo.upper(), None) is not None
+        almacen.guardar("holding", estado)
     return borrado

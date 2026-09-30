@@ -75,12 +75,21 @@ def _opciones_mineria(p: argparse.ArgumentParser) -> None:
     p.add_argument("--dias", type=int, default=DIAS_HISTORICO, help="días de histórico (por defecto 3 años)")
 
 
-def _ver_banco(borrar: str | None) -> None:
+def _ver_banco(borrar: str | None, limpiar: bool = False) -> None:
     from . import banco
 
     if borrar:
         print("Borrada." if banco.borrar(borrar) else f"No hay ninguna estrategia {borrar}.")
         return
+    if limpiar:
+        from .control import aplicar
+
+        try:
+            print(aplicar({"accion": "limpiar_repetidas"}))
+        except ValueError as e:
+            print(e)
+        return
+    repetidas = banco.repetidas()
     items = banco.cargar()
     if not items:
         print("El banco está vacío. Mina estrategias con:  python -m trading_floor minar")
@@ -93,6 +102,9 @@ def _ver_banco(borrar: str | None) -> None:
         print(f"   fuera de muestra: {_es(fu['retorno_pct'], 1)} %  · {fu['operaciones']} ops · "
               f"FB {_es(fu['factor_beneficio'])} · caída máx. {_es(fu['max_dd_pct'], 1)} %")
     print(f"\n{len(items)} estrategias. Recuerda: son resultados sobre datos pasados, no promesas.")
+    if repetidas:
+        sobran = sum(len(r) for _, r in repetidas)
+        print(f"Hay {sobran} repetidas (misma idea con otros números). Quítalas con:  python -m trading_floor banco --limpiar-repetidas")
 
 
 def main() -> None:
@@ -117,9 +129,11 @@ def main() -> None:
     p_banco = sub.add_parser("banco", help="ver o borrar estrategias aprobadas")
     p_banco.add_argument("--borrar", metavar="ID", help="borra una estrategia del banco")
     p_banco.add_argument("--vaciar", action="store_true", help="vacía el banco entero (sus traders dejan la sala)")
+    p_banco.add_argument("--limpiar-repetidas", action="store_true",
+                         help="retira las estrategias repetidas (misma idea con otros números) y deja la mejor de cada grupo")
 
     p_papel = sub.add_parser("papel", help="paper trading con las estrategias del banco")
-    p_papel.add_argument("--segundos", type=float, default=60, help="cada cuánto revisar el mercado")
+    p_papel.add_argument("--segundos", type=float, default=20, help="cada cuánto revisar el mercado (por defecto 20 s)")
     p_papel.add_argument("--telegram", action="store_true", help="avisar de cada operación por Telegram")
 
     sub.add_parser("macro", help="resumen macroeconómico (bolsa, VIX, dólar, oro, Fear & Greed...)")
@@ -158,7 +172,7 @@ def main() -> None:
                 almacen.guardar("banco", [])
                 print("Banco vaciado. La minería lo volverá a llenar.")
             else:
-                _ver_banco(args.borrar)
+                _ver_banco(args.borrar, args.limpiar_repetidas)
         elif args.orden == "papel":
             from .papel import operar
 
@@ -187,7 +201,7 @@ def main() -> None:
             from .web import servir
 
             servir(args.puerto)
-            threading.Thread(target=operar, args=(60, args.telegram, parar), daemon=True).start()
+            threading.Thread(target=operar, args=(20, args.telegram, parar), daemon=True).start()
             threading.Thread(target=vigilar, args=(15, parar), daemon=True).start()
             if args.sin_minar:
                 parar.wait()

@@ -18,7 +18,7 @@ import pandas as pd
 
 from . import almacen, banco, riesgo
 from .backtest import simular
-from .config import CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA
+from .config import CAPITAL_POR_ESTRATEGIA, coste_de, dias_de, es_scalping
 from .datos import velas
 from .estrategia import Estrategia
 from .mercado import Mercado
@@ -53,7 +53,7 @@ def _telegram(texto: str) -> None:
         print(f"[papel] No he podido avisar por Telegram: {e}")
 
 
-def _curva(res, m: Mercado, inicio: int, direccion: str, fracciones: list[float]) -> np.ndarray:
+def _curva(res, m: Mercado, inicio: int, direccion: str, fracciones: list[float], coste: float) -> np.ndarray:
     """Patrimonio relativo (1 = capital inicial) al cierre de cada vela desde `inicio - 1`,
     valorando a precio de mercado las posiciones abiertas. Cada operación solo mueve la parte
     del capital que invirtió (su fracción)."""
@@ -62,7 +62,7 @@ def _curva(res, m: Mercado, inicio: int, direccion: str, fracciones: list[float]
     d = 1 if direccion == "largo" else -1
     for e, s, pe, r, motivo, f in zip(res.entradas, res.salidas, res.precio_entrada, res.retornos, res.motivos, fracciones):
         hasta = len(m) if motivo == "abierta" else s
-        eq[e - n0 : hasta - n0] *= 1 + f * (d * (m.c[e:hasta] / pe - 1) - COSTE_IDA_VUELTA)
+        eq[e - n0 : hasta - n0] *= 1 + f * (d * (m.c[e:hasta] / pe - 1) - coste)
         if motivo != "abierta":
             eq[s - n0 :] *= 1 + f * r
     return eq
@@ -98,6 +98,33 @@ def _resumen(pnl: list[pd.Series], traders: dict) -> tuple[dict, list, list]:
     return resumen, curva, diarios
 
 
+def _serie_horaria(curvas: list[pd.Series]) -> list[list]:
+    """Resultado acumulado de un grupo de traders, hora a hora, desde el primero."""
+    if not curvas:
+        return []
+    total = pd.concat(curvas, axis=1).sort_index().ffill().fillna(0).sum(axis=1)
+    horas = total.resample("1h").last().ffill()
+    return [[t.isoformat(), round(float(v), 2)] for t, v in horas.items()]
+
+
+def _resumen_grupo(grupo: str, traders: dict, medianoche: pd.Timestamp) -> dict:
+    """Cifras de una sala (trading o scalping): resultado, hoy, operaciones, acierto y comisiones."""
+    ts = [t for t in traders.values() if t.get("grupo") == grupo]
+    ops = [o for t in ts for o in t["operaciones"]]
+    hoy = [o for o in ops if pd.Timestamp(o["salida_t"]) >= medianoche]
+    return {
+        "traders": len(ts),
+        "capital": CAPITAL_POR_ESTRATEGIA * len(ts),
+        "resultado": round(sum(t["resultado"] for t in ts), 2),
+        "hoy": round(sum(t.get("hoy", 0.0) for t in ts), 2),
+        "operaciones": len(ops),
+        "operaciones_hoy": len(hoy),
+        "aciertos_pct": round(sum(o["retorno_pct"] > 0 for o in ops) / len(ops) * 100, 1) if ops else None,
+        "abiertas": sum(1 for t in ts if t["posicion"]),
+        "comisiones": round(sum(t.get("comisiones", 0.0) for t in ts), 2),
+    }
+
+
 def _radar(est: Estrategia, m: Mercado) -> dict:
     """Qué condiciones de la estrategia se cumplen ahora, cuándo cierra la próxima vela y niveles clave."""
     conds = est.condiciones_ahora(m)
@@ -127,14 +154,22 @@ def ciclo(estado: dict) -> list[dict]:
     def evento(tipo: str, texto: str, **datos) -> None:
         eventos.append({"t": _ahora(), "tipo": tipo, "texto": texto, **datos})
 
-    # 1) Mercados, precios y traders nuevos.
+    # 1) Mercados, precios y traders nuevos. Cada mercado se descarga con historia suficiente para
+    #    simular a su trader más antiguo desde el principio (si no, sus primeras operaciones se perderían).
+    precios_scalping = estado.setdefault("precios_scalping", {})
+    ahora = pd.Timestamp.now(tz="UTC")
+    edad: dict[tuple[str, str], int] = {}
+    for id_, t in traders.items():
+        e = en_banco[id_]["estrategia"]
+        clave = (e["simbolo"], e["intervalo"])
+        edad[clave] = max(edad.get(clave, 0), (ahora - pd.Timestamp(t["inicio"])).days)
     mercados: dict[tuple[str, str], Mercado] = {}
     for b in en_banco.values():
         clave = (b["estrategia"]["simbolo"], b["estrategia"]["intervalo"])
         if clave not in mercados:
-            m = mercados[clave] = Mercado(velas(*clave), *clave)
+            m = mercados[clave] = Mercado(velas(*clave, max(dias_de(clave[1]), edad.get(clave, 0) + 5)), *clave)
             velas_dia = max(1, 1440 // m.minutos)
-            precios[clave[0]] = {
+            (precios_scalping if es_scalping(clave[1]) else precios)[clave[0]] = {
                 "precio": float(m.c[-1]),
                 "cambio_24h_pct": round(float(m.c[-1] / m.c[-1 - velas_dia] - 1) * 100, 2),
                 "serie": [float(x) for x in m.c[-72:]],
@@ -147,9 +182,13 @@ def ciclo(estado: dict) -> list[dict]:
                 "simbolo": clave[0], "direccion": est.direccion, "descripcion": b["descripcion"],
                 "operaciones": [], "posicion": None, "aprobadas": [], "vetadas": [],
             }
-            evento("alta", f"{b['id']} ha superado las pruebas y se pone en marcha: un trader nuevo la opera desde "
-                           f"la próxima vela con {_precio(CAPITAL_POR_ESTRATEGIA)} $ ficticios",
-                   id=b["id"], simbolo=clave[0], direccion=est.direccion)
+            sala = "la sala de scalping (velas de 5 minutos)" if es_scalping(clave[1]) else "la sala de trading"
+            evento("alta", f"{b['id']} ha superado las pruebas y se pone en marcha en {sala}: un trader nuevo la "
+                           f"opera desde la próxima vela con {_precio(CAPITAL_POR_ESTRATEGIA)} $ ficticios",
+                   id=b["id"], simbolo=clave[0], direccion=est.direccion, grupo="scalping" if es_scalping(clave[1]) else "trading")
+        t = traders[b["id"]]
+        t["intervalo"] = clave[1]
+        t["grupo"] = "scalping" if es_scalping(clave[1]) else "trading"
 
     # 2) Simulación con la gestión de riesgo: cada entrada nueva se aprueba o se veta una sola vez.
     def simular_trader(id_: str):
@@ -169,25 +208,43 @@ def ciclo(estado: dict) -> list[dict]:
             t["aprobadas"] = [sim[1].tiempo[e].isoformat() for e in sim[3].entradas] if sim else []
     bloqueo = riesgo.bloqueo_general(estado.get("resumen"), estado.get("curva"))
     vetos = estado.get("riesgo", {}).get("vetos", [])
+    lim = riesgo.limites()
+
+    def abiertas_en(momento: pd.Timestamp, scalping: bool, salvo: str) -> list[tuple[str, str]]:
+        """Posiciones aprobadas de la misma sala que estaban abiertas justo cuando entra `salvo`."""
+        lista = []
+        for i, s_ in sims.items():
+            if not s_ or i == salvo or traders[i]["grupo"] != ("scalping" if scalping else "trading"):
+                continue
+            est_, m_, _, res_ = s_
+            aprobadas_ = aprobadas[i]
+            for k, e in enumerate(res_.entradas):
+                if m_.tiempo[e] > momento:
+                    break
+                if m_.tiempo[e].isoformat() in aprobadas_ and (res_.motivos[k] == "abierta" or m_.tiempo[res_.salidas[k]] >= momento):
+                    lista.append((est_.simbolo, est_.direccion))
+        return lista
+
+    aprobadas = {id_: set(t["aprobadas"]) for id_, t in traders.items()}
     for _ in range(6):
         pendientes = []
         for id_, sim in sims.items():
             if sim:
                 est, m, _, res = sim
-                aprobadas = set(traders[id_]["aprobadas"])
                 for j, e in enumerate(res.entradas):
-                    if m.tiempo[e].isoformat() not in aprobadas:
-                        pendientes.append((m.tiempo[e].isoformat(), id_, j))
+                    if m.tiempo[e].isoformat() not in aprobadas[id_]:
+                        pendientes.append((m.tiempo[e], id_, j))
         if not pendientes:
             break
-        abiertas = [(s[0].simbolo, s[0].direccion) for i, s in sims.items()
-                    if s and s[3].abierta and s[1].tiempo[s[3].entradas[-1]].isoformat() in traders[i]["aprobadas"]]
         cambiados = set()
-        for te, id_, j in sorted(pendientes):
+        for momento, id_, j in sorted(pendientes, key=lambda x: (x[0], x[1])):
             if id_ in cambiados:
                 continue  # tras un veto hay que volver a simular a este trader antes de seguir
             est, m, _, res = sims[id_]
-            motivo = riesgo.evaluar_entrada(id_, est.simbolo, est.direccion, abiertas, bloqueo)
+            te = momento.isoformat()
+            scalping = traders[id_]["grupo"] == "scalping"
+            motivo = riesgo.evaluar_entrada(id_, est.simbolo, est.direccion, abiertas_en(momento, scalping, id_),
+                                            bloqueo, scalping, lim)
             if motivo:
                 traders[id_]["vetadas"].append(te)
                 cambiados.add(id_)
@@ -197,13 +254,13 @@ def ciclo(estado: dict) -> list[dict]:
                 vetos = [{"t": _ahora(), "id": id_, "simbolo": est.simbolo, "direccion": est.direccion, "motivo": motivo}] + vetos
             else:
                 traders[id_]["aprobadas"].append(te)
-                if res.motivos[j] == "abierta":
-                    abiertas.append((est.simbolo, est.direccion))
+                aprobadas[id_].add(te)
         for id_ in cambiados:
             sims[id_] = simular_trader(id_)
 
     # 3) Resultados de cada trader, con el tamaño de cada operación según el riesgo.
     pnl: list[pd.Series] = []
+    por_grupo: dict[str, list[pd.Series]] = {"trading": [], "scalping": []}
     for id_, t in traders.items():
         cerradas, posicion = [], None
         t["hoy"] = t["semana"] = 0.0
@@ -222,9 +279,10 @@ def ciclo(estado: dict) -> list[dict]:
                 if clave not in guardadas:
                     guardadas[clave] = riesgo.fraccion(est.stop_atr, atr[e - 1], pe, riesgo_ahora)
                 fracciones.append(guardadas[clave])
-            curva = pd.Series(CAPITAL_POR_ESTRATEGIA * (_curva(res, m, inicio, est.direccion, fracciones) - 1),
+            curva = pd.Series(CAPITAL_POR_ESTRATEGIA * (_curva(res, m, inicio, est.direccion, fracciones, coste_de(m.intervalo)) - 1),
                               index=m.tiempo[inicio - 1 :] + pd.Timedelta(minutes=m.minutos))
             pnl.append(curva)
+            por_grupo[t["grupo"]].append(curva)
             antes = curva[curva.index <= medianoche]
             t["hoy"] = round(float(curva.iloc[-1] - (antes.iloc[-1] if len(antes) else 0.0)), 2)
             hace_semana = curva[curva.index <= curva.index[-1] - pd.Timedelta(days=7)]
@@ -269,8 +327,13 @@ def ciclo(estado: dict) -> list[dict]:
             patrimonio *= 1 + posicion["retorno_pct"] / 100
         t["patrimonio"] = round(patrimonio, 2)
         t["resultado"] = round(patrimonio - CAPITAL_POR_ESTRATEGIA, 2)
+        # comisiones y deslizamiento pagados (sobre lo invertido en cada operación), para ver cuánto se come el coste
+        t["comisiones"] = round(sum(CAPITAL_POR_ESTRATEGIA * o["fraccion"] * coste_de(t["intervalo"])
+                                    for o in cerradas + ([posicion] if posicion else [])), 2)
 
     estado["resumen"], estado["curva"], estado["diarios"] = _resumen(pnl, traders)
+    estado["grupos"] = {g: _resumen_grupo(g, traders, medianoche) for g in ("trading", "scalping")}
+    estado["series"] = {g: _serie_horaria(c) for g, c in por_grupo.items()}   # para el fondo: toda la historia, hora a hora
     nuevo_bloqueo = riesgo.bloqueo_general(estado["resumen"], estado["curva"])
     anterior = estado.get("riesgo", {}).get("bloqueo")
     if nuevo_bloqueo and not anterior:
@@ -278,7 +341,7 @@ def ciclo(estado: dict) -> list[dict]:
                motivo=nuevo_bloqueo)
     elif anterior and not nuevo_bloqueo:
         evento("reanuda", "Se levanta el freno de riesgo: se vuelven a permitir entradas.")
-    abiertas = [(t["simbolo"], t["direccion"]) for t in traders.values() if t["posicion"]]
+    abiertas = [(t["simbolo"], t["direccion"]) for t in traders.values() if t["posicion"] and t["grupo"] == "trading"]
     estado["riesgo"] = riesgo.estado(estado["resumen"], estado["curva"], abiertas, nuevo_bloqueo, vetos)
     estado["capital_por_estrategia"] = CAPITAL_POR_ESTRATEGIA
     estado["actividad"] = (eventos[::-1] + estado.get("actividad", []))[:ACTIVIDAD_MAX]
@@ -286,7 +349,7 @@ def ciclo(estado: dict) -> list[dict]:
     return eventos
 
 
-def operar(segundos: float = 60, telegram: bool = False, parar: threading.Event | None = None) -> None:
+def operar(segundos: float = 20, telegram: bool = False, parar: threading.Event | None = None) -> None:
     """Bucle del paper trading: un ciclo cada `segundos` hasta que se pida parar."""
     parar = parar or threading.Event()
     print(f"[papel] Paper trading en marcha (dinero ficticio). Reviso el mercado cada {segundos:g} s.", flush=True)

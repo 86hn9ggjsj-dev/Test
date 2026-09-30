@@ -130,6 +130,11 @@ class Estrategia:
     def firma(self) -> str:
         return json.dumps(asdict(self), sort_keys=True)
 
+    def idea(self) -> str:
+        """La idea sin los números: activo, tipo de vela, dirección y tipos de condición. Dos estrategias con
+        la misma idea y otros parámetros («RSI < 30» y «RSI < 35») son la misma apuesta para el banco."""
+        return f"{self.simbolo}|{self.intervalo}|{self.direccion}|" + "+".join(c["tipo"] for c in self.condiciones)
+
     def a_dict(self) -> dict:
         return asdict(self)
 

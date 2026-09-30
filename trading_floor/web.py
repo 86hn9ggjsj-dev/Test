@@ -13,8 +13,9 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from . import almacen, banco, chat, control
-from .config import CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, MAX_POR_SIMBOLO, SIMBOLOS
+from . import almacen, banco, chat, control, fondo
+from .config import (CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, MAX_POR_SIMBOLO, MAX_SCALPERS_POR_SIMBOLO,
+                     SCALPING_INTERVALO, SCALPING_SIMBOLOS, SIMBOLOS)
 
 PAGINA = Path(__file__).resolve().parent / "web" / "index.html"
 
@@ -39,22 +40,32 @@ def precios_en_vivo(simbolos: set[str]) -> dict[str, float]:
 
 
 def estado() -> dict:
-    papel, holding = almacen.cargar("papel", {}), almacen.cargar("holding", {})
+    papel, holding, lista = almacen.cargar("papel", {}), almacen.cargar("holding", {}), banco.cargar()
+    resumen_fondo = fondo.resumen_rapido(papel, holding)
+    # las curvas largas solo las necesita el dashboard del fondo (/api/fondo): aquí se quitan para no cargar la oficina
+    papel.pop("series", None)
+    holding.pop("serie", None)
+    for plan in (holding.get("planes") or {}).values():
+        plan.pop("serie", None)
     simbolos = set(SIMBOLOS) | set(papel.get("precios", {})) | set(holding.get("planes", {}))
     return {
         "vivo": precios_en_vivo(simbolos),
         "control": control.cargar(),
         "chat_modo": "claude" if chat.hay_clave() else "basico",
         "coste_ida_vuelta": COSTE_IDA_VUELTA,
+        "coste_scalping": COSTE_SCALPING,
         "ahora": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
         "mineria": almacen.cargar("mineria", {}),
-        "banco": banco.cargar(),
+        "banco": lista,
+        "repetidas": [[a["id"], [x["id"] for x in resto]] for a, resto in banco.repetidas(lista)],
         "papel": papel,
         "macro": almacen.cargar("macro", {}),
         "holding": holding,
+        "fondo": resumen_fondo,
         "capital_por_estrategia": CAPITAL_POR_ESTRATEGIA,
         "simbolos": SIMBOLOS,
         "max_por_simbolo": MAX_POR_SIMBOLO,
+        "scalping": {"simbolos": SCALPING_SIMBOLOS, "max_por_simbolo": MAX_SCALPERS_POR_SIMBOLO, "intervalo": SCALPING_INTERVALO},
     }
 
 
@@ -65,6 +76,12 @@ class _Manejador(BaseHTTPRequestHandler):
             self._responder(PAGINA.read_bytes(), "text/html; charset=utf-8")
         elif ruta == "/api/estado":
             self._responder(json.dumps(estado(), ensure_ascii=False).encode(), "application/json; charset=utf-8")
+        elif ruta == "/api/fondo":
+            try:
+                datos = fondo.analitica(precios_en_vivo(set(SIMBOLOS)))
+            except Exception as e:  # sin datos todavía o sin conexión
+                datos = {"error": str(e)}
+            self._responder(json.dumps(datos, ensure_ascii=False).encode(), "application/json; charset=utf-8")
         else:
             self.send_error(404)
 

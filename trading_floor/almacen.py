@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import threading
 import time
 from typing import Any
 
@@ -22,7 +24,7 @@ def cargar(nombre: str, defecto: Any) -> Any:
 
 def guardar(nombre: str, valor: Any) -> None:
     ruta = DATA_DIR / f"{nombre}.json"
-    tmp = ruta.with_suffix(".tmp")
+    tmp = ruta.with_suffix(f".{os.getpid()}-{threading.get_ident()}.tmp")   # uno por hilo: dos hilos no se pisan
     tmp.write_text(json.dumps(valor, ensure_ascii=False, indent=1), encoding="utf-8")
     for intento in range(5):
         try:

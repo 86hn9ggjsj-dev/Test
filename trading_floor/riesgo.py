@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from . import control
 from .config import (LIMITE_PERDIDA_DIARIA, MAX_CAIDA, MAX_MISMA_APUESTA, MAX_POSICIONES,
-                     RIESGO_POR_OPERACION)
+                     MAX_POSICIONES_SCALPING, RIESGO_POR_OPERACION)
 
 
 def limites() -> dict:
@@ -21,6 +21,7 @@ def limites() -> dict:
     return {
         "riesgo_por_operacion": r.get("riesgo_por_operacion", RIESGO_POR_OPERACION * 100) / 100,
         "max_posiciones": int(r.get("max_posiciones", MAX_POSICIONES)),
+        "max_posiciones_scalping": int(r.get("max_posiciones_scalping", MAX_POSICIONES_SCALPING)),
         "max_misma_apuesta": int(r.get("max_misma_apuesta", MAX_MISMA_APUESTA)),
         "limite_perdida_diaria": r.get("limite_perdida_diaria", LIMITE_PERDIDA_DIARIA * 100) / 100,
         "max_caida": r.get("max_caida", MAX_CAIDA * 100) / 100,
@@ -34,9 +35,11 @@ def reglas(lim: dict) -> list[dict]:
         {"nombre": "Riesgo por operación", "valor": f"{lim['riesgo_por_operacion'] * 100:g} %".replace(".", ","),
          "explica": "Si salta el stop, el trader pierde como mucho este porcentaje de su capital."},
         {"nombre": "Posiciones abiertas", "valor": f"máx. {lim['max_posiciones']}",
-         "explica": "Límite de posiciones abiertas a la vez en toda la sala."},
+         "explica": "Límite de posiciones abiertas a la vez en la sala de trading."},
+        {"nombre": "Posiciones de scalping", "valor": f"máx. {lim['max_posiciones_scalping']}",
+         "explica": "Límite de posiciones abiertas a la vez en la sala de scalping."},
         {"nombre": "Misma apuesta", "valor": f"máx. {lim['max_misma_apuesta']}",
-         "explica": "Posiciones en el mismo símbolo y la misma dirección: más sería apostar lo mismo varias veces."},
+         "explica": "Posiciones en el mismo símbolo y la misma dirección (en cada sala): más sería apostar lo mismo varias veces."},
         {"nombre": "Freno diario", "valor": f"−{lim['limite_perdida_diaria'] * 100:g} %".replace(".", ","),
          "explica": "Si el día va perdiendo este porcentaje del capital, no se abren más posiciones hasta mañana."},
         {"nombre": "Caída máxima", "valor": f"−{lim['max_caida'] * 100:g} %".replace(".", ","),
@@ -74,15 +77,17 @@ def bloqueo_general(resumen: dict | None, curva: list | None) -> str | None:
 
 
 def evaluar_entrada(id_: str, simbolo: str, direccion: str, abiertas: list[tuple[str, str]],
-                    bloqueo: str | None) -> str | None:
-    """Devuelve el motivo del veto, o None si la entrada se permite."""
-    lim = limites()
+                    bloqueo: str | None, scalping: bool = False, lim: dict | None = None) -> str | None:
+    """Devuelve el motivo del veto, o None si la entrada se permite. `abiertas` son las posiciones de su
+    misma sala que estaban abiertas en el momento de la entrada."""
+    lim = lim or limites()
     if id_ in lim["pausados"]:
         return "este trader está pausado por el jefe"
     if bloqueo:
         return bloqueo
-    if len(abiertas) >= lim["max_posiciones"]:
-        return f"ya hay {len(abiertas)} posiciones abiertas (máximo {lim['max_posiciones']})"
+    maximo = lim["max_posiciones_scalping" if scalping else "max_posiciones"]
+    if len(abiertas) >= maximo:
+        return f"ya hay {len(abiertas)} posiciones abiertas en {'scalping' if scalping else 'la sala'} (máximo {maximo})"
     iguales = sum(1 for s, d in abiertas if s == simbolo and d == direccion)
     if iguales >= lim["max_misma_apuesta"]:
         lado = "largas" if direccion == "largo" else "cortas"
@@ -106,6 +111,7 @@ def estado(resumen: dict | None, curva: list | None, abiertas: list[tuple[str, s
         "pausados": sorted(lim["pausados"]),
         "posiciones": len(abiertas),
         "max_posiciones": lim["max_posiciones"],
+        "max_posiciones_scalping": lim["max_posiciones_scalping"],
         "max_misma_apuesta": lim["max_misma_apuesta"],
         "mayor_apuesta": max(apuestas.values(), default=0),
         "apuestas": apuestas,
