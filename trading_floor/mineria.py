@@ -16,8 +16,8 @@ import numpy as np
 
 from . import almacen, banco, control
 from .backtest import simular
-from .config import (DIAS_HISTORICO, INTERVALO, MAX_POR_SIMBOLO, MAX_SCALPERS_POR_SIMBOLO, PARTE_EN_MUESTRA,
-                     SCALPING_DIAS, SCALPING_INTERVALO, SCALPING_SIMBOLOS, es_scalping)
+from .config import (DIAS_HISTORICO, INTERVALO, PARTE_EN_MUESTRA, SCALPING_DIAS, SCALPING_INTERVALO, SCALPING_SIMBOLOS,
+                     cupo_banco)
 from .datos import velas
 from .estrategia import Estrategia, aleatoria, cruzar, mutar
 from .mercado import Mercado
@@ -96,14 +96,17 @@ def repetida(est: Estrategia, huella: dict | None, ocupadas: list[dict]) -> str 
     """Motivo por el que una estrategia es igual que otra del banco (o None). Sin huella solo mira la idea."""
     for o in ocupadas:
         if o["idea"] == est.idea():
+            if o.get("descartada"):
+                return f"es la misma idea que {o['id']}, que ya se retiró del banco ({o['descartada']})"
             return f"es la misma idea que {o['id']} (las mismas condiciones con otros números)"
     if huella is None:
         return None
     for o in ocupadas:
+        ya = f", que ya se retiró del banco ({o['descartada']})" if o.get("descartada") else ""
         if o["direccion"] == est.direccion and _entradas_comunes(huella["entradas"], o["entradas"]) > ENTRADAS_COMUNES:
-            return f"entra casi en los mismos momentos que {o['id']}"
+            return f"entra casi en los mismos momentos que {o['id']}{ya}"
         if _solape(huella["mascara"], o["mascara"]) > SOLAPE_MAXIMO:
-            return f"está dentro del mercado a la vez que {o['id']} la mayor parte del tiempo"
+            return f"está dentro del mercado a la vez que {o['id']} la mayor parte del tiempo{ya}"
     return None
 
 
@@ -136,8 +139,7 @@ def _embudo(est: Estrategia, m: Mercado, corte: int, rng: np.random.Generator, m
         estado.evento(f"{est.id} lo supera todo, pero {motivo}", "descartada",
                       consola=False, id=est.id, etapa="Distinta a las del banco")
         return None
-    cupo = MAX_SCALPERS_POR_SIMBOLO if es_scalping(est.intervalo) else MAX_POR_SIMBOLO
-    if len(ocupadas) >= cupo:
+    if sum(1 for o in ocupadas if not o.get("descartada")) >= cupo_banco(est.intervalo):
         estado.evento(f"{est.id} lo supera todo, pero el banco de {est.simbolo} ya está lleno", "descartada",
                       consola=False, id=est.id, etapa="Distinta a las del banco")
         return None
@@ -179,11 +181,15 @@ def minar(simbolo: str, intervalo: str = INTERVALO, estrategias: int = 2000, gen
         f"de ahí a hoy las guardo para validar."
     )
 
+    # las del banco y las que se retiraron (por no ser rentables o porque las quitaste): ninguna nueva puede repetirlas
     ocupadas = [
         _huella(Estrategia.de_dict(b["estrategia"]), m, b["id"])
         for b in banco.cargar()
         if b["estrategia"]["simbolo"] == simbolo and b["estrategia"]["intervalo"] == intervalo
     ]
+    for d in banco.descartadas():
+        if d["estrategia"]["simbolo"] == simbolo and d["estrategia"]["intervalo"] == intervalo:
+            ocupadas.append({**_huella(Estrategia.de_dict(d["estrategia"]), m, d["id"]), "descartada": d.get("motivo", "retirada")})
     tam = max(20, estrategias // generaciones)
     vistas: set[str] = set()
     puntuadas: list[tuple[float, Estrategia]] = []
@@ -255,7 +261,7 @@ def minar_continuo(simbolos: list[str], intervalo: str = INTERVALO, estrategias:
             if parar.is_set() or control.cargar()["mineria_pausada"]:
                 break
             en_banco = banco.ocupacion(simbolo, intervalo)
-            if en_banco >= MAX_POR_SIMBOLO:
+            if en_banco >= cupo_banco(intervalo):
                 estado.evento(f"{simbolo.upper()} ya tiene {en_banco} estrategias en el banco; me lo salto.")
                 continue
             try:
@@ -276,11 +282,13 @@ def minar_a_demanda(simbolos: list[str], intervalo: str = INTERVALO, estrategias
                     generaciones: int = 10, dias: int = DIAS_HISTORICO,
                     parar: threading.Event | None = None) -> None:
     """La minería de la oficina: espera a que el jefe pulse «Buscar estrategias» y entonces hace una
-    búsqueda (una ronda por cada activo pedido que tenga mesas libres). Luego vuelve a esperar."""
+    búsqueda (una ronda por cada activo pedido que tenga sitio en el banco). Luego vuelve a esperar.
+    El supervisor también puede pedir una búsqueda cuando retira una estrategia y no hay ninguna en reserva."""
     parar = parar or threading.Event()
     estado = EstadoMineria()
-    if control.cargar()["busqueda"]:  # una búsqueda a medias de la vez anterior no se retoma sola
-        control.terminar_busqueda(control.cargar()["busqueda"])
+    pendiente = control.cargar()["busqueda"]
+    if pendiente and pendiente.get("por") != "supervisor":  # una búsqueda tuya a medias de la vez anterior no se retoma sola
+        control.terminar_busqueda(pendiente)
     estado.datos["estado"] = "esperando"
     estado.evento("Minería en espera: solo busco estrategias cuando pulses «Buscar estrategias».", "espera")
     while not parar.is_set():
@@ -306,11 +314,12 @@ def _buscar(pedido: dict, simbolos: list[str], intervalo: str, estrategias: int,
 
     scalping = pedido.get("tipo") == "scalping"
     vela, historia = (SCALPING_INTERVALO, SCALPING_DIAS) if scalping else (intervalo, dias)
-    cupo = MAX_SCALPERS_POR_SIMBOLO if scalping else MAX_POR_SIMBOLO
+    cupo = cupo_banco(vela)
     lista = [x.upper() for x in pedido.get("simbolos") or (SCALPING_SIMBOLOS if scalping else simbolos)]
     estado.datos["embudo"] = {e: 0 for e in ETAPAS}  # el embudo de la pantalla es el de esta búsqueda
     que = "scalping (velas de 5 minutos) de " if scalping else ""
-    estado.evento(f"¡A buscar! Búsqueda de {que}{', '.join(x.replace('USDT', '') for x in lista)} pedida por el jefe.",
+    quien = "el supervisor, para tener recambio" if pedido.get("por") == "supervisor" else "el jefe"
+    estado.evento(f"¡A buscar! Búsqueda de {que}{', '.join(x.replace('USDT', '') for x in lista)} pedida por {quien}.",
                   "busqueda", simbolos=lista, sala="scalping" if scalping else "trading")
     nuevas = 0
     for n, simbolo in enumerate(lista, 1):
@@ -320,7 +329,8 @@ def _buscar(pedido: dict, simbolos: list[str], intervalo: str, estrategias: int,
                                  "tipo": "scalping" if scalping else "trading"}
         en_banco = banco.ocupacion(simbolo, vela)
         if en_banco >= cupo:
-            estado.evento(f"{simbolo.replace('USDT', '')} ya tiene sus {cupo} mesas de {'scalping' if scalping else 'trading'} ocupadas; me lo salto.")
+            estado.evento(f"{simbolo.replace('USDT', '')} ya tiene {cupo} estrategias de {'scalping' if scalping else 'trading'} en el "
+                          "banco (el máximo por activo, contando la reserva); me lo salto.")
             continue
         try:
             nuevas += len(minar(simbolo, vela, estrategias, generaciones, historia, estado=estado, seguir=seguir))
@@ -331,7 +341,8 @@ def _buscar(pedido: dict, simbolos: list[str], intervalo: str, estrategias: int,
     estado.datos.update(estado="esperando", simbolo=None, ciclo=None)
     texto = "Búsqueda parada" if parada else "Búsqueda terminada"
     if nuevas:
-        texto += f": {nuevas} estrategia{'s' if nuevas > 1 else ''} nueva{'s' if nuevas > 1 else ''} en el banco, ya operando con su trader."
+        texto += (f": {nuevas} estrategia{'s' if nuevas > 1 else ''} nueva{'s' if nuevas > 1 else ''} en el banco. Con mesa libre "
+                  "empiezan a operar ya; si no, esperan en la reserva.")
     else:
         texto += ": ninguna ha superado las seis pruebas esta vez. Es lo normal; prueba otra búsqueda cuando quieras."
     estado.evento(texto, "fin_busqueda", nuevas=nuevas)

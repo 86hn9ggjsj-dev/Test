@@ -35,8 +35,9 @@ Telegram de Jarvis, si lo tienes configurado.
 1. **Datos.** Velas de 30 minutos de los últimos 3 años de Binance (API pública, sin claves) de BTC,
    ETH, SOL, BNB, XRP y DOGE, guardadas en `~/.trading_floor/datos/`.
 2. **Minería** (`mineria.py`). **Solo busca cuando pulsas «🔍 Buscar estrategias»** (arriba en la
-   oficina, eligiendo todos los activos con mesas libres o uno en concreto) o se lo pides por el chat; al
-   terminar la búsqueda se queda en espera. Una estrategia es "entra en largo o en corto cuando se cumplan
+   oficina, eligiendo todos los activos con sitio en el banco o uno en concreto) o se lo pides por el chat; al
+   terminar la búsqueda se queda en espera. La única excepción: si el supervisor retira una estrategia y no
+   queda ninguna en la reserva, pide él un ciclo de búsqueda (uno solo) para tener recambio. Una estrategia es "entra en largo o en corto cuando se cumplan
    1-3 condiciones" (RSI, medias, cruces, rupturas, Bollinger, MACD, momento, volatilidad) más
    una salida por stop, objetivo o tiempo. Se generan al azar y con un algoritmo genético, y se
    prueban **solo en el 70 % inicial** de los datos.
@@ -47,14 +48,16 @@ Telegram de Jarvis, si lo tienes configurado.
    - **Monte Carlo**: barajando 1.000 veces sus operaciones, ¿el peor 5 % sigue en positivo?
    - **Estabilidad**: ¿siguen ganando las variantes con parámetros vecinos?
    - **Test del mono**: en datos no vistos, ¿gana al 90 % de "monos" que entran al azar?
-4. **Banco** (`banco.py`). Guarda las supervivientes (máximo 8 por activo: 6 activos × 8 = las 48 mesas
-   de la sala de trading) **sin repetidas**: no entra una estrategia que sea la misma idea que otra
-   del banco (mismas condiciones con otros números; se mira antes de las pruebas), que entre casi en
-   los mismos momentos (más del 30 % de sus entradas) o que esté dentro del mercado a la vez la mayor
-   parte del tiempo. Las repetidas de versiones anteriores se quitan con «quita las repetidas» en el
+4. **Banco** (`banco.py`). Guarda las supervivientes (máximo 10 por activo en trading y 5 en scalping:
+   las de las mesas más una pequeña **reserva**) **sin repetidas**: no entra una estrategia que sea la
+   misma idea que otra del banco (mismas condiciones con otros números; se mira antes de las pruebas), que
+   entre casi en los mismos momentos (más del 30 % de sus entradas) o que esté dentro del mercado a la
+   vez la mayor parte del tiempo. Tampoco si se parece a una que ya se retiró (las retiradas se guardan
+   en `descartadas.json`). Las repetidas de versiones anteriores se quitan con «quita las repetidas» en el
    chat o `trading banco --limpiar-repetidas` (se queda la mejor fuera de muestra de cada idea).
-5. **Paper trading** (`papel.py`). En cuanto una estrategia entra en el banco, un trader se sienta en
-   una mesa con ella y 1.000 $ ficticios. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen
+5. **Paper trading** (`papel.py`). En cuanto una estrategia entra en el banco, el trader de una mesa
+   libre se pone con ella (48 mesas en trading, 12 en scalping; si están todas ocupadas, espera en la
+   reserva del banco) y con el capital ficticio que le toca según tu reparto. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen
    **todas** sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra;
    después sale sola por stop, objetivo o tiempo máximo. Son reglas exigentes: cada estrategia opera de
    media una vez cada pocos días (su ficha dice cada cuánto), así que es normal ver a muchos traders
@@ -62,6 +65,17 @@ Telegram de Jarvis, si lo tienes configurado.
    precio de mercado vela a vela, de ahí salen el resultado total, el de hoy y el de cada día.
    Además calcula el **radar de señales** de cada trader: cuántas de sus condiciones se cumplen
    ahora mismo, cuál falta, cuándo cierra la próxima vela, soporte, resistencia y ATR.
+   - **Supervisor y periodo de prueba** (`config.PRUEBA`). Clara (trading) y Álex (scalping) vigilan
+     a cada trader con su estrategia: en trading, 14 días y 6 operaciones cerradas; en scalping, 3 días
+     y 20 operaciones. Si al acabar la prueba va en pérdidas, o si antes pierde un 5 % de su capital (un
+     4 % en scalping), el supervisor le retira la estrategia **cuando no tiene nada abierto** y le da la
+     mejor de la reserva (la de mejor rentabilidad/caída fuera de muestra), en la misma mesa y con un
+     periodo de prueba nuevo. Pasada la prueba sigue vigilando: si vuelve a pérdidas, se repite. Si no
+     hay reserva, la mesa espera y el supervisor pide un ciclo de búsqueda.
+   - **Lo retirado sigue contando.** Cuando una estrategia sale del banco (la retira el supervisor, tú
+     con «retira E-XXXXXX» o por repetida), su resultado queda congelado y sigue sumando en la sala y en
+     tu fondo: quitar una estrategia que pierde no borra lo perdido. Si tenía algo abierto, se cierra al
+     precio del momento.
 6. **Control de riesgos** (`riesgo.py`). Encima del paper trading:
    - **Tamaño de cada operación**: arriesga como mucho el 1 % del capital de su trader si salta el
      stop (con un stop lejano se invierte menos; nunca más del 100 %).
@@ -136,7 +150,11 @@ descanso, a la terraza o al gimnasio.
 
 - **Supervisión**: cada sala tiene su supervisor, que la patrulla y conoce sus números; la
   supervisión general hace rondas preguntándoles y acude corriendo si una sala se pone en rojo.
-  La pestaña «Salas» muestra el semáforo de cada una.
+  La pestaña «Salas» muestra el semáforo de cada una. Cuando Clara o Álex retiran una estrategia que no
+  funciona, van a la mesa y se lo explican al trader (qué le quitan, por qué y cuál le dan); el trader es
+  el mismo y sigue en su mesa. Cada trader lleva en la lista su periodo de prueba («prueba 5/14 días»,
+  «✓ prueba» o «⚠ a cambiar») y en su ficha las barras de días y operaciones. En la ficha de Clara y de
+  Álex están la reserva del banco y las últimas estrategias retiradas.
 - **Ranking**: podio y clasificación de traders por resultado total, de hoy, de la semana o por
   acierto (en papel), o por cómo lo hizo su estrategia en el backtest. El número 1 lleva corona.
 - **Chat contigo (tú eres el jefe)**: escribe en la caja del chat a toda la oficina, o a alguien
@@ -145,7 +163,8 @@ descanso, a la terraza o al gimnasio.
   buscar estrategias (o parar la búsqueda), activar o quitar un freno manual, pausar, reanudar o retirar a
   un trader, cambiar los límites de riesgo, rehacer un plan de holding y convocar el comité.
   - **Modo básico (gratis)**: entiende órdenes sencillas («busca estrategias de SOL», «para la búsqueda»,
-    «activa el freno», «pausa a E-XXXXXX», «riesgo 0,5», «¿cómo va el holding?», «¿cómo vamos?»,
+    «activa el freno», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?»,
+    «riesgo 0,5», «¿cómo va el holding?», «¿cómo vamos?»,
     «¿quién es el mejor?»).
   - **Con Claude (opcional, de pago)**: si pones `ANTHROPIC_API_KEY=...` en el archivo `.env` de la
     raíz del proyecto, contestan de verdad a cualquier cosa. Cada mensaje cuesta unos céntimos de tu

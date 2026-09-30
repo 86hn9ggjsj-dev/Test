@@ -27,10 +27,9 @@ import pandas as pd
 
 from . import almacen
 from .config import (CAPITAL_HOLDING, CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, FONDO_CAPITAL_INICIAL,
-                     FONDO_VL_INICIAL, MAX_POR_SIMBOLO, MAX_SCALPERS_POR_SIMBOLO, SCALPING_SIMBOLOS, SIMBOLOS)
+                     FONDO_VL_INICIAL, MESAS)
 
 AREAS = ("trading", "scalping", "holding")
-MESAS = {"trading": MAX_POR_SIMBOLO * len(SIMBOLOS), "scalping": MAX_SCALPERS_POR_SIMBOLO * len(SCALPING_SIMBOLOS)}
 _cerrojo = threading.RLock()
 _cache: dict = {"t": 0.0, "datos": None}
 
@@ -331,7 +330,8 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
     objetivo = reparto(f)
     traders = papel.get("estrategias") or {}
     ocupadas = {g: sum(1 for t in traders.values() if t.get("grupo", "trading") == g) for g in ("trading", "scalping")}
-    ops_stats, ultimas = _operaciones(papel.get("estrategias") or {})
+    # las operaciones de las estrategias ya retiradas también cuentan: se hicieron con dinero del fondo
+    ops_stats, ultimas = _operaciones({**(papel.get("retirados") or {}), **traders})
     btc = _btc(indice)
     # series para las gráficas: hora a hora los últimos 30 días y un punto al día antes
     corte = indice[-1] - pd.Timedelta(days=30)

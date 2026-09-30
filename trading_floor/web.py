@@ -14,8 +14,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from . import almacen, banco, chat, control, fondo
-from .config import (CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, MAX_POR_SIMBOLO, MAX_SCALPERS_POR_SIMBOLO,
-                     SCALPING_INTERVALO, SCALPING_SIMBOLOS, SIMBOLOS)
+from .config import (CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, INTERVALO, MAX_POR_SIMBOLO, MAX_SCALPERS_POR_SIMBOLO,
+                     MESAS, PRUEBA, SCALPING_INTERVALO, SCALPING_SIMBOLOS, SIMBOLOS, cupo_banco)
 
 PAGINA = Path(__file__).resolve().parent / "web" / "index.html"
 
@@ -44,6 +44,10 @@ def estado() -> dict:
     resumen_fondo = fondo.resumen_rapido(papel, holding)
     # las curvas largas solo las necesita el dashboard del fondo (/api/fondo): aquí se quitan para no cargar la oficina
     papel.pop("series", None)
+    # de las estrategias retiradas, solo las últimas y sin su curva ni sus operaciones
+    retirados = sorted((papel.pop("retirados", None) or {}).values(), key=lambda r: r.get("fin", ""), reverse=True)
+    papel["retirados"] = [{k: v for k, v in r.items() if k not in ("serie", "operaciones")} | {"n_operaciones": len(r.get("operaciones", []))}
+                          for r in retirados[:40]]
     holding.pop("serie", None)
     for plan in (holding.get("planes") or {}).values():
         plan.pop("serie", None)
@@ -65,7 +69,12 @@ def estado() -> dict:
         "capital_por_estrategia": CAPITAL_POR_ESTRATEGIA,
         "simbolos": SIMBOLOS,
         "max_por_simbolo": MAX_POR_SIMBOLO,
-        "scalping": {"simbolos": SCALPING_SIMBOLOS, "max_por_simbolo": MAX_SCALPERS_POR_SIMBOLO, "intervalo": SCALPING_INTERVALO},
+        "cupo_banco": cupo_banco(INTERVALO),   # estrategias por activo en el banco: las de las mesas más la reserva
+        "mesas": MESAS,
+        "prueba": PRUEBA,
+        "descartadas": len(banco.descartadas()),
+        "scalping": {"simbolos": SCALPING_SIMBOLOS, "max_por_simbolo": MAX_SCALPERS_POR_SIMBOLO, "intervalo": SCALPING_INTERVALO,
+                     "cupo_banco": cupo_banco(SCALPING_INTERVALO)},
     }
 
 

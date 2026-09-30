@@ -269,6 +269,12 @@ canvas.grafica{display:block;width:100%}
 #ficha ul{margin:4px 0 8px;padding-left:18px;font-size:12px;color:#c9d0db}
 #ficha li{margin-bottom:3px}
 #ficha .aviso{font-size:11px;color:var(--suave)}
+#ficha .aviso.baja{color:var(--ambar)} #ficha .aviso.sube{color:var(--verde)}
+.prueba-barra{position:relative;height:18px;margin:6px 0;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden}
+.prueba-barra i{position:absolute;inset:0 auto 0 0;background:rgba(212,255,58,.22);border-right:2px solid var(--neon)}
+.prueba-barra span{position:relative;display:block;padding:0 8px;font:600 11px/18px Inter,sans-serif;color:var(--texto)}
+.trader .etq{display:inline-block;margin-left:4px;padding:0 5px;border-radius:5px;font-size:10px;line-height:15px;vertical-align:1px;background:rgba(255,255,255,.07);color:var(--suave)}
+.trader .etq.ok{background:rgba(46,230,166,.14);color:var(--verde)} .trader .etq.mal{background:rgba(255,194,74,.16);color:var(--ambar)}
 
 #sinConexion{position:fixed;left:50%;top:76px;transform:translateX(-50%);z-index:8;background:rgba(255,90,118,.14);border:1px solid rgba(255,90,118,.5);color:#ffd3db;padding:8px 14px;border-radius:10px;font-size:13px}
 #sinConexion[hidden]{display:none}
@@ -527,16 +533,17 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p><b>Minería.</b> Genera estrategias sin parar: combina indicadores (RSI, medias, Bollinger…) al azar y con un algoritmo genético, y las prueba en el 70 % inicial de tres años de velas reales de Binance.</p>
     <p><b>Laboratorio.</b> Las que parecen rentables viajan por la cinta. Cada puesto es una prueba de robustez; si la falla, a la trituradora.</p>
     <p><b>Cámara.</b> Las que lo superan todo se guardan en el banco (cada lingote es una estrategia), salvo que se parezcan demasiado a otra que ya esté dentro.</p>
-    <p><b>Sala de trading.</b> Cada estrategia del banco es un trader con su capital ficticio (el % del fondo que dedicas al trading, repartido entre sus 48 mesas; al principio, 1.000 $) que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
-    <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). En cuanto entra en el banco, un trader se sienta en una mesa con ella. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 48 mesas (8 por activo).</p>
+    <p><b>Sala de trading.</b> Cada mesa tiene su trader, que opera una estrategia del banco con su capital ficticio (el % del fondo que dedicas al trading, repartido entre sus 48 mesas; al principio, 1.000 $) que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
+    <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). En cuanto entra en el banco, un trader se sienta en una mesa libre con ella (si están todas ocupadas, espera en la reserva del banco). Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 48 mesas (8 por activo).</p>
     <p><b>Radar de señales.</b> El equipo de análisis mira, para cada trader, cuántas condiciones de su estrategia se cumplen ahora mismo y le avisa cuando le falta una para entrar (con la hora del próximo cierre de vela, soporte, resistencia y ATR).</p>
     <p><b>Mi fondo.</b> Todo es tu fondo de inversión (con dinero ficticio): tú aportas capital y recibes participaciones; el valor liquidativo sube o baja solo con los resultados de trading, scalping y holding, así que un trader nuevo no cambia tu patrimonio. Tú decides el reparto: qué % va a trading (se divide entre sus 48 mesas), a scalping (12 mesas) y a holding; el resto es liquidez. Se cambia en «Mi fondo» o por el chat («dedica un 20 % al holding») y se aplica desde ese momento, sin perder lo ganado. En la pestaña «Mi fondo» (arriba) tienes tu dashboard: rentabilidad frente a BTC, caídas, volatilidad, Sharpe, reparto del dinero, exposición, meses, operaciones y aportaciones o reembolsos.</p>
     <p><b>Scalping.</b> Una sala aparte con operaciones cortas en velas de 5 minutos (BTC, ETH y SOL, 12 mesas). Los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta) y pasan el mismo embudo de seis pruebas. Aun así, las comisiones pesan mucho: la sala muestra cuánto se paga.</p>
-    <p><b>Sin repetidas.</b> Una estrategia no entra en el banco si es la misma idea que otra (mismas condiciones con otros números), si entra en los mismos momentos o si está en el mercado a la vez la mayor parte del tiempo. Si tenías repetidas de antes, pídele por el chat «quita las repetidas».</p>
+    <p><b>Sin repetidas.</b> Una estrategia no entra en el banco si es la misma idea que otra (mismas condiciones con otros números), si entra en los mismos momentos o si está en el mercado a la vez la mayor parte del tiempo. Tampoco si se parece a una que ya se retiró por no funcionar. Si tenías repetidas de antes, pídele por el chat «quita las repetidas».</p>
     <p><b>Holding.</b> Carteras de largo plazo (BTC, ETH y SOL) sin stop loss: si el precio baja, promedian comprando más cada −8 % (y si se acaba el presupuesto, meten capital de la reserva); si sube, venden una parte en sus puntos de salida (+30, +60 y +100 % sobre el coste medio). Siempre se queda una parte en cartera.</p>
     <p><b>Control de riesgos.</b> Decide cuánto invierte cada operación (arriesgando como mucho un 1 % del capital del trader) y veta entradas si hay demasiadas posiciones, demasiadas iguales, o si el día o la caída acumulada pierden demasiado.</p>
     <p><b>Macroeconomía.</b> Cuatro analistas siguen la bolsa, el VIX, el dólar, el oro, el petróleo, los bonos y el sentimiento cripto, y deciden si el mercado está en modo RISK-ON (apetito por el riesgo) o RISK-OFF.</p>
     <p><b>Supervisión.</b> Cada sala tiene su supervisor, que la patrulla y sabe cómo va. La supervisión general hace rondas por toda la oficina preguntando a cada uno, y acude corriendo si una sala se pone en rojo. El estado de cada sala está en la pestaña «Salas».</p>
+    <p><b>Periodo de prueba y relevo.</b> Clara (trading) y Álex (scalping) vigilan a sus traders. Cada uno tiene un periodo de prueba con su estrategia: 14 días y 6 operaciones en trading, 3 días y 20 operaciones en scalping. Si al acabarlo va en pérdidas, o si antes pierde un 5 % de su capital (un 4 % en scalping), el supervisor va a su mesa y le cambia la estrategia por la mejor de la reserva del banco, siempre cuando no tiene nada abierto. Si no hay reserva, pide un ciclo de búsqueda. Lo que ganó o perdió la estrategia retirada sigue contando en tu fondo (no se borra) y la minería no vuelve a buscar esa idea. El banco guarda hasta 10 estrategias por activo (5 en scalping): las que no caben en las mesas esperan en la reserva. Haz clic en Clara o en Álex para ver la reserva y los últimos cambios.</p>
     <p><b>Ranking.</b> Los traders se ordenan por su resultado en papel (total, hoy, semana o acierto) o por cómo lo hizo su estrategia en el backtest. Los tres mejores llevan corona o medalla en la oficina.</p>
     <p><b>Comité, descanso y terraza.</b> De vez en cuando se reúnen para repasar el riesgo, y cuando no hay trabajo se van a por café.</p>
     <p class="nota">Todo es <b>paper trading</b>: nunca se envía ninguna orden real. Los resultados de un backtest no garantizan nada sobre el futuro.</p>
@@ -1470,7 +1477,7 @@ const ROLES = {
 const agentes = [];
 class Agente {
   constructor(o) {
-    const h = hash(o.nombre + (o.id || ""));
+    const h = hash(o.nombre + (o.rol === "trader" ? "" : o.id || ""));   // un trader es siempre el mismo, cambie o no de estrategia
     const rol = ROLES[o.rol];
     Object.assign(this, {
       x: 0, y: 0, z: 0, mira: "s", postura: "de_pie", ruta: [], andando: false, fase: 0, velocidad: 1.8,
@@ -1540,7 +1547,8 @@ const SALAS_SUP = [
 ];
 const SUPERVISORES = SALAS_SUP.map(s => {
   const a = new Agente({nombre: s.sup, rol: "supervisor", sala: s, puesto: "Supervisión · " + s.nombre, proximaRonda: rand(4, 14), puntoRonda: 0,
-    explica: `Supervisa ${s.nombre.toLowerCase()}: la patrulla, vigila sus números y se los cuenta a la supervisión general en cada ronda. Si algo se pone en rojo, da la alarma.`});
+    explica: `Supervisa ${s.nombre.toLowerCase()}: la patrulla, vigila sus números y se los cuenta a la supervisión general en cada ronda. Si algo se pone en rojo, da la alarma.` +
+      (s.id === "trading" || s.id === "scalping" ? " Además vigila el periodo de prueba de cada trader: al que no es rentable le cambia la estrategia por la mejor de la reserva del banco." : "")});
   a.tono = s.color; a.x = s.casa[0]; a.y = s.casa[1]; a.mira = "s";
   agentes.push(a);
   return a;
@@ -2110,10 +2118,18 @@ function grafico(sim, p, w, h) {
     const k = s.length - 1; circulo(x(k), y(s[k]), 4 + Math.sin(T * 5), col);
   }
 }
+function etiquetaPrueba(d) {
+  const pr = d && d.prueba;
+  if (!pr) return "";
+  if (pr.estado === "rentable") return `<span class="etq ok" title="Periodo de prueba superado y en positivo">✓ prueba</span>`;
+  if (pr.estado === "espera_cierre") return `<span class="etq mal" title="${esc(pr.motivo || "")}: se le cambiará la estrategia al cerrar">⚠ a cambiar</span>`;
+  const falta = pr.dias < pr.dias_min ? `${Math.floor(pr.dias)}/${pr.dias_min} días` : `${pr.operaciones}/${pr.operaciones_min} ops`;   // lo que le queda por cumplir
+  return `<span class="etq" title="Periodo de prueba: día ${Math.floor(pr.dias)} de ${pr.dias_min} y ${pr.operaciones} de ${pr.operaciones_min} operaciones">prueba ${falta}</span>`;
+}
 function grupoVivo(g) {   // cifras de una sala con los precios en vivo (trading o scalping)
   const ts = Object.values(S && S.papel && S.papel.estrategias || {}).filter(t => (t.grupo || "trading") === g), est = (S && S.papel && S.papel.grupos || {})[g] || {};
-  return {n: ts.length, abiertas: ts.filter(t => t.posicion).length, resultado: ts.reduce((a, t) => a + (t.resultado || 0), 0),
-    hoy: ts.reduce((a, t) => a + (t.hoy || 0), 0), operaciones: est.operaciones || 0, operaciones_hoy: est.operaciones_hoy || 0,
+  return {n: ts.length, abiertas: ts.filter(t => t.posicion).length, resultado: ts.reduce((a, t) => a + (t.resultado || 0), 0) + (est.resultado_retiradas || 0),
+    hoy: ts.reduce((a, t) => a + (t.hoy || 0), 0) + (est.hoy_retiradas || 0), operaciones: est.operaciones || 0, retiradas: est.retiradas || 0, operaciones_hoy: est.operaciones_hoy || 0,
     aciertos_pct: est.aciertos_pct, comisiones: est.comisiones || 0, traders: ts};
 }
 function totales() {
@@ -2550,7 +2566,7 @@ function procesarMineria(eventos) {
       enfocar(26, 5.5, 2.2, 7);
       const n = (S.banco || []).length;
       charla([[PROBADORES[5], `¡${e.id} ha superado las seis pruebas! ${e.fuera ? "Fuera de muestra: " + e.fuera + "." : ""}`, "bueno"],
-        [BANQUERA, `Guardada en la cámara (${n} en el banco). Se pone en marcha ya: le busco trader y mesa.`, "oro"],
+        [BANQUERA, `Guardada en la cámara (${n} en el banco). Si hay mesa libre se pone en marcha ya; si no, a la reserva.`, "oro"],
         [DIRECTOR, pick(["Buen trabajo. Que empiece a operar en papel y veremos.", "Bien. Ahora a demostrarlo con precios de verdad.", "Una más. Sin euforia: el backtest no es el futuro."])]], 3);
     }
     else if (e.tipo === "descanso") decir(pick(MINEROS), pick(["Ronda terminada. ¡Café!", "Fin de ronda. Me voy al sofá.", "Los servidores descansan y yo también."]));
@@ -2570,6 +2586,10 @@ function procesarPapel(eventos) {
   for (const e of eventos) {
     if (e.tipo === "freno") { enCanal("riesgos", () => charla([[RIESGOS, e.texto, "malo"], [DIRECTOR, "Recibido. Nadie abre nada hasta que Riesgos diga."]], 3)); enfocar(42, 14, 2, 8); continue; }
     if (e.tipo === "reanuda") { enCanal("riesgos", () => decir(RIESGOS, e.texto, 3, "bueno")); continue; }
+    if (e.tipo === "relevo") { escenaRelevo(e); continue; }
+    if (e.tipo === "busqueda") { const sup = supervisorDe(e.grupo); enCanal("operaciones", () => charla([[sup, e.texto, ""], [SUPERVISORES[0], "Recibido. Enciendo los servidores: un ciclo y paramos.", "", sup]], 2)); continue; }
+    if (e.tipo === "reserva") { enCanal("operaciones", () => decir(BANQUERA, `${e.id} aprobada, pero no hay mesa libre en ${e.grupo === "scalping" ? "scalping" : "trading"}: la guardo en la reserva. Será la primera opción si el supervisor retira alguna.`, 2, "oro")); continue; }
+    if (e.tipo === "baja") { enCanal("operaciones", () => decir(supervisorDe(e.grupo) || BANQUERA, e.texto, 2)); continue; }
     const a = agenteDeTrader(e.id);
     if (e.tipo === "veto") {
       const quien = pick(EQUIPO_RIESGO);
@@ -2581,6 +2601,10 @@ function procesarPapel(eventos) {
       continue;
     }
     if (!a) continue;
+    if (e.tipo === "alta") {   // una estrategia de la reserva llega a una mesa que ya tenía trader
+      if (a.relevo && T - a.relevo < 120) decir(a, `Me dan ${e.id}, de la reserva del banco: ${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}. Empiezo en la próxima vela.`, 2, "bueno");
+      continue;
+    }
     if (a.casa) enfocar(a.casa.x, a.casa.y, 2.4, 6);
     if (e.tipo === "apertura") {
       decir(a, `Abro ${ladoTxt(e.direccion)} en ${moneda(e.simbolo)} a ${fmt.precio(e.precio)}${e.fraccion ? ` con el ${Math.round(e.fraccion * 100)} % de mi capital` : ""}. ${pick(["Stop puesto.", "Sigo el plan.", "Riesgos da el visto bueno."])}`, 2);
@@ -2588,7 +2612,7 @@ function procesarPapel(eventos) {
       if (t.abiertas >= 3 && (t.largos === t.abiertas || t.cortos === t.abiertas)) enCanal("riesgos", () => decir(RIESGOS, `Ojo: ${t.abiertas} posiciones abiertas y todas ${t.largos ? "largas" : "cortas"}. Es casi la misma apuesta.`, 2));
     } else if (e.tipo === "cierre") {
       const r = e.retorno_pct || 0, bien = r > 0;
-      const motivo = {stop: "stop", objetivo: "objetivo", tiempo: "tiempo", fin: "fin"}[e.motivo] || e.motivo;
+      const motivo = {stop: "stop", objetivo: "objetivo", tiempo: "tiempo", fin: "fin", retirada: "retirada"}[e.motivo] || e.motivo;
       decir(a, `Cierro ${moneda(e.simbolo)}: ${fmt.pct(r)} (${motivo}). ${bien ? pick(["✅", "Bien.", "Así da gusto."]) : pick(["El stop está para eso.", "Sin dramas: el plan es el plan.", "Toca aceptar la pérdida."])}`, 2, bien ? "bueno" : "malo");
       if (a.casa) flotante(a.casa.x, a.casa.y - .5, .9, (r > 0 ? "+" : "−") + NF2.format(Math.abs(r * (S.capital_por_estrategia || 1000) / 100)) + " $", bien ? "#2ee6a6" : "#ff5a76");
       if (r > 1.5) { const otro = pick([...traders.values()].filter(t => t !== a)); if (otro) decir(otro, pick(["¡Buena!", "Eso es seguir el plan.", "👏"]), 1); }
@@ -2604,37 +2628,79 @@ function procesarHolding(eventos) {
     else if (e.tipo === "aportacion") { charla([[HOLDERS[1], `💰 ${e.texto}`, "oro"], [RIESGOS, "Anotado. Sin stop, pero con la reserva contada: no se mete más de lo previsto."]], 2); flotante(MONEDA.x, MONEDA.y, 1.6, "RESERVA " + moneda(e.simbolo), "#ffcf5a"); enfocar(41, 4.5, 2.2, 6); }
   }
 }
+// Cada mesa tiene su trader (el nombre va con la mesa). Si el supervisor le cambia la estrategia, sigue siendo la misma
+// persona en la misma mesa; si su mesa se queda sin estrategia, se va hasta que llegue una nueva.
+function mesaDe(d) { return d && d.mesa != null ? (d.grupo === "scalping" ? MESAS_SCALP : MESAS)[d.mesa] || null : null; }
+function puestoTrader(id, d) { return `${d.grupo === "scalping" ? "Scalper" : "Trader"} · mesa ${d.mesa + 1} · ${id}`; }
 function crearTrader(id, datos) {
-  const usados = new Set([...traders.values()].map(t => t.nombre));
-  let n = hash(id) % NOMBRES_TRADERS.length;
-  for (let k = 0; k < NOMBRES_TRADERS.length && usados.has(NOMBRES_TRADERS[n]); k++) n = (n + 1) % NOMBRES_TRADERS.length;
-  return new Agente({nombre: NOMBRES_TRADERS[n], rol: "trader", id, datos, puesto: (datos.grupo === "scalping" ? "Scalper · " : "Trader · ") + id});
+  const nombre = NOMBRES_TRADERS[((datos.grupo === "scalping" ? MESAS.length : 0) + datos.mesa) % NOMBRES_TRADERS.length];
+  return new Agente({nombre, rol: "trader", id, datos, puesto: puestoTrader(id, datos)});
 }
 function sincronizarTraders(inicial) {
   const ests = S.papel && S.papel.estrategias || {};
-  const ids = Object.keys(ests).sort((a, b) => String(ests[a].inicio).localeCompare(String(ests[b].inicio)) || a.localeCompare(b));
+  const ids = Object.keys(ests).sort((a, b) => (ests[a].mesa ?? 999) - (ests[b].mesa ?? 999) || a.localeCompare(b));
+  for (const [id, a] of [...traders]) {
+    if (ests[id]) continue;
+    traders.delete(id);
+    const nueva = ids.find(i => !traders.has(i) && mesaDe(ests[i]) === a.mesa);
+    if (nueva) {   // relevo: la misma persona se queda en su mesa con la estrategia nueva
+      a.id = nueva; a.datos = ests[nueva]; a.puesto = puestoTrader(nueva, ests[nueva]); a.anterior = id; a.relevo = T;
+      traders.set(nueva, a);
+      continue;
+    }
+    a.mesa.trader = null; a.casa = null; a.tarea = "salir"; ascensorHasta = T + 5; liberarSitio(a);
+    decir(a, "Me han retirado la estrategia. Vuelvo en cuanto haya una nueva para mi mesa.", 1);
+    irA(a, .6, 10, "de_pie", "o", () => { const i = agentes.indexOf(a); if (i >= 0) agentes.splice(i, 1); });
+  }
   for (const id of ids) {
-    const a = traders.get(id);
-    if (a) { a.datos = ests[id]; continue; }
-    const mesa = (ests[id].grupo === "scalping" ? MESAS_SCALP : MESAS).find(m => !m.trader);
-    if (!mesa) continue;
-    const nuevo = crearTrader(id, ests[id]);
+    const d = ests[id], mesa = mesaDe(d);
+    let a = traders.get(id);
+    if (a && mesa && a.mesa !== mesa) {   // ha cambiado de mesa (al ordenar las mesas de una versión anterior)
+      if (a.mesa && a.mesa.trader === a) a.mesa.trader = null;
+      a.mesa = mesa; a.casa = mesa.asiento; mesa.trader = a; a.puesto = puestoTrader(id, d);
+      if (!a.tarea) volverAlPuesto(a);
+    }
+    if (a) { a.datos = d; continue; }
+    if (!mesa || mesa.trader) continue;
+    const nuevo = crearTrader(id, d);
     nuevo.casa = mesa.asiento; nuevo.mesa = mesa; mesa.trader = nuevo;
     traders.set(id, nuevo); agentes.push(nuevo);
     if (inicial) colocar(nuevo, mesa.asiento);
     else {
       nuevo.x = .6; nuevo.y = 10; nuevo.mira = "e"; ascensorHasta = T + 3;
-      const d = ests[id];
-      decir(BANQUERA, `${id} ya está en marcha: la opera ${nuevo.nombre}, mesa ${MESAS.indexOf(mesa) + 1}.`, 2, "oro");
+      const sala = d.grupo === "scalping" ? "la sala de scalping" : "la sala de trading";
+      decir(BANQUERA, `${id} ya está en marcha: la opera ${nuevo.nombre}, mesa ${d.mesa + 1} de ${sala}.`, 2, "oro");
       volverAlPuesto(nuevo, () => enCanal("operaciones", () => decir(nuevo, `Hola, soy ${nuevo.nombre}. Llevo ${id}: ${ladoTxt(d.direccion).toLowerCase()} en ${moneda(d.simbolo)}, con ${fmt.n(d.capital || 1000)} $ ficticios. Entraré cuando se cumplan todas sus condiciones.`, 2)));
-      decir(DIRECTOR, pick([`¡Te damos la bienvenida! Tu mesa te espera en la sala de trading.`, `Llega ${id} al parqué. A operar en papel.`]), 2);
+      decir(DIRECTOR, pick([`¡Te damos la bienvenida! Tu mesa te espera en ${sala}.`, `Llega ${id} al parqué. A operar en papel.`]), 2);
     }
   }
-  for (const [id, a] of traders) if (!ests[id]) {
-    traders.delete(id); a.mesa.trader = null; a.casa = null; a.tarea = "salir"; ascensorHasta = T + 5;
-    decir(a, "Me han sacado del banco. ¡Hasta otra!", 1);
-    irA(a, .6, 10, "de_pie", "o", () => { const i = agentes.indexOf(a); if (i >= 0) agentes.splice(i, 1); });
+}
+function supervisorDe(grupo) { return SUPERVISORES.find(s => s.sala.id === (grupo === "scalping" ? "scalping" : "trading")); }
+// El supervisor va a la mesa y se lo explica al trader: qué estrategia le retira, por qué y cuál le da.
+function escenaRelevo(e) {
+  const sup = supervisorDe(e.grupo), mesa = mesaDe(e), a = e.id ? traders.get(e.id) : null;
+  const perdio = e.resultado != null ? ` Deja ${dineroS(e.resultado)}, que siguen contando en el fondo.` : "";
+  const hablar = () => enCanal("operaciones", () => charla(a ? [
+      [sup, `${a.nombre}, te retiro ${e.anterior}: ${e.motivo}.${perdio}`, "malo", a],
+      [sup, `Te doy ${e.id}, la mejor de la reserva del banco: ${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}. Empiezas en la próxima vela y con un periodo de prueba nuevo.`, "bueno", a],
+      [a, pick(["Entendido. Borrón y cuenta nueva.", "Vale, a por la nueva. Esta vez sale.", "Hecho. Lo perdido queda apuntado; toca recuperarlo con esta."]), "", sup]]
+    : [[sup, `Fuera ${e.anterior}: ${e.motivo}.${perdio} No hay ninguna estrategia en la reserva del banco, así que esa mesa espera a la próxima que se apruebe.`, "malo"]], 3));
+  if (mesa) {
+    enfocar(mesa.asiento.x, mesa.asiento.y, 2.4, 10);
+    flotante(mesa.asiento.x, mesa.asiento.y - .5, 1.3, a ? "NUEVA ESTRATEGIA" : "ESTRATEGIA RETIRADA", a ? "#d4ff3a" : "#ff5a76");
   }
+  if (!sup) return;
+  if (mesa && !sup.tarea) {
+    let dicho = false;
+    const decirYa = () => { if (!dicho) { dicho = true; hablar(); } };
+    setTimeout(decirYa, 9000);   // si algo le corta el paso (una ronda de la supervisión general), lo dice igual
+    setTimeout(() => { if (sup.tarea === "relevo" && !sup.andando) sup.tarea = null; }, 30000);
+    sup.tarea = "relevo"; sup.velocidad = 2.6;
+    irA(sup, mesa.asiento.x + .85, mesa.asiento.y + .1, "de_pie", "o", () => {
+      sup.velocidad = 1.8; decirYa();
+      setTimeout(() => { if (sup.tarea === "relevo") { sup.tarea = null; sup.proximaRonda = T + rand(4, 8); } }, 12000);
+    });
+  } else hablar();
 }
 
 // ---- descansos, comité y charla de fondo ----
@@ -2837,7 +2903,7 @@ function actualizarHUD() {
   $("#traders").innerHTML = lista.length ? lista.map(a => {
     const d = a.datos, r = d.resultado || 0;
     return `<div class="trader" data-id="${esc(a.id)}"><div class="av" style="background:${a.camisa}">${esc(iniciales(a.nombre))}</div>
-      <div style="min-width:0"><div class="n">${esc(a.nombre)} · ${esc(a.id)}</div><div class="d">${esc(moneda(d.simbolo))} ${esc(ladoTxt(d.direccion))} · ${d.posicion ? "posición abierta" : d.radar ? `radar ${d.radar.cumplidas}/${d.radar.total}` : "esperando señal"}</div></div>
+      <div style="min-width:0"><div class="n">${esc(a.nombre)} · ${esc(a.id)}${etiquetaPrueba(d)}</div><div class="d">${esc(moneda(d.simbolo))} ${esc(ladoTxt(d.direccion))} · ${d.posicion ? "posición abierta" : d.radar ? `radar ${d.radar.cumplidas}/${d.radar.total}` : "esperando señal"}</div></div>
       <div class="r ${r > 0 ? "sube" : r < 0 ? "baja" : ""}">${dineroS(r)}<small>hoy ${dineroS(d.hoy || 0)} · ${(d.operaciones || []).length} ops</small></div></div>`;
   }).join("") : `<p class="vacio">Todavía no hay traders. Llegarán cuando la minería apruebe estrategias.</p>`;
   // cinta de precios
@@ -2936,8 +3002,15 @@ function estadoSalas() {
     out.holding = [seco ? "alerta" : reserva || mal ? "aviso" : "ok", `${hr ? `Valor ${fmt.n(hr.valor)} $ (${fmt.pct(hr.resultado_pct)}). ` : ""}${seco ? `${moneda(seco.simbolo)} ya no tiene dinero ni reserva para promediar. ` : reserva ? `${moneda(reserva.simbolo)} está usando la reserva. ` : ""}${moneda(btc.simbolo)}: ${sig ? `compra en ${fmt.precio(sig.precio)}` : "sin compras pendientes"}, ${obj ? `salida en ${fmt.precio(obj.precio)}` : "salidas hechas"}.`];
   }
   const lider = rankingPapel("total")[0], gt = grupoVivo("trading"), gs = grupoVivo("scalping");
-  out.trading = [r && r.bloqueo ? "alerta" : gt.hoy < 0 ? "aviso" : "ok", gt.n ? `${gt.n} traders, ${gt.abiertas} posiciones abiertas, hoy ${dineroS(gt.hoy)} y en total ${dineroS(gt.resultado)}.${lider && lider.total > 0 ? ` Líder: ${lider.a.nombre} (${dineroS(lider.total)}).` : ""}` : "Sala vacía: pulsa «Buscar estrategias»."];
-  out.scalping = [r && r.bloqueo ? "alerta" : !gs.n ? "aviso" : gs.hoy < 0 ? "aviso" : "ok", gs.n ? `${gs.n} scalpers, ${gs.abiertas} dentro, hoy ${dineroS(gs.hoy)} y en total ${dineroS(gs.resultado)}. Comisiones pagadas: ${fmt.n(gs.comisiones)} $.` : "Sala vacía: pulsa «Buscar estrategias» → Scalping."];
+  const sup = (g, grupo) => {   // lo que vigila el supervisor: periodo de prueba, estrategias a cambiar y reserva
+    const ts = g.traders, cambiar = ts.filter(t => t.prueba && t.prueba.estado === "espera_cierre").length;
+    const prueba = ts.filter(t => t.prueba && t.prueba.estado === "en_prueba").length;
+    const reserva = (S.papel && S.papel.reserva || []).filter(x => x.grupo === grupo).length;
+    return {cambiar, texto: ` ${prueba} en periodo de prueba${cambiar ? `, ${cambiar} en pérdidas (se les cambiará la estrategia al cerrar)` : ""}${reserva ? `, ${reserva} en reserva` : ""}${g.retiradas ? `; ${g.retiradas} ${g.retiradas === 1 ? "estrategia retirada" : "estrategias retiradas"}` : ""}.`};
+  };
+  const st = sup(gt, "trading"), ss = sup(gs, "scalping");
+  out.trading = [r && r.bloqueo ? "alerta" : gt.hoy < 0 || st.cambiar ? "aviso" : "ok", gt.n ? `${gt.n} traders, ${gt.abiertas} posiciones abiertas, hoy ${dineroS(gt.hoy)} y en total ${dineroS(gt.resultado)}.${lider && lider.total > 0 ? ` Líder: ${lider.a.nombre} (${dineroS(lider.total)}).` : ""}${st.texto}` : "Sala vacía: pulsa «Buscar estrategias»."];
+  out.scalping = [r && r.bloqueo ? "alerta" : !gs.n ? "aviso" : gs.hoy < 0 || ss.cambiar ? "aviso" : "ok", gs.n ? `${gs.n} scalpers, ${gs.abiertas} dentro, hoy ${dineroS(gs.hoy)} y en total ${dineroS(gs.resultado)}. Comisiones pagadas: ${fmt.n(gs.comisiones)} $.${ss.texto}` : "Sala vacía: pulsa «Buscar estrategias» → Scalping."];
   if (!r) out.riesgos = ["ok", "Esperando al paper trading."];
   else {
     const uso = Math.max(r.posiciones / r.max_posiciones, r.mayor_apuesta / r.max_misma_apuesta, r.perdida_hoy_pct / r.limite_diario_pct, r.caida_pct / r.max_caida_pct);
@@ -2972,6 +3045,7 @@ function rondaGeneral(urgente) {
   let i = urgente ? SALAS_SUP.findIndex(x => x.id === urgente) : -1;
   if (i < 0) { indiceRonda = (indiceRonda + 1) % SALAS_SUP.length; i = indiceRonda; }
   const sala = SALAS_SUP[i], sup = SUPERVISORES[i];
+  if (sup.tarea === "relevo") { GENERAL.proxima = T + 15; return; }   // está cambiando una estrategia: ya volverá
   GENERAL.tarea = "ronda"; sup.tarea = "reunion"; sup.ruta = []; sup.andando = false;
   GENERAL.velocidad = urgente ? 3 : 1.8;
   if (urgente) enCanal("supervision", () => decir(GENERAL, `Voy para ${sala.nombre.toLowerCase()}.`, 3, "", sup));
@@ -3007,7 +3081,7 @@ function actualizarScalping() {
   const fila = t => {
     const a = [...traders.values()].find(x => x.datos === t), p = t.posicion, r = t.resultado || 0;
     return `<div class="trader" data-id="${esc(a ? a.id : "")}"><div class="av" style="background:${a ? a.camisa : "#4a2d5e"}">${esc(iniciales(a ? a.nombre : "?"))}</div>
-      <div style="min-width:0"><div class="n">${esc(a ? a.nombre : "")} · ${esc(a ? a.id : "")}</div><div class="d">${esc(moneda(t.simbolo))} ${esc(ladoTxt(t.direccion))} · ${p ? `dentro, ${fmt.pct(p.retorno_pct)}` : t.radar ? `radar ${t.radar.cumplidas}/${t.radar.total}` : "esperando señal"} · comisiones ${fmt.n(t.comisiones || 0)} $</div></div>
+      <div style="min-width:0"><div class="n">${esc(a ? a.nombre : "")} · ${esc(a ? a.id : "")}${etiquetaPrueba(t)}</div><div class="d">${esc(moneda(t.simbolo))} ${esc(ladoTxt(t.direccion))} · ${p ? `dentro, ${fmt.pct(p.retorno_pct)}` : t.radar ? `radar ${t.radar.cumplidas}/${t.radar.total}` : "esperando señal"} · comisiones ${fmt.n(t.comisiones || 0)} $</div></div>
       <div class="r ${clase(r)}">${dineroS(r)}<small>hoy ${dineroS(t.hoy || 0)} · ${(t.operaciones || []).length} ops</small></div></div>`;
   };
   $("#scalping").innerHTML = `<div class="mini-kpis">
@@ -3304,9 +3378,13 @@ function porSimbolo(tipo = "trading") {   // estrategias del banco por activo (d
   for (const b of S.banco || []) if ((b.estrategia.intervalo === vela) === (tipo === "scalping")) cuenta[b.estrategia.simbolo] = (cuenta[b.estrategia.simbolo] || 0) + 1;
   return cuenta;
 }
-function mesasLibres() {
-  const max = S.max_por_simbolo || 8, cuenta = porSimbolo();
-  return (S.simbolos || []).reduce((n, x) => n + Math.max(0, max - (cuenta[x] || 0)), 0);
+function mesasLibres(grupo = "trading") {   // mesas sin trader en una sala
+  const ocupadas = Object.values(S.papel && S.papel.estrategias || {}).filter(t => (t.grupo || "trading") === grupo).length;
+  return Math.max(0, (S.mesas && S.mesas[grupo] || (grupo === "scalping" ? 12 : 48)) - ocupadas);
+}
+function sitioEnBanco(tipo = "trading") {   // estrategias que aún caben en el banco (mesas + reserva)
+  const sc = S.scalping || {}, max = tipo === "scalping" ? sc.cupo_banco || 5 : S.cupo_banco || 10, cuenta = porSimbolo(tipo);
+  return (tipo === "scalping" ? sc.simbolos || [] : S.simbolos || []).reduce((n, x) => n + Math.max(0, max - (cuenta[x] || 0)), 0);
 }
 function pintarBotonBuscar() {
   const b = $("#bBuscar"), activa = !!(S && S.control && S.control.busqueda), m = S && S.mineria || {}, c = m.ciclo;
@@ -3314,7 +3392,7 @@ function pintarBotonBuscar() {
   const avance = activa && c && m.estado === "minando" ? ` · ${c.tipo === "scalping" ? "scalping " : ""}${esc(moneda(m.simbolo || ""))} ${c.n}/${c.activos.length} · gen ${m.generacion || 0}/${m.generaciones || 0}` : "";
   b.innerHTML = activa ? `⏹ <span>Parar búsqueda${avance}</span>` : "🔍 <span>Buscar estrategias</span>";
   b.title = activa ? "Ciclo de búsqueda en marcha: se para solo al terminar. Pulsa para cortarlo antes."
-    : "Cada pulsación hace un ciclo de búsqueda y se para sola al terminar. Las estrategias que superen las seis pruebas se ponen a operar, cada una con su trader.";
+    : "Cada pulsación hace un ciclo de búsqueda y se para sola al terminar. Las estrategias que superen las seis pruebas se ponen a operar con su trader si hay mesa libre; si no, esperan en la reserva.";
 }
 async function decisionDirecta(propuesta) {
   let r;
@@ -3333,15 +3411,16 @@ $("#bBuscar").addEventListener("click", e => {
   if (S.control && S.control.busqueda) { decisionDirecta({accion: "parar_busqueda"}); return; }
   const menu = $("#menuBuscar");
   if (!menu.hidden) { cerrarMenuBuscar(); return; }
-  const max = S.max_por_simbolo || 8, cuenta = porSimbolo(), sims = S.simbolos || [], libres = mesasLibres();
-  const sc = S.scalping || {simbolos: [], max_por_simbolo: 4}, cs = porSimbolo("scalping");
-  const libresScalping = sc.simbolos.reduce((n, x) => n + Math.max(0, sc.max_por_simbolo - (cs[x] || 0)), 0);
-  menu.innerHTML = `<p><b>Cada pulsación hace un ciclo</b>: el equipo prueba unas 2.000 estrategias por activo (varios minutos cada uno) y <b>se para solo al terminar</b>. Las que superen las seis pruebas entran al banco y se ponen a operar, cada una con su trader.</p>
-    <button class="todos" data-s="" ${libres ? "" : "disabled"}>Todos los activos con mesas libres <small>${libres} libres</small></button>
-    ${sims.map(x => `<button data-s="${esc(moneda(x))}" ${(cuenta[x] || 0) >= max ? "disabled" : ""}>${esc(moneda(x))} <small>${cuenta[x] || 0}/${max} traders${(cuenta[x] || 0) >= max ? " · lleno" : ""}</small></button>`).join("")}
+  const max = S.cupo_banco || 10, cuenta = porSimbolo(), sims = S.simbolos || [], sitio = sitioEnBanco();
+  const sc = S.scalping || {simbolos: [], cupo_banco: 5}, maxS = sc.cupo_banco || 5, cs = porSimbolo("scalping"), sitioS = sitioEnBanco("scalping");
+  const lleno = n => n >= max ? " · lleno" : "", llenoS = n => n >= maxS ? " · lleno" : "";
+  menu.innerHTML = `<p><b>Cada pulsación hace un ciclo</b>: el equipo prueba unas 2.000 estrategias por activo (varios minutos cada uno) y <b>se para solo al terminar</b>. Las que superen las seis pruebas entran al banco: si hay mesa libre se ponen a operar con su trader y, si no, esperan en la reserva.</p>
+    <button class="todos" data-s="" ${sitio ? "" : "disabled"}>Todos los activos con sitio en el banco <small>${mesasLibres()} mesas libres</small></button>
+    ${sims.map(x => `<button data-s="${esc(moneda(x))}" ${(cuenta[x] || 0) >= max ? "disabled" : ""}>${esc(moneda(x))} <small>${cuenta[x] || 0}/${max} en el banco${lleno(cuenta[x] || 0)}</small></button>`).join("")}
     <p class="sep"><b>Scalping</b> · velas de 5 minutos, comisión de maker (0,06 % ida y vuelta)</p>
-    <button class="todos" data-s="" data-t="scalping" ${libresScalping ? "" : "disabled"}>Todos los de scalping <small>${libresScalping} libres</small></button>
-    ${sc.simbolos.map(x => `<button data-s="${esc(moneda(x))}" data-t="scalping" ${(cs[x] || 0) >= sc.max_por_simbolo ? "disabled" : ""}>${esc(moneda(x))} <small>${cs[x] || 0}/${sc.max_por_simbolo} scalpers${(cs[x] || 0) >= sc.max_por_simbolo ? " · lleno" : ""}</small></button>`).join("")}`;
+    <button class="todos" data-s="" data-t="scalping" ${sitioS ? "" : "disabled"}>Todos los de scalping <small>${mesasLibres("scalping")} mesas libres</small></button>
+    ${sc.simbolos.map(x => `<button data-s="${esc(moneda(x))}" data-t="scalping" ${(cs[x] || 0) >= maxS ? "disabled" : ""}>${esc(moneda(x))} <small>${cs[x] || 0}/${maxS} en el banco${llenoS(cs[x] || 0)}</small></button>`).join("")}
+    <p class="sep">Máximo por activo: las estrategias de las mesas más ${max - (S.max_por_simbolo || 8)} de reserva (${maxS - (sc.max_por_simbolo || 4)} en scalping).</p>`;
   menu.hidden = false; $("#bBuscar").setAttribute("aria-expanded", "true");
 });
 $("#menuBuscar").addEventListener("click", e => {
@@ -3477,6 +3556,46 @@ function cadaCuanto(b) {   // frecuencia de su estrategia en el backtest: "1 vez
   const dias = (Date.parse(t.hasta) - Date.parse(t.desde)) / 864e5 / t.operaciones;
   return dias < 1 ? `unas ${Math.round(1 / dias)} veces al día` : `1 vez cada ${dias < 2 ? NF2.format(dias).replace(/,?0+$/, "") : Math.round(dias)} días`;
 }
+// Periodo de prueba de un trader con su estrategia: barra de días, operaciones y qué hará el supervisor.
+function textoPrueba(d) {
+  const pr = d.prueba, sup = supervisorDe(d.grupo), n = sup ? sup.nombre : "El supervisor";
+  if (!pr) return "";
+  if (pr.estado === "espera_cierre") return `⚠ ${pr.motivo[0].toUpperCase() + pr.motivo.slice(1)}. En cuanto cierre la posición abierta, ${n} le cambia la estrategia por la mejor de la reserva.`;
+  if (pr.estado === "rentable") return `✓ Prueba superada y en positivo. ${n} sigue vigilando: si vuelve a pérdidas, le cambia la estrategia por la mejor de la reserva.`;
+  return `Si al acabar la prueba va en pérdidas, o si antes pierde un ${NF1.format(pr.corte_pct)} % de su capital, ${n} le cambia la estrategia por la mejor de la reserva del banco (en la misma mesa).`;
+}
+function fichaPrueba(d) {
+  const pr = d.prueba;
+  if (!pr) return "";
+  const pd = Math.min(1, pr.dias / pr.dias_min), po = Math.min(1, pr.operaciones / pr.operaciones_min);
+  const clase = pr.estado === "espera_cierre" ? "baja" : pr.estado === "rentable" ? "sube" : "";
+  const barra = (v, txt) => `<div class="prueba-barra"><i style="width:${Math.round(v * 100)}%"></i><span>${txt}</span></div>`;
+  return `<h3>Periodo de prueba ${pr.estado === "rentable" ? "· superado" : pr.estado === "espera_cierre" ? "· en pérdidas" : ""}</h3>
+    ${barra(pd, `${fmt.n(Math.floor(pr.dias))} de ${pr.dias_min} días`)}${barra(po, `${pr.operaciones} de ${pr.operaciones_min} operaciones`)}
+    <table><tr><td>Resultado sobre su capital</td><td class="${pr.resultado_pct > 0 ? "sube" : pr.resultado_pct < 0 ? "baja" : ""}">${fmt.pct(pr.resultado_pct)}</td></tr>
+    <tr><td>Corte por pérdidas</td><td>−${NF1.format(pr.corte_pct)} %</td></tr></table>
+    <p class="aviso ${clase}">${esc(textoPrueba(d))}</p>`;
+}
+// Ficha del supervisor de trading o de scalping: cómo van sus traders, la reserva del banco y los últimos cambios.
+function fichaSupervision(grupo) {
+  const ts = Object.values(S.papel && S.papel.estrategias || {}).filter(t => (t.grupo || "trading") === grupo);
+  const cuenta = k => ts.filter(t => t.prueba && t.prueba.estado === k).length;
+  const reglas = S.prueba && S.prueba[grupo] || {}, mesas = S.mesas && S.mesas[grupo] || 0;
+  const reserva = (S.papel && S.papel.reserva || []).filter(r => r.grupo === grupo);
+  const ret = (S.papel && S.papel.retirados || []).filter(r => r.grupo === grupo);
+  const vigilados = ts.filter(t => t.prueba && t.prueba.estado === "espera_cierre");
+  let html = `<h3>Supervisión de los traders</h3>
+    <table><tr><td>Mesas ocupadas</td><td>${ts.length} de ${mesas}</td></tr>
+    <tr><td>En periodo de prueba</td><td>${cuenta("en_prueba")}</td></tr>
+    <tr><td>Prueba superada (en positivo)</td><td class="sube">${cuenta("rentable")}</td></tr>
+    <tr><td>En pérdidas, a cambiar al cerrar</td><td class="${vigilados.length ? "baja" : ""}">${vigilados.length}</td></tr>
+    <tr><td>Estrategias en reserva</td><td>${reserva.length}</td></tr>
+    <tr><td>Estrategias retiradas</td><td>${ret.length}</td></tr></table>
+    <p class="aviso">Prueba: ${reglas.dias || "—"} días y ${reglas.operaciones || "—"} operaciones. Si al acabarla va en pérdidas, o si antes pierde un ${NF1.format(reglas.corte_pct || 0)} % de su capital, le cambio la estrategia (cuando no tiene nada abierto) por la mejor de la reserva. Si no hay reserva, pido un ciclo de búsqueda.</p>`;
+  if (reserva.length) html += `<h3>Reserva del banco</h3><table>${reserva.slice(0, 6).map((r, i) => `<tr><td>${i + 1}. ${esc(r.id)} · ${esc(moneda(r.simbolo))} ${esc(ladoTxt(r.direccion).toLowerCase())}</td><td>${r.fuera_pct == null ? "—" : fmt.pct(r.fuera_pct)}</td></tr>`).join("")}</table>`;
+  if (ret.length) html += `<h3>Últimas estrategias retiradas</h3><table>${ret.slice(0, 6).map(r => `<tr><td>${esc(r.id)} · mesa ${r.mesa == null ? "—" : r.mesa + 1} · ${new Date(r.fin).toLocaleDateString("es-ES", {day: "numeric", month: "short"})}<br><small style="color:var(--suave)">${esc(r.motivo || "")}</small></td><td class="${r.resultado >= 0 ? "sube" : "baja"}" style="white-space:nowrap">${dineroS(r.resultado)}</td></tr>`).join("")}</table>`;
+  return html;
+}
 function mostrarFicha(a, abrir = true) {
   fichaAbierta = a;
   const f = $("#ficha");
@@ -3493,6 +3612,7 @@ function mostrarFicha(a, abrir = true) {
       <tr><td>Operaciones cerradas</td><td>${(d.operaciones || []).length}</td></tr>
       <tr><td>Opera desde</td><td>${d.inicio ? new Date(d.inicio).toLocaleString("es-ES", {dateStyle: "short", timeStyle: "short"}) : "—"}</td></tr>
       ${cadaCuanto(b) ? `<tr><td>Suele operar (backtest)</td><td>${cadaCuanto(b)}</td></tr>` : ""}</table>
+      ${fichaPrueba(d)}
       <h3>Cómo aplica su estrategia</h3><ol class="pasos"><li>Cada 30 minutos, al cerrar la vela, mira si se cumplen <b>todas</b> las condiciones de arriba.</li>
       <li>Si falta alguna, espera (el radar dice cuál le falta). Si se cumplen, pide permiso a Riesgos, que decide cuánto invierte o la veta.</li>
       <li>Con el visto bueno entra, y sale sola al tocar el stop, el objetivo o el tiempo máximo.</li></ol>`;
@@ -3529,6 +3649,7 @@ function mostrarFicha(a, abrir = true) {
       const salas = a.rol === "general" ? SALAS_SUP : [a.sala];
       html += `<table>${salas.map(x => `<tr><td>${esc(x.nombre)}</td><td class="${est[x.id][0] === "ok" ? "sube" : est[x.id][0] === "alerta" ? "baja" : ""}">${{ok: "🟢 bien", aviso: "🟡 atención", alerta: "🔴 alerta"}[est[x.id][0]]}</td></tr>`).join("")}</table>`;
       if (a.rol === "supervisor") html += `<div class="desc">${esc(est[a.sala.id][1])}</div>`;
+      if (a.rol === "supervisor" && (a.sala.id === "trading" || a.sala.id === "scalping")) html += fichaSupervision(a.sala.id);
     } else if (a.rol === "holder") {
       html += planesHolding().map(p => `<table><tr><td>${esc(moneda(p.simbolo))}</td><td class="${p.resultado >= 0 ? "sube" : "baja"}">${fmt.n(p.valor)} $ (${fmt.pct(p.resultado_pct)})</td></tr>
         <tr><td>Coste medio</td><td>${p.coste_medio ? fmt.precio(p.coste_medio) : "—"}</td></tr>

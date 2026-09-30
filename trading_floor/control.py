@@ -31,7 +31,7 @@ ACCIONES = {
     "quitar_freno": "Quitar el freno manual",
     "pausar_trader": "Pausar a un trader (no abrirá posiciones nuevas)",
     "reanudar_trader": "Reanudar a un trader",
-    "retirar_estrategia": "Retirar una estrategia del banco (su trader deja la sala)",
+    "retirar_estrategia": "Retirar una estrategia del banco: su trader recibe la mejor de la reserva (lo que ganó o perdió sigue contando en el fondo)",
     "cambiar_riesgo": "Cambiar un límite de riesgo",
     "nuevo_plan_holding": "Rehacer un plan de holding (presupuesto, caída para promediar, reserva y puntos de salida)",
     "convocar_comite": "Convocar el comité ahora",
@@ -51,6 +51,19 @@ def terminar_busqueda(pedido: dict) -> None:
         if c["busqueda"] == pedido:
             c["busqueda"] = None
             almacen.guardar("control", c)
+
+
+def pedir_busqueda(tipo: str = "trading", simbolos: list[str] | None = None, por: str = "jefe") -> bool:
+    """Deja pedida una búsqueda de estrategias (un solo ciclo). No hace nada si ya hay una en marcha."""
+    with _cerrojo:
+        c = cargar()
+        if c["busqueda"]:
+            return False
+        c["busqueda"] = {"pedida": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+                         "simbolos": list(simbolos or []), "tipo": "scalping" if tipo == "scalping" else "trading", "por": por}
+        c["mineria_pausada"] = False
+        almacen.guardar("control", c)
+        return True
 
 
 def cargar() -> dict:
@@ -110,20 +123,19 @@ def _aplicar(propuesta: dict) -> str:
         if simbolo and simbolo not in validos:
             raise ValueError(f"Solo se buscan estrategias {'de scalping ' if scalping else ''}de "
                              f"{', '.join(x.replace('USDT', '') for x in validos)}.")
-        if c["busqueda"]:
+        if not pedir_busqueda("scalping" if scalping else "trading", [simbolo] if simbolo else []):
             raise ValueError("Ya hay una búsqueda en marcha. Espera a que termine o párala.")
-        c["busqueda"] = {"pedida": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
-                         "simbolos": [simbolo] if simbolo else [], "tipo": "scalping" if scalping else "trading"}
-        c["mineria_pausada"] = False
+        c = cargar()
         hecho = (f"Buscando estrategias {'de scalping ' if scalping else ''}nuevas de "
-                 f"{simbolo.replace('USDT', '') if simbolo else 'todos los activos con mesas libres'}.")
+                 f"{simbolo.replace('USDT', '') if simbolo else 'todos los activos con sitio en el banco'}.")
     elif accion == "limpiar_repetidas":
         grupos = banco.repetidas()
         if not grupos:
             raise ValueError("No hay estrategias repetidas en el banco.")
         sobran = [b for _, resto in grupos for b in resto]
-        for b in sobran:
-            banco.borrar(b["id"])
+        for queda, resto in grupos:
+            for b in resto:
+                banco.descartar(b["id"], f"repetida: la misma idea que {queda['id']}, que lo hizo mejor fuera de muestra")
         ids = {b["id"] for b in sobran}
         c["traders_pausados"] = [i for i in c["traders_pausados"] if i not in ids]
         hecho = (f"Retiradas {len(sobran)} estrategias repetidas ({', '.join(sorted(ids))}); de cada idea se queda "
@@ -148,9 +160,10 @@ def _aplicar(propuesta: dict) -> str:
             c["traders_pausados"] = [i for i in c["traders_pausados"] if i != objetivo]
             hecho = f"{objetivo} vuelve a operar."
         else:
-            banco.borrar(objetivo)
+            banco.descartar(objetivo, "retirada por decisión del jefe")
             c["traders_pausados"] = [i for i in c["traders_pausados"] if i != objetivo]
-            hecho = f"{objetivo} retirada del banco: su trader deja la sala."
+            hecho = (f"{objetivo} retirada del banco. Lo que ganó o perdió sigue contando en el fondo; su mesa pasa a la "
+                     "mejor estrategia de la reserva (si hay).")
     elif accion == "cambiar_riesgo":
         if objetivo not in RIESGO_EDITABLE:
             raise ValueError(f"Ese límite no se puede cambiar: {objetivo}")

@@ -45,7 +45,8 @@ PLANTILLA = {
     "Paula": "holding de BTC y ETH",
     "Íñigo": "holding de SOL y gestión de la reserva de capital",
     "Diego": "supervisor del holding",
-    "Clara": "supervisora de la sala de trading",
+    "Clara": "supervisora de la sala de trading: vigila el periodo de prueba de cada trader y cambia las estrategias que no son rentables",
+    "Álex": "supervisor de la sala de scalping: vigila el periodo de prueba de cada scalper y cambia las estrategias que no son rentables",
 }
 
 SISTEMA = """Eres la voz de los empleados del Trading Floor, una oficina de trading SIMULADA que \
@@ -57,8 +58,14 @@ El laboratorio las pasa por pruebas de robustez; las que sobreviven van al banco
 marcha con un trader propio con 1.000 $ FICTICIOS que opera en papel (paper trading) con precios reales. \
 Cada 30 minutos, al cierre de la vela, el trader mira si se cumplen todas las condiciones de su estrategia; \
 si se cumplen, Riesgos aprueba el tamaño o la veta, y la posición sale sola por stop, objetivo o tiempo. \
-Cada estrategia opera de media una vez cada pocos días. Caben 48 traders (8 por activo) en la sala de \
-trading y 12 en la de scalping (velas de 5 minutos, BTC/ETH/SOL; con comisiones el scalping es muy difícil). \
+Cada estrategia opera de media una vez cada pocos días. Hay 48 mesas en la sala de trading y 12 en la de \
+scalping (velas de 5 minutos, BTC/ETH/SOL; con comisiones el scalping es muy difícil). Si no hay mesa libre, la \
+estrategia espera en la reserva del banco. Los supervisores (Clara en trading, Álex en scalping) vigilan el \
+periodo de prueba de cada trader («supervision.reglas»: días y operaciones mínimas, y un corte por pérdidas): si al \
+acabarlo va en pérdidas, o si antes pierde más del corte, le retiran la estrategia en cuanto no tiene nada abierto y \
+le dan la mejor de la reserva (por su resultado fuera de muestra), en la misma mesa. Si no hay reserva, piden un \
+ciclo de búsqueda. Lo que ganó o perdió la estrategia retirada sigue contando en el fondo, y la minería no vuelve a \
+buscar esa idea. \
 Todo forma parte del FONDO del jefe: él aporta capital ficticio y recibe participaciones; el valor liquidativo \
 (VL) sube o baja con los resultados de trading, scalping y holding. Lo que no está asignado es liquidez. Hay control de riesgos, una sala de holding a largo plazo (BTC, ETH, SOL) con un plan \
 adaptativo SIN stop loss (promedia a la baja cada cierto % de caída, usa una reserva de capital si se acaba \
@@ -168,6 +175,8 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
             "le_falta": radar.get("faltan", [])[:2],
             "pausado_por_el_jefe": id_ in pausados,
             "estrategia": t.get("descripcion", ""),
+            "sala": t.get("grupo", "trading"), "mesa": (t["mesa"] + 1) if t.get("mesa") is not None else None,
+            "periodo_de_prueba": {k: v for k, v in (t.get("prueba") or {}).items() if k != "motivo"} or None,
         })
     m = E.get("mineria", {})
     riesgo = {k: v for k, v in (papel.get("riesgo") or {}).items() if k not in ("reglas", "apuestas")}
@@ -194,6 +203,11 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
         "fondo": E.get("fondo"),
         "salas": (papel.get("grupos") or {}),
         "estrategias_repetidas": E.get("repetidas", []),
+        "supervision": {"reglas": E.get("prueba"), "mesas": E.get("mesas"),
+                        "reserva_del_banco": [{k: r.get(k) for k in ("id", "grupo", "simbolo", "direccion", "fuera_pct")}
+                                              for r in papel.get("reserva", [])],
+                        "ultimas_retiradas": [{k: r.get(k) for k in ("id", "grupo", "simbolo", "mesa", "fin", "motivo", "por", "resultado")}
+                                              for r in (papel.get("retirados") or [])[:6]]},
         "decisiones_del_jefe": {"busqueda_de_estrategias_en_marcha": ctrl.get("busqueda"), "freno_manual": ctrl.get("freno_manual"),
                                 "traders_pausados": sorted(pausados), "ultimas": ctrl.get("decisiones", [])[:5]},
     }
@@ -316,8 +330,11 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         return dice("Julia", "Si lo apruebas, quito el freno manual y se vuelven a permitir entradas.", _propuesta("quitar_freno", "Quitar el freno manual"))
     if "freno" in t or "para todo" in t:
         return dice("Julia", "Propongo activar el freno manual: nadie abre posiciones nuevas hasta que lo quites.", _propuesta("activar_freno", "Activar el freno manual"))
-    if ident and re.search(r"retir|elimin|borr|echa|despid", t):
-        return dice("Clara", f"Retirar a {nombre} ({ident}) lo saca del banco y deja la sala. ¿Lo apruebas?", _propuesta("retirar_estrategia", f"Retirar {ident} del banco", ident))
+    if ident and re.search(r"retir|elimin|borr|echa|despid|cambia|otra estrategia|relev", t):
+        de = f" de {nombre}" if nombre and nombre != ident else ""
+        return dice("Clara", f"¿Retiro la estrategia {ident}{de}? Lo que ganó o perdió sigue contando en el fondo, y su mesa "
+                             "pasa a la mejor estrategia de la reserva del banco (si hay).",
+                    _propuesta("retirar_estrategia", f"Retirar {ident} del banco", ident))
     if ident and re.search(r"reanud|activ|vuelv|despaus", t):
         return dice("Clara", f"Si lo apruebas, {nombre} vuelve a operar con normalidad.", _propuesta("reanudar_trader", f"Reanudar a {nombre} ({ident})", ident))
     if ident and re.search(r"paus|para|deten|frena", t):
@@ -328,6 +345,21 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                     _propuesta("cambiar_riesgo", f"Riesgo por operación = {_es(numero, False)} %", "riesgo_por_operacion", numero))
     if "comite" in t:
         return dice("Bruno", "¿Convoco el comité ahora mismo?", _propuesta("convocar_comite", "Convocar el comité"))
+    if re.search(r"supervis|relev|\bprueba\b|no (es |son )?rentable|reserva del banco|en reserva", t):
+        ts = list(papel.get("estrategias", {}).values())
+        reglas = E.get("prueba") or {}
+        pt = reglas.get("trading", {})
+        prueba = [x for x in ts if (x.get("prueba") or {}).get("estado") == "en_prueba"]
+        vigilados = [x for x in ts if (x.get("prueba") or {}).get("estado") == "espera_cierre"]
+        ret = papel.get("retirados") or []
+        txt = (f"Cada trader tiene un periodo de prueba ({pt.get('dias', 14)} días y {pt.get('operaciones', 6)} operaciones en trading). "
+               f"Si al acabarlo va en pérdidas, o si antes pierde un {_es(pt.get('corte_pct', 5), False)} %, le cambio la estrategia por la "
+               f"mejor de la reserva. Ahora: {len(prueba)} en prueba, {len(ts) - len(prueba) - len(vigilados)} con la prueba superada"
+               + (f", {len(vigilados)} a los que cambiaré en cuanto cierren su posición" if vigilados else "")
+               + f"; {len(papel.get('reserva', []))} estrategias en reserva y {len(ret)} retiradas hasta hoy.")
+        if ret:
+            txt += f" La última: {ret[0]['id']} ({ret[0].get('motivo', '')})."
+        return dice("Clara", txt)
     if "holding" in t or "promedi" in t or "reserva" in t:
         planes = (E.get("holding") or {}).get("planes", {})
         if not planes:
@@ -353,14 +385,19 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         rd = x.get("radar") or {}
         falta = f" Le falta: {', '.join(rd.get('faltan', [])[:2])}." if rd.get("faltan") else ""
         estado = "tiene una posición abierta" if x.get("posicion") else f"espera su señal ({rd.get('cumplidas', 0)} de {rd.get('total', 0)} condiciones)"
-        return dice(nombre or "Clara", f"Llevo {_es(x.get('resultado', 0))} $ ficticios y ahora {estado}.{falta}")
+        pr = x.get("prueba") or {}
+        prueba = (f" Periodo de prueba: día {int(pr['dias'])} de {pr['dias_min']} y {pr['operaciones']} de {pr['operaciones_min']} operaciones."
+                  if pr.get("estado") == "en_prueba" else " Prueba superada." if pr.get("estado") == "rentable"
+                  else " Voy en pérdidas: en cuanto cierre esta posición, el supervisor me cambia la estrategia." if pr.get("estado") == "espera_cierre"
+                  else "")
+        return dice(nombre or "Clara", f"Llevo {_es(x.get('resultado', 0))} $ ficticios y ahora {estado}.{falta}{prueba}")
     if re.search(r"como va|como vamos|resumen|estado|que tal|informe", t):
         m = E.get("mineria", {})
         return dice("Marta", f"Resultado en papel: {_es(r.get('resultado', 0))} $ (hoy {_es(r.get('hoy', 0))} $). "
                              f"{len(papel.get('estrategias', {}))} traders, minería {m.get('estado', 'parada')}"
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
     return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «para la búsqueda», «quita las repetidas», "
-                         "«activa el freno», «quita el freno», «pausa a E-XXXXXX», «riesgo 0,5», «convoca el comité», "
+                         "«activa el freno», «quita el freno», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «riesgo 0,5», «convoca el comité», "
                          "«¿cómo va el holding?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 
 

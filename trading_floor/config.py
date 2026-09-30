@@ -32,14 +32,18 @@ CAPITAL_POR_ESTRATEGIA = 1_000.0  # dinero ficticio que recibe cada estrategia e
 # La minería solo ve el 70 % inicial de los datos; el 30 % final se reserva para validar.
 PARTE_EN_MUESTRA = 0.7
 
-# En la minería continua, un símbolo deja de minarse cuando ya tiene tantas estrategias en el banco.
-MAX_POR_SIMBOLO = 8  # 6 activos x 8 = las 48 mesas de la sala de trading
+# Mesas de cada sala: 6 activos x 8 = las 48 mesas de trading (las mesas no son de un activo: se reparten según llegan).
+MAX_POR_SIMBOLO = 8
+# Además de lo que cabe en las mesas, cada activo puede tener estrategias de reserva en el banco: cuando el supervisor
+# retira una estrategia que no funciona, su trader recibe la mejor de la reserva.
+RESERVA_POR_SIMBOLO = 2
 
 # Sala de scalping: operaciones cortas con velas de 5 minutos, en los activos más líquidos.
 SCALPING_INTERVALO = "5m"
 SCALPING_DIAS = 120  # historia para minar scalping: 120 días de velas de 5 minutos
 SCALPING_SIMBOLOS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
 MAX_SCALPERS_POR_SIMBOLO = 4  # 3 activos x 4 = las 12 mesas de la sala de scalping
+RESERVA_SCALPING_POR_SIMBOLO = 1
 # Los scalpers trabajan con órdenes límite: pagan comisión de «maker» (0,02 % en Binance Futures) en vez de la de
 # «taker» (0,05 %). Se añade un poco de deslizamiento para no ser optimistas: 0,06 % ida y vuelta, frente al 0,14 %.
 COMISION_SCALPING = 0.0002
@@ -59,6 +63,25 @@ def coste_de(intervalo: str) -> float:
 def dias_de(intervalo: str) -> int:
     """Historia que se descarga para cada tipo de vela."""
     return SCALPING_DIAS if es_scalping(intervalo) else DIAS_HISTORICO
+
+
+MESAS = {"trading": MAX_POR_SIMBOLO * len(SIMBOLOS), "scalping": MAX_SCALPERS_POR_SIMBOLO * len(SCALPING_SIMBOLOS)}
+
+
+def cupo_banco(intervalo: str) -> int:
+    """Cuántas estrategias de un mismo activo caben en el banco (las de las mesas más la reserva)."""
+    if es_scalping(intervalo):
+        return MAX_SCALPERS_POR_SIMBOLO + RESERVA_SCALPING_POR_SIMBOLO
+    return MAX_POR_SIMBOLO + RESERVA_POR_SIMBOLO
+
+
+# Supervisor de cada sala (papel.py): cada trader tiene un periodo de prueba con su estrategia. Si al acabarlo va en
+# pérdidas (o si antes pierde demasiado), el supervisor le retira la estrategia, cuando no tiene nada abierto, y le da
+# la mejor de la reserva del banco. Después sigue vigilando: si vuelve a pérdidas, se repite.
+PRUEBA = {
+    "trading": {"dias": 14, "operaciones": 6, "corte_pct": 5.0},   # 2 semanas y 6 operaciones; fuera si pierde un 5 %
+    "scalping": {"dias": 3, "operaciones": 20, "corte_pct": 4.0},  # 3 días y 20 operaciones; fuera si pierde un 4 %
+}
 
 
 # Gestión de riesgo del paper trading (ver riesgo.py).

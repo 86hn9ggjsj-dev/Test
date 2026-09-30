@@ -1,7 +1,13 @@
-"""Banco de estrategias: las que han superado todo el embudo de pruebas."""
+"""Banco de estrategias: las que han superado todo el embudo de pruebas.
+
+Las que tienen mesa libre las opera un trader; el resto espera en la reserva (papel.py). Cuando una estrategia
+sale del banco (el supervisor la retira por no ser rentable, o la retiras tú) pasa a la lista de descartadas:
+lo que ganó o perdió sigue contando en el fondo y la minería no vuelve a buscar esa misma idea.
+"""
 
 from __future__ import annotations
 
+import datetime as dt
 import threading
 
 from . import almacen
@@ -23,15 +29,29 @@ def anadir(entrada: dict) -> None:
     nueva.set()
 
 
-def borrar(id_: str) -> bool:
+def descartadas() -> list[dict]:
+    return almacen.cargar("descartadas", [])
+
+
+def descartar(id_: str, motivo: str, por: str = "jefe") -> dict | None:
+    """Saca una estrategia del banco y la guarda como descartada (con cuándo, por qué y quién). Devuelve la entrada."""
     with _cerrojo:
         items = cargar()
-        restantes = [b for b in items if b["id"].upper() != id_.upper()]
-        almacen.guardar("banco", restantes)
-    return len(restantes) != len(items)
+        fuera = [b for b in items if b["id"].upper() == id_.upper()]
+        if not fuera:
+            return None
+        almacen.guardar("banco", [b for b in items if b["id"].upper() != id_.upper()])
+        entrada = {**fuera[0], "retirada": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
+                   "motivo": motivo, "por": por}
+        almacen.guardar("descartadas", [d for d in descartadas() if d["id"] != entrada["id"]] + [entrada])
+    return entrada
 
 
-def _calidad(b: dict) -> float:
+def borrar(id_: str, motivo: str = "retirada por decisión del jefe") -> bool:
+    return descartar(id_, motivo) is not None
+
+
+def calidad(b: dict) -> float:
     """Cuánto valía en datos no vistos: rentabilidad / caída fuera de muestra (mejor cuanto más alta)."""
     fuera = b.get("fuera") or {}
     return float(fuera.get("ret_dd") or fuera.get("retorno_pct") or 0.0)
@@ -47,7 +67,7 @@ def repetidas(items: list[dict] | None = None) -> list[tuple[dict, list[dict]]]:
     salida = []
     for lista in grupos.values():
         if len(lista) > 1:
-            lista = sorted(lista, key=_calidad, reverse=True)
+            lista = sorted(lista, key=calidad, reverse=True)
             salida.append((lista[0], lista[1:]))
     return salida
 

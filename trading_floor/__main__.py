@@ -79,7 +79,7 @@ def _ver_banco(borrar: str | None, limpiar: bool = False) -> None:
     from . import banco
 
     if borrar:
-        print("Borrada." if banco.borrar(borrar) else f"No hay ninguna estrategia {borrar}.")
+        print("Retirada (lo que ganó o perdió sigue contando en tu fondo)." if banco.borrar(borrar) else f"No hay ninguna estrategia {borrar}.")
         return
     if limpiar:
         from .control import aplicar
@@ -167,10 +167,11 @@ def main() -> None:
                 print("\nListo. Mira las aprobadas con:  python -m trading_floor banco")
         elif args.orden == "banco":
             if args.vaciar:
-                from . import almacen
+                from . import banco
 
-                almacen.guardar("banco", [])
-                print("Banco vaciado. La minería lo volverá a llenar.")
+                for b in banco.cargar():   # como retiradas: lo que ganaron o perdieron sigue contando en el fondo
+                    banco.descartar(b["id"], "banco vaciado desde la terminal")
+                print("Banco vaciado. Lo que ganaron o perdieron sus traders sigue contando en tu fondo.")
             else:
                 _ver_banco(args.borrar, args.limpiar_repetidas)
         elif args.orden == "papel":
