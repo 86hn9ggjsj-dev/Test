@@ -212,7 +212,7 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
   - **Modo básico (gratis)**: entiende órdenes sencillas («busca estrategias de SOL», «para la búsqueda»,
     «pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX»,
     «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?»,
-    «riesgo 0,5», «¿cómo va el holding?», «¿cómo vamos?»,
+    «riesgo 0,5», «¿cómo va el holding?», «¿cómo vamos?», «¿cómo paseo por la oficina?»,
     «¿quién es el mejor?»).
   - **Con Claude (opcional, de pago)**: si pones `ANTHROPIC_API_KEY=...` en el archivo `.env` de la
     raíz del proyecto, contestan de verdad a cualquier cosa. Cada mensaje cuesta unos céntimos de tu
@@ -224,6 +224,16 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
 - En la pestaña «Salas», «Ir a una sala» lleva la cámara a cada sala; las flechas ‹ › del panel pasan de
   pestaña y de canal.
 - Arrastra para moverte, rueda o pellizca para hacer zoom, haz clic en cualquiera para ver su ficha.
+- 🚶 **Pasear** (botón bajo las plantas, o tecla P): recorres la oficina **en primera persona**, en 3D.
+  Haz clic para empezar; **W A S D** (o las flechas) para andar, el **ratón** para mirar, **Mayús** para
+  correr, **E** (o clic) para ver la ficha de quien tengas delante y, junto al ascensor (al fondo del pasillo,
+  a la izquierda), para cambiar de planta; Re Pág / Av Pág también te llevan de una planta a otra.
+  **Esc** suelta el ratón y «✕ Salir del paseo» (o P) vuelve a la vista de siempre, justo donde estabas.
+  La escena 3D se construye sola a partir de la oficina isométrica: las mismas mesas, tabiques, carteles y
+  pantallas (con los datos en vivo), la misma gente con sus bocadillos, el gato, el robot, el holograma, la
+  piscina, la fogata, el cielo según la hora y la ciudad alrededor. En el móvil se anda con el pulgar
+  izquierdo y se mira con el derecho. Usa [Three.js](https://threejs.org) (licencia MIT, incluido en
+  `web/vendor/`, así que funciona sin Internet).
 - 🎬 activa el **modo cine**: la cámara recorre las salas y persigue lo que va pasando.
 - ◐ cambia entre día, noche y automático (según tu hora).
 
@@ -249,3 +259,4 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
 | `control.py` | Tus decisiones: búsqueda de estrategias, pausar todo, reabrir, kill switch, traders, límites de riesgo |
 | `chat.py` | Chat con la oficina: modo básico o con Claude, y propuestas de decisiones |
 | `web.py`, `web/index.html` | Servidor local y la oficina isométrica (canvas, sin librerías) |
+| `web/paseo.js`, `web/vendor/` | El paseo en primera persona: la misma oficina en 3D con Three.js |

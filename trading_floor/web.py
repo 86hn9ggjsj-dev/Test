@@ -19,6 +19,8 @@ from .config import (CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, I
                      SCALPING_SIMBOLOS, SIMBOLOS, cupo_banco)
 
 PAGINA = Path(__file__).resolve().parent / "web" / "index.html"
+# Archivos que necesita el paseo en primera persona (solo estos: no se sirve nada más del disco).
+ESTATICOS = {"/paseo.js": ("paseo.js", False), "/vendor/three.module.min.js": ("vendor/three.module.min.js", True)}
 
 
 _vivo: dict = {"t": 0.0, "precios": {}}
@@ -107,6 +109,9 @@ class _Manejador(BaseHTTPRequestHandler):
         ruta = self.path.split("?")[0]
         if ruta in ("/", "/index.html"):
             self._responder(PAGINA.read_bytes(), "text/html; charset=utf-8")
+        elif ruta in ESTATICOS:
+            archivo, guardar = ESTATICOS[ruta]
+            self._responder((PAGINA.parent / archivo).read_bytes(), "text/javascript; charset=utf-8", guardar)
         elif ruta == "/api/estado":
             self._responder(json.dumps(estado(), ensure_ascii=False).encode(), "application/json; charset=utf-8")
         elif ruta == "/api/fondo":
@@ -145,10 +150,10 @@ class _Manejador(BaseHTTPRequestHandler):
             return
         self._responder(json.dumps(respuesta, ensure_ascii=False).encode(), "application/json; charset=utf-8")
 
-    def _responder(self, cuerpo: bytes, tipo: str) -> None:
+    def _responder(self, cuerpo: bytes, tipo: str, guardar: bool = False) -> None:
         self.send_response(200)
         self.send_header("Content-Type", tipo)
-        self.send_header("Cache-Control", "no-store")
+        self.send_header("Cache-Control", "max-age=86400" if guardar else "no-store")
         self.send_header("Content-Length", str(len(cuerpo)))
         self.end_headers()
         self.wfile.write(cuerpo)

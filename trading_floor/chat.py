@@ -81,7 +81,9 @@ de mejor nota primero; si la incubadora está llena, esperan en el banquillo. Ca
 post mortem (por qué falló) y la ACADEMIA junta lo aprendido: la minería busca más de lo que funciona en real y menos \
 de lo que falla, sin dejar de explorar. Con 30 operaciones reales o más, cada trader arriesga según el Kelly prudente \
 (un cuarto del Kelly con un acierto rebajado, entre 0,25 % y 1,5 veces el riesgo base). El equipo Quant hace además el \
-Monte Carlo del fondo; Comunicación escribe el informe del día; Infraestructura vigila el sistema. Botones de \
+Monte Carlo del fondo; Comunicación escribe el informe del día; Infraestructura vigila el sistema. El jefe puede \
+recorrer la oficina en primera persona, en 3D, con el botón «🚶 Pasear» o la tecla P (W A S D para andar, ratón para \
+mirar, E para ver la ficha de alguien o coger el ascensor). Botones de \
 emergencia: «Pausar todo» (freno manual), «Reabrir» y «Kill switch» (cierra ya todo lo abierto del fondo). \
 Todo forma parte del FONDO del jefe: él aporta capital ficticio y recibe participaciones; el valor liquidativo \
 (VL) sube o baja con los resultados de trading, scalping y holding. Lo que no está asignado es liquidez. Hay control de riesgos, una sala de holding a largo plazo (BTC, ETH, SOL) con un plan \
@@ -355,6 +357,11 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         return dice("Tomás", f"¿Busco estrategias nuevas de {que}? Es un ciclo: se para solo al terminar. Si alguna supera las "
                              "seis pruebas, entra al banco y se pone a operar con su trader.",
                     _propuesta("buscar_estrategias", f"Buscar estrategias de {que}", activo.upper(), tipo="scalping" if scalp else ""))
+    if re.search(r"\bpase(o|a|ar|arme)\b|primera persona|\b3d\b|recorrer la oficina|\bcaminar\b", t) and not re.search(r"estrateg|trader|\be-[0-9a-f]", t):
+        return dice("Chema", "¡Ven a vernos! Pulsa «🚶 Pasear» (debajo de los botones de las plantas) o la tecla P. Haz clic y anda con "
+                             "W A S D, mira con el ratón, corre con Mayús y pulsa E delante de alguien para ver su ficha. El ascensor "
+                             "está al fondo del pasillo, a la izquierda: con E subes a la terraza. Esc suelta el ratón y P te devuelve "
+                             "a la vista de siempre. Te invito a un cortado sin apalancamiento.")
     if re.search(r"kill|cierra todo|cerrar todo|emergencia|vende todo", t):
         return dice("Julia", "¿Pulso el kill switch? Se cierran ya todas las posiciones abiertas del fondo al último precio y no se "
                              "abre nada nuevo hasta que pulses «Reabrir». La incubadora sigue, porque no usa dinero del fondo.",
@@ -467,7 +474,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                              f"{len(papel.get('estrategias', {}))} traders, minería {m.get('estado', 'parada')}"
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
     return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «para la búsqueda», «quita las repetidas», "
-                         "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», "
+                         "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», «¿cómo paseo por la oficina?», "
                          "«¿cómo va el holding?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 
 

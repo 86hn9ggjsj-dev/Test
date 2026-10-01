@@ -344,6 +344,9 @@ canvas.grafica{display:block;width:100%}
 .vistas{display:flex;background:var(--panel2);border:1px solid var(--borde);border-radius:999px;padding:3px;flex:none}
 .vistas button{border:0;background:none;color:var(--suave);font:700 12px Inter,sans-serif;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
 .vistas button.activa{background:var(--neon);color:#0a0d12}
+body.en-paseo #lienzo,body.en-paseo #panel,body.en-paseo #plegar,body.en-paseo #resultados,body.en-paseo #controles,body.en-paseo #ayuda,body.en-paseo #plantas,body.en-paseo #botonera,body.en-paseo #barra,body.en-paseo #cinta{display:none!important}
+#plantas button#bPasear{border-color:rgba(212,255,58,.45)}
+#plantas button#bPasear.cargando{opacity:.6;cursor:progress}
 body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-fondo #ayuda,body.en-fondo #plegar,body.en-fondo #ficha,body.en-fondo #plantas,body.en-fondo #botonera{display:none!important}
 #dash{--d-sup:#10151d;--d-ink:#e9edf3;--d-ink2:#c3c8d1;--d-mute:#898781;--d-grid:rgba(255,255,255,.07);position:fixed;top:60px;left:0;right:0;bottom:0;overflow:auto;background:var(--fondo);z-index:8;padding:22px 24px 40px;transition:opacity .3s}
 #dash.recargando .d-rejilla,#dash.recargando .d-kpis{opacity:.6}
@@ -610,6 +613,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
 <div id="plantas" role="group" aria-label="Planta que se ve">
   <button type="button" data-planta="1" title="Planta 1: incubadora, quant, academia, comunicación, sistemas, cafetería, juegos y terraza (tecla Re Pág)">🌇 <span>Planta 1 · terraza</span></button>
   <button type="button" data-planta="0" class="activo" title="Planta baja: minería, laboratorio, banco, macro, holding, trading, scalping, riesgos y comité (tecla Av Pág)">🏢 <span>Planta baja</span></button>
+  <button type="button" id="bPasear" title="Pasear por la oficina en primera persona: W A S D para andar y el ratón para mirar (tecla P)">🚶 <span>Pasear</span></button>
 </div>
 <nav id="botonera" aria-label="Acciones rápidas">
   <button type="button" data-b="comite" title="Convocar el comité ahora">🗳 <span>Comité</span></button>
@@ -630,7 +634,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
   <canvas class="grafica" id="gTarjetaDias" height="46" style="margin-top:6px"></canvas>
   <div class="pie-res"><span><b id="rTraders">0</b> traders</span><span><b id="rAbiertas">0</b> posiciones abiertas</span><span>desde <b id="rDesde">—</b></span></div>
 </section>
-<div id="ayuda">Arrastra para moverte · rueda para zoom · clic en alguien para ver qué hace</div>
+<div id="ayuda">Arrastra para moverte · rueda para zoom · clic en alguien para ver qué hace · P para pasear en primera persona</div>
 <div id="ficha" hidden></div>
 <div id="sinConexion" hidden>Sin conexión con el Trading Floor. ¿Sigue en marcha el programa?</div>
 <footer id="cinta"><div id="cintaInterior"></div></footer>
@@ -701,6 +705,7 @@ function cuad(a, b, c, d, color) {
 }
 /** Caja isométrica: solo se ven el techo y las caras que miran a +y (izquierda) y +x (derecha). */
 function caja(x, y, z, w, d, h, color, o) {
+  if (captura3D) { captura3D.cajas.push([x, y, z, w, d, h, o && o.top || shade(color, 1.07), o && o.izq || shade(color, .8), o && o.der || shade(color, .63), captura3D.planta]); return; }
   const a = iso(x, y + d, z), b = iso(x + w, y + d, z), c = iso(x + w, y, z);
   const hz = h * ZH;
   const at = [a[0], a[1] - hz], bt = [b[0], b[1] - hz], ct = [c[0], c[1] - hz], dt = iso(x, y, z + h);
@@ -709,11 +714,11 @@ function caja(x, y, z, w, d, h, color, o) {
   cuad(dt, ct, bt, at, o && o.top || shade(color, 1.07));
 }
 /** Dibuja en la cara que mira a +y (plano y = cte). u → +x, v → hacia abajo desde zTop. 1 unidad = 1/100 de baldosa. */
-function caraY(x, y, zTop, fn) { ctx.save(); const [ox, oy] = iso(x, y, zTop); ctx.transform(TW / 200, TH / 200, 0, ZH / 100, ox, oy); fn(); ctx.restore(); }
+function caraY(x, y, zTop, fn) { if (captura3D) return captarCara("y", x, y, zTop, fn); ctx.save(); const [ox, oy] = iso(x, y, zTop); ctx.transform(TW / 200, TH / 200, 0, ZH / 100, ox, oy); fn(); ctx.restore(); }
 /** Dibuja en la cara que mira a +x (plano x = cte). u → hacia −y (a la derecha en pantalla), desde y. */
-function caraX(x, y, zTop, fn) { ctx.save(); const [ox, oy] = iso(x, y, zTop); ctx.transform(TW / 200, -TH / 200, 0, ZH / 100, ox, oy); fn(); ctx.restore(); }
+function caraX(x, y, zTop, fn) { if (captura3D) return captarCara("x", x, y, zTop, fn); ctx.save(); const [ox, oy] = iso(x, y, zTop); ctx.transform(TW / 200, -TH / 200, 0, ZH / 100, ox, oy); fn(); ctx.restore(); }
 /** Dibuja sobre un plano horizontal a altura z. u → +x, v → +y. */
-function plano(x, y, z, fn) { ctx.save(); const [ox, oy] = iso(x, y, z); ctx.transform(TW / 200, TH / 200, -TW / 200, TH / 200, ox, oy); fn(); ctx.restore(); }
+function plano(x, y, z, fn) { if (captura3D) return captarCara("z", x, y, z, fn); ctx.save(); const [ox, oy] = iso(x, y, z); ctx.transform(TW / 200, TH / 200, -TW / 200, TH / 200, ox, oy); fn(); ctx.restore(); }
 
 function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
 function circulo(x, y, r, color) { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); }
@@ -721,6 +726,29 @@ function circulo(x, y, r, color) { ctx.fillStyle = color; ctx.beginPath(); ctx.a
 // Brillos (luces de pantallas, neones...) que se suman al final, más intensos de noche.
 let brillos = [];
 function brillo(x, y, z, r, color, a = .5) { brillos.push([x, y, z, r, color, a]); }
+
+// ---- captura para el paseo en primera persona (paseo.js) ----
+// Mientras `captura3D` no es null, las funciones de dibujo no pintan: apuntan cajas, caras (pantallas, carteles...) y
+// objetos para construir la misma oficina en 3D. Así la versión 3D nunca se queda atrás cuando cambia la 2D.
+let captura3D = null;
+const NULO = new Proxy({}, {get: (o, k) => k === "measureText" ? () => ({width: 0}) : String(k).startsWith("create") ? () => ({addColorStop() {}}) : () => {}, set: () => true});
+function captarCara(tipo, x, y, z, fn) { captura3D.caras.push({tipo, x, y, z, fn, planta: captura3D.planta}); }
+function objeto3D(o) { if (captura3D) captura3D.objetos.push({...o, planta: captura3D.planta}); }
+function capturarOficina() {
+  const zoom = cam.zoom, previo = ctx;
+  const c = captura3D = {cajas: [], caras: [], pantallas: [], cristales: [], objetos: [], suelo: [], planta: 0};
+  cam.zoom = 4; ctx = NULO;   // con zoom alto se apuntan también las piezas pequeñas
+  try {
+    for (const p of [0, 1]) {
+      c.planta = p; paredes(p); for (const e of PLANTAS[p].estaticos) e.f();
+      const n = c.caras.length; decorarSuelo(p); c.suelo[p] = c.caras.splice(n);   // lo que se pinta sobre el suelo
+    }
+  }
+  finally { captura3D = null; cam.zoom = zoom; ctx = previo; }
+  return c;
+}
+/** Pinta con las funciones de dibujo de la oficina en otro lienzo (pantallas del paseo 3D). */
+function pintarEn(g, fn) { const previo = ctx; ctx = g; try { fn(); } finally { ctx = previo; } }
 
 // ------------------------------------------------------- estado global --
 let S = null;                  // último estado recibido del servidor
@@ -764,6 +792,7 @@ const estatico = (k, f, x, y) => estaticos.push({k, f, x, y});   // con x, y se 
 
 // ---- tabiques de cristal (con huecos para puertas) ----
 function cristal(x, y, w, d, h, neon) {
+  if (captura3D) { captura3D.cristales.push([x, y, w, d, h, neon, captura3D.planta]); return; }
   caja(x, y, 0, w, d, .12, "#1a1e26");
   caja(x, y, .12, w, d, h - .17, "#000000", {top: "rgba(255,255,255,.06)", izq: "rgba(160,205,255,.14)", der: "rgba(160,205,255,.1)"});
   caja(x, y, h - .05, w, d, .05, neon);
@@ -806,12 +835,14 @@ function monitor(mx, my, mw, pintar, i) {
   if (cam.zoom >= 1.1) caja(mx + mw / 2 - .1, my + .02, .42, .2, .1, .015, "#1a1d24");
   caja(mx + mw / 2 - .03, my + .05, .43, .06, .04, .12, "#23272f");
   caja(mx, my, .52, mw, .05, .33, "#101217", {top: "#2a2f39", izq: "#15181e", der: "#0c0e12"});
-  caraY(mx + .025, my + .05 + .002, .83, () => {
+  const pantalla = () => {
     const w = (mw - .05) * 100, h = 28;
     ctx.fillStyle = "#06080c"; ctx.fillRect(0, 0, w, h);
     pintar && pintar(w, h, i);
     ctx.fillStyle = "rgba(255,255,255,.05)"; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(w * .55, 0); ctx.lineTo(0, h * .9); ctx.fill();   // reflejo del cristal
-  });
+  };
+  if (captura3D) captura3D.pantallas.push({x: mx + .025, y: my + .052, z: .83, w: mw - .05, h: .28, fn: pantalla, planta: captura3D.planta});
+  else caraY(mx + .025, my + .05 + .002, .83, pantalla);
 }
 // Cosas de encima de la mesa: taza (con vapor si hay alguien), planta, lámpara, papeles o figurita de toro/oso.
 function decorMesa(x, y, w, d, cosa, ocupado, semilla) {
@@ -881,6 +912,7 @@ function planta(x, y, grande = false) {
     caja(x - .18, y - .18, 0, .36, .36, .32, "#c8b9a6");
     const [px, py] = iso(x, y, .32);
     const s = grande ? 1.35 : 1;
+    objeto3D({tipo: "planta", x, y, s});
     const hojas = [[0, -14, 9], [-8, -8, 7], [8, -9, 7], [-4, -19, 6], [5, -18, 6], [0, -24, 5]];
     for (const [dx, dy, r] of hojas) circulo(px + dx * s, py + dy * s, r * s, dx < 0 ? "#2f8f5b" : dx > 0 ? "#237a4b" : "#3aa56a");
   }, x, y);
@@ -1253,7 +1285,7 @@ estatico(25.07 + 19.6, () => {   // lámpara de pie en arco
   brillo(25.6, 20.1, 1.1, 60, "#ffd98a", .3 + noche * .45);
 });
 for (const [x, y, c] of [[23.5, 22.8, "#ff8a5c"], [24.6, 23.2, "#d4ff3a"]]) {
-  estatico(x + y - .1, () => { const [px, py] = iso(x, y, 0); ctx.fillStyle = shade(c, .7); ctx.beginPath(); ctx.ellipse(px, py - 5, 17, 10, 0, 0, TAU); ctx.fill(); ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(px - 1, py - 9, 14, 8, 0, 0, TAU); ctx.fill(); });
+  estatico(x + y - .1, () => { objeto3D({tipo: "disco", x, y, z: 0, r: .36, alto: .26, color: c}); const [px, py] = iso(x, y, 0); ctx.fillStyle = shade(c, .7); ctx.beginPath(); ctx.ellipse(px, py - 5, 17, 10, 0, 0, TAU); ctx.fill(); ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(px - 1, py - 9, 14, 8, 0, 0, TAU); ctx.fill(); });
 }
 planta(29.4, 23.4, true); planta(18.6, 23.4); planta(29.4, 17.6);
 const SITIOS = [
@@ -1451,6 +1483,7 @@ function pantallaLimites(w, h) {
 bloquear(40.8, 19.4, 43.2, 21.2);
 estatico(42 + 20.3, () => {
   caja(41.9, 20.2, 0, .2, .2, .42, "#333");
+  objeto3D({tipo: "disco", x: 42, y: 20.3, z: .4, r: .97, alto: .05, color: "#6b3445"});
   const [px, py] = iso(42, 20.3, .45);
   ctx.fillStyle = "#4a2632"; ctx.beginPath(); ctx.ellipse(px, py + 2, 44, 22, 0, 0, TAU); ctx.fill();
   ctx.fillStyle = "#6b3445"; ctx.beginPath(); ctx.ellipse(px, py, 44, 22, 0, 0, TAU); ctx.fill();
@@ -1698,12 +1731,12 @@ estatico(41.3 + 2.3, () => {
   for (let k = 0; k < 4; k++) caja(43.5 + k * .2, 2.2, .98, .11, .11, .11, ["#f4f1ea", "#d4ff3a", "#ff8a5c", "#5cc0ff"][k], {top: "#4a2c1d"});
 }, 41.3, 2.3);
 for (const x of [38.7, 39.9, 41.1, 42.3, 43.5]) {   // taburetes altos
-  estatico(x + 3.05, () => { caja(x - .04, 3.01, 0, .08, .08, .6, "#2a2e36"); const [px, py] = iso(x, 3.05, .62); ctx.fillStyle = "#c2410c"; ctx.beginPath(); ctx.ellipse(px, py, 7, 3.5, 0, 0, TAU); ctx.fill(); }, x, 3.05);
+  estatico(x + 3.05, () => { caja(x - .04, 3.01, 0, .08, .08, .6, "#2a2e36"); objeto3D({tipo: "disco", x, y: 3.05, z: .58, r: .16, alto: .05, color: "#c2410c"}); const [px, py] = iso(x, 3.05, .62); ctx.fillStyle = "#c2410c"; ctx.beginPath(); ctx.ellipse(px, py, 7, 3.5, 0, 0, TAU); ctx.fill(); }, x, 3.05);
 }
 const MESAS_CAFE = [[39.4, 6.2], [42.6, 6.2], [44.9, 4.4]];
 for (const [x, y] of MESAS_CAFE) {
   bloquear(x - .35, y - .35, x + .35, y + .35);
-  estatico(x + y, () => { caja(x - .05, y - .05, 0, .1, .1, .45, "#2a2e36"); const [px, py] = iso(x, y, .46); ctx.fillStyle = "#3a2a1c"; ctx.beginPath(); ctx.ellipse(px, py + 1, 19, 9.5, 0, 0, TAU); ctx.fill(); ctx.fillStyle = "#f2efe8"; ctx.beginPath(); ctx.ellipse(px, py, 19, 9.5, 0, 0, TAU); ctx.fill(); caja(x - .05, y - .1, .46, .1, .1, .1, "#f4f1ea", {top: "#4a2c1d"}); }, x, y);
+  estatico(x + y, () => { caja(x - .05, y - .05, 0, .1, .1, .45, "#2a2e36"); objeto3D({tipo: "disco", x, y, z: .44, r: .42, alto: .03, color: "#f2efe8"}); const [px, py] = iso(x, y, .46); ctx.fillStyle = "#3a2a1c"; ctx.beginPath(); ctx.ellipse(px, py + 1, 19, 9.5, 0, 0, TAU); ctx.fill(); ctx.fillStyle = "#f2efe8"; ctx.beginPath(); ctx.ellipse(px, py, 19, 9.5, 0, 0, TAU); ctx.fill(); caja(x - .05, y - .1, .46, .1, .1, .1, "#f4f1ea", {top: "#4a2c1d"}); }, x, y);
   silla(x - .75, y, "e", "#7a4a1d"); silla(x + .75, y, "o", "#7a4a1d");
 }
 const ASIENTO_CHEMA = {x: 41.3, y: 1.25, mira: "s", postura: "de_pie", planta: 1};
@@ -1742,7 +1775,7 @@ estatico(51.3 + 5.2, () => {   // tele con la consola
   brillo(51.3, 5.2, 1, 60, "#2ee6a6", .3);
 }, 51.3, 5.2);
 for (const [x, y, c] of [[50.2, 7.1, "#ff8a5c"], [51.4, 7.4, "#d4ff3a"], [52.6, 7.1, "#5cc0ff"]]) {
-  estatico(x + y - .1, () => { const [px, py] = iso(x, y, 0); ctx.fillStyle = shade(c, .7); ctx.beginPath(); ctx.ellipse(px, py - 5, 17, 10, 0, 0, TAU); ctx.fill(); ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(px - 1, py - 9, 14, 8, 0, 0, TAU); ctx.fill(); }, x, y);
+  estatico(x + y - .1, () => { objeto3D({tipo: "disco", x, y, z: 0, r: .36, alto: .26, color: c}); const [px, py] = iso(x, y, 0); ctx.fillStyle = shade(c, .7); ctx.beginPath(); ctx.ellipse(px, py - 5, 17, 10, 0, 0, TAU); ctx.fill(); ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(px - 1, py - 9, 14, 8, 0, 0, TAU); ctx.fill(); }, x, y);
 }
 planta(53.4, 8.4, true); planta(46.6, 8.4);
 
@@ -1781,6 +1814,7 @@ function sombrilla(x, y, c) {
   estatico(x + y, () => {
     caja(x - .05, y - .05, 0, .1, .1, .45, "#444"); caja(x - .45, y - .45, .45, .9, .9, .05, "#f2efe8");
     caja(x - .03, y - .03, .5, .06, .06, 1.25, "#666");
+    objeto3D({tipo: "sombrilla", x, y, c});
     const [px, py] = iso(x, y, 1.75);
     ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(px, py - 10); ctx.lineTo(px - 46, py + 12); ctx.lineTo(px, py + 22); ctx.lineTo(px + 46, py + 12); ctx.closePath(); ctx.fill();
     ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.moveTo(px, py - 10); ctx.lineTo(px - 15, py + 17); ctx.lineTo(px, py + 22); ctx.lineTo(px + 15, py + 17); ctx.closePath(); ctx.fill();
@@ -1849,6 +1883,7 @@ function arbol(x, y, s = 1) {
   bloquear(x - .4, y - .4, x + .4, y + .4);
   estatico(x + y, () => {
     caja(x - .35, y - .35, 0, .7, .7, .45, "#8a7a66", {top: "#3a2a1c"});
+    objeto3D({tipo: "arbol", x, y, s});
     const [px, py] = iso(x, y, .45);
     ctx.fillStyle = "#5a3a22"; ctx.fillRect(px - 2, py - 30 * s, 4, 30 * s);
     for (const [dx, dy, r, c] of [[0, -42, 20, "#2f8f5b"], [-14, -34, 15, "#237a4b"], [14, -36, 15, "#2a8551"], [0, -56, 14, "#3aa56a"], [-8, -50, 11, "#46b877"]]) circulo(px + dx * s, py + dy * s, r * s, c);
@@ -3160,6 +3195,13 @@ function crearSuelo(p = 0) {
   for (const s of SALAS) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
     cuad(iso(x, y), iso(x + 1, y), iso(x + 1, y + 1), iso(x, y + 1), (x + y) % 2 ? s.a : s.b);
   }
+  decorarSuelo(0);
+  ctx = principal;
+  sueloCache[0] = {c, minX, minY, esc};
+}
+/** Texturas, alfombras y rótulos del suelo de una planta (los usan la vista isométrica y el paseo 3D). */
+function decorarSuelo(p) {
+  if (p === 1) return decorarSuelo1();
   // texturas de cada sala y sombra junto a las paredes del fondo
   for (const sala of SALAS) plano(sala.x0, sala.y0, 0, () => texturaSuelo(sala, (sala.x1 - sala.x0) * 100, (sala.y1 - sala.y0) * 100));
   // pasillo: líneas de neón y flechas
@@ -3178,13 +3220,15 @@ function crearSuelo(p = 0) {
     const s = SALAS.find(s => s.id === id);
     plano(x, y, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
   }
-  ctx = principal;
-  sueloCache[0] = {c, minX, minY, esc};
 }
 function sueloPlanta1(c, minX, minY, esc) {
   for (const s of SALAS1) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
     cuad(iso(x, y), iso(x + 1, y), iso(x + 1, y + 1), iso(x, y + 1), (x + y) % 2 ? s.a : s.b);
   }
+  decorarSuelo1();
+  sueloCache[1] = {c, minX, minY, esc};
+}
+function decorarSuelo1() {
   for (const sala of SALAS1) plano(sala.x0, sala.y0, 0, () => texturaSuelo(sala, (sala.x1 - sala.x0) * 100, (sala.y1 - sala.y0) * 100));
   plano(0, 9, 0, () => {   // pasillo con neón y flechas hacia el ascensor
     ctx.fillStyle = "rgba(212,255,58,.8)"; ctx.fillRect(0, 12, W * 100, 3); ctx.fillRect(0, 185, W * 100, 3);
@@ -3199,7 +3243,6 @@ function sueloPlanta1(c, minX, minY, esc) {
     const s = SALAS1.find(s => s.id === id);
     plano(x, y, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
   }
-  sueloCache[1] = {c, minX, minY, esc};
 }
 
 function horaDelDia() { const d = new Date(); const h = parametros.get("hora"); return h !== null ? +h : d.getHours() + d.getMinutes() / 60; }
@@ -4362,6 +4405,7 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarMenuBu
 $("#formChat").addEventListener("submit", e => { e.preventDefault(); const t = $("#entrada").value; $("#entrada").value = ""; enviarChat(t); });
 $("#sugerencias").addEventListener("click", e => { const b = e.target.closest("button"); if (b) enviarChat(b.textContent); });
 function hablarCon(a) {
+  if (paseo && paseo.activo()) paseo.salir();   // el chat está en el panel de la vista de siempre
   document.querySelector('.pestanas button[data-p="chat"]').click();
   $("#entrada").value = `@${a.nombre} `; $("#entrada").focus();
 }
@@ -5064,8 +5108,32 @@ function pintarFondo() {
 document.querySelectorAll("#plantas [data-planta]").forEach(b => b.addEventListener("click", () => { cambiarPlanta(+b.dataset.planta); if (!cam.tocada) encuadrar(); }));
 addEventListener("keydown", e => {
   if (e.target.closest && e.target.closest("input,textarea")) return;
+  if (paseo && paseo.activo()) return;   // en el paseo, las teclas las lleva paseo.js
   if (e.key === "PageUp") cambiarPlanta(1); else if (e.key === "PageDown") cambiarPlanta(0);
+  else if ((e.key === "p" || e.key === "P") && !vistaFondo && !e.ctrlKey && !e.metaKey && !e.altKey) alternarPaseo(true);
 });
+
+// ---- Paseo en primera persona: la misma oficina en 3D (paseo.js, con Three.js) ----
+let paseo = null, cargandoPaseo = false;
+async function alternarPaseo(activar = !(paseo && paseo.activo())) {
+  if (!activar) { if (paseo && paseo.activo()) paseo.salir(); return; }
+  if (cargandoPaseo || (paseo && paseo.activo())) return;
+  cargandoPaseo = true; $("#bPasear").classList.add("cargando");
+  try {
+    if (!paseo) paseo = await import("/paseo.js");
+    if (cine) alternarCine(false);
+    if (vistaFondo) cambiarVista("oficina");
+    paseo.entrar({alSalir: (p, x, y) => {   // al salir, la vista isométrica enseña dónde estabas
+      if (p !== vista) cambiarPlanta(p);
+      const o = objetivoEn(x, y, .7, Math.max(cam.zoom, 1.6), p);
+      cam.x = o.x; cam.y = o.y; cam.zoom = o.zoom; cam.tocada = true; vuelo = null;
+    }});
+  } catch (err) {
+    console.error(err);
+    alert("No se ha podido abrir el paseo en 3D: " + (err && err.message || err) + "\nComprueba que el navegador está actualizado (hace falta WebGL).");
+  } finally { cargandoPaseo = false; $("#bPasear").classList.remove("cargando"); }
+}
+$("#bPasear").addEventListener("click", () => alternarPaseo(true));
 $("#botonera").addEventListener("click", e => {
   const b = e.target.closest("[data-b]"); if (!b || !S) return;
   const que = b.dataset.b;
@@ -5207,7 +5275,9 @@ function bucle(ahora) {
   moverAgente(GATO, dt); planificarGato();
   moverPaquetes(dt); moverParticulas(dt); robot(dt); procesarChat(); moverCamara(dt); pasoAnimaciones(ahora);
   acumulado += dt; if (acumulado > .5) { acumulado = 0; planificar(); }
-  if (!document.hidden && !vistaFondo) dibujar();   // con «Mi fondo» abierto no se pinta la oficina (ahorra CPU)
+  if (!document.hidden && !vistaFondo) {   // con «Mi fondo» abierto no se pinta la oficina (ahorra CPU)
+    if (paseo && paseo.activo()) paseo.fotograma(dt); else dibujar();
+  }
   $("#pReloj").textContent = fmt.hora(new Date());
   const falta = Math.max(0, Math.round((proximoComiteMs - Date.now()) / 1000));
   $("#pComite").textContent = `Comité en ${String(Math.floor(falta / 60)).padStart(2, "0")}:${String(falta % 60).padStart(2, "0")}`;
