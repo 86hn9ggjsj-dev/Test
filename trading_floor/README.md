@@ -48,16 +48,23 @@ Telegram de Jarvis, si lo tienes configurado.
    - **Monte Carlo**: barajando 1.000 veces sus operaciones, ¿el peor 5 % sigue en positivo?
    - **Estabilidad**: ¿siguen ganando las variantes con parámetros vecinos?
    - **Test del mono**: en datos no vistos, ¿gana al 90 % de "monos" que entran al azar?
-4. **Banco** (`banco.py`). Guarda las supervivientes (máximo 10 por activo en trading y 5 en scalping:
-   las de las mesas más una pequeña **reserva**) **sin repetidas**: no entra una estrategia que sea la
+4. **Banco** (`banco.py`). Guarda las supervivientes (máximo 14 por activo en trading y 7 en scalping,
+   contando las que están en la incubadora o en el banquillo) **sin repetidas**: no entra una estrategia que sea la
    misma idea que otra del banco (mismas condiciones con otros números; se mira antes de las pruebas), que
    entre casi en los mismos momentos (más del 30 % de sus entradas) o que esté dentro del mercado a la
    vez la mayor parte del tiempo. Tampoco si se parece a una que ya se retiró (las retiradas se guardan
    en `descartadas.json`). Las repetidas de versiones anteriores se quitan con «quita las repetidas» en el
    chat o `trading banco --limpiar-repetidas` (se queda la mejor fuera de muestra de cada idea).
-5. **Paper trading** (`papel.py`). En cuanto una estrategia entra en el banco, el trader de una mesa
-   libre se pone con ella (48 mesas en trading, 12 en scalping; si están todas ocupadas, espera en la
-   reserva del banco) y con el capital ficticio que le toca según tu reparto. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen
+5. **Incubadora** (`papel.py`, `config.INCUBADORA`). Toda estrategia nueva opera primero en la
+   incubadora (planta 1) con **1.000 $ de prueba que no cuentan en tu fondo** y sin vetos de sala. Su
+   examen: en trading, 10 operaciones y 7 días como mínimo, ganando y con un factor de beneficio de 1,1 o
+   más (en scalping, 30 operaciones y 2 días); suspende si pierde un 4 % (3 % en scalping) o si en 60
+   días (14 en scalping) no da la talla. Las aprobadas suben a una mesa libre con dinero del fondo, la de
+   mejor nota primero (la nota mide lo clara que es su ventaja: media entre dispersión por la raíz del
+   número de operaciones). Si la incubadora está llena (24 plazas de trading y 8 de scalping), esperan en
+   el banquillo. Las suspendidas se descartan con su post mortem sin haber tocado tu dinero.
+6. **Paper trading** (`papel.py`). Cada trader tiene su mesa (48 en trading, 12 en scalping) y el
+   capital ficticio que le toca según tu reparto. Al cerrar cada vela comprueba si se cumplen
    **todas** sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra;
    después sale sola por stop, objetivo o tiempo máximo. Son reglas exigentes: cada estrategia opera de
    media una vez cada pocos días (su ficha dice cada cuánto), así que es normal ver a muchos traders
@@ -69,14 +76,32 @@ Telegram de Jarvis, si lo tienes configurado.
      a cada trader con su estrategia: en trading, 14 días y 6 operaciones cerradas; en scalping, 3 días
      y 20 operaciones. Si al acabar la prueba va en pérdidas, o si antes pierde un 5 % de su capital (un
      4 % en scalping), el supervisor le retira la estrategia **cuando no tiene nada abierto** y le da la
-     mejor de la reserva (la de mejor rentabilidad/caída fuera de muestra), en la misma mesa y con un
-     periodo de prueba nuevo. Pasada la prueba sigue vigilando: si vuelve a pérdidas, se repite. Si no
-     hay reserva, la mesa espera y el supervisor pide un ciclo de búsqueda.
+     mejor aprobada de la incubadora, en la misma mesa y con un periodo de prueba nuevo. Pasada la prueba
+     sigue vigilando: si vuelve a pérdidas, se repite. Si no hay ninguna aprobada y la incubadora está
+     vacía, la mesa espera y el supervisor pide un ciclo de búsqueda.
+   - **Kelly prudente** (`config.KELLY_*`). Con 30 operaciones reales o más (contando las del examen), el
+     riesgo de cada operación sale de la fórmula de Kelly, f = A − (1 − A) / R, con el acierto A rebajado
+     en un error estándar (por si ha tenido suerte) y R = ganancia media / pérdida media. Se usa una cuarta
+     parte, entre un 0,25 % y 1,5 veces tu riesgo por operación. Antes de las 30, el riesgo de siempre.
+   - **Post mortem** (`postmortem.py`). Cada estrategia que se retira (por el supervisor, al suspender o
+     a mano) lleva un informe: lo que prometía el backtest frente a lo que hizo en real (acierto, media por
+     operación, factor de beneficio, operaciones al mes) y las causas: comisiones que se comen la ventaja,
+     mercado en contra, acierto mucho más bajo, casi todo en stop, volatilidad distinta, frecuencia muy
+     diferente o, simplemente, muy pocas operaciones para saber nada.
+   - **Academia** (`academia.py`). Junta lo aprendido en real: qué tipos de condición y qué dirección
+     tienen las estrategias que funcionan (aprobadas o rentables en su mesa) y las que fallan. La minería
+     genera más a menudo lo que funciona y menos lo que falla (pesos entre ×0,4 y ×2,5), pero un 30 %
+     sigue siendo al azar y todo pasa igualmente las pruebas y el examen. Una estrategia nunca se cambia
+     sola según sus últimos resultados: eso sería adaptarse a la casualidad.
+   - **Kill switch, pausar todo y reabrir** (`control.py`). «Pausar todo» es el freno manual (nadie abre
+     posiciones nuevas; las abiertas siguen con su stop). «Kill switch» cierra además todas las
+     posiciones abiertas del fondo al cierre de la última vela; la incubadora sigue porque no usa dinero
+     del fondo. «Reabrir» quita el freno.
    - **Lo retirado sigue contando.** Cuando una estrategia sale del banco (la retira el supervisor, tú
      con «retira E-XXXXXX» o por repetida), su resultado queda congelado y sigue sumando en la sala y en
      tu fondo: quitar una estrategia que pierde no borra lo perdido. Si tenía algo abierto, se cierra al
      precio del momento.
-6. **Control de riesgos** (`riesgo.py`). Encima del paper trading:
+7. **Control de riesgos** (`riesgo.py`). Encima del paper trading:
    - **Tamaño de cada operación**: arriesga como mucho el 1 % del capital de su trader si salta el
      stop (con un stop lejano se invierte menos; nunca más del 100 %).
    - **Vetos**: una entrada nueva se veta si ya había 16 posiciones abiertas en la sala de trading (12 en
@@ -85,7 +110,7 @@ Telegram de Jarvis, si lo tienes configurado.
      Se evalúa con las posiciones que estaban abiertas justo cuando llega la señal.
    - **Frenos**: si el día pierde un 2 % del capital, no se abren más posiciones hasta mañana; si el
      resultado cae un 6 % del capital desde su máximo, se pausan las entradas.
-7. **Holding** (`holding.py`). Carteras de largo plazo (por defecto 5.000 $ en BTC, 3.000 $ en ETH y
+8. **Holding** (`holding.py`). Carteras de largo plazo (por defecto 5.000 $ en BTC, 3.000 $ en ETH y
    2.000 $ en SOL, ficticios) con un plan adaptativo y **sin stop loss**:
    - **Compra inicial** del 25 % del presupuesto.
    - **Promediar a la baja**: cada vez que el precio cae un 8 % desde la última compra, compra otro
@@ -101,13 +126,13 @@ Telegram de Jarvis, si lo tienes configurado.
    ```bash
    ./trading.sh holding --nuevo BTCUSDT --presupuesto 5000 --paso 10 --tramo 15 --reserva 50 --salidas 30,60,100
    ```
-8. **Scalping** (misma minería y paper trading, con velas de 5 minutos). Una sala aparte con 12 mesas
+9. **Scalping** (misma minería y paper trading, con velas de 5 minutos). Una sala aparte con 12 mesas
    (4 para BTC, 4 para ETH y 4 para SOL, los más líquidos). Se mina con 120 días de velas de 5 minutos y
    el mismo embudo de seis pruebas. Como los scalpers trabajan con órdenes límite, pagan comisión de
    «maker» (0,02 % por lado en Binance Futures) más un poco de deslizamiento: 0,06 % ida y vuelta, frente
    al 0,14 % de la sala de trading. Con la comisión de «taker» casi ninguna estrategia de 5 minutos
    sobrevive; con la de «maker» sí algunas. La sala enseña cuánto se paga en comisiones.
-9. **Tu fondo** (`fondo.py`). Todo junto funciona como un fondo de inversión, con dinero ficticio:
+10. **Tu fondo** (`fondo.py`). Todo junto funciona como un fondo de inversión, con dinero ficticio:
    aportas capital (100.000 $ al empezar) y recibes participaciones a 10 $. El **valor liquidativo**
    (patrimonio / participaciones) solo sube o baja con los resultados de trading, scalping y holding;
    aportar o retirar dinero no lo cambia. Así la cabecera muestra tu patrimonio de verdad y un trader
@@ -124,7 +149,7 @@ Telegram de Jarvis, si lo tienes configurado.
    devuelven capital, y si les falta efectivo venden lo justo). Al aportar o retirar dinero se reajusta
    solo para mantener tus %. Se cambia en «Mi fondo» → «Cambiar el reparto» o por el chat («dedica un
    20 % al holding»).
-10. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
+11. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
    (Yahoo Finance) y el Fear & Greed de cripto (alternative.me). Con ellos se calcula un régimen
    RISK-ON / RISK-OFF. Es contexto para el comité: **las estrategias no usan estos datos**.
 
@@ -146,15 +171,37 @@ comentan en el chat lo que ocurre (aprobaciones, descartes, operaciones, vetos, 
 macro, radar de señales), a veces dirigiéndose a alguien ("Rocío → Jana"). El chat se puede filtrar
 por canal: operaciones, riesgos, minería, análisis, macro, holding, comité y charla. El comité se
 reúne cada 15 minutos (con cuenta atrás arriba), y cuando no hay trabajo se van a la sala de
-descanso, a la terraza o al gimnasio.
+descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o la terraza.
+
+- **Dos plantas** (botones arriba a la izquierda o teclas Re Pág / Av Pág). La **planta baja**: minería,
+  laboratorio, cámara del banco, macro, holding, sala de trading, scalping, riesgos, comité, descanso y
+  patio. La **planta 1**, que se ve encima del edificio de la planta baja:
+  - **Incubadora**: 32 mesas de examen, el tablón de exámenes en la pared y Lorena, su supervisora.
+  - **Equipo Quant**: Ainara (Kelly), Bernat (Monte Carlo) y Yago (post mortem), con una gran pantalla del
+    Monte Carlo del fondo, Sharpe, Sortino, Calmar y el Kelly de cada trader.
+  - **Academia**: Begoña da clase con lo aprendido en real (la pizarra lo muestra).
+  - **Comunicación**: Rebeca y Gorka escriben el informe del día (pestaña «Informe»), con plató de TF News.
+  - **Sistemas**: Néstor y los servidores; un panel enseña la salud del sistema (errores, duración del ciclo).
+  - **Cafetería** con Chema el barista, **sala de juegos** (futbolín, recreativas, dardos y pufs) y una
+    **terraza al aire libre** con pérgola y mesa larga, sombrillas, piscina con tumbonas, fogata con sofás,
+    barbacoa, césped, árboles, telescopio y luces por la noche.
+  La gente sube y baja en **ascensor**. Cuando una estrategia aprueba en la incubadora, su trader baja a
+  entregarla a la mesa. **Satoshi, el gato**, se pasea por las dos plantas: duerme en el sofá o en una
+  tumbona, se sienta junto a la fogata o se sube a la mesa de algún trader. Su ficha dice dónde está.
+- **Botonera** (abajo): Comité, Megáfono (dices algo a toda la oficina), A trabajar, Descanso, Pausar todo
+  o Reabrir, y Kill switch (con confirmación). En la cabecera, junto al patrimonio, está la caída del fondo
+  desde su máximo.
+- **Pestañas nuevas**: «Incubadora» (exámenes, banquillo y suspendidas con su post mortem), «Informe»
+  (resultado por equipos, informe del día, Monte Carlo y sistemas) y «Academia» (lecciones, tipos de
+  condición que funcionan o fallan, Kelly de cada trader y todos los post mortem).
 
 - **Supervisión**: cada sala tiene su supervisor, que la patrulla y conoce sus números; la
   supervisión general hace rondas preguntándoles y acude corriendo si una sala se pone en rojo.
   La pestaña «Salas» muestra el semáforo de cada una. Cuando Clara o Álex retiran una estrategia que no
   funciona, van a la mesa y se lo explican al trader (qué le quitan, por qué y cuál le dan); el trader es
   el mismo y sigue en su mesa. Cada trader lleva en la lista su periodo de prueba («prueba 5/14 días»,
-  «✓ prueba» o «⚠ a cambiar») y en su ficha las barras de días y operaciones. En la ficha de Clara y de
-  Álex están la reserva del banco y las últimas estrategias retiradas.
+  «✓ prueba» o «⚠ a cambiar») y en su ficha las barras de días y operaciones, su examen de la incubadora y su
+  Kelly. En la ficha de Clara y de Álex están las aprobadas que esperan mesa y las últimas estrategias retiradas.
 - **Ranking**: podio y clasificación de traders por resultado total, de hoy, de la semana o por
   acierto (en papel), o por cómo lo hizo su estrategia en el backtest. El número 1 lleva corona.
 - **Chat contigo (tú eres el jefe)**: escribe en la caja del chat a toda la oficina, o a alguien
@@ -163,7 +210,8 @@ descanso, a la terraza o al gimnasio.
   buscar estrategias (o parar la búsqueda), activar o quitar un freno manual, pausar, reanudar o retirar a
   un trader, cambiar los límites de riesgo, rehacer un plan de holding y convocar el comité.
   - **Modo básico (gratis)**: entiende órdenes sencillas («busca estrategias de SOL», «para la búsqueda»,
-    «activa el freno», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?»,
+    «pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX»,
+    «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?»,
     «riesgo 0,5», «¿cómo va el holding?», «¿cómo vamos?»,
     «¿quién es el mejor?»).
   - **Con Claude (opcional, de pago)**: si pones `ANTHROPIC_API_KEY=...` en el archivo `.env` de la
@@ -189,12 +237,15 @@ descanso, a la terraza o al gimnasio.
 | `backtest.py` | Simulador de operaciones y métricas (retorno, caída, Sharpe, factor de beneficio…) |
 | `robustez.py` | Las seis pruebas del laboratorio |
 | `mineria.py` | Algoritmo genético y embudo; minería continua por rondas |
-| `banco.py`, `almacen.py` | Banco de estrategias y almacén JSON en `~/.trading_floor/` |
+| `banco.py`, `almacen.py` | Banco de estrategias, descartadas y almacén JSON en `~/.trading_floor/` |
+| `postmortem.py` | Por qué falló cada estrategia retirada: backtest frente a real y causas |
+| `academia.py` | Lo aprendido en real y los pesos que usa la minería |
+| `informe.py` | Informe del día (departamento de Comunicación) |
 | `papel.py` | Paper trading, curva de resultados, resultado diario y resumen de cada sala |
-| `fondo.py` | Tu fondo: participaciones, valor liquidativo, aportaciones, métricas y comparación con BTC |
+| `fondo.py` | Tu fondo: participaciones, valor liquidativo, aportaciones, métricas (Sharpe, Sortino, Calmar), Monte Carlo y comparación con BTC |
 | `riesgo.py` | Tamaño de las operaciones, límites, vetos y frenos |
 | `holding.py` | Carteras de largo plazo sin stop: promedian a la baja y salen por partes sobre el coste medio |
 | `macro.py` | Datos macroeconómicos y régimen de mercado |
-| `control.py` | Tus decisiones: búsqueda de estrategias, freno manual, traders pausados, límites de riesgo |
+| `control.py` | Tus decisiones: búsqueda de estrategias, pausar todo, reabrir, kill switch, traders, límites de riesgo |
 | `chat.py` | Chat con la oficina: modo básico o con Claude, y propuestas de decisiones |
 | `web.py`, `web/index.html` | Servidor local y la oficina isométrica (canvas, sin librerías) |

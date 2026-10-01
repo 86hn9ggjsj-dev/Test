@@ -1,4 +1,4 @@
-"""Decisiones del jefe (tú): buscar estrategias, freno manual, pausar traders, límites de riesgo...
+"""Decisiones del jefe (tú): buscar estrategias, pausar todo, reabrir, kill switch, pausar traders, límites de riesgo...
 
 Se guardan en control.json y las leen la minería, el paper trading y la gestión de riesgo.
 Cada decisión se valida aquí antes de aplicarse: solo se aceptan acciones de esta lista y
@@ -27,11 +27,12 @@ ACCIONES = {
     "buscar_estrategias": "Buscar estrategias nuevas ahora: un ciclo de búsqueda en todos los activos con mesas libres o en el que se diga; con tipo «scalping», para la sala de scalping (velas de 5 minutos)",
     "limpiar_repetidas": "Retirar las estrategias repetidas del banco (misma idea con otros números): se queda la mejor de cada grupo",
     "parar_busqueda": "Parar la búsqueda de estrategias en curso",
-    "activar_freno": "Activar el freno manual (no se abren posiciones nuevas)",
-    "quitar_freno": "Quitar el freno manual",
+    "activar_freno": "Pausar todo: activar el freno manual (no se abren posiciones nuevas; las abiertas siguen con su stop)",
+    "quitar_freno": "Reabrir: quitar el freno manual",
+    "kill_switch": "Kill switch: cerrar ya todas las posiciones abiertas del fondo al último precio y activar el freno manual",
     "pausar_trader": "Pausar a un trader (no abrirá posiciones nuevas)",
     "reanudar_trader": "Reanudar a un trader",
-    "retirar_estrategia": "Retirar una estrategia del banco: su trader recibe la mejor de la reserva (lo que ganó o perdió sigue contando en el fondo)",
+    "retirar_estrategia": "Retirar una estrategia del banco (de su mesa o de la incubadora): su mesa pasa a la mejor aprobada de la incubadora y lo que ganó o perdió con dinero del fondo sigue contando",
     "cambiar_riesgo": "Cambiar un límite de riesgo",
     "nuevo_plan_holding": "Rehacer un plan de holding (presupuesto, caída para promediar, reserva y puntos de salida)",
     "convocar_comite": "Convocar el comité ahora",
@@ -71,6 +72,7 @@ def cargar() -> dict:
     c.setdefault("mineria_pausada", False)  # solo para la minería continua de la terminal (minar --siempre)
     c.setdefault("busqueda", None)  # búsqueda de estrategias pedida con el botón: {"pedida", "simbolos"}
     c.setdefault("freno_manual", False)
+    c.setdefault("kill_switch", None)   # cuándo se pulsó por última vez el kill switch
     c.setdefault("traders_pausados", [])
     c.setdefault("riesgo", {})
     c.setdefault("decisiones", [])
@@ -147,7 +149,12 @@ def _aplicar(propuesta: dict) -> str:
     elif accion == "activar_freno":
         c["freno_manual"], hecho = True, "Freno manual activado: no se abren posiciones nuevas."
     elif accion == "quitar_freno":
-        c["freno_manual"], hecho = False, "Freno manual quitado."
+        c["freno_manual"], hecho = False, "Reabierto: se quita el freno manual y se vuelven a permitir entradas."
+    elif accion == "kill_switch":
+        c["freno_manual"] = True
+        c["kill_switch"] = dt.datetime.now().astimezone().isoformat(timespec="seconds")
+        hecho = ("Kill switch pulsado: en el próximo ciclo se cierran todas las posiciones abiertas del fondo al último precio "
+                 "y no se abre nada nuevo hasta que pulses «Reabrir». La incubadora sigue (no usa dinero del fondo).")
     elif accion in ("pausar_trader", "reanudar_trader", "retirar_estrategia"):
         ids = {b["id"] for b in banco.cargar()}
         objetivo = objetivo.upper()
@@ -162,8 +169,8 @@ def _aplicar(propuesta: dict) -> str:
         else:
             banco.descartar(objetivo, "retirada por decisión del jefe")
             c["traders_pausados"] = [i for i in c["traders_pausados"] if i != objetivo]
-            hecho = (f"{objetivo} retirada del banco. Lo que ganó o perdió sigue contando en el fondo; su mesa pasa a la "
-                     "mejor estrategia de la reserva (si hay).")
+            hecho = (f"{objetivo} retirada del banco, con su post mortem. Lo que ganó o perdió con dinero del fondo sigue "
+                     "contando; si tenía mesa, pasa a la mejor aprobada de la incubadora (si hay).")
     elif accion == "cambiar_riesgo":
         if objetivo not in RIESGO_EDITABLE:
             raise ValueError(f"Ese límite no se puede cambiar: {objetivo}")

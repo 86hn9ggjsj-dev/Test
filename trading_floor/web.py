@@ -13,14 +13,27 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from . import almacen, banco, chat, control, fondo
+from . import academia, almacen, banco, chat, control, fondo, informe
 from .config import (CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, INTERVALO, MAX_POR_SIMBOLO, MAX_SCALPERS_POR_SIMBOLO,
-                     MESAS, PRUEBA, SCALPING_INTERVALO, SCALPING_SIMBOLOS, SIMBOLOS, cupo_banco)
+                     CAPITAL_INCUBADORA, INCUBADORA, KELLY_MIN_OPERACIONES, MESAS, PRUEBA, SCALPING_INTERVALO,
+                     SCALPING_SIMBOLOS, SIMBOLOS, cupo_banco)
 
 PAGINA = Path(__file__).resolve().parent / "web" / "index.html"
 
 
 _vivo: dict = {"t": 0.0, "precios": {}}
+_lecciones: dict = {"t": 0.0, "datos": None}
+
+
+def lecciones() -> dict:
+    """Lo que enseña la academia (se recalcula como mucho cada 30 segundos)."""
+    if _lecciones["datos"] is None or time.time() - _lecciones["t"] > 30:
+        try:
+            _lecciones["datos"] = academia.lecciones(almacen.cargar("papel", {}))
+        except Exception:   # sin datos todavía
+            _lecciones["datos"] = None
+        _lecciones["t"] = time.time()
+    return _lecciones["datos"]
 _cerrojo = threading.Lock()
 
 
@@ -45,6 +58,11 @@ def estado() -> dict:
     # las curvas largas solo las necesita el dashboard del fondo (/api/fondo): aquí se quitan para no cargar la oficina
     papel.pop("series", None)
     # de las estrategias retiradas, solo las últimas y sin su curva ni sus operaciones
+    for t in [*(papel.get("estrategias") or {}).values(), *(papel.get("incubadora") or {}).values()]:
+        for k in ("fracciones", "aprobadas", "vetadas", "forzadas"):   # solo los usa el cálculo, no la oficina
+            t.pop(k, None)
+        if t.get("examen"):
+            t["examen"] = {k: v for k, v in t["examen"].items() if k != "movimientos"}
     retirados = sorted((papel.pop("retirados", None) or {}).values(), key=lambda r: r.get("fin", ""), reverse=True)
     papel["retirados"] = [{k: v for k, v in r.items() if k not in ("serie", "operaciones")} | {"n_operaciones": len(r.get("operaciones", []))}
                           for r in retirados[:40]]
@@ -52,7 +70,7 @@ def estado() -> dict:
     for plan in (holding.get("planes") or {}).values():
         plan.pop("serie", None)
     simbolos = set(SIMBOLOS) | set(papel.get("precios", {})) | set(holding.get("planes", {}))
-    return {
+    E = {
         "vivo": precios_en_vivo(simbolos),
         "control": control.cargar(),
         "chat_modo": "claude" if chat.hay_clave() else "basico",
@@ -75,7 +93,13 @@ def estado() -> dict:
         "descartadas": len(banco.descartadas()),
         "scalping": {"simbolos": SCALPING_SIMBOLOS, "max_por_simbolo": MAX_SCALPERS_POR_SIMBOLO, "intervalo": SCALPING_INTERVALO,
                      "cupo_banco": cupo_banco(SCALPING_INTERVALO)},
+        "incubadora": {"capital": CAPITAL_INCUBADORA, "reglas": INCUBADORA},
+        "kelly_min_operaciones": KELLY_MIN_OPERACIONES,
+        "academia": lecciones(),
+        "sistema": almacen.cargar("sistema", {}),
     }
+    E["informe"] = informe.generar(E)
+    return E
 
 
 class _Manejador(BaseHTTPRequestHandler):

@@ -47,6 +47,15 @@ PLANTILLA = {
     "Diego": "supervisor del holding",
     "Clara": "supervisora de la sala de trading: vigila el periodo de prueba de cada trader y cambia las estrategias que no son rentables",
     "Álex": "supervisor de la sala de scalping: vigila el periodo de prueba de cada scalper y cambia las estrategias que no son rentables",
+    "Lorena": "supervisora de la incubadora (planta 1): examina a las estrategias nuevas con dinero de prueba",
+    "Ainara": "equipo Quant: calcula el Kelly prudente de cada trader (cuánto arriesgar por operación)",
+    "Bernat": "equipo Quant: Monte Carlo del fondo (rango probable de los próximos 30 días)",
+    "Yago": "equipo Quant: escribe el post mortem de cada estrategia retirada",
+    "Begoña": "profesora de la academia: lo que se aprende en real y cómo cambia la minería",
+    "Rebeca": "comunicación: escribe el informe del día",
+    "Gorka": "comunicación: noticias y anuncios de la oficina",
+    "Néstor": "infraestructura: vigila que el sistema y los datos funcionan",
+    "Chema": "cafetería de la planta 1",
 }
 
 SISTEMA = """Eres la voz de los empleados del Trading Floor, una oficina de trading SIMULADA que \
@@ -59,13 +68,21 @@ marcha con un trader propio con 1.000 $ FICTICIOS que opera en papel (paper trad
 Cada 30 minutos, al cierre de la vela, el trader mira si se cumplen todas las condiciones de su estrategia; \
 si se cumplen, Riesgos aprueba el tamaño o la veta, y la posición sale sola por stop, objetivo o tiempo. \
 Cada estrategia opera de media una vez cada pocos días. Hay 48 mesas en la sala de trading y 12 en la de \
-scalping (velas de 5 minutos, BTC/ETH/SOL; con comisiones el scalping es muy difícil). Si no hay mesa libre, la \
-estrategia espera en la reserva del banco. Los supervisores (Clara en trading, Álex en scalping) vigilan el \
-periodo de prueba de cada trader («supervision.reglas»: días y operaciones mínimas, y un corte por pérdidas): si al \
-acabarlo va en pérdidas, o si antes pierde más del corte, le retiran la estrategia en cuanto no tiene nada abierto y \
-le dan la mejor de la reserva (por su resultado fuera de muestra), en la misma mesa. Si no hay reserva, piden un \
-ciclo de búsqueda. Lo que ganó o perdió la estrategia retirada sigue contando en el fondo, y la minería no vuelve a \
+scalping (velas de 5 minutos, BTC/ETH/SOL; con comisiones el scalping es muy difícil). Los supervisores (Clara en \
+trading, Álex en scalping) vigilan el periodo de prueba de cada trader en su mesa («supervision.reglas»: días y \
+operaciones mínimas, y un corte por pérdidas): si al acabarlo va en pérdidas, o si antes pierde más del corte, le \
+retiran la estrategia en cuanto no tiene nada abierto y le dan la mejor aprobada de la incubadora, en la misma mesa. \
+Si no hay ninguna y la incubadora está vacía, piden un ciclo de búsqueda. Lo que ganó o perdió la estrategia retirada sigue contando en el fondo, y la minería no vuelve a \
 buscar esa idea. \
+La oficina tiene dos plantas. En la planta 1 está la INCUBADORA: toda estrategia nueva opera primero ahí con \
+1.000 $ de prueba que NO cuentan en el fondo, hasta que aprueba su examen (en trading, 10 operaciones ganando y con \
+factor de beneficio de 1,1 o más; suspende si pierde un 4 %). Las aprobadas suben a una mesa con dinero del fondo, la \
+de mejor nota primero; si la incubadora está llena, esperan en el banquillo. Cada estrategia que se retira lleva un \
+post mortem (por qué falló) y la ACADEMIA junta lo aprendido: la minería busca más de lo que funciona en real y menos \
+de lo que falla, sin dejar de explorar. Con 30 operaciones reales o más, cada trader arriesga según el Kelly prudente \
+(un cuarto del Kelly con un acierto rebajado, entre 0,25 % y 1,5 veces el riesgo base). El equipo Quant hace además el \
+Monte Carlo del fondo; Comunicación escribe el informe del día; Infraestructura vigila el sistema. Botones de \
+emergencia: «Pausar todo» (freno manual), «Reabrir» y «Kill switch» (cierra ya todo lo abierto del fondo). \
 Todo forma parte del FONDO del jefe: él aporta capital ficticio y recibe participaciones; el valor liquidativo \
 (VL) sube o baja con los resultados de trading, scalping y holding. Lo que no está asignado es liquidez. Hay control de riesgos, una sala de holding a largo plazo (BTC, ETH, SOL) con un plan \
 adaptativo SIN stop loss (promedia a la baja cada cierto % de caída, usa una reserva de capital si se acaba \
@@ -177,6 +194,8 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
             "estrategia": t.get("descripcion", ""),
             "sala": t.get("grupo", "trading"), "mesa": (t["mesa"] + 1) if t.get("mesa") is not None else None,
             "periodo_de_prueba": {k: v for k, v in (t.get("prueba") or {}).items() if k != "motivo"} or None,
+            "examen_de_incubadora": {k: (t.get("examen") or {}).get(k) for k in ("operaciones", "resultado_pct", "factor", "nota")} if t.get("examen") else None,
+            "kelly": t.get("kelly"),
         })
     m = E.get("mineria", {})
     riesgo = {k: v for k, v in (papel.get("riesgo") or {}).items() if k not in ("reglas", "apuestas")}
@@ -203,9 +222,19 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
         "fondo": E.get("fondo"),
         "salas": (papel.get("grupos") or {}),
         "estrategias_repetidas": E.get("repetidas", []),
+        "incubadora": [{"id": i, "activo": t["simbolo"], "lado": t["direccion"], "sala": t.get("grupo"),
+                        "examen": {k: (t.get("examen") or {}).get(k) for k in ("estado", "operaciones", "operaciones_min", "dias",
+                                                                               "resultado_pct", "factor", "nota", "motivo")}}
+                       for i, t in (papel.get("incubadora") or {}).items()],
+        "banquillo": len(papel.get("banquillo") or []),
+        "ultimas_suspendidas": [{k: x.get(k) for k in ("id", "simbolo", "motivo", "resultado")} for x in (papel.get("suspendidas") or [])[:5]],
+        "academia": {k: (E.get("academia") or {}).get(k) for k in ("juzgadas", "funcionan", "fallan", "textos", "causas")},
+        "informe_del_dia": E.get("informe"),
+        "sistema": {k: {kk: v.get(kk) for kk in ("ok", "ciclo_s", "errores_seguidos", "ultimo_error")}
+                    for k, v in (E.get("sistema") or {}).items() if isinstance(v, dict)},
         "supervision": {"reglas": E.get("prueba"), "mesas": E.get("mesas"),
-                        "reserva_del_banco": [{k: r.get(k) for k in ("id", "grupo", "simbolo", "direccion", "fuera_pct")}
-                                              for r in papel.get("reserva", [])],
+                        "aprobadas_esperando_mesa": [i for i, t in (papel.get("incubadora") or {}).items()
+                                                     if (t.get("examen") or {}).get("estado") == "aprobada"],
                         "ultimas_retiradas": [{k: r.get(k) for k in ("id", "grupo", "simbolo", "mesa", "fin", "motivo", "por", "resultado")}
                                               for r in (papel.get("retirados") or [])[:6]]},
         "decisiones_del_jefe": {"busqueda_de_estrategias_en_marcha": ctrl.get("busqueda"), "freno_manual": ctrl.get("freno_manual"),
@@ -326,6 +355,40 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         return dice("Tomás", f"¿Busco estrategias nuevas de {que}? Es un ciclo: se para solo al terminar. Si alguna supera las "
                              "seis pruebas, entra al banco y se pone a operar con su trader.",
                     _propuesta("buscar_estrategias", f"Buscar estrategias de {que}", activo.upper(), tipo="scalping" if scalp else ""))
+    if re.search(r"kill|cierra todo|cerrar todo|emergencia|vende todo", t):
+        return dice("Julia", "¿Pulso el kill switch? Se cierran ya todas las posiciones abiertas del fondo al último precio y no se "
+                             "abre nada nuevo hasta que pulses «Reabrir». La incubadora sigue, porque no usa dinero del fondo.",
+                    _propuesta("kill_switch", "Kill switch: cerrar todo lo abierto del fondo"))
+    if re.search(r"reabr|reanuda todo|vuelve a abrir", t):
+        return dice("Julia", "Si lo apruebas, quito el freno manual y se vuelven a permitir entradas.", _propuesta("quitar_freno", "Reabrir"))
+    if re.search(r"pausa todo|pausar todo|para todo", t):
+        return dice("Julia", "¿Pauso todo? Nadie abre posiciones nuevas; las abiertas siguen con su stop y su objetivo.",
+                    _propuesta("activar_freno", "Pausar todo (freno manual)"))
+    if re.search(r"incubador|banquillo|examen", t):
+        inc = list((papel.get("incubadora") or {}).items())
+        if not inc:
+            return dice("Lorena", "La incubadora está vacía. Cuando la minería apruebe estrategias nuevas, empezarán aquí con dinero de prueba.")
+        aprob = [i for i, x in inc if (x.get("examen") or {}).get("estado") == "aprobada"]
+        mejor = max(inc, key=lambda kv: (kv[1].get("examen") or {}).get("nota", 0))
+        ex = mejor[1].get("examen") or {}
+        return dice("Lorena", f"Tengo {len(inc)} estrategias de examen con dinero de prueba (no cuenta en tu fondo) y "
+                              f"{len(papel.get('banquillo') or [])} en el banquillo. Aprobadas esperando mesa: {len(aprob)}. La que mejor va es "
+                              f"{mejor[0]}: {ex.get('operaciones', 0)} de {ex.get('operaciones_min', 10)} operaciones, "
+                              f"{_es(ex.get('resultado_pct', 0))} %.")
+    if re.search(r"informe|resumen del dia|noticias", t):
+        inf = E.get("informe") or {}
+        return dice("Rebeca", f"{inf.get('titular', 'Sin informe todavía')}. " + " ".join(f"{x['tema']}: {x['texto']}" for x in (inf.get("puntos") or [])[:3]))
+    if re.search(r"academia|aprendid|leccion|post ?mortem", t):
+        ac = E.get("academia") or {}
+        textos = ac.get("textos") or ["Todavía no hay lecciones."]
+        n = ac.get("juzgadas", 0)
+        return dice("Begoña", f"Hemos juzgado {n} {'estrategia' if n == 1 else 'estrategias'} en real: {ac.get('funcionan', 0)} "
+                              f"{'funciona' if ac.get('funcionan', 0) == 1 else 'funcionan'} y {ac.get('fallan', 0)} "
+                              f"{'falla' if ac.get('fallan', 0) == 1 else 'fallan'}. {' '.join(textos[:2])}")
+    if "kelly" in t:
+        return dice("Ainara", "Con 30 operaciones reales o más, cada trader arriesga según el Kelly prudente: uso un acierto rebajado "
+                              "por si ha tenido suerte y solo una cuarta parte del resultado, entre un 0,25 % y 1,5 veces tu riesgo "
+                              "por operación. Antes de las 30, el riesgo de siempre.")
     if "freno" in t and re.search(r"quit|levant|desactiv|suelt", t):
         return dice("Julia", "Si lo apruebas, quito el freno manual y se vuelven a permitir entradas.", _propuesta("quitar_freno", "Quitar el freno manual"))
     if "freno" in t or "para todo" in t:
@@ -333,7 +396,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
     if ident and re.search(r"retir|elimin|borr|echa|despid|cambia|otra estrategia|relev", t):
         de = f" de {nombre}" if nombre and nombre != ident else ""
         return dice("Clara", f"¿Retiro la estrategia {ident}{de}? Lo que ganó o perdió sigue contando en el fondo, y su mesa "
-                             "pasa a la mejor estrategia de la reserva del banco (si hay).",
+                             "pasa a la mejor aprobada de la incubadora (si hay).",
                     _propuesta("retirar_estrategia", f"Retirar {ident} del banco", ident))
     if ident and re.search(r"reanud|activ|vuelv|despaus", t):
         return dice("Clara", f"Si lo apruebas, {nombre} vuelve a operar con normalidad.", _propuesta("reanudar_trader", f"Reanudar a {nombre} ({ident})", ident))
@@ -354,9 +417,10 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         ret = papel.get("retirados") or []
         txt = (f"Cada trader tiene un periodo de prueba ({pt.get('dias', 14)} días y {pt.get('operaciones', 6)} operaciones en trading). "
                f"Si al acabarlo va en pérdidas, o si antes pierde un {_es(pt.get('corte_pct', 5), False)} %, le cambio la estrategia por la "
-               f"mejor de la reserva. Ahora: {len(prueba)} en prueba, {len(ts) - len(prueba) - len(vigilados)} con la prueba superada"
+               f"mejor aprobada de la incubadora. Ahora: {len(prueba)} en prueba, {len(ts) - len(prueba) - len(vigilados)} con la prueba superada"
                + (f", {len(vigilados)} a los que cambiaré en cuanto cierren su posición" if vigilados else "")
-               + f"; {len(papel.get('reserva', []))} estrategias en reserva y {len(ret)} retiradas hasta hoy.")
+               + f"; {sum((t.get('examen') or {}).get('estado') == 'aprobada' for t in (papel.get('incubadora') or {}).values())} "
+               f"aprobadas en la incubadora esperando mesa y {len(ret)} retiradas hasta hoy.")
         if ret:
             txt += f" La última: {ret[0]['id']} ({ret[0].get('motivo', '')})."
         return dice("Clara", txt)
@@ -380,6 +444,12 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
             i, x = ts[0]
             return dice("Clara", f"Ahora mismo lidera {nombres.get(i, i)} ({i}, {x['simbolo'].replace('USDT', '')}) con {_es(x['resultado'])} $ ficticios.")
         return dice("Clara", "Todavía nadie ha ganado nada: los traders acaban de empezar y esperan su señal.")
+    if ident and ident in (papel.get("incubadora") or {}):
+        ex = (papel["incubadora"][ident].get("examen") or {})
+        estado = {"aprobada": "ha aprobado y espera mesa", "suspendida": "va a suspender", "espera_cierre": "se decide al cerrar su posición"}.get(
+            ex.get("estado"), "sigue de examen")
+        return dice("Lorena", f"{ident} está en la incubadora (dinero de prueba): {ex.get('operaciones', 0)} de {ex.get('operaciones_min', 10)} "
+                              f"operaciones, {_es(ex.get('resultado_pct', 0))} % y {estado}.")
     if ident:
         x = papel.get("estrategias", {}).get(ident, {})
         rd = x.get("radar") or {}
@@ -397,7 +467,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                              f"{len(papel.get('estrategias', {}))} traders, minería {m.get('estado', 'parada')}"
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
     return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «para la búsqueda», «quita las repetidas», "
-                         "«activa el freno», «quita el freno», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «riesgo 0,5», «convoca el comité», "
+                         "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», "
                          "«¿cómo va el holding?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 
 

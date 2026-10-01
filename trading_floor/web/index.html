@@ -219,6 +219,37 @@ h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--suav
 #plegar{position:fixed;top:72px;right:392px;z-index:6;width:34px;height:34px;border-radius:10px;border:1px solid var(--borde);background:var(--panel);cursor:pointer;transition:right .35s cubic-bezier(.2,.8,.2,1)}
 #plegar.fuera{right:12px}
 #controles{position:fixed;left:12px;top:72px;z-index:5;display:flex;flex-direction:column;gap:6px}
+#plantas{position:fixed;left:58px;top:72px;z-index:5;display:flex;flex-direction:column;gap:6px}
+#plantas button{height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--borde);background:var(--panel);cursor:pointer;font:700 12px Inter,sans-serif;color:var(--texto);text-align:left;backdrop-filter:blur(8px)}
+#plantas button.activo{border-color:var(--neon);color:var(--neon);box-shadow:0 0 14px rgba(212,255,58,.3)}
+#botonera{position:fixed;left:364px;right:402px;bottom:42px;z-index:5;display:flex;gap:6px;justify-content:center;align-items:center;overflow-x:auto;scrollbar-width:none;padding:2px}
+#botonera::-webkit-scrollbar{display:none}
+#botonera button{flex:none;height:32px;padding:0 11px;border-radius:999px;border:1px solid var(--borde);background:var(--panel);cursor:pointer;font:700 12px Inter,sans-serif;color:var(--texto);backdrop-filter:blur(8px)}
+#botonera button:hover{border-color:var(--neon)}
+#botonera button.activo{border-color:var(--ambar);color:var(--ambar)}
+#botonera button.peligro{border-color:rgba(255,90,118,.6);color:#ff8095;background:rgba(80,10,24,.55)}
+#botonera button.peligro:hover{background:rgba(120,14,34,.75)}
+#botonera i{flex:none;width:1px;height:20px;background:var(--borde);margin:0 2px}
+.inc-fila{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--borde);cursor:pointer}
+.inc-fila .av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:800 11px Inter,sans-serif;color:#0b0d11}
+.inc-fila .n{font:700 12px Inter,sans-serif}.inc-fila .d{font-size:11px;color:var(--suave)}
+.inc-fila .r{text-align:right;font:800 12px var(--mono)}.inc-fila .r small{display:block;font:600 10px Inter,sans-serif;color:var(--suave)}
+.barra-ex{height:6px;border-radius:4px;background:rgba(255,255,255,.07);margin-top:4px;overflow:hidden}.barra-ex i{display:block;height:100%;background:#ff8a5c}
+.estado-ex{display:inline-block;padding:0 6px;border-radius:5px;font-size:10px;line-height:16px;margin-left:4px;background:rgba(255,138,92,.16);color:#ff9d76}
+.estado-ex.ok{background:rgba(46,230,166,.14);color:var(--verde)}.estado-ex.esp{background:rgba(255,194,74,.16);color:var(--ambar)}
+.tabla-eq{width:100%;border-collapse:collapse;font-size:11px;margin:6px 0 4px}
+#informe .d-scroll{overflow-x:auto}
+.tabla-eq th{color:var(--suave);font-weight:700;text-align:right;padding:5px 4px;border-bottom:1px solid var(--borde)}.tabla-eq th:first-child,.tabla-eq td:first-child{text-align:left}
+.tabla-eq td{padding:6px 4px;text-align:right;font-family:var(--mono);border-bottom:1px solid rgba(255,255,255,.04)}.tabla-eq td:first-child{font-family:Inter,sans-serif;font-weight:700}
+.tabla-eq tr.prueba td{color:#c9b8a8}.tabla-eq tr.prueba td:first-child small{display:block;font-weight:500;color:var(--suave)}
+.informe-tit{font:800 16px Inter,sans-serif;margin:4px 0 8px}
+.informe-punto{padding:8px 10px;border-left:3px solid var(--borde);background:rgba(255,255,255,.025);border-radius:6px;margin-bottom:6px;font-size:12.5px;line-height:1.45}
+.informe-punto b{display:block;font-size:10.5px;letter-spacing:.06em;color:var(--suave)}.informe-punto.bueno{border-color:var(--verde)}.informe-punto.malo{border-color:var(--rojo)}
+.pm{border:1px solid var(--borde);border-radius:10px;padding:8px 10px;margin-bottom:8px;background:rgba(255,255,255,.02)}
+.pm summary{cursor:pointer;font:700 12px Inter,sans-serif;list-style:none}.pm summary::-webkit-details-marker{display:none}
+.pm summary small{display:block;font-weight:500;color:var(--suave);margin-top:2px}.pm p{font-size:12px;line-height:1.45;margin:8px 0 4px}
+.pm ul{margin:4px 0 0 16px;padding:0;font-size:12px;line-height:1.45}
+.leccion{padding:8px 10px;border-radius:8px;background:rgba(255,207,90,.07);border:1px solid rgba(255,207,90,.2);margin-bottom:6px;font-size:12.5px;line-height:1.45}
 #controles button{width:36px;height:36px;border-radius:10px;border:1px solid var(--borde);background:var(--panel);cursor:pointer;font-size:15px;backdrop-filter:blur(8px)}
 #controles button:hover{border-color:var(--neon)}
 #controles button.activo{border-color:var(--neon);color:var(--neon);box-shadow:0 0 14px rgba(212,255,58,.35)}
@@ -246,7 +277,7 @@ canvas.grafica{display:block;width:100%}
 .pie-res b{color:var(--texto);font-family:var(--mono)}
 .kpi b.sube,.kpi b.baja{text-shadow:0 0 18px currentColor}
 .kpi b small{display:inline;font-size:11px;letter-spacing:0;text-transform:none;color:inherit;margin-left:6px;opacity:.85}
-#ayuda{position:fixed;left:62px;right:0;bottom:52px;margin:auto;width:max-content;max-width:calc(100vw - 32px);font-size:12px;color:var(--suave);background:var(--panel);border:1px solid var(--borde);padding:6px 12px;border-radius:999px;z-index:4;pointer-events:none;transition:opacity 1s}
+#ayuda{position:fixed;left:62px;right:0;bottom:84px;margin:auto;width:max-content;max-width:calc(100vw - 32px);font-size:12px;color:var(--suave);background:var(--panel);border:1px solid var(--borde);padding:6px 12px;border-radius:999px;z-index:4;pointer-events:none;transition:opacity 1s}
 
 #cinta{position:fixed;left:0;right:0;bottom:0;height:34px;background:rgba(5,7,11,.94);border-top:1px solid var(--borde);overflow:hidden;z-index:6;font:600 12px var(--mono)}
 #cintaInterior{display:inline-flex;white-space:nowrap;line-height:34px;animation:cinta 60s linear infinite;will-change:transform}
@@ -286,6 +317,8 @@ canvas.grafica{display:block;width:100%}
 @media (max-width:1560px){.vistas button span{display:none}.marca > div:not(.logo){display:none}}
 
 @media (max-width:1000px){#pFng{display:none}}
+@media (max-width:1300px){.kpi.caida{display:none}}
+@media (max-width:1560px){#botonera button span{display:none}#plantas button span{display:none}}
 @media (max-width:1400px){#pComite{display:none}}
 @media (max-width:760px){
   #barra{height:54px;gap:8px;padding:0 10px}
@@ -300,6 +333,8 @@ canvas.grafica{display:block;width:100%}
   #plegar{top:auto;bottom:calc(42vh + 48px);right:12px}
   #plegar.fuera{bottom:48px}
   #controles{top:62px}
+  #plantas{left:12px;top:280px}
+  #botonera{left:58px;right:8px;top:62px;bottom:auto;justify-content:flex-start}
   #resultados{display:none}
   #ayuda{display:none}
   #ficha{top:62px;left:8px;right:8px;width:auto;max-height:calc(58vh - 80px)}
@@ -309,7 +344,7 @@ canvas.grafica{display:block;width:100%}
 .vistas{display:flex;background:var(--panel2);border:1px solid var(--borde);border-radius:999px;padding:3px;flex:none}
 .vistas button{border:0;background:none;color:var(--suave);font:700 12px Inter,sans-serif;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
 .vistas button.activa{background:var(--neon);color:#0a0d12}
-body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-fondo #ayuda,body.en-fondo #plegar,body.en-fondo #ficha{display:none!important}
+body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-fondo #ayuda,body.en-fondo #plegar,body.en-fondo #ficha,body.en-fondo #plantas,body.en-fondo #botonera{display:none!important}
 #dash{--d-sup:#10151d;--d-ink:#e9edf3;--d-ink2:#c3c8d1;--d-mute:#898781;--d-grid:rgba(255,255,255,.07);position:fixed;top:60px;left:0;right:0;bottom:0;overflow:auto;background:var(--fondo);z-index:8;padding:22px 24px 40px;transition:opacity .3s}
 #dash.recargando .d-rejilla,#dash.recargando .d-kpis{opacity:.6}
 .d-cab{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
@@ -413,6 +448,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <div class="kpi principal"><small>Patrimonio</small><b id="kPatrimonio">—</b></div>
     <div class="kpi principal"><small>Resultado total</small><b id="kResultado">—</b></div>
     <div class="kpi"><small>Hoy</small><b id="kHoy">—</b></div>
+    <div class="kpi caida" title="Cuánto está el valor liquidativo de tu fondo por debajo de su máximo"><small>Caída</small><b id="kCaida">—</b></div>
     <div class="kpi opc" title="Posiciones abiertas ahora / máximo permitido, en la sala de trading y en la de scalping (cada una con su límite)"><small>Posiciones · trading | scalping</small><b id="kPosiciones">—</b></div>
     <div class="kpi opc"><small>Holding</small><b id="kHolding">—</b></div>
     <div class="kpi opc opc2"><small>Banco</small><b id="kBanco">—</b></div>
@@ -488,6 +524,9 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <button data-p="traders">Resultados</button>
     <button data-p="ranking">Ranking</button>
     <button data-p="scalping">Scalping</button>
+    <button data-p="incubadora">Incubadora</button>
+    <button data-p="informe">Informe</button>
+    <button data-p="academia">Academia</button>
     <button data-p="salas">Salas</button>
     <button data-p="holding">Holding</button>
     <button data-p="riesgo">Riesgo</button>
@@ -520,6 +559,9 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p class="nota">Total, hoy y semana: resultados en papel (dinero ficticio) desde que cada trader llegó a la sala. Backtest: cómo lo hizo su estrategia fuera de muestra, con datos pasados.</p></section>
   <section class="pagina" id="p-scalping"><h3>Sala de scalping</h3><div id="scalping"></div>
     <p class="nota">Operaciones cortas con velas de 5 minutos en BTC, ETH y SOL. Se asume que los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta, frente al 0,14 % de la sala de trading). Aun así, las comisiones se comen buena parte de lo que se gana: fíjate en «comisiones pagadas». Mismo embudo de seis pruebas que el resto; dinero ficticio.</p></section>
+  <section class="pagina" id="p-incubadora"><h3>Incubadora · planta 1</h3><div id="incubadora"></div></section>
+  <section class="pagina" id="p-informe"><div id="informe"></div></section>
+  <section class="pagina" id="p-academia"><h3>Academia · lo aprendido en real</h3><div id="academia"></div></section>
   <section class="pagina" id="p-salas"><h3>Ir a una sala</h3>
     <div class="ira"></div>
     <h3>Supervisión de las salas</h3><div id="salas"></div></section>
@@ -534,7 +576,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p><b>Laboratorio.</b> Las que parecen rentables viajan por la cinta. Cada puesto es una prueba de robustez; si la falla, a la trituradora.</p>
     <p><b>Cámara.</b> Las que lo superan todo se guardan en el banco (cada lingote es una estrategia), salvo que se parezcan demasiado a otra que ya esté dentro.</p>
     <p><b>Sala de trading.</b> Cada mesa tiene su trader, que opera una estrategia del banco con su capital ficticio (el % del fondo que dedicas al trading, repartido entre sus 48 mesas; al principio, 1.000 $) que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
-    <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). En cuanto entra en el banco, un trader se sienta en una mesa libre con ella (si están todas ocupadas, espera en la reserva del banco). Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 48 mesas (8 por activo).</p>
+    <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). Primero se examina en la incubadora (planta 1) con dinero de prueba; si aprueba, un trader se sienta con ella en una mesa libre. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 48 mesas (8 por activo).</p>
     <p><b>Radar de señales.</b> El equipo de análisis mira, para cada trader, cuántas condiciones de su estrategia se cumplen ahora mismo y le avisa cuando le falta una para entrar (con la hora del próximo cierre de vela, soporte, resistencia y ATR).</p>
     <p><b>Mi fondo.</b> Todo es tu fondo de inversión (con dinero ficticio): tú aportas capital y recibes participaciones; el valor liquidativo sube o baja solo con los resultados de trading, scalping y holding, así que un trader nuevo no cambia tu patrimonio. Tú decides el reparto: qué % va a trading (se divide entre sus 48 mesas), a scalping (12 mesas) y a holding; el resto es liquidez. Se cambia en «Mi fondo» o por el chat («dedica un 20 % al holding») y se aplica desde ese momento, sin perder lo ganado. En la pestaña «Mi fondo» (arriba) tienes tu dashboard: rentabilidad frente a BTC, caídas, volatilidad, Sharpe, reparto del dinero, exposición, meses, operaciones y aportaciones o reembolsos.</p>
     <p><b>Scalping.</b> Una sala aparte con operaciones cortas en velas de 5 minutos (BTC, ETH y SOL, 12 mesas). Los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta) y pasan el mismo embudo de seis pruebas. Aun así, las comisiones pesan mucho: la sala muestra cuánto se paga.</p>
@@ -543,7 +585,13 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p><b>Control de riesgos.</b> Decide cuánto invierte cada operación (arriesgando como mucho un 1 % del capital del trader) y veta entradas si hay demasiadas posiciones, demasiadas iguales, o si el día o la caída acumulada pierden demasiado.</p>
     <p><b>Macroeconomía.</b> Cuatro analistas siguen la bolsa, el VIX, el dólar, el oro, el petróleo, los bonos y el sentimiento cripto, y deciden si el mercado está en modo RISK-ON (apetito por el riesgo) o RISK-OFF.</p>
     <p><b>Supervisión.</b> Cada sala tiene su supervisor, que la patrulla y sabe cómo va. La supervisión general hace rondas por toda la oficina preguntando a cada uno, y acude corriendo si una sala se pone en rojo. El estado de cada sala está en la pestaña «Salas».</p>
-    <p><b>Periodo de prueba y relevo.</b> Clara (trading) y Álex (scalping) vigilan a sus traders. Cada uno tiene un periodo de prueba con su estrategia: 14 días y 6 operaciones en trading, 3 días y 20 operaciones en scalping. Si al acabarlo va en pérdidas, o si antes pierde un 5 % de su capital (un 4 % en scalping), el supervisor va a su mesa y le cambia la estrategia por la mejor de la reserva del banco, siempre cuando no tiene nada abierto. Si no hay reserva, pide un ciclo de búsqueda. Lo que ganó o perdió la estrategia retirada sigue contando en tu fondo (no se borra) y la minería no vuelve a buscar esa idea. El banco guarda hasta 10 estrategias por activo (5 en scalping): las que no caben en las mesas esperan en la reserva. Haz clic en Clara o en Álex para ver la reserva y los últimos cambios.</p>
+    <p><b>Dos plantas.</b> Con los botones de arriba a la izquierda (o las teclas Re Pág y Av Pág) cambias de planta. En la baja están la minería, el laboratorio, el banco, macro, holding, trading, scalping, riesgos y el comité. En la planta 1 están la incubadora, el equipo Quant, la academia, comunicación, sistemas, la cafetería, la sala de juegos y una terraza al aire libre con pérgola, piscina, fogata y barbacoa. La gente sube y baja en ascensor, y Satoshi, el gato, se pasea por las dos.</p>
+    <p><b>Incubadora.</b> Toda estrategia nueva empieza en la planta 1 con 1.000 $ de prueba que no cuentan en tu fondo y sin vetos de sala. Para subir a una mesa con dinero del fondo tiene que aprobar el examen: 10 operaciones (30 en scalping) y 7 días como mínimo, ganando y con un factor de beneficio de 1,1 o más. Suspende si pierde un 4 % (3 % en scalping) o si en 60 días no da la talla. Las aprobadas suben, la de mejor nota primero; su trader de la incubadora baja a entregarla a la mesa. Si la incubadora está llena, esperan en el banquillo.</p>
+    <p><b>Equipo Quant.</b> Con 30 operaciones reales o más, cada trader arriesga según el Kelly prudente: un cuarto del Kelly, con el acierto rebajado por si ha tenido suerte, entre un 0,25 % y 1,5 veces tu riesgo por operación. También hacen el Monte Carlo del fondo (rango probable de los próximos 30 días) y el post mortem de cada estrategia retirada: qué prometía el backtest, qué hizo en real y por qué falló.</p>
+    <p><b>Academia.</b> Junta los post mortem y lo que funciona en real. La minería busca más de lo que funciona y menos de lo que falla, pero un 30 % sigue siendo al azar y todo pasa igualmente las pruebas y el examen. Una estrategia nunca se cambia sola: eso sería adaptarse a la casualidad.</p>
+    <p><b>Comunicación y sistemas.</b> Comunicación escribe el informe del día con los datos reales (pestaña «Informe»). Sistemas vigila que el paper trading, el holding y los datos funcionan, y cuánto tarda cada ciclo.</p>
+    <p><b>Botonera.</b> Abajo tienes Comité, Megáfono (dices algo a toda la oficina), A trabajar, Descanso, Pausar todo o Reabrir (el freno manual: nadie abre posiciones nuevas) y Kill switch (cierra ya todas las posiciones abiertas del fondo al último precio y pausa; la incubadora sigue).</p>
+    <p><b>Periodo de prueba y relevo.</b> Clara (trading) y Álex (scalping) vigilan a sus traders. Cada uno tiene un periodo de prueba con su estrategia: 14 días y 6 operaciones en trading, 3 días y 20 operaciones en scalping. Si al acabarlo va en pérdidas, o si antes pierde un 5 % de su capital (un 4 % en scalping), el supervisor va a su mesa y le cambia la estrategia por la mejor aprobada de la incubadora, siempre cuando no tiene nada abierto. Si no hay ninguna y la incubadora está vacía, pide un ciclo de búsqueda. Lo que ganó o perdió la estrategia retirada sigue contando en tu fondo (no se borra) y la minería no vuelve a buscar esa idea. El banco guarda hasta 14 estrategias por activo (7 en scalping), contando las de la incubadora y el banquillo. Haz clic en Clara o en Álex para ver los últimos cambios.</p>
     <p><b>Ranking.</b> Los traders se ordenan por su resultado en papel (total, hoy, semana o acierto) o por cómo lo hizo su estrategia en el backtest. Los tres mejores llevan corona o medalla en la oficina.</p>
     <p><b>Comité, descanso y terraza.</b> De vez en cuando se reúnen para repasar el riesgo, y cuando no hay trabajo se van a por café.</p>
     <p class="nota">Todo es <b>paper trading</b>: nunca se envía ninguna orden real. Los resultados de un backtest no garantizan nada sobre el futuro.</p>
@@ -559,6 +607,19 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
   <button id="zVer" title="Ver toda la oficina">⤢</button>
   <button id="bNoche" title="Día / noche / automático">◐</button>
 </div>
+<div id="plantas" role="group" aria-label="Planta que se ve">
+  <button type="button" data-planta="1" title="Planta 1: incubadora, quant, academia, comunicación, sistemas, cafetería, juegos y terraza (tecla Re Pág)">🌇 <span>Planta 1 · terraza</span></button>
+  <button type="button" data-planta="0" class="activo" title="Planta baja: minería, laboratorio, banco, macro, holding, trading, scalping, riesgos y comité (tecla Av Pág)">🏢 <span>Planta baja</span></button>
+</div>
+<nav id="botonera" aria-label="Acciones rápidas">
+  <button type="button" data-b="comite" title="Convocar el comité ahora">🗳 <span>Comité</span></button>
+  <button type="button" data-b="megafono" title="Decir algo a toda la oficina">📣 <span>Megáfono</span></button>
+  <button type="button" data-b="trabajar" title="Todo el mundo de vuelta a su puesto">💼 <span>A trabajar</span></button>
+  <button type="button" data-b="descanso" title="Mandar a descansar a quien no tenga nada abierto">☕ <span>Descanso</span></button>
+  <i></i>
+  <button type="button" data-b="pausa" id="bPausa" title="Pausar todo: nadie abre posiciones nuevas (las abiertas siguen con su stop)">⏸ <span>Pausar todo</span></button>
+  <button type="button" data-b="kill" class="peligro" title="Kill switch: cerrar ya todas las posiciones abiertas del fondo y pausar">⛔ <span>Kill switch</span></button>
+</nav>
 <section id="resultados">
   <div class="cab"><span>Traders · resultado en papel</span>
     <div class="rangos" data-grafica="tarjeta"><button data-r="24">24H</button><button data-r="168" class="activo">7D</button><button data-r="720">30D</button></div>
@@ -678,15 +739,19 @@ const SALAS = [
   {id: "scalping", nombre: "SCALPING", x0: 46, y0: 0, x1: 54, y1: 9, a: "#160f22", b: "#1b1229", rotulo: "rgba(255,79,216,.11)"},
   {id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 54, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
   {id: "riesgos", nombre: "RIESGOS", x0: 38, y0: 11, x1: 46, y1: 24, a: "#1c1216", b: "#22161b", rotulo: "rgba(255,90,118,.1)"},
-  {id: "terraza", nombre: "TERRAZA", x0: 30, y0: 11, x1: 38, y1: 24, a: "#8a6a48", b: "#7f6141", rotulo: "rgba(40,20,0,.14)"},
+  {id: "terraza", nombre: "PATIO", x0: 30, y0: 11, x1: 38, y1: 24, a: "#8a6a48", b: "#7f6141", rotulo: "rgba(40,20,0,.14)"},
   {id: "trading", nombre: "SALA DE TRADING", x0: 0, y0: 11, x1: 18, y1: 24, a: "#eceee8", b: "#e2e5dd", rotulo: "rgba(0,0,0,.075)"},
   {id: "comite", nombre: "COMITÉ", x0: 18, y0: 11, x1: 30, y1: 17, a: "#d8d0c2", b: "#cec5b5", rotulo: "rgba(60,30,0,.09)"},
   {id: "descanso", nombre: "DESCANSO", x0: 18, y0: 17, x1: 30, y1: 24, a: "#b98f62", b: "#b28858", rotulo: "rgba(60,30,0,.12)"},
 ];
 
-const bloqueado = Array.from({length: W}, () => new Uint8Array(D));
-const muros = new Set();
-const estaticos = [];
+// Dos plantas: cada una con sus obstáculos, tabiques y objetos fijos. Mientras se construye una planta, estas tres
+// variables apuntan a la suya (construirEn); en marcha, cada función usa la planta que le toca.
+const PLANTAS = [0, 1].map(() => ({bloqueado: Array.from({length: W}, () => new Uint8Array(D)), muros: new Set(), estaticos: []}));
+let bloqueado = PLANTAS[0].bloqueado, muros = PLANTAS[0].muros, estaticos = PLANTAS[0].estaticos;
+function construirEn(p) { ({bloqueado, muros, estaticos} = PLANTAS[p]); }
+const ALTURA_PLANTA = 3.1;   // la planta 1 se dibuja encima de la baja, a esta altura
+let vista = 0;               // planta que se está viendo
 const arista = (a, b, c, d) => (a < c || (a === c && b < d)) ? `${a},${b}|${c},${d}` : `${c},${d}|${a},${b}`;
 function bloquear(x0, y0, x1, y1) {
   for (let x = Math.max(0, Math.floor(x0)); x < Math.min(W, Math.ceil(x1)); x++)
@@ -1415,22 +1480,438 @@ muroH(17, 18, 30, [[26, 28]], 1, "#ff8a5c");
 for (let y = 0; y < D; y++) { muros.add(arista(-1, y, 0, y)); }
 estaticos.sort((a, b) => a.k - b.k);
 
+// =================================================== PLANTA 1 =========
+// Arriba: la incubadora (estrategias de examen con dinero de prueba), el equipo Quant, la academia, comunicación,
+// infraestructura, la cafetería, la sala de juegos y una terraza al aire libre. Se sube y se baja en ascensor.
+construirEn(1);
+const SALAS1 = [
+  {id: "comunicacion", nombre: "COMUNICACIÓN", x0: 0, y0: 0, x1: 9, y1: 9, a: "#1f1a26", b: "#241e2c", rotulo: "rgba(255,138,92,.12)"},
+  {id: "infra", nombre: "SISTEMAS", x0: 9, y0: 0, x1: 17, y1: 9, a: "#11161c", b: "#141a21", rotulo: "rgba(46,230,166,.1)"},
+  {id: "quant", nombre: "EQUIPO QUANT", x0: 17, y0: 0, x1: 28, y1: 9, a: "#0f1a2a", b: "#122034", rotulo: "rgba(92,192,255,.11)"},
+  {id: "academia", nombre: "ACADEMIA", x0: 28, y0: 0, x1: 37, y1: 9, a: "#e8e3d4", b: "#dfd9c9", rotulo: "rgba(60,40,0,.1)"},
+  {id: "cafeteria", nombre: "CAFETERÍA", x0: 37, y0: 0, x1: 46, y1: 9, a: "#c79f76", b: "#be966d", rotulo: "rgba(60,30,0,.13)"},
+  {id: "juegos", nombre: "JUEGOS", x0: 46, y0: 0, x1: 54, y1: 9, a: "#1c1432", b: "#21183b", rotulo: "rgba(181,140,255,.15)"},
+  {id: "pasillo1", nombre: "", x0: 0, y0: 9, x1: 54, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
+  {id: "incubadora", nombre: "INCUBADORA", x0: 0, y0: 11, x1: 18, y1: 24, a: "#efeee6", b: "#e6e4da", rotulo: "rgba(120,60,0,.08)"},
+  {id: "terraza1", nombre: "TERRAZA", x0: 18, y0: 11, x1: 46, y1: 24, a: "#a07a52", b: "#96714a", rotulo: "rgba(40,20,0,.13)"},
+];
+const enPlanta1 = s => ({...s, planta: 1});
+
+// ---- INCUBADORA: 24 plazas de trading y 8 de scalping, con dinero de prueba que no es del fondo ----
+const PLAZAS = {trading: [], scalping: []};
+for (const y of [12.2, 14.2, 16.2])
+  for (const x of [1, 3, 5, 7, 9, 11, 13, 15]) {
+    const mesa = {trader: null, incubadora: true};
+    mesa.asiento = enPlanta1(puesto({x, y, w: 1.5, color: "#cdd3db", colorSilla: "#5d6470", pintar: (w, h, i) => pantallaIncubada(mesa, w, h, i),
+      brilla: () => mesa.trader && mesa.trader.datos ? colorExamen(mesa.trader.datos) : null}));
+    PLAZAS.trading.push(mesa);
+  }
+for (const x of [1, 3, 5, 7, 9, 11, 13, 15]) {
+  const mesa = {trader: null, incubadora: true, scalping: true};
+  mesa.asiento = enPlanta1(puesto({x, y: 18.3, w: 1.5, color: "#4a3a66", colorSilla: "#5a3d73", pintar: (w, h, i) => pantallaIncubada(mesa, w, h, i),
+    brilla: () => mesa.trader && mesa.trader.datos ? colorExamen(mesa.trader.datos) : null}));
+  PLAZAS.scalping.push(mesa);
+}
+function colorExamen(d) {
+  const e = d.examen && d.examen.estado;
+  return e === "aprobada" ? "#2ee6a6" : e === "espera_cierre" ? "#ffc24a" : "#ff8a5c";
+}
+function pantallaIncubada(mesa, w, h, i) {
+  const a = mesa.trader, d = a && a.datos;
+  if (!d) {   // sin estrategia: esperando la siguiente
+    ctx.fillStyle = "#0d0f14"; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "#3a4250"; ctx.font = "800 5px JetBrains Mono, monospace"; ctx.fillText(a ? "ESPERANDO" : "LIBRE", 3, 10);
+    ctx.fillText(a ? "ESTRATEGIA" : "", 3, 17);
+    return;
+  }
+  const ex = d.examen || {}, c = colorExamen(d);
+  ctx.fillStyle = "#120c06"; ctx.fillRect(0, 0, w, h);
+  if (i === 0) {
+    ctx.fillStyle = c; ctx.font = "800 5px JetBrains Mono, monospace";
+    ctx.fillText(ex.estado === "aprobada" ? "APROBADA" : "EXAMEN", 3, 7);
+    const f = clamp((ex.operaciones || 0) / (ex.operaciones_min || 10), 0, 1);
+    ctx.fillStyle = "#2a1f14"; ctx.fillRect(3, 12, w - 6, 4); ctx.fillStyle = c; ctx.fillRect(3, 12, (w - 6) * f, 4);
+    ctx.fillStyle = "#e9edf3"; ctx.fillText(`${ex.operaciones || 0}/${ex.operaciones_min || 10} ops`, 3, 24);
+  } else {
+    const r = ex.resultado_pct || 0;
+    ctx.fillStyle = "#cfd6e0"; ctx.font = "800 5px JetBrains Mono, monospace"; ctx.fillText(moneda(d.simbolo) + (d.posicion ? " " + ladoTxt(d.direccion) : ""), 3, 8);
+    ctx.fillStyle = r > 0 ? "#2ee6a6" : r < 0 ? "#ff5a76" : "#cfd6e0"; ctx.font = "800 7.5px JetBrains Mono, monospace";
+    ctx.fillText((r >= 0 ? "+" : "") + r.toFixed(2) + "%", 3, 21);
+  }
+}
+// mesa de la supervisora de la incubadora y rincón de estudio
+const ASIENTO_LORENA = enPlanta1(puesto({x: 7.2, y: 21, w: 1.8, color: "#7a4a1d", colorSilla: "#9a5a22", pintar: (w, h, i) => pantallaLorena(w, h, i), brilla: () => "#ff8a5c"}));
+function pantallaLorena(w, h, i) {
+  const inc = S && S.papel && S.papel.grupos_incubadora || {}, t = inc.trading || {}, s = inc.scalping || {};
+  ctx.fillStyle = "#140c05"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#ff8a5c"; ctx.font = "800 5px JetBrains Mono, monospace";
+  ctx.fillText(i ? "APROBADAS" : "DE EXAMEN", 3, 7);
+  ctx.fillStyle = "#e9edf3"; ctx.font = "800 9px JetBrains Mono, monospace";
+  ctx.fillText(String(i ? (t.aprobadas || 0) + (s.aprobadas || 0) : (t.traders || 0) + (s.traders || 0)), 3, 21);
+}
+bloquear(1.2, 21.2, 4.6, 22.4);
+estatico(2.9 + 21.8, () => {   // mesa de estudio con libros
+  caja(1.2, 21.2, 0, 3.4, 1.2, .44, "#b98a55", {top: "#d6a86f", izq: "#a77a48", der: "#8d673c"});
+  for (const [k, c] of [[0, "#ff5a76"], [1, "#5cc0ff"], [2, "#ffcf5a"], [3, "#2ee6a6"]]) caja(1.5 + k * .22, 21.4, .44, .18, .5, .08 + k * .02, c);
+  caja(3.2, 21.5, .44, .55, .4, .02, "", {top: "#f4f6f9", izq: "#d9dde3", der: "#c9cdd3"});
+}, 2.9, 21.8);
+for (const [x, y, m] of [[1.9, 20.75, "s"], [3.4, 20.75, "s"], [1.9, 22.85, "n"], [3.4, 22.85, "n"]]) silla(x, y, m, "#5d6470");
+planta(17.4, 11.6, true); planta(17.4, 23.4); planta(.5, 23.4, true); planta(10.8, 23.4);
+
+// ---- EQUIPO QUANT: Kelly, Monte Carlo y post mortem ----
+const PUESTOS_QUANT = [[18, 3.2], [20.7, 3.2], [23.4, 3.2]].map(([x, y], i) =>
+  enPlanta1(puesto({x, y, w: 1.8, color: "#15263c", colorSilla: "#23405f", pintar: (w, h, k) => pantallaQuant(i, k, w, h), brilla: () => "#5cc0ff"})));
+function pantallaQuant(i, k, w, h) {
+  ctx.fillStyle = "#06101c"; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "#5cc0ff"; ctx.lineWidth = .8;
+  if (i === 1) {   // abanico de Monte Carlo
+    for (let c = 0; c < 6; c++) { ctx.beginPath(); ctx.moveTo(2, h / 2); for (let u = 0; u <= 10; u++) ctx.lineTo(2 + u * (w - 4) / 10, h / 2 - Math.sin(u * .7 + c + T * .3) * u * .9 * (c - 2.5) * .5); ctx.stroke(); }
+  } else if (i === 0) {   // barras de Kelly
+    const ts = Object.values(S && S.papel && S.papel.estrategias || {}).filter(t => t.kelly).slice(0, 8);
+    (ts.length ? ts : [{kelly: {riesgo_pct: .6}}, {kelly: {riesgo_pct: 1.1}}, {kelly: {riesgo_pct: .3}}]).forEach((t, n) => {
+      ctx.fillStyle = "#5cc0ff"; ctx.fillRect(3 + n * 6, h - 3 - t.kelly.riesgo_pct * 12, 4, t.kelly.riesgo_pct * 12);
+    });
+  } else {   // post mortem: texto que corre
+    ctx.fillStyle = "#cfe8ff"; ctx.font = "700 4.4px JetBrains Mono, monospace";
+    ["POST MORTEM", "causa: " + (k ? "stops" : "mercado"), "vivo vs backtest", "acierto −15 pts"].forEach((l, n) => ctx.fillText(l, 3, 6 + n * 6));
+  }
+}
+bloquear(25.9, 5.7, 27.5, 6.05);
+estatico(26.7 + 5.9, () => {   // pizarra con la fórmula de Kelly
+  caja(26, 5.8, 0, .06, .06, 1.1, "#8a94a6"); caja(27.4, 5.8, 0, .06, .06, 1.1, "#8a94a6");
+  caja(25.9, 5.85, .55, 1.6, .06, .95, "#f4f6f9", {izq: "#f7f8fa", top: "#c9cdd3", der: "#d9dde3"});
+  caraY(25.95, 5.912, 1.45, () => {
+    ctx.fillStyle = "#1d3a8a"; ctx.font = "800 15px Inter, sans-serif"; ctx.fillText("f* = A − (1 − A) / R", 6, 24);
+    ctx.fillStyle = "#c2410c"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText("× ¼ · acierto prudente", 8, 46);
+    ctx.strokeStyle = "#2a7a4a"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(8, 80); ctx.bezierCurveTo(50, 20, 90, 70, 150, 40); ctx.stroke();
+  });
+}, 26.7, 5.9);
+bloquear(18.6, 6.4, 21.4, 7.6);
+estatico(20 + 7, () => { caja(18.6, 6.4, 0, 2.8, 1.2, .44, "#1d2c40", {top: "#2a3d57"}); caja(19.4, 6.6, .44, .7, .5, .02, "", {top: "#f4f6f9", izq: "#d9dde3", der: "#c9cdd3"}); }, 20, 7);
+for (const [x, y, m] of [[19.1, 6.05, "s"], [20.6, 6.05, "s"], [19.1, 7.95, "n"], [20.6, 7.95, "n"]]) silla(x, y, m, "#23405f");
+planta(27.5, .9, true);
+
+// ---- ACADEMIA: pizarra con las lecciones y pupitres ----
+const PUPITRES = [];
+for (const y of [5, 6.9]) for (const x of [29.6, 31.3, 33, 34.7]) {
+  bloquear(x - .45, y - .75, x + .45, y - .35);
+  estatico(x + y - .55, () => caja(x - .45, y - .75, 0, .9, .4, .5, "#c9a47a", {top: "#e2bf93", izq: "#b8936a", der: "#9c7a55"}), x, y);
+  silla(x, y, "n", "#6b5a44");
+  PUPITRES.push({x, y, mira: "n", postura: "sentado", tipo: "clase", planta: 1});
+}
+bloquear(35.6, 1.2, 36.4, 2);
+estatico(36 + 1.6, () => {   // atril de la profesora
+  caja(35.65, 1.25, 0, .7, .7, 1, "#6b4b2e", {top: "#8a6440"});
+  caja(35.7, 1.3, 1, .6, .45, .04, "", {top: "#f4f6f9", izq: "#d9dde3", der: "#c9cdd3"});
+}, 36, 1.6);
+planta(28.6, 8.4); planta(36.4, 8.4, true);
+
+// ---- COMUNICACIÓN: informe del día, plató y redes ----
+const PUESTOS_COM = [[1, 3.2], [3.5, 3.2]].map(([x, y], i) =>
+  enPlanta1(puesto({x, y, w: 1.8, color: "#2e2236", colorSilla: "#4a3352", pintar: (w, h, k) => pantallaComunicacion(i, k, w, h), brilla: () => "#ff8a5c"})));
+function pantallaComunicacion(i, k, w, h) {
+  const inf = S && S.informe;
+  ctx.fillStyle = "#140a12"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#ff8a5c"; ctx.font = "800 5px JetBrains Mono, monospace"; ctx.fillText(i ? "NOTICIAS" : "INFORME", 3, 7);
+  ctx.fillStyle = "#e9edf3"; ctx.font = "600 4.2px Inter, sans-serif";
+  const texto = inf ? (k ? (inf.puntos[Math.floor(T / 6) % inf.puntos.length] || {}).texto || "" : inf.titular) : "…";
+  partirLineas(texto, w - 6, 3).forEach((l, n) => ctx.fillText(l, 3, 14 + n * 5.2));
+}
+function partirLineas(texto, max, n) {
+  const out = [];
+  let l = "";
+  for (const p of String(texto).split(" ")) { const prueba = l ? l + " " + p : p; if (ctx.measureText(prueba).width > max && l) { out.push(l); l = p; } else l = prueba; if (out.length >= n) break; }
+  if (l && out.length < n) out.push(l);
+  return out;
+}
+bloquear(5.6, 5.2, 7.6, 6);
+estatico(6.6 + 5.6, () => {   // mesa del plató con el logo
+  caja(5.6, 5.2, 0, 2, .8, .75, "#1a1d24", {top: "#2a2f3a"});
+  caraY(5.65, 6.002, .7, () => { ctx.fillStyle = "#d4ff3a"; ctx.font = "900 26px Inter, sans-serif"; ctx.fillText("TF NEWS", 30, 40); });
+}, 6.6, 5.6);
+bloquear(6.4, 7.6, 6.9, 8.1);
+estatico(6.65 + 7.85, () => {   // cámara en su trípode
+  const [bx, by] = iso(6.65, 7.85, 0), [tx, ty] = iso(6.65, 7.85, 1.15);
+  ctx.strokeStyle = "#2a2e36"; ctx.lineWidth = 1.6; ctx.beginPath();
+  for (const dx of [-6, 0, 6]) { ctx.moveTo(bx + dx, by + (dx ? 2 : -2)); ctx.lineTo(tx, ty); } ctx.stroke();
+  caja(6.5, 7.7, 1.15, .3, .3, .22, "#15181e", {top: "#2a2f3a"});
+  circulo(tx - 5, ty - 6, 2.2, Math.sin(T * 3) > 0 ? "#ff3b3b" : "#5a1414");
+}, 6.65, 7.85);
+for (const [x, y, c] of [[5.2, 7.3, "#ffd98a"], [8.1, 7.3, "#ffd98a"]]) {   // focos del plató
+  bloquear(x - .15, y - .15, x + .15, y + .15);
+  estatico(x + y, () => { caja(x - .04, y - .04, 0, .08, .08, 1.4, "#2a2e36"); const [px, py] = iso(x, y, 1.45); circulo(px, py, 5, "#f4efe0"); brillo(x, y, 1.45, 40, c, .35 + noche * .4); }, x, y);
+}
+silla(6.6, 4.75, "s", "#4a3352");
+planta(8.5, .9, true); planta(.6, 8.4);
+
+// ---- SISTEMAS: servidores y el panel de salud del sistema ----
+for (let i = 0; i < 7; i++) { const x = 9.35 + i * 1.05; bloquear(x, .3, x + .9, 1.15); estatico(x + .45 + .72, () => rack(x, .3), x + .45, .72); }
+const ASIENTO_NESTOR = enPlanta1(puesto({x: 10.2, y: 4.6, w: 1.8, color: "#1b2a24", colorSilla: "#2b443a", pintar: (w, h, i) => pantallaSistemaMini(w, h, i), brilla: () => sistemaOk() ? "#2ee6a6" : "#ff5a76"}));
+function sistemaOk() {
+  const p = S && S.sistema && S.sistema.papel;
+  return !p || !p.errores_seguidos;
+}
+function pantallaSistemaMini(w, h, i) {
+  const p = S && S.sistema && S.sistema.papel || {}, ok = sistemaOk();
+  ctx.fillStyle = "#04100b"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = ok ? "#2ee6a6" : "#ff5a76"; ctx.font = "800 5px JetBrains Mono, monospace";
+  ctx.fillText(i ? "CICLO" : (ok ? "SISTEMA OK" : "ERRORES"), 3, 7);
+  ctx.fillStyle = "#cfe8d8"; ctx.font = "800 8px JetBrains Mono, monospace";
+  ctx.fillText(i ? `${p.ciclo_s == null ? "—" : NF1.format(p.ciclo_s)} s` : `${p.errores_seguidos || 0} err`, 3, 20);
+}
+bloquear(13.2, 5.4, 16.2, 5.75);
+estatico(14.7 + 5.6, () => {   // pared de monitores con la salud del sistema
+  caja(13.3, 5.45, 0, .1, .1, .7, "#222"); caja(16, 5.45, 0, .1, .1, .7, "#222");
+  caja(13.2, 5.4, .7, 3, .12, 1.3, "#0b0e13");
+  caraY(13.25, 5.522, 1.95, () => cacheado("sistema", 290, 120, 1, () => pantallaSistema(290, 120)));
+  brillo(14.7, 5.6, 1.3, 70, sistemaOk() ? "#2ee6a6" : "#ff5a76", .2);
+}, 14.7, 5.6);
+function pantallaSistema(w, h) {
+  const sis = S && S.sistema || {}, p = sis.papel || {}, ho = sis.holding || {}, m = S && S.mineria || {};
+  ctx.fillStyle = "#050c09"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#2ee6a6"; ctx.font = "900 13px Inter, sans-serif"; ctx.fillText("SALUD DEL SISTEMA", 10, 18);
+  const hace = t => t ? Math.max(0, Math.round((Date.now() - Date.parse(t)) / 1000)) : null;
+  const filas = [["Paper trading", p.errores_seguidos ? `${p.errores_seguidos} errores` : hace(p.ok) == null ? "—" : `ok hace ${hace(p.ok)} s`, !p.errores_seguidos],
+    ["Ciclo", p.ciclo_s == null ? "—" : `${NF2.format(p.ciclo_s)} s`, (p.ciclo_s || 0) < 15], ["Holding", ho.errores_seguidos ? `${ho.errores_seguidos} errores` : "ok", !ho.errores_seguidos],
+    ["Minería", m.estado || "—", true], ["Mercados", String((p.mercados || []).length), true]];
+  filas.forEach(([t, v, ok], k) => {
+    const y = 38 + k * 16;
+    circulo(16, y - 4, 4, ok ? "#2ee6a6" : "#ff5a76");
+    ctx.fillStyle = "#9fb3a8"; ctx.font = "700 10px Inter, sans-serif"; ctx.fillText(t, 26, y);
+    ctx.fillStyle = "#e9f5ee"; ctx.font = "800 10px JetBrains Mono, monospace"; ctx.textAlign = "right"; ctx.fillText(v, w - 10, y); ctx.textAlign = "start";
+  });
+}
+planta(16.5, 8.4, true);
+
+// ---- CAFETERÍA: barra, cafetera, vitrina y mesas ----
+bloquear(38, 1.9, 44.6, 2.65);
+estatico(41.3 + 2.3, () => {
+  caja(38, 1.9, 0, 6.6, .75, .98, "#5a3a22", {top: "#e9e4dc", izq: "#6b4528", der: "#4e331e"});
+  caraY(38, 2.652, .9, () => { ctx.fillStyle = "rgba(255,207,90,.35)"; ctx.fillRect(0, 6, 660, 2); for (let u = 30; u < 660; u += 90) { ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.fillRect(u, 14, 2, 70); } });
+  // cafetera profesional
+  caja(38.3, 1.98, .98, .9, .5, .55, "#c9ced5", {top: "#e6e9ee", izq: "#d4d8de", der: "#aab0b9"});
+  caraY(38.32, 2.482, 1.48, () => { ctx.fillStyle = "#101216"; ctx.fillRect(8, 6, 70, 14); ctx.fillStyle = "#ff8a5c"; ctx.font = "800 9px JetBrains Mono, monospace"; ctx.fillText("ESPRESSO", 12, 17); for (let k = 0; k < 2; k++) { ctx.fillStyle = "#2a2e36"; ctx.fillRect(16 + k * 34, 26, 10, 12); } });
+  // vitrina de dulces
+  caja(41.8, 2, .98, 1.4, .5, .4, "#000000", {top: "rgba(255,255,255,.18)", izq: "rgba(180,220,255,.18)", der: "rgba(180,220,255,.12)"});
+  for (let k = 0; k < 5; k++) { const [px, py] = iso(42 + k * .26, 2.25, 1.05); circulo(px, py, 3, ["#e8b04a", "#c2410c", "#f4d4a0", "#7a3e1d", "#ff8aa8"][k]); }
+  // tazas y servilletero
+  for (let k = 0; k < 4; k++) caja(43.5 + k * .2, 2.2, .98, .11, .11, .11, ["#f4f1ea", "#d4ff3a", "#ff8a5c", "#5cc0ff"][k], {top: "#4a2c1d"});
+}, 41.3, 2.3);
+for (const x of [38.7, 39.9, 41.1, 42.3, 43.5]) {   // taburetes altos
+  estatico(x + 3.05, () => { caja(x - .04, 3.01, 0, .08, .08, .6, "#2a2e36"); const [px, py] = iso(x, 3.05, .62); ctx.fillStyle = "#c2410c"; ctx.beginPath(); ctx.ellipse(px, py, 7, 3.5, 0, 0, TAU); ctx.fill(); }, x, 3.05);
+}
+const MESAS_CAFE = [[39.4, 6.2], [42.6, 6.2], [44.9, 4.4]];
+for (const [x, y] of MESAS_CAFE) {
+  bloquear(x - .35, y - .35, x + .35, y + .35);
+  estatico(x + y, () => { caja(x - .05, y - .05, 0, .1, .1, .45, "#2a2e36"); const [px, py] = iso(x, y, .46); ctx.fillStyle = "#3a2a1c"; ctx.beginPath(); ctx.ellipse(px, py + 1, 19, 9.5, 0, 0, TAU); ctx.fill(); ctx.fillStyle = "#f2efe8"; ctx.beginPath(); ctx.ellipse(px, py, 19, 9.5, 0, 0, TAU); ctx.fill(); caja(x - .05, y - .1, .46, .1, .1, .1, "#f4f1ea", {top: "#4a2c1d"}); }, x, y);
+  silla(x - .75, y, "e", "#7a4a1d"); silla(x + .75, y, "o", "#7a4a1d");
+}
+const ASIENTO_CHEMA = {x: 41.3, y: 1.25, mira: "s", postura: "de_pie", planta: 1};
+planta(45.4, 8.4, true); planta(37.6, 8.4);
+
+// ---- SALA DE JUEGOS: futbolín, recreativas, dardos y pufs ----
+const FUTBOLIN = {x: 47.2, y: 3.6, w: 1.5, d: .8};
+bloquear(FUTBOLIN.x, FUTBOLIN.y, FUTBOLIN.x + FUTBOLIN.w, FUTBOLIN.y + FUTBOLIN.d);
+estatico(FUTBOLIN.x + .75 + FUTBOLIN.y + .4, () => {
+  for (const [dx, dy] of [[.05, .05], [1.37, .05], [.05, .67], [1.37, .67]]) caja(FUTBOLIN.x + dx, FUTBOLIN.y + dy, 0, .08, .08, .55, "#2a2e36");
+  caja(FUTBOLIN.x, FUTBOLIN.y, .55, FUTBOLIN.w, FUTBOLIN.d, .22, "#3d2a1a", {top: "#2f8f5b"});
+  plano(FUTBOLIN.x, FUTBOLIN.y, .771, () => {
+    ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.lineWidth = 2; ctx.strokeRect(6, 6, 138, 68); ctx.beginPath(); ctx.moveTo(75, 6); ctx.lineTo(75, 74); ctx.stroke();
+    for (let k = 0; k < 6; k++) { ctx.fillStyle = k % 2 ? "#ff5a76" : "#5cc0ff"; for (let j = 0; j < 3; j++) ctx.fillRect(16 + k * 22, 14 + j * 22 + Math.sin(T * 6 + k) * 4, 5, 8); }
+    if (futbolinJugando()) { const t = T * 1.7; circulo(75 + Math.sin(t * 2.3) * 55, 40 + Math.sin(t * 3.1) * 25, 3.5, "#fff"); }
+  });
+}, FUTBOLIN.x + .75, FUTBOLIN.y + .4);
+for (const [k, x] of [[0, 49.4], [1, 50.5], [2, 51.6]]) {
+  bloquear(x, .35, x + .8, 1.05);
+  estatico(x + .4 + .7, () => {
+    const c = ["#402a6e", "#1f4a6e", "#6e2a4a"][k];
+    caja(x, .35, 0, .8, .7, 1.45, c, {top: shade(c, 1.3)});
+    caraY(x + .05, 1.052, 1.35, () => {
+      ctx.fillStyle = "#07091a"; ctx.fillRect(5, 5, 70, 46);
+      for (let i = 0; i < 6; i++) { ctx.fillStyle = ["#ff5a76", "#ffc24a", "#2ee6a6", "#5cc0ff"][(i + k) % 4]; ctx.fillRect(8 + ((T * (25 + k * 9) + i * 13) % 60), 9 + i * 7, 5, 4); }
+      ctx.fillStyle = "#d4ff3a"; ctx.font = "800 8px JetBrains Mono, monospace"; ctx.fillText(["HODL", "PUMP", "MOON"][k], 22, 62);
+    });
+    brillo(x + .4, 1.05, 1.1, 40, ["#b58cff", "#5cc0ff", "#ff5a76"][k], .4);
+  }, x + .4, .7);
+}
+bloquear(50.4, 5, 52.2, 5.35);
+estatico(51.3 + 5.2, () => {   // tele con la consola
+  caja(50.5, 5.05, 0, 1.6, .3, .45, "#1a1d24", {top: "#2a2f3a"});
+  caja(50.45, 5.1, .45, 1.7, .08, .95, "#0b0d11");
+  caraY(50.5, 5.182, 1.35, () => { ctx.fillStyle = "#0a1a10"; ctx.fillRect(0, 0, 160, 86); ctx.fillStyle = "#2ee6a6"; ctx.fillRect(10 + (T * 40) % 130, 50, 16, 10); ctx.fillStyle = "#ff5a76"; ctx.fillRect(120 - (T * 33) % 110, 30, 12, 12); ctx.fillStyle = "#d4ff3a"; ctx.font = "800 10px JetBrains Mono, monospace"; ctx.fillText("GAME ON", 50, 18); });
+  brillo(51.3, 5.2, 1, 60, "#2ee6a6", .3);
+}, 51.3, 5.2);
+for (const [x, y, c] of [[50.2, 7.1, "#ff8a5c"], [51.4, 7.4, "#d4ff3a"], [52.6, 7.1, "#5cc0ff"]]) {
+  estatico(x + y - .1, () => { const [px, py] = iso(x, y, 0); ctx.fillStyle = shade(c, .7); ctx.beginPath(); ctx.ellipse(px, py - 5, 17, 10, 0, 0, TAU); ctx.fill(); ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(px - 1, py - 9, 14, 8, 0, 0, TAU); ctx.fill(); }, x, y);
+}
+planta(53.4, 8.4, true); planta(46.6, 8.4);
+
+// ---- PASILLO: máquina de vending y bancos ----
+bloquear(30, 9.15, 30.8, 9.75);
+estatico(30.4 + 9.5, () => {
+  caja(30, 9.15, 0, .8, .6, 1.5, "#1f2a3a", {top: "#2c3a50"});
+  caraY(30.05, 9.752, 1.42, () => { ctx.fillStyle = "#0b1220"; ctx.fillRect(4, 4, 50, 80); for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) { ctx.fillStyle = ["#ff5a76", "#ffc24a", "#2ee6a6", "#5cc0ff"][(r + c) % 4]; ctx.fillRect(8 + c * 15, 10 + r * 18, 10, 12); } ctx.fillStyle = "#d4ff3a"; ctx.fillRect(60, 30, 12, 20); });
+  brillo(30.4, 9.75, 1, 40, "#5cc0ff", .3);
+}, 30.4, 9.5);
+for (const x of [8, 39]) planta(x, 10.3);
+
+// ---- TERRAZA: pérgola con mesa larga, sombrillas, piscina, fogata, barbacoa, césped y telescopio ----
+const PERGOLA = {x0: 19.4, y0: 12.5, x1: 27.2, y1: 15.9};
+for (const [x, y] of [[PERGOLA.x0, PERGOLA.y0], [PERGOLA.x1, PERGOLA.y0], [PERGOLA.x0, PERGOLA.y1], [PERGOLA.x1, PERGOLA.y1]]) {
+  bloquear(x - .1, y - .1, x + .1, y + .1);
+  estatico(x + y, () => caja(x - .07, y - .07, 0, .14, .14, 2.25, "#5a3a22", {top: "#6b4528"}), x, y);
+}
+estatico(PERGOLA.x0 + PERGOLA.y0 + .1, () => caja(PERGOLA.x0, PERGOLA.y0 - .05, 2.25, PERGOLA.x1 - PERGOLA.x0, .1, .12, "#5a3a22", {top: "#6b4528"}));
+estatico(PERGOLA.x0 + PERGOLA.y0 + .1, () => caja(PERGOLA.x0 - .05, PERGOLA.y0, 2.25, .1, PERGOLA.y1 - PERGOLA.y0, .12, "#5a3a22", {top: "#6b4528"}));
+estatico(PERGOLA.x1 + PERGOLA.y1 + .2, () => { caja(PERGOLA.x0, PERGOLA.y1 - .05, 2.25, PERGOLA.x1 - PERGOLA.x0, .1, .12, "#5a3a22", {top: "#6b4528"}); caja(PERGOLA.x1 - .05, PERGOLA.y0, 2.25, .1, PERGOLA.y1 - PERGOLA.y0, .12, "#5a3a22", {top: "#6b4528"}); });
+bloquear(20.3, 13.8, 26.3, 14.6);
+for (let x = 20.3; x < 26.3; x += 1) estatico(x + .5 + 14.2, () => { caja(x, 13.8, .42, 1, .8, .06, "#8a6440", {top: "#b08356", izq: "#7a5636", der: "#5f432a"}); caja(x + .45, 14.1, 0, .1, .2, .42, "#5a3a22"); });
+estatico(23.3 + 14.2 + .1, () => { for (let k = 0; k < 4; k++) { caja(20.9 + k * 1.5, 14.05, .48, .12, .12, .14, "#f4f1ea", {top: "#7a1d2a"}); const [px, py] = iso(21.4 + k * 1.5, 14.2, .5); circulo(px, py, 4, ["#ff8a5c", "#2ee6a6", "#ffcf5a", "#ff5a76"][k]); } }, 23.3, 14.2);
+const SILLAS_PERGOLA = [];
+for (const x of [20.8, 22.3, 23.8, 25.3]) {
+  silla(x, 13.3, "s", "#3a2a1c"); silla(x, 15.1, "n", "#3a2a1c");
+  SILLAS_PERGOLA.push({x, y: 13.3, mira: "s", postura: "sentado", tipo: "comida", planta: 1}, {x, y: 15.1, mira: "n", postura: "sentado", tipo: "comida", planta: 1});
+}
+const BOMBILLAS1 = [];
+for (let x = PERGOLA.x0; x <= PERGOLA.x1; x += .5) { BOMBILLAS1.push([x, PERGOLA.y0, 2.2]); BOMBILLAS1.push([x, PERGOLA.y1, 2.2]); }
+for (let x = 18.4; x < 45.8; x += .6) BOMBILLAS1.push([x, 23.85, 1.15]);
+for (let y = 11.4; y < 23.8; y += .6) BOMBILLAS1.push([45.85, y, 1.15]);
+function sombrilla(x, y, c) {
+  bloquear(x - .45, y - .45, x + .45, y + .45);
+  estatico(x + y, () => {
+    caja(x - .05, y - .05, 0, .1, .1, .45, "#444"); caja(x - .45, y - .45, .45, .9, .9, .05, "#f2efe8");
+    caja(x - .03, y - .03, .5, .06, .06, 1.25, "#666");
+    const [px, py] = iso(x, y, 1.75);
+    ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(px, py - 10); ctx.lineTo(px - 46, py + 12); ctx.lineTo(px, py + 22); ctx.lineTo(px + 46, py + 12); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.moveTo(px, py - 10); ctx.lineTo(px - 15, py + 17); ctx.lineTo(px, py + 22); ctx.lineTo(px + 15, py + 17); ctx.closePath(); ctx.fill();
+  }, x, y);
+}
+const SITIOS_SOMBRILLA = [];
+for (const [x, y, c] of [[29.6, 13.4, "#2ee6a6"], [33, 13.4, "#5cc0ff"]]) {
+  sombrilla(x, y, c);
+  silla(x - .8, y, "e", "#e9e4dc"); silla(x + .8, y, "o", "#e9e4dc");
+  SITIOS_SOMBRILLA.push({x: x - .8, y, mira: "e", postura: "sentado", tipo: "terraza", planta: 1}, {x: x + .8, y, mira: "o", postura: "sentado", tipo: "terraza", planta: 1});
+}
+const PISCINA = {x0: 27.4, y0: 17.2, x1: 34.4, y1: 21.4};
+bloquear(PISCINA.x0 - .2, PISCINA.y0 - .2, PISCINA.x1 + .2, PISCINA.y1 + .2);
+for (let x = PISCINA.x0; x < PISCINA.x1; x++) estatico(x + .5 + PISCINA.y0 - .3, () => {
+  const w = Math.min(1, PISCINA.x1 - x);
+  plano(x, PISCINA.y0, .02, () => {
+    const h = (PISCINA.y1 - PISCINA.y0) * 100, g = ctx.createLinearGradient(0, 0, w * 100, h);
+    g.addColorStop(0, "#1ea6d6"); g.addColorStop(1, "#0c7fb0"); ctx.fillStyle = g; ctx.fillRect(0, 0, w * 100 + .5, h);
+    ctx.strokeStyle = "rgba(255,255,255,.28)"; ctx.lineWidth = 2;   // reflejos del agua
+    for (let k = 0; k < 9; k++) { const v = (k * 47 + T * 12 + x * 30) % h; ctx.beginPath(); ctx.moveTo(10, v); ctx.quadraticCurveTo(50, v + Math.sin(T * 2 + k + x) * 8, 90, v); ctx.stroke(); }
+  });
+});
+estatico(PISCINA.x0 + PISCINA.y0, () => {   // borde de piedra
+  const b = {top: "#e9e4dc", izq: "#cfc6b8", der: "#b7ad9e"};
+  caja(PISCINA.x0 - .2, PISCINA.y0 - .2, 0, PISCINA.x1 - PISCINA.x0 + .4, .2, .06, "", b);
+  caja(PISCINA.x0 - .2, PISCINA.y0, 0, .2, PISCINA.y1 - PISCINA.y0, .06, "", b);
+});
+estatico(PISCINA.x1 + PISCINA.y1 + .3, () => {
+  const b = {top: "#e9e4dc", izq: "#cfc6b8", der: "#b7ad9e"};
+  caja(PISCINA.x0 - .2, PISCINA.y1, 0, PISCINA.x1 - PISCINA.x0 + .4, .2, .06, "", b);
+  caja(PISCINA.x1, PISCINA.y0, 0, .2, PISCINA.y1 - PISCINA.y0, .06, "", b);
+  for (const dy of [0, .35]) caja(PISCINA.x1 - .35, PISCINA.y0 + .3 + dy, .06, .05, .05, .55, "#c9ced5");   // escalerilla
+});
+const TUMBONAS = [];
+for (const x of [28, 29.7, 31.4, 33.1]) {
+  bloquear(x - .35, 22.1, x + .35, 23.5);
+  estatico(x + 22.8, () => { caja(x - .35, 22.15, 0, .7, 1.3, .22, "#e9e4dc", {top: "#fbf8f2"}); caja(x - .35, 22.15, .22, .7, .45, .32, "#e9e4dc", {top: "#fbf8f2"}); caja(x - .3, 22.6, .22, .6, .85, .04, ["#ff8a5c", "#5cc0ff", "#d4ff3a", "#ff5a76"][TUMBONAS.length % 4]); }, x, 22.8);
+  TUMBONAS.push({x, y: 22.85, mira: "n", postura: "sentado", tipo: "tumbona", planta: 1});
+}
+const FOGATA = {x: 39.6, y: 15.4};
+bloquear(FOGATA.x - .5, FOGATA.y - .5, FOGATA.x + .5, FOGATA.y + .5);
+estatico(FOGATA.x + FOGATA.y, () => {
+  const [px, py] = iso(FOGATA.x, FOGATA.y, .25);
+  caja(FOGATA.x - .5, FOGATA.y - .5, 0, 1, 1, .25, "#4a4f5a", {top: "#2a2e36"});
+  for (let k = 0; k < 7; k++) {   // llamas
+    const f = (T * 3 + k * .7) % 1, x = px + Math.sin(k * 2.1 + T * 4) * 6, y = py - f * 22;
+    ctx.fillStyle = `rgba(255,${120 + k * 15},40,${1 - f})`; ctx.beginPath(); ctx.ellipse(x, y, 4 * (1 - f) + 1, 7 * (1 - f) + 1, 0, 0, TAU); ctx.fill();
+  }
+  brillo(FOGATA.x, FOGATA.y, .6, 90, "#ff8a3c", .55 + noche * .4);
+}, FOGATA.x, FOGATA.y);
+const SITIOS_FUEGO = [];
+for (const [x, y, w, d, mira] of [[37.5, 14.7, .7, 1.5, "e"], [38.9, 13.3, 1.5, .7, "s"], [41.1, 14.7, .7, 1.5, "o"]]) {
+  bloquear(x, y, x + w, y + d);
+  estatico(x + w / 2 + y + d / 2, () => { caja(x, y, 0, w, d, .38, "#3d5a80", {top: "#d9d2c3", izq: "#4a6b94", der: "#324b6b"}); caja(x + (mira === "e" ? 0 : mira === "o" ? w - .18 : 0), y + (mira === "s" ? 0 : 0), .38, mira === "s" ? w : .18, mira === "s" ? .18 : d, .32, "#3d5a80", {top: "#4d6d96"}); }, x + w / 2, y + d / 2);
+  const cx = x + w / 2, cy = y + d / 2;
+  SITIOS_FUEGO.push({x: mira === "e" ? cx + .55 : mira === "o" ? cx - .55 : cx, y: mira === "s" ? cy + .55 : cy, mira, postura: "sentado", tipo: "fuego", planta: 1});
+}
+bloquear(43.5, 12, 44.5, 12.8);
+estatico(44 + 12.4, () => {
+  caja(43.5, 12, 0, 1, .8, .7, "#2b2b30", {top: "#3a3a40"});
+  plano(43.55, 12.05, .705, () => { for (let i = 0; i < 4; i++) { ctx.fillStyle = Math.sin(T * 4 + i) > 0 ? "#ff8a3c" : "#c2410c"; ctx.fillRect(8 + i * 22, 20, 14, 40); } });
+  brillo(44, 12.4, .8, 40, "#ff8a3c", .5);
+  if (Math.random() < .08 && vista === 1) particulas.push({x: 44 + rand(-.2, .2), y: 12.4, z: .8, vx: 0, vy: 0, vz: .4, g: -.05, vida: 2, t: 0, color: "#ffffff", r: 2.5, vapor: true, planta: 1});
+}, 44, 12.4);
+function arbol(x, y, s = 1) {
+  bloquear(x - .4, y - .4, x + .4, y + .4);
+  estatico(x + y, () => {
+    caja(x - .35, y - .35, 0, .7, .7, .45, "#8a7a66", {top: "#3a2a1c"});
+    const [px, py] = iso(x, y, .45);
+    ctx.fillStyle = "#5a3a22"; ctx.fillRect(px - 2, py - 30 * s, 4, 30 * s);
+    for (const [dx, dy, r, c] of [[0, -42, 20, "#2f8f5b"], [-14, -34, 15, "#237a4b"], [14, -36, 15, "#2a8551"], [0, -56, 14, "#3aa56a"], [-8, -50, 11, "#46b877"]]) circulo(px + dx * s, py + dy * s, r * s, c);
+  }, x, y);
+}
+arbol(18.9, 23.2); arbol(36.2, 23.2, 1.1); arbol(45.1, 23.2, 1.2); arbol(45.1, 18.6); arbol(45.1, 11.9, .9);
+bloquear(42.2, 20.4, 42.8, 21);
+estatico(42.5 + 20.7, () => {   // telescopio
+  const [bx, by] = iso(42.5, 20.7, 0), [tx, ty] = iso(42.5, 20.7, 1.1);
+  ctx.strokeStyle = "#2a2e36"; ctx.lineWidth = 1.6; ctx.beginPath(); for (const dx of [-6, 0, 6]) { ctx.moveTo(bx + dx, by + (dx ? 2 : -2)); ctx.lineTo(tx, ty); } ctx.stroke();
+  ctx.save(); ctx.translate(tx, ty); ctx.rotate(-.5); ctx.fillStyle = "#e9edf3"; rr(-4, -3, 22, 6, 3); ctx.fill(); ctx.fillStyle = "#5cc0ff"; ctx.fillRect(15, -3, 3, 6); ctx.restore();
+}, 42.5, 20.7);
+bloquear(35.4, 12.1, 36.4, 12.7);
+estatico(35.9 + 12.4, () => {   // carrito de bebidas
+  caja(35.4, 12.1, .1, 1, .6, .05, "#c9ced5"); caja(35.4, 12.1, .55, 1, .6, .05, "#c9ced5");
+  for (const [dx, dy] of [[0, 0], [.94, 0], [0, .54], [.94, .54]]) caja(35.4 + dx, 12.1 + dy, 0, .06, .06, .6, "#8a94a6");
+  for (let k = 0; k < 4; k++) caja(35.5 + k * .22, 12.25, .6, .1, .1, .28, ["#2ee6a6", "#ff8a5c", "#ffcf5a", "#5cc0ff"][k]);
+}, 35.9, 12.4);
+// barandilla de cristal en los bordes de la terraza
+for (let x = 18; x < X_ALA; x++) estatico(x + .5 + 24, () => { caja(x, 23.9, 0, 1, .08, .9, "#000000", {top: "rgba(255,255,255,.35)", izq: "rgba(170,215,255,.16)", der: "rgba(170,215,255,.1)"}); caja(x, 23.88, .9, 1, .12, .05, "#c9ced5"); }, x + .5, 23.95);
+for (let y = 11; y < D; y++) estatico(X_ALA + y + .5, () => { caja(X_ALA - .08, y, 0, .08, 1, .9, "#000000", {top: "rgba(255,255,255,.35)", izq: "rgba(170,215,255,.12)", der: "rgba(170,215,255,.16)"}); caja(X_ALA - .1, y, .9, .12, 1, .05, "#c9ced5"); }, X_ALA - .05, y + .5);
+
+// ---- tabiques de la planta 1 ----
+muroH(9, 0, 54, [[4, 6], [12, 14], [21, 23], [31, 33], [40, 42], [49, 51]], 1, "#d4ff3a");
+muroV(9, 0, 9, [], 1, "#ff8a5c");
+muroV(17, 0, 9, [], 1, "#2ee6a6");
+muroV(28, 0, 9, [], 1, "#5cc0ff");
+muroV(37, 0, 9, [], 1, "#ffcf5a");
+muroV(46, 0, 9, [], 1, "#b58cff");
+muroH(11, 0, 18, [[8, 10]], 1, "#ff8a5c");
+muroH(11, 18, 46, [[22, 26], [33, 37], [42, 44]], 1, "#2ee6a6");
+muroV(18, 11, 24, [[19, 21]], 1, "#ff8a5c");
+bloquear(X_ALA, 11, W, D);   // fuera del edificio
+for (let y = 0; y < D; y++) muros.add(arista(-1, y, 0, y));
+SITIOS.push(...SILLAS_PERGOLA, ...SITIOS_SOMBRILLA, ...TUMBONAS, ...SITIOS_FUEGO, ...PUPITRES,
+  {x: 44.1, y: 13.2, mira: "n", postura: "de_pie", tipo: "barbacoa", planta: 1}, {x: 42.5, y: 21.4, mira: "n", postura: "de_pie", tipo: "telescopio", planta: 1},
+  ...[38.7, 39.9, 41.1, 42.3, 43.5].map(x => ({x, y: 3.25, mira: "n", postura: "de_pie", tipo: "barra", planta: 1})),
+  ...MESAS_CAFE.flatMap(([x, y]) => [{x: x - .75, y, mira: "e", postura: "sentado", tipo: "cafeteria", planta: 1}, {x: x + .75, y, mira: "o", postura: "sentado", tipo: "cafeteria", planta: 1}]),
+  {x: 47.95, y: 3.15, mira: "s", postura: "de_pie", tipo: "futbolin", planta: 1}, {x: 47.95, y: 4.85, mira: "n", postura: "de_pie", tipo: "futbolin", planta: 1},
+  ...[49.8, 50.9, 52].map(x => ({x, y: 1.6, mira: "n", postura: "de_pie", tipo: "arcade", planta: 1})),
+  ...[[50.2, 7.2], [51.4, 7.5], [52.6, 7.2]].map(([x, y]) => ({x, y, mira: "n", postura: "sentado", tipo: "puf", planta: 1})),
+  {x: 53, y: 3.4, mira: "n", postura: "de_pie", tipo: "dardos", planta: 1});
+SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
+function futbolinJugando() { return SITIOS.filter(s => s.tipo === "futbolin" && s.ocupante && !s.ocupante.andando).length === 2; }
+estaticos.sort((a, b) => a.k - b.k);
+construirEn(0);
+
 // ---------------------------------------------------------- caminos --
-function libre(x, y) { return x >= 0 && y >= 0 && x < W && y < D && !bloqueado[x][y]; }
-function celdaLibreCerca(px, py) {
+function libre(x, y, p = 0) { return x >= 0 && y >= 0 && x < W && y < D && !PLANTAS[p].bloqueado[x][y]; }
+function celdaLibreCerca(px, py, p = 0) {
   const cx = clamp(Math.floor(px), 0, W - 1), cy = clamp(Math.floor(py), 0, D - 1);
-  if (libre(cx, cy)) return [cx, cy];
+  if (libre(cx, cy, p)) return [cx, cy];
   let mejor = null, md = 1e9;
   for (let dx = -3; dx <= 3; dx++) for (let dy = -3; dy <= 3; dy++) {
     const x = cx + dx, y = cy + dy;
-    if (!libre(x, y)) continue;
+    if (!libre(x, y, p)) continue;
     const d = Math.hypot(x + .5 - px, y + .5 - py);
     if (d < md) { md = d; mejor = [x, y]; }
   }
   return mejor || [cx, cy];
 }
-function ruta(ax, ay, bx, by) {
-  const [sx, sy] = celdaLibreCerca(ax, ay), [gx, gy] = celdaLibreCerca(bx, by);
+function ruta(ax, ay, bx, by, p = 0) {
+  const [sx, sy] = celdaLibreCerca(ax, ay, p), [gx, gy] = celdaLibreCerca(bx, by, p), muros = PLANTAS[p].muros;
   const previo = new Int32Array(W * D).fill(-1), inicio = sx * D + sy, meta = gx * D + gy;
   previo[inicio] = inicio;
   const cola = [inicio];
@@ -1438,7 +1919,7 @@ function ruta(ax, ay, bx, by) {
     const c = cola[i], x = Math.floor(c / D), y = c % D;
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const nx = x + dx, ny = y + dy, n = nx * D + ny;
-      if (!libre(nx, ny) || previo[n] >= 0 || muros.has(arista(x, y, nx, ny))) continue;
+      if (!libre(nx, ny, p) || previo[n] >= 0 || muros.has(arista(x, y, nx, ny))) continue;
       previo[n] = c; cola.push(n);
     }
   }
@@ -1473,6 +1954,11 @@ const ROLES = {
   general: {puesto: "Supervisión general", camisa: "#f1ece2", pantalon: "#2b2f38", accesorio: "general", tono: "#ffcf5a"},
   riesgo2: {puesto: "Control de riesgos", camisa: "#8a2c45", pantalon: "#241820", accesorio: "gafas_pasta", tono: "#ff7a95"},
   trader: {puesto: "Trader", camisa: null, pantalon: "#2b3140", accesorio: "cascos"},
+  quant: {puesto: "Equipo Quant", camisa: "#1f4f8f", pantalon: "#1d2633", accesorio: "gafas", tono: "#5cc0ff"},
+  profesora: {puesto: "Academia", camisa: "#b4462f", pantalon: "#2b2f38", accesorio: "gafas_pasta", tono: "#ff8a5c"},
+  comunicacion: {puesto: "Comunicación", camisa: "#e0457b", pantalon: "#23202a", accesorio: null, tono: "#ff8a5c"},
+  it: {puesto: "Sistemas", camisa: "#20b26b", pantalon: "#1e2621", accesorio: "cascos", tono: "#2ee6a6"},
+  barista: {puesto: "Cafetería", camisa: "#3a2a1c", pantalon: "#1a1512", accesorio: null, tono: "#ffcf5a"},
 };
 const agentes = [];
 class Agente {
@@ -1480,7 +1966,7 @@ class Agente {
     const h = hash(o.nombre + (o.rol === "trader" ? "" : o.id || ""));   // un trader es siempre el mismo, cambie o no de estrategia
     const rol = ROLES[o.rol];
     Object.assign(this, {
-      x: 0, y: 0, z: 0, mira: "s", postura: "de_pie", ruta: [], andando: false, fase: 0, velocidad: 1.8,
+      x: 0, y: 0, z: 0, planta: 0, mira: "s", postura: "de_pie", ruta: [], andando: false, fase: 0, velocidad: 1.8,
       burbuja: null, tarea: null, hasta: 0, sitio: null, alLlegar: null, semilla: h % 1000,
       piel: PIELES[h % PIELES.length], pelo: PELOS[(h >>> 4) % PELOS.length], peinado: PEINADOS[(h >>> 9) % PEINADOS.length],
       camisa: rol.camisa || CAMISAS[(h >>> 13) % CAMISAS.length], pantalon: rol.pantalon, accesorio: rol.accesorio, puesto: rol.puesto,
@@ -1488,14 +1974,33 @@ class Agente {
     this.tono = rol.tono || this.camisa;
   }
 }
-function colocar(a, s) { a.x = s.x; a.y = s.y; a.mira = s.mira; a.postura = s.postura || "sentado"; a.ruta = []; a.andando = false; }
+function colocar(a, s) { a.x = s.x; a.y = s.y; a.planta = s.planta || 0; a.mira = s.mira; a.postura = s.postura || "sentado"; a.ruta = []; a.andando = false; a.transbordo = null; }
 function irA(a, x, y, postura, mira, alLlegar) {
-  a.ruta = ruta(a.x, a.y, x, y);
+  a.transbordo = null;
+  a.ruta = ruta(a.x, a.y, x, y, a.planta || 0);
   a.andando = true; a.postura = "de_pie";
   a.alLlegar = () => { a.postura = postura; if (mira) a.mira = mira; alLlegar && alLlegar(); };
 }
-function volverAlPuesto(a, alLlegar) { if (a.casa) irA(a, a.casa.x, a.casa.y, "sentado", a.casa.mira, alLlegar); }
+// Para ir a otra planta se coge el ascensor (al fondo del pasillo): se entra, se sube o se baja y se sigue andando.
+const ASCENSOR = {x: .9, y: 10.1};
+const ascensorPlanta = [0, 0];   // hasta cuándo está abierto el ascensor de cada planta (animación de las puertas)
+function irAPlanta(a, p, x, y, postura, mira, alLlegar) {
+  if ((a.planta || 0) === p) return irA(a, x, y, postura, mira, alLlegar);
+  irA(a, ASCENSOR.x, ASCENSOR.y, "de_pie", "o", () => {
+    ascensorPlanta[a.planta || 0] = T + 2;
+    a.transbordo = {p, x, y, postura, mira, alLlegar, hasta: T + 2.4};
+  });
+}
+function volverAlPuesto(a, alLlegar) { if (a.casa) irAPlanta(a, a.casa.planta || 0, a.casa.x, a.casa.y, a.casa.postura || "sentado", a.casa.mira, alLlegar); }
 function moverAgente(a, dt) {
+  if (a.transbordo) {   // dentro del ascensor: no se le ve hasta que llega a la otra planta
+    if (T >= a.transbordo.hasta) {
+      const tb = a.transbordo;
+      a.transbordo = null; a.planta = tb.p; a.x = ASCENSOR.x; a.y = ASCENSOR.y; ascensorPlanta[tb.p] = T + 2;
+      irA(a, tb.x, tb.y, tb.postura, tb.mira, tb.alLlegar);
+    }
+    return;
+  }
   if (!a.ruta.length) return;
   const [tx, ty] = a.ruta[0], dx = tx - a.x, dy = ty - a.y, dist = Math.hypot(dx, dy), paso = a.velocidad * dt;
   if (dist > .01) a.mira = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "e" : "o") : (dy > 0 ? "s" : "n");
@@ -1544,12 +2049,14 @@ const SALAS_SUP = [
   {id: "trading", nombre: "Sala de trading", sup: "Clara", color: "#d4ff3a", casa: [9.5, 11.6], ruta: [[2.5, 13.6], [16.6, 13.6], [16.6, 21.6], [2.5, 21.6], [8.5, 23.6], [9.5, 11.6]]},
   {id: "riesgos", nombre: "Control de riesgos", sup: "Pablo", color: "#ff5a76", casa: [42, 17.2], ruta: [[39.5, 12], [44.6, 17.6], [42, 22.6], [42, 17.2]]},
   {id: "scalping", nombre: "Scalping", sup: "Álex", color: "#ff4fd8", casa: [50, 8.3], ruta: [[46.5, 8.2], [53.5, 8.2], [52.2, 6.6], [48.2, 6.6], [50, 8.3]]},
+  {id: "incubadora", nombre: "Incubadora", sup: "Lorena", color: "#ff8a5c", casa: [9.5, 20.1], ruta: [[2, 19.9], [16.5, 19.9], [16.5, 11.7], [9.5, 20.1]], planta: 1},
 ];
 const SUPERVISORES = SALAS_SUP.map(s => {
   const a = new Agente({nombre: s.sup, rol: "supervisor", sala: s, puesto: "Supervisión · " + s.nombre, proximaRonda: rand(4, 14), puntoRonda: 0,
     explica: `Supervisa ${s.nombre.toLowerCase()}: la patrulla, vigila sus números y se los cuenta a la supervisión general en cada ronda. Si algo se pone en rojo, da la alarma.` +
-      (s.id === "trading" || s.id === "scalping" ? " Además vigila el periodo de prueba de cada trader: al que no es rentable le cambia la estrategia por la mejor de la reserva del banco." : "")});
-  a.tono = s.color; a.x = s.casa[0]; a.y = s.casa[1]; a.mira = "s";
+      (s.id === "trading" || s.id === "scalping" ? " Además vigila el periodo de prueba de cada trader: al que no es rentable le cambia la estrategia por la mejor aprobada de la incubadora." : "") +
+      (s.id === "incubadora" ? " En la incubadora examina a cada estrategia nueva con 1.000 $ de prueba que no cuentan en tu fondo: si aprueba, sube a una mesa; si suspende, se descarta con su post mortem." : "")});
+  a.tono = s.color; a.x = s.casa[0]; a.y = s.casa[1]; a.planta = s.planta || 0; a.mira = "s";
   agentes.push(a);
   return a;
 });
@@ -1562,11 +2069,107 @@ const NOMBRES_TRADERS = ["Lucía", "Mateo", "Aitana", "Leo", "Martina", "Unai", 
   "Kai", "Nil", "Zoe", "Iris", "Ian", "Alma", "Dylan", "Leire", "Thiago", "Maya", "Óliver", "Cloe"];
 const traders = new Map();
 
+// ---- la gente de la planta 1 ----
+const LORENA = SUPERVISORES.find(s => s.sala.id === "incubadora");
+const QUANTS = [["Ainara", "Calcula el Kelly prudente de cada trader: con 30 operaciones reales o más, cuánto arriesgar en cada operación según su acierto y su ganancia media (un cuarto del Kelly, con un acierto rebajado por si ha tenido suerte)."],
+  ["Bernat", "Hace el Monte Carlo del fondo: baraja miles de veces sus días reales para ver el rango probable de los próximos 30 días y la probabilidad de perder o de caer un 5 %. También sigue el Sharpe, el Sortino y el Calmar."],
+  ["Yago", "Escribe el post mortem de cada estrategia que se retira: compara lo que prometía el backtest con lo que hizo en real y busca la causa (comisiones, mercado en contra, stops, volatilidad...)."]]
+  .map(([n, e], i) => empleado({nombre: n, rol: "quant", explica: e}, PUESTOS_QUANT[i]));
+const PROFESORA = empleado({nombre: "Begoña", rol: "profesora", explica: "Da clase en la academia con lo que se aprende en real: junta los post mortem y qué tipos de estrategia funcionan o fallan. Con eso, la minería busca más de lo que funciona y menos de lo que falla, sin dejar de explorar."},
+  {x: 32.6, y: 2.4, mira: "s", postura: "de_pie", planta: 1});
+const COMUNICADORES = [["Rebeca", "Escribe el informe del día con los datos reales: cómo va el fondo, el mejor y el peor trader, la incubadora, los relevos y los avisos de riesgo. Está en la pestaña «Informe»."],
+  ["Gorka", "Lleva las noticias de la oficina y el plató de TF News: anuncia los aprobados de la incubadora y los cambios de estrategia."]]
+  .map(([n, e], i) => empleado({nombre: n, rol: "comunicacion", explica: e}, PUESTOS_COM[i]));
+const NESTOR = empleado({nombre: "Néstor", rol: "it", explica: "Vigila que todo funciona: cuánto tarda cada ciclo del paper trading, si hay errores, si llegan los datos de Binance y si la minería está en marcha. Su panel está en la sala de sistemas."}, ASIENTO_NESTOR);
+const CHEMA = empleado({nombre: "Chema", rol: "barista", explica: "El barista de la cafetería de la planta 1. Sabe más de la oficina que nadie: todo el mundo le cuenta sus operaciones mientras espera el café."}, ASIENTO_CHEMA);
+const EQUIPO_P1 = [...QUANTS, PROFESORA, ...COMUNICADORES, NESTOR, CHEMA];
+
+// ---- traders de la incubadora: uno por plaza, con la acreditación naranja de «en prueba» ----
+const NOMBRES_INCUBADORA = ["Noelia", "Fermín", "Celia", "Rober", "Paola", "Saúl", "Elsa", "Iván", "Judith", "Hernán", "Lidia", "Tristán", "Miriam", "Ulises", "Claudia", "Ramón",
+  "Silvia", "Abel", "Nadia", "Germán", "Ariadna", "César", "Yolanda", "Bosco", "Itziar", "Ezequiel", "Rosa", "Moisés", "Estela", "Liam", "Greta", "Félix"];
+function plazaDe(d) { return d && d.plaza != null ? (d.grupo === "scalping" ? PLAZAS.scalping : PLAZAS.trading)[d.plaza] || null : null; }
+function sincronizarIncubadora(inicial) {
+  const inc = S.papel && S.papel.incubadora || {}, ests = S.papel && S.papel.estrategias || {};
+  for (const mesa of [...PLAZAS.trading, ...PLAZAS.scalping]) {   // plazas que se quedan sin estrategia
+    const a = mesa.trader;
+    if (!a || !a.id || inc[a.id]) continue;
+    const id = a.id, graduada = ests[id];
+    a.id = null; a.datos = null; a.puesto = "Incubadora · esperando estrategia";
+    if (graduada && !inicial) entregarEstrategia(a, id, graduada);
+  }
+  for (const [id, d] of Object.entries(inc)) {
+    const mesa = plazaDe(d);
+    if (!mesa) continue;
+    let a = mesa.trader;
+    if (a && a.id === id) { a.datos = d; continue; }
+    if (!a) {
+      const n = (d.grupo === "scalping" ? 24 : 0) + d.plaza;
+      a = new Agente({nombre: NOMBRES_INCUBADORA[n % NOMBRES_INCUBADORA.length], rol: "trader", incubadora: true});
+      a.casa = mesa.asiento; a.mesa = mesa; mesa.trader = a; agentes.push(a);
+      if (inicial) colocar(a, mesa.asiento);
+      else { a.planta = 1; a.x = ASCENSOR.x; a.y = ASCENSOR.y; ascensorPlanta[1] = T + 2; volverAlPuesto(a); }
+    }
+    a.id = id; a.datos = d; a.puesto = `Incubadora · plaza ${d.plaza + 1} · ${id}`;
+    if (!inicial) enCanal("operaciones", () => decir(a, `Me toca ${id}: ${ladoTxt(d.direccion).toLowerCase()} en ${moneda(d.simbolo)}, con 1.000 $ de prueba. ¡A aprobar el examen!`, 1));
+  }
+}
+// Cuando una estrategia aprueba y sube a una mesa, su trader de la incubadora baja a entregarla y vuelve a su plaza.
+function entregarEstrategia(a, id, d) {
+  const mesa = mesaDe(d);
+  if (!mesa || a.tarea === "entrega") return;
+  liberarSitio(a); a.tarea = "entrega";
+  confeti(a.x, a.y, 1.2, 1); flotante(a.x, a.y, 1.6, "¡APROBADA!", "#2ee6a6", 1);
+  enCanal("operaciones", () => decir(a, `¡${id} ha aprobado! Bajo a llevarla a la mesa ${d.mesa + 1}.`, 2, "bueno"));
+  irAPlanta(a, 0, mesa.asiento.x + .85, mesa.asiento.y + .1, "de_pie", "o", () => {
+    const quien = mesa.trader && mesa.trader !== a ? mesa.trader : null;
+    enCanal("operaciones", () => {
+      decir(a, quien ? `${quien.nombre}, te traigo ${id}: aprobada en la incubadora. ¡Cuídala!` : `Mesa ${d.mesa + 1}: aquí queda ${id}, aprobada en la incubadora.`, 2, "bueno", quien);
+      if (quien) decir(quien, pick(["¡Gracias! La cuido bien.", "Recibida. Primero, a respetar el plan.", "Vamos allá: ahora con dinero del fondo, cero alegrías."]), 1, "", a);
+    });
+    setTimeout(() => { if (a.tarea === "entrega") { a.tarea = null; volverAlPuesto(a); } }, 3500);
+  });
+}
+
+// ---- Satoshi, el gato: se pasea por las dos plantas y se echa donde le apetece ----
+Object.assign(GATO, {planta: 0, ruta: [], andando: false, fase: 0, velocidad: .95, mira: "o", estado: "dormir", hasta: 40, transbordo: null, alLlegar: null,
+  donde: "durmiendo en el sofá del descanso", nombre: "Satoshi"});
+const SITIOS_GATO = [
+  {x: 29.5, y: 21.1, z: .55, planta: 0, estado: "dormir", donde: "durmiendo en el sofá del descanso"},
+  {x: 26.7, y: 21.75, z: .33, planta: 0, estado: "sentado", donde: "sentado en la mesa baja del descanso, como si fuera suya"},
+  {x: 24, y: 10.2, z: 0, planta: 0, estado: "sentado", donde: "plantado en medio del pasillo, como siempre"},
+  {x: 41.9, y: 5.6, z: 0, planta: 0, estado: "sentado", donde: "mirando fijamente la moneda de bitcoin del holding"},
+  {x: 16.5, y: 7.6, z: 0, planta: 0, estado: "sentado", donde: "persiguiendo con la mirada los cubos de la cinta del laboratorio"},
+  {x: 31, y: 22.85, z: .26, planta: 1, estado: "dormir", donde: "tomando el sol en una tumbona de la terraza"},
+  {x: 38.1, y: 15.4, z: .4, planta: 1, estado: "dormir", donde: "calentito junto a la fogata de la terraza"},
+  {x: 41, y: 3.6, z: 0, planta: 1, estado: "sentado", donde: "esperando a que se le caiga algo a alguien en la cafetería"},
+  {x: 32.4, y: 3.3, z: 0, planta: 1, estado: "sentado", donde: "en primera fila de la academia (no toma apuntes)"},
+  {x: 40.2, y: 21.6, z: 0, planta: 1, estado: "dormir", donde: "durmiendo en el césped de la terraza"},
+  {x: 51.4, y: 7.45, z: .28, planta: 1, estado: "dormir", donde: "acurrucado en un puf de la sala de juegos"},
+];
+function planificarGato() {
+  if (GATO.andando || GATO.transbordo || T < GATO.hasta) return;
+  let s = pick(SITIOS_GATO.filter(x => x.planta === GATO.planta || Math.random() < .35));
+  if (Math.random() < .3) {   // a veces se sube a la mesa de alguien
+    const conAlguien = [...MESAS, ...MESAS_SCALP, ...PLAZAS.trading].filter(m => m.trader && m.trader.id);
+    if (conAlguien.length) {
+      const m = pick(conAlguien);
+      s = {x: m.asiento.x + .5, y: m.asiento.y - .85, z: .42, planta: m.asiento.planta || 0, estado: "sentado", donde: `subido a la mesa de ${m.trader.nombre}, tapándole la pantalla`};
+    }
+  }
+  GATO.z = 0; GATO.estado = "andar"; GATO.donde = "dando un paseo por la oficina";
+  GATO.hasta = T + 1e9;
+  irAPlanta(GATO, s.planta, s.x, s.y, "de_pie", null, () => {
+    GATO.z = s.z; GATO.estado = s.estado; GATO.donde = s.donde; GATO.hasta = T + rand(25, 70);
+    if (s.planta === vista && Math.random() < .5) flotante(s.x, s.y, s.z + .6, s.estado === "dormir" ? "z z z" : "miau", "#ffcf5a", s.planta);
+  });
+}
+
 // ---- dibujo de una persona (en coordenadas del mundo) ----
 // Cuerpo con hombros, manos y zapatos; cara con ojos que parpadean, cejas y boca según el ánimo;
 // ropa según el puesto (bata, americana, chaleco, sudadera...) y gestos cuando no teclean.
 const ROPA = {minero: "chaleco", prueba: "bata", banco: "traje", director: "traje", supervisor: "americana", general: "americana",
-  riesgos: "americana", riesgo2: "jersey", macro: "jersey", holder: "sudadera", trader: "camisa"};
+  riesgos: "americana", riesgo2: "jersey", macro: "jersey", holder: "sudadera", trader: "camisa", quant: "jersey", profesora: "americana",
+  comunicacion: "camisa", it: "sudadera", barista: "camisa"};
 function torsoRuta(cx, top, h, wa, wb) {
   ctx.beginPath();
   ctx.moveTo(cx - wa / 2 + 2.4, top);
@@ -1710,7 +2313,7 @@ function persona(a) {
       if (a.rol === "trader") {   // acreditación colgada del cuello
         ctx.strokeStyle = shade(a.tono || "#5cc0ff", 1.1); ctx.lineWidth = .8;
         ctx.beginPath(); ctx.moveTo(fx - 3, top + .3); ctx.lineTo(fx - .6, top + 6.2); ctx.moveTo(fx + 3, top + .3); ctx.lineTo(fx + .6, top + 6.2); ctx.stroke();
-        ctx.fillStyle = "#f4f6f9"; rr(fx - 1.8, top + 6, 3.6, 4.2, .8); ctx.fill(); ctx.fillStyle = "#d4ff3a"; ctx.fillRect(fx - 1.8, top + 6, 3.6, 1.1);
+        ctx.fillStyle = "#f4f6f9"; rr(fx - 1.8, top + 6, 3.6, 4.2, .8); ctx.fill(); ctx.fillStyle = a.incubadora ? "#ff8a5c" : "#d4ff3a"; ctx.fillRect(fx - 1.8, top + 6, 3.6, 1.1);
       }
     }
   } else if (ropa === "sudadera" && !frente) {   // capucha
@@ -1843,6 +2446,32 @@ function persona(a) {
 
 function gato() {
   const [px, py] = iso(GATO.x, GATO.y, GATO.z);
+  const c = "#e28f3e", o = "#b86a26", s = GATO.mira === "e" || GATO.mira === "s" ? 1 : -1;
+  ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.beginPath(); ctx.ellipse(px, py, 9, 3.5, 0, 0, TAU); ctx.fill();
+  if (GATO.andando || GATO.estado === "sentado") {
+    const anda = GATO.andando, paso = Math.sin(GATO.fase * 13);
+    if (anda) {   // de lado, con las patas moviéndose y la cola levantada
+      ctx.strokeStyle = o; ctx.lineWidth = 2; ctx.lineCap = "round";
+      for (const [dx, f] of [[-5, 1], [-2.5, -1], [3, 1], [5.5, -1]]) { ctx.beginPath(); ctx.moveTo(px + dx * s, py - 6); ctx.lineTo(px + dx * s + paso * f * 1.6 * s, py - .8); ctx.stroke(); }
+      ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(px, py - 8 - Math.abs(paso) * .6, 9, 4.6, 0, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(px - 8 * s, py - 9); ctx.quadraticCurveTo(px - 14 * s, py - 15, px - 11 * s, py - 20 + Math.sin(T * 6) * 1.5); ctx.stroke();
+      ctx.lineCap = "butt";
+      circulo(px + 9 * s, py - 12, 4.2, c);
+      ctx.beginPath(); ctx.moveTo(px + 6.5 * s, py - 14.5); ctx.lineTo(px + 7.5 * s, py - 18.5); ctx.lineTo(px + 9.5 * s, py - 15.5); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(px + 10 * s, py - 15.5); ctx.lineTo(px + 12.5 * s, py - 18); ctx.lineTo(px + 12.5 * s, py - 13.5); ctx.fill();
+      ctx.fillStyle = o; for (let i = 0; i < 3; i++) ctx.fillRect(px - 4 * s + i * 3.2 * s, py - 12, 1.4, 3);
+    } else {   // sentado, mirando la oficina
+      ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(px, py - 7, 5.8, 7.2, 0, 0, TAU); ctx.fill();
+      ctx.strokeStyle = o; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px - 4 * s, py - 1.5); ctx.quadraticCurveTo(px - 11 * s, py, px - 9 * s, py - 6 + Math.sin(T * 2) * 1.2); ctx.stroke();
+      circulo(px + s, py - 16, 4.4, c);
+      ctx.beginPath(); ctx.moveTo(px - 2 * s, py - 18.5); ctx.lineTo(px - 1.2 * s, py - 23); ctx.lineTo(px + .8 * s, py - 19.5); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(px + 2 * s, py - 19.5); ctx.lineTo(px + 4.5 * s, py - 22.5); ctx.lineTo(px + 4.6 * s, py - 17.5); ctx.fill();
+      if (cam.zoom > 1.1) { circulo(px - .6 * s, py - 16.4, .9, "#2a7a2a"); circulo(px + 2.2 * s, py - 16.4, .9, "#2a7a2a"); }
+      ctx.fillStyle = o; for (let i = 0; i < 3; i++) ctx.fillRect(px - 2.5 + i * 2.2, py - 12 + i * .3, 1.2, 2.6);
+    }
+    GATO.caja = [px - 12, py - 24, px + 12, py + 2];
+    return;
+  }
   const respira = Math.sin(T * 2) * .6;
   ctx.fillStyle = "#e28f3e"; ctx.beginPath(); ctx.ellipse(px, py - 4, 9 + respira * .3, 5 + respira * .3, 0, 0, TAU); ctx.fill();
   circulo(px + 7, py - 7, 4, "#e28f3e");
@@ -1867,15 +2496,16 @@ function dibujarRobot() {
 
 // ========================================================== EFECTOS ==
 const paquetes = [], colaPaquetes = [], particulas = [], flotantes = [];
-let ultimoPaquete = 0, actividadLab = -99, ascensor = 0, ascensorHasta = 0;
+let ultimoPaquete = 0, actividadLab = -99, ascensorHasta = 0;
+const ascensorAnim = [0, 0];
 function puff(x, y, z, color, n = 10) {
   for (let i = 0; i < n; i++) particulas.push({x, y, z, vx: rand(-.6, .6), vy: rand(-.6, .6), vz: rand(.4, 1.4), vida: rand(.5, .9), t: 0, color, r: rand(1.5, 3)});
 }
-function confeti(x, y, z) {
-  for (let i = 0; i < 60; i++) particulas.push({x, y, z, vx: rand(-1.5, 1.5), vy: rand(-1.5, 1.5), vz: rand(1.5, 3.5), g: 4, vida: rand(1.2, 2), t: 0,
+function confeti(x, y, z, planta = 0) {
+  for (let i = 0; i < 60; i++) particulas.push({x, y, z, planta, vx: rand(-1.5, 1.5), vy: rand(-1.5, 1.5), vz: rand(1.5, 3.5), g: 4, vida: rand(1.2, 2), t: 0,
     color: pick(["#ffcf5a", "#d4ff3a", "#2ee6a6", "#5cc0ff", "#ff5a76", "#b58cff"]), r: rand(1.5, 2.6), cuadrado: true});
 }
-function flotante(x, y, z, texto, color) { flotantes.push({x, y, z, texto, color, t: 0}); }
+function flotante(x, y, z, texto, color, planta = 0) { flotantes.push({x, y, z, texto, color, t: 0, planta}); }
 function encolarPaquetes(antes, ahora) {
   const d = k => Math.max(0, (ahora[k] || 0) - (antes[k] || 0));
   const llegan = d("Rentables en muestra"), aprobadas = d("Distinta a las del banco");
@@ -1943,8 +2573,9 @@ function moverParticulas(dt) {
   for (let i = flotantes.length - 1; i >= 0; i--) if (flotantes[i].t > 2.6) flotantes.splice(i, 1);
   // vapor de la cafetera
   if (Math.random() < dt * 5) particulas.push({x: 18.78 + rand(-.05, .05), y: 17.45, z: 1.02, vx: rand(-.05, .05), vy: 0, vz: .5, g: -.1, vida: 1.6, t: 0, color: "#ffffff", r: 2.2, vapor: true});
-  // Zzz del gato
-  if (Math.random() < dt * .6) particulas.push({x: GATO.x + .1, y: GATO.y - .1, z: GATO.z + .45, vx: .1, vy: -.05, vz: .25, g: 0, vida: 2.2, t: 0, color: "#ffffff", texto: "z"});
+  // Zzz del gato (solo si duerme) y vapor de la cafetera de arriba
+  if (GATO.estado === "dormir" && !GATO.andando && Math.random() < dt * .6) particulas.push({x: GATO.x + .1, y: GATO.y - .1, z: GATO.z + .45, planta: GATO.planta, vx: .1, vy: -.05, vz: .25, g: 0, vida: 2.2, t: 0, color: "#ffffff", texto: "z"});
+  if (vista === 1 && Math.random() < dt * 4) particulas.push({x: 38.75 + rand(-.05, .05), y: 2.2, z: 1.55, planta: 1, vx: rand(-.05, .05), vy: 0, vz: .45, g: -.1, vida: 1.6, t: 0, color: "#ffffff", r: 2.2, vapor: true});
   if (S && S.mineria && S.mineria.estado === "minando" && Math.random() < dt * 14)
     particulas.push({x: HOLO.x + rand(-.25, .25), y: HOLO.y + rand(-.25, .25), z: .3, vx: 0, vy: 0, vz: rand(.6, 1.3), g: 0, vida: 1.6, t: 0, color: "#3effd0", r: 1.4});
   destelloBanco = Math.max(0, destelloBanco - dt * .8);
@@ -1992,6 +2623,33 @@ function guirnalda() {
     if (i % 2 === 0) brillo(x, y, z - .05, 16, c, .25 + noche * .5);
   });
 }
+function guirnaldaTerraza() {   // luces de la pérgola y de la barandilla de la terraza
+  ctx.strokeStyle = "rgba(40,40,40,.7)"; ctx.lineWidth = 1;
+  BOMBILLAS1.forEach(([x, y, z], i) => {
+    const zz = z - Math.abs(Math.sin(x * 5.7 + y * 5.7)) * .12, [px, py] = iso(x, y, zz), c = ["#ffcf5a", "#ff8a5c", "#d4ff3a", "#5cc0ff"][i % 4];
+    circulo(px, py + 2, 2, noche > .3 ? c : shade(c, .7));
+    if (i % 3 === 0) brillo(x, y, zz - .05, 15, c, .2 + noche * .55);
+  });
+}
+// Vista desde la planta 1: la planta baja se ve como el edificio que hay debajo, con sus ventanas.
+function edificioBajo() {
+  const H = ALTURA_PLANTA, piel = {top: "#20252e", izq: "#1c212a", der: "#161b23"};
+  caja(0, 0, 0, W, 11, H, "", piel);
+  caja(0, 11, 0, X_ALA, D - 11, H, "", piel);
+  const ventanas = (n, semilla) => {
+    ctx.fillStyle = "rgba(212,255,58,.75)"; ctx.fillRect(0, H * 100 - 14, n * 100, 3);
+    for (let k = 0; k < n; k++) {
+      const encendida = noche > .3 && hash(semilla + k) % 3 !== 0;
+      ctx.fillStyle = encendida ? "rgba(255,214,140,.82)" : "rgba(120,170,220,.24)"; ctx.fillRect(k * 100 + 12, 40, 76, H * 100 - 100);
+      ctx.fillStyle = "rgba(255,255,255,.07)"; ctx.fillRect(k * 100 + 12, 40, 18, H * 100 - 100);
+    }
+  };
+  caraY(0, D + .002, H, () => ventanas(X_ALA, "s"));
+  caraX(X_ALA + .002, D, H, () => ventanas(D - 11, "e"));
+  caraY(X_ALA, 11.002, H, () => ventanas(W - X_ALA, "s2"));
+  caraX(W + .002, 11, H, () => ventanas(11, "e2"));
+  caraY(1, D + .004, H - .15, () => { ctx.fillStyle = "#d4ff3a"; ctx.font = "900 26px Inter, sans-serif"; ctx.fillText("TRADING FLOOR · PLANTA BAJA", 0, 28); });
+}
 function pelotaPingPong() {
   const a = SITIOS[6].ocupante, b = SITIOS[7].ocupante;
   if (!a || !b || a.andando || b.andando) return null;
@@ -2035,7 +2693,150 @@ function cacheado(clave, w, h, cada, fn) {
   }
   ctx.drawImage(e.c, 0, 0, w, h);
 }
-function paredes() {
+// ---- paredes de la planta 1 ----
+function puertaAscensor(p) {
+  caraX(.002, 11, 2.35, () => {
+    ctx.fillStyle = "#1a1e26"; ctx.fillRect(10, 30, 180, 205);
+    const ab = ascensorAnim[p] * 42;
+    ctx.fillStyle = "#0b0d11"; ctx.fillRect(28, 50, 144, 185);
+    ctx.fillStyle = "#8b95a5"; ctx.fillRect(28 - ab, 50, 72, 185); ctx.fillRect(100 + ab, 50, 72, 185);
+    ctx.fillStyle = "#6b7585"; ctx.fillRect(99 + ab, 50, 2, 185);
+    ctx.fillStyle = "#d4ff3a"; ctx.font = "900 17px Inter, sans-serif"; ctx.fillText(p ? "PLANTA 1 · ▼ 0" : "TRADING FLOOR · ▲ 1", 18, 22);
+    ctx.fillStyle = ascensorAnim[p] > .1 ? "#2ee6a6" : "#394252"; ctx.fillRect(92, 36, 16, 8);
+  });
+  brillo(.1, 10, 2.1, 60, "#d4ff3a", .3);
+}
+function paredes1() {
+  const colorMuro = "#262b34";
+  caja(-.25, -.25, 0, W + .25, .25, ALTO_MURO, colorMuro, {izq: "#2d333d", top: "#3a414d"});
+  caja(-.25, 0, 0, .25, D, ALTO_MURO, colorMuro, {der: "#2a3039", top: "#3a414d"});
+  caraY(0, .002, .12, () => { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 0, W * 100, 3); });
+  caraX(.002, D, .12, () => { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 0, D * 100, 3); });
+  caraY(.3, .002, 2.34, () => cacheado("informe", 840, 205, 3, () => paredInforme(840, 205)));
+  brillo(4.5, .3, 1.6, 140, "#ff8a5c", .18);
+  caraY(9.3, .002, 2.36, () => { ctx.fillStyle = "#2ee6a6"; ctx.font = "900 19px Inter, sans-serif"; ctx.fillText("SISTEMAS · DATOS EN VIVO", 8, 20); });
+  caraY(17.3, .002, 2.34, () => cacheado("quant", 1040, 205, 2, () => paredQuant(1040, 205)));
+  brillo(22.5, .3, 1.6, 170, "#5cc0ff", .2);
+  caraY(28.3, .002, 2.3, () => cacheado("pizarra", 840, 200, 3, () => pizarraAcademia(840, 200)));
+  caraY(37.3, .002, 2.34, () => cacheado("carta", 840, 205, 30, () => cartaCafeteria(840, 205)));
+  caraY(46.3, .002, 2.34, () => cacheado("juegos", 740, 205, 1, () => paredJuegos(740, 205)));
+  brillo(50, .3, 1.7, 150, "#b58cff", .25);
+  caraX(.002, 8.6, 2.2, () => cacheado("ventana3", 820, 130, 5, () => ventana(820, 130)));
+  puertaAscensor(1);
+  caraX(.002, 23.6, 2.25, () => cacheado("examenes", 1200, 200, 1, () => pantallaExamenes(1200, 200)));
+  brillo(.1, 17.5, 1.4, 150, "#ff8a5c", .16);
+}
+function paredInforme(w, h) {
+  const inf = S && S.informe;
+  ctx.fillStyle = "#0e0a12"; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "#2a2232"; ctx.lineWidth = 4; ctx.strokeRect(2, 2, w - 4, h - 4);
+  const on = Math.sin(T * 2) > -.3;
+  ctx.fillStyle = on ? "#ff3b3b" : "#5a1414"; rr(w - 120, 14, 104, 26, 6); ctx.fill();
+  ctx.fillStyle = "#fff"; ctx.font = "900 15px Inter, sans-serif"; ctx.fillText("ON AIR", w - 98, 33);
+  ctx.fillStyle = "#ff8a5c"; ctx.font = "900 15px Inter, sans-serif"; ctx.fillText(`INFORME DEL DÍA${inf ? " · " + inf.hora : ""}`, 16, 32);
+  if (!inf) return;
+  ctx.fillStyle = "#f4f1ea"; ctx.font = "900 24px Inter, sans-serif";
+  partirLineas(inf.titular, w - 32, 2).forEach((l, n) => ctx.fillText(l, 16, 70 + n * 28));
+  const pt = inf.puntos[Math.floor(T / 7) % Math.max(1, inf.puntos.length)];
+  if (pt) {
+    ctx.fillStyle = pt.tono === "bueno" ? "#2ee6a6" : pt.tono === "malo" ? "#ff5a76" : "#d4ff3a"; ctx.font = "800 14px Inter, sans-serif"; ctx.fillText(pt.tema.toUpperCase(), 16, 140);
+    ctx.fillStyle = "#cfc8d8"; ctx.font = "600 14px Inter, sans-serif";
+    partirLineas(pt.texto, w - 32, 3).forEach((l, n) => ctx.fillText(l, 16, 160 + n * 17));
+  }
+}
+let FONDO_ANALITICA = null, analiticaPedida = 0;
+async function refrescarAnalitica() {
+  if (Date.now() - analiticaPedida < 60000) return;
+  analiticaPedida = Date.now();
+  try { const r = await fetch("/api/fondo", {cache: "no-store"}); const d = await r.json(); if (!d.error) FONDO_ANALITICA = d; } catch (err) { /* sin conexión: se reintenta */ }
+}
+function paredQuant(w, h) {
+  const F = FONDO_ANALITICA, mc = F && F.montecarlo, mt = F && F.metricas || {};
+  ctx.fillStyle = "#050d18"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#5cc0ff"; ctx.font = "900 16px Inter, sans-serif"; ctx.fillText("EQUIPO QUANT", 14, 24);
+  ctx.fillStyle = "#7f93ad"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText("Monte Carlo del fondo · 30 días", 14, 44);
+  // abanico: percentiles 5, 50 y 95 del resultado a 30 días
+  const x0 = 14, y0 = 56, gw = 380, gh = 130, mid = y0 + gh / 2;
+  ctx.strokeStyle = "#1c2a3d"; ctx.lineWidth = 1; ctx.strokeRect(x0, y0, gw, gh);
+  if (mc) {
+    const esc = gh / 2 / Math.max(1, Math.abs(mc.p5_pct), Math.abs(mc.p95_pct)), y = v => mid - v * esc;
+    ctx.fillStyle = "rgba(92,192,255,.18)"; ctx.beginPath(); ctx.moveTo(x0, mid); ctx.lineTo(x0 + gw, y(mc.p95_pct)); ctx.lineTo(x0 + gw, y(mc.p5_pct)); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "#5cc0ff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x0, mid); ctx.lineTo(x0 + gw, y(mc.p50_pct)); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,.15)"; ctx.beginPath(); ctx.moveTo(x0, mid); ctx.lineTo(x0 + gw, mid); ctx.stroke();
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 11px JetBrains Mono, monospace"; ctx.textAlign = "right";
+    ctx.fillText(`P95 ${fmt.pct(mc.p95_pct)}`, x0 + gw - 4, y(mc.p95_pct) - 4); ctx.fillText(`P50 ${fmt.pct(mc.p50_pct)}`, x0 + gw - 4, y(mc.p50_pct) - 4); ctx.fillText(`P5 ${fmt.pct(mc.p5_pct)}`, x0 + gw - 4, y(mc.p5_pct) + 14);
+    ctx.textAlign = "start";
+  } else { ctx.fillStyle = "#3a4a60"; ctx.font = "700 12px Inter, sans-serif"; ctx.fillText("Hacen falta 10 días de historia del fondo.", x0 + 12, mid); }
+  // cifras de riesgo
+  const cifras = [["Prob. de perder en 30 días", mc ? NF1.format(mc.prob_perdida_pct) + " %" : "—"], ["Prob. de caer un 5 %", mc ? NF1.format(mc.prob_caida5_pct) + " %" : "—"],
+    ["Sharpe", mt.sharpe == null ? "—" : NF2.format(mt.sharpe)], ["Sortino", mt.sortino == null ? "—" : NF2.format(mt.sortino)], ["Calmar", mt.calmar == null ? "—" : NF2.format(mt.calmar)],
+    ["Volatilidad anual", mt.volatilidad_pct == null ? "—" : NF1.format(mt.volatilidad_pct) + " %"]];
+  cifras.forEach(([t, v], k) => {
+    const x = 420 + (k % 2) * 150, y = 62 + Math.floor(k / 2) * 44;
+    ctx.fillStyle = "#7f93ad"; ctx.font = "700 10px Inter, sans-serif"; ctx.fillText(t, x, y);
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 17px JetBrains Mono, monospace"; ctx.fillText(v, x, y + 20);
+  });
+  // Kelly de cada trader
+  ctx.fillStyle = "#7f93ad"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText("Kelly prudente · riesgo por operación", 730, 44);
+  const ts = Object.entries(S && S.papel && S.papel.estrategias || {}).filter(([, t]) => t.kelly).sort((a, b) => b[1].kelly.riesgo_pct - a[1].kelly.riesgo_pct).slice(0, 6);
+  if (!ts.length) { ctx.fillStyle = "#3a4a60"; ctx.font = "700 11px Inter, sans-serif"; ["Aún ningún trader tiene 30", "operaciones reales: todos usan", "el riesgo de siempre."].forEach((l, n) => ctx.fillText(l, 730, 76 + n * 16)); }
+  ts.forEach(([id, t], k) => {
+    const y = 64 + k * 22, f = clamp(t.kelly.riesgo_pct / 2, 0, 1);
+    ctx.fillStyle = "#cfe8ff"; ctx.font = "700 10px JetBrains Mono, monospace"; ctx.fillText(id, 730, y + 9);
+    ctx.fillStyle = "#13233a"; ctx.fillRect(812, y, 150, 11); ctx.fillStyle = "#5cc0ff"; ctx.fillRect(812, y, 150 * f, 11);
+    ctx.fillStyle = "#e9edf3"; ctx.fillText(NF2.format(t.kelly.riesgo_pct) + " %", 970, y + 9);
+  });
+}
+function pizarraAcademia(w, h) {
+  const ac = S && S.academia;
+  ctx.fillStyle = "#f7f8fa"; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "#c9ced5"; ctx.lineWidth = 6; ctx.strokeRect(3, 3, w - 6, h - 6);
+  ctx.fillStyle = "#1d3a8a"; ctx.font = "900 18px Inter, sans-serif"; ctx.fillText("ACADEMIA · LO QUE HEMOS APRENDIDO EN REAL", 16, 30);
+  ctx.fillStyle = "#c2410c"; ctx.font = "700 12px Inter, sans-serif";
+  ctx.fillText(ac ? `${ac.juzgadas} estrategias juzgadas · ${ac.funcionan} funcionan · ${ac.fallan} fallan` : "Sin lecciones todavía", 16, 50);
+  ctx.fillStyle = "#26303d"; ctx.font = "600 13px Inter, sans-serif";
+  let y = 76;
+  for (const t of (ac && ac.textos || []).slice(0, 4)) {
+    for (const l of partirLineas("• " + t, w - 40, 2)) { ctx.fillText(l, 20, y); y += 17; }
+    y += 4;
+    if (y > h - 20) break;
+  }
+}
+function cartaCafeteria(w, h) {
+  ctx.fillStyle = "#1f3a2c"; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "#8a6440"; ctx.lineWidth = 8; ctx.strokeRect(4, 4, w - 8, h - 8);
+  ctx.fillStyle = "#f4f1ea"; ctx.font = "900 22px Inter, sans-serif"; ctx.fillText("CAFETERÍA · CARTA", 22, 38);
+  ctx.font = "600 14px Inter, sans-serif";
+  [["Espresso de stop loss", "1.500 sats"], ["Cortado sin apalancamiento", "1.800 sats"], ["Capuchino alcista", "2.100 sats"], ["Té de manos de diamante", "1.200 sats"], ["Croissant del backtest", "900 sats"]]
+    .forEach(([a, b], k) => { ctx.fillStyle = "#e9e4dc"; ctx.fillText(a, 26, 72 + k * 24); ctx.fillStyle = "#ffcf5a"; ctx.textAlign = "right"; ctx.fillText(b, w - 26, 72 + k * 24); ctx.textAlign = "start"; });
+}
+function paredJuegos(w, h) {
+  ctx.fillStyle = "#120c1f"; ctx.fillRect(0, 0, w, h);
+  const brilla = .7 + Math.sin(T * 3) * .3;
+  ctx.shadowColor = "#b58cff"; ctx.shadowBlur = 18 * brilla;
+  ctx.fillStyle = `rgba(214,190,255,${.8 + brilla * .2})`; ctx.font = "900 34px Inter, sans-serif"; ctx.fillText("GAME ROOM", 24, 60);
+  ctx.shadowBlur = 0;
+  const cx = w - 120, cy = 110;   // diana
+  for (const [r, c] of [[56, "#1a1a1a"], [50, "#e8e0c8"], [40, "#c2302f"], [30, "#e8e0c8"], [20, "#2f8f5b"], [10, "#c2302f"], [4, "#2f8f5b"]]) circulo(cx, cy, r, c);
+  for (let k = 0; k < 3; k++) { const a = k * 2.1 + Math.floor(T / 4); ctx.fillStyle = "#d4ff3a"; ctx.fillRect(cx + Math.cos(a) * 18 * (k + 1) / 2, cy + Math.sin(a) * 14, 3, 3); }
+}
+function pantallaExamenes(w, h) {
+  const inc = Object.entries(S && S.papel && S.papel.incubadora || {}).sort((a, b) => ((b[1].examen || {}).nota || 0) - ((a[1].examen || {}).nota || 0));
+  ctx.fillStyle = "#120b05"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#ff8a5c"; ctx.font = "900 17px Inter, sans-serif"; ctx.fillText("INCUBADORA · EXÁMENES", 14, 24);
+  ctx.fillStyle = "#b7a08c"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText("Dinero de prueba: no cuenta en tu fondo. Aprueban ganando con 10 operaciones (30 en scalping).", 300, 22);
+  if (!inc.length) { ctx.fillStyle = "#5a4a3a"; ctx.font = "700 14px Inter, sans-serif"; ctx.fillText("Sin estrategias de examen. Pulsa «Buscar estrategias».", 14, 80); return; }
+  inc.slice(0, 12).forEach(([id, t], k) => {
+    const ex = t.examen || {}, x = 14 + (k % 2) * 590, y = 46 + Math.floor(k / 2) * 25, f = clamp((ex.operaciones || 0) / (ex.operaciones_min || 10), 0, 1), c = colorExamen(t);
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 11px JetBrains Mono, monospace"; ctx.fillText(`${id} ${moneda(t.simbolo)} ${t.direccion === "largo" ? "▲" : "▼"}`, x, y + 11);
+    ctx.fillStyle = "#2a1f14"; ctx.fillRect(x + 160, y + 2, 200, 11); ctx.fillStyle = c; ctx.fillRect(x + 160, y + 2, 200 * f, 11);
+    ctx.fillStyle = "#cfc4b8"; ctx.fillText(`${ex.operaciones || 0}/${ex.operaciones_min || 10}`, x + 368, y + 11);
+    const r = ex.resultado_pct || 0; ctx.fillStyle = r > 0 ? "#2ee6a6" : r < 0 ? "#ff5a76" : "#cfd6e0"; ctx.fillText(fmt.pct(r), x + 420, y + 11);
+    ctx.fillStyle = c; ctx.fillText(ex.estado === "aprobada" ? "APROBADA" : ex.estado === "espera_cierre" ? "AL CERRAR" : "EXAMEN", x + 500, y + 11);
+  });
+}
+function paredes(p) { if (p === 1) paredes1(); else paredes0(); }
+function paredes0() {
   const colorMuro = "#262b34";
   caja(-.25, -.25, 0, W + .25, .25, ALTO_MURO, colorMuro, {izq: "#2d333d", top: "#3a414d"});
   caja(-.25, 0, 0, .25, D, ALTO_MURO, colorMuro, {der: "#2a3039", top: "#3a414d"});
@@ -2082,16 +2883,7 @@ function paredes() {
   // PARED OESTE: pantalla de minería, ascensor y videowall
   caraX(.002, 7.6, 2.2, () => cacheado("mineria", 600, 150, .25, () => pantallaMineria(600, 150)));
   brillo(.1, 4.6, 1.5, 120, "#ffc24a", S && S.mineria && S.mineria.estado === "minando" ? .2 : .06);
-  caraX(.002, 11, 2.35, () => {
-    ctx.fillStyle = "#1a1e26"; ctx.fillRect(10, 30, 180, 205);
-    const ab = ascensor * 42;
-    ctx.fillStyle = "#0b0d11"; ctx.fillRect(28, 50, 144, 185);
-    ctx.fillStyle = "#8b95a5"; ctx.fillRect(28 - ab, 50, 72, 185); ctx.fillRect(100 + ab, 50, 72, 185);
-    ctx.fillStyle = "#6b7585"; ctx.fillRect(99 + ab, 50, 2, 185);
-    ctx.fillStyle = "#d4ff3a"; ctx.font = "900 17px Inter, sans-serif"; ctx.fillText("TRADING FLOOR", 30, 22);
-    ctx.fillStyle = ascensor > .1 ? "#2ee6a6" : "#394252"; ctx.fillRect(92, 36, 16, 8);
-  });
-  brillo(.1, 10, 2.1, 60, "#d4ff3a", .3);
+  puertaAscensor(0);
   const precios = S && S.papel && S.papel.precios || {};
   const simbolos = Object.keys(precios).filter(k => (precios[k].serie || []).length > 1).slice(0, 3);
   const paneles = [[23.6, 0], [20.5, 1], [17.4, 2], [14.3, 3]];
@@ -2279,7 +3071,7 @@ function pantallaRiesgos(w, h) {
 }
 
 // ========================================================= DIBUJO =====
-let sueloCache = null, vineta = null;
+let sueloCache = [null, null], vineta = null;
 function texturaSuelo(sala, w, h) {   // coordenadas del plano: 100 unidades = 1 baldosa
   const azar = (() => { let k = hash(sala.id); return () => ((k = Math.imul(k ^ (k >>> 15), 2246822507) + 0x9e3779b9 >>> 0) / 4294967296); })();
   const motas = (n, color, r = 1.4) => { ctx.fillStyle = color; for (let i = 0; i < n; i++) ctx.fillRect(azar() * w, azar() * h, r, r); };
@@ -2314,17 +3106,47 @@ function texturaSuelo(sala, w, h) {   // coordenadas del plano: 100 unidades = 1
     ctx.strokeStyle = "rgba(255,207,90,.3)"; ctx.lineWidth = 3; ctx.strokeRect(30, 30, w - 60, h - 60);
   } else if (sala.id === "terraza") {
     motas(900, "rgba(0,0,0,.06)", 2);
+  } else if (sala.id === "terraza1") {   // tarima de madera al aire libre, con césped al fondo
+    for (let v = 0, k = 0; v < h; v += 18, k++) {
+      ctx.fillStyle = k % 2 ? "rgba(255,230,190,.05)" : "rgba(60,30,0,.05)"; ctx.fillRect(0, v, w, 18);
+      ctx.fillStyle = "rgba(40,20,0,.22)"; ctx.fillRect(0, v, w, 1.6);
+      for (let u = (k * 211) % 300; u < w; u += 300) ctx.fillRect(u, v, 1.6, 18);
+    }
+    const cx = (36 - 18) * 100, cy = (18.4 - 11) * 100;   // césped con flores
+    ctx.fillStyle = "#3f8f4a"; rr(cx, cy, 940, 520, 40); ctx.fill();
+    ctx.save(); rr(cx, cy, 940, 520, 40); ctx.clip();
+    for (let i = 0; i < 1400; i++) { ctx.fillStyle = azar() < .5 ? "rgba(255,255,255,.05)" : "rgba(0,40,0,.1)"; ctx.fillRect(cx + azar() * 940, cy + azar() * 520, 2, 5); }
+    for (let i = 0; i < 60; i++) { ctx.fillStyle = ["#ffcf5a", "#ff8aa8", "#ffffff", "#b58cff"][i % 4]; ctx.beginPath(); ctx.arc(cx + 30 + azar() * 880, cy + 30 + azar() * 460, 4, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  } else if (sala.id === "incubadora") {   // moqueta cálida con borde naranja bajo las mesas
+    const x0 = 25, y0 = 62, mw = w - 70, mh = 900;
+    ctx.fillStyle = "#3a2a1f"; rr(x0, y0, mw, mh, 18); ctx.fill();
+    ctx.save(); rr(x0, y0, mw, mh, 18); ctx.clip(); motas(2200, "rgba(255,255,255,.05)"); ctx.restore();
+    ctx.strokeStyle = "rgba(255,138,92,.55)"; ctx.lineWidth = 4; rr(x0, y0, mw, mh, 18); ctx.stroke();
+  } else if (sala.id === "cafeteria" || sala.id === "academia") {   // parqué
+    for (let v = 0, k = 0; v < h; v += 24, k++) {
+      ctx.fillStyle = k % 2 ? "rgba(60,30,0,.07)" : "rgba(255,230,190,.06)"; ctx.fillRect(0, v, w, 24);
+      ctx.fillStyle = "rgba(40,20,0,.14)"; ctx.fillRect(0, v, w, 1.4);
+      for (let u = (k * 137) % 160; u < w; u += 160 + (k * 31) % 60) ctx.fillRect(u, v, 1.4, 24);
+    }
+  } else if (sala.id === "infra") {   // suelo técnico de baldosas
+    ctx.strokeStyle = "rgba(46,230,166,.08)"; ctx.lineWidth = 2;
+    for (let u = 0; u <= w; u += 60) { ctx.beginPath(); ctx.moveTo(u, 0); ctx.lineTo(u, h); ctx.stroke(); }
+    for (let v = 0; v <= h; v += 60) { ctx.beginPath(); ctx.moveTo(0, v); ctx.lineTo(w, v); ctx.stroke(); }
+  } else if (sala.id === "juegos") {   // moqueta con figuras
+    motas(1400, "rgba(181,140,255,.08)", 2);
+    for (let i = 0; i < 40; i++) { ctx.strokeStyle = ["rgba(255,90,118,.18)", "rgba(92,192,255,.18)", "rgba(212,255,58,.18)"][i % 3]; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(azar() * w, azar() * h, 10 + azar() * 14, 0, TAU); ctx.stroke(); }
   } else if (sala.id !== "pasillo") {   // moquetas de macro, holding y riesgos
     motas(1600, "rgba(255,255,255,.04)");
     motas(1200, "rgba(0,0,0,.08)");
   }
-  if (sala.id === "pasillo" || sala.id === "terraza") return;
+  if (sala.id === "pasillo" || sala.id === "terraza" || sala.id === "pasillo1" || sala.id === "terraza1") return;
   for (const [x, y, gw, gh, x1, y1] of [[0, 0, w, 40, 0, 40], [0, 0, 40, h, 40, 0]]) {   // sombra al pie de las paredes del fondo
     const g = ctx.createLinearGradient(0, 0, x1, y1); g.addColorStop(0, "rgba(0,0,0,.3)"); g.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = g; ctx.fillRect(x, y, gw, gh);
   }
 }
-function crearSuelo() {
+function crearSuelo(p = 0) {
   const esc = 2, minX = -D * TW / 2 - 30, maxX = W * TW / 2 + 30, minY = -30, maxY = (W + D) * TH / 2 + 30;
   const c = document.createElement("canvas");
   c.width = Math.ceil((maxX - minX) * esc); c.height = Math.ceil((maxY - minY) * esc);
@@ -2334,6 +3156,7 @@ function crearSuelo() {
   // grosor del forjado
   caja(0, 0, -.35, W, 11, .35, "#15181e", {izq: "#1b1f27", der: "#12151a"});
   caja(0, 11, -.35, X_ALA, D - 11, .35, "#15181e", {izq: "#1b1f27", der: "#12151a"});
+  if (p === 1) { sueloPlanta1(c, minX, minY, esc); ctx = principal; return; }
   for (const s of SALAS) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
     cuad(iso(x, y), iso(x + 1, y), iso(x + 1, y + 1), iso(x, y + 1), (x + y) % 2 ? s.a : s.b);
   }
@@ -2356,7 +3179,27 @@ function crearSuelo() {
     plano(x, y, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
   }
   ctx = principal;
-  sueloCache = {c, minX, minY, esc};
+  sueloCache[0] = {c, minX, minY, esc};
+}
+function sueloPlanta1(c, minX, minY, esc) {
+  for (const s of SALAS1) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
+    cuad(iso(x, y), iso(x + 1, y), iso(x + 1, y + 1), iso(x, y + 1), (x + y) % 2 ? s.a : s.b);
+  }
+  for (const sala of SALAS1) plano(sala.x0, sala.y0, 0, () => texturaSuelo(sala, (sala.x1 - sala.x0) * 100, (sala.y1 - sala.y0) * 100));
+  plano(0, 9, 0, () => {   // pasillo con neón y flechas hacia el ascensor
+    ctx.fillStyle = "rgba(212,255,58,.8)"; ctx.fillRect(0, 12, W * 100, 3); ctx.fillRect(0, 185, W * 100, 3);
+    ctx.fillStyle = "rgba(212,255,58,.25)";
+    for (let x = 450; x < W * 100; x += 300) { ctx.beginPath(); ctx.moveTo(x, 80); ctx.lineTo(x - 40, 100); ctx.lineTo(x, 120); ctx.fill(); }
+  });
+  plano(19.6, 12.7, 0, () => { ctx.fillStyle = "rgba(255,207,90,.16)"; rr(0, 0, 740, 300, 30); ctx.fill(); });   // alfombra bajo la pérgola
+  plano(37, 13.1, 0, () => { ctx.fillStyle = "rgba(255,138,60,.14)"; ctx.beginPath(); ctx.arc(260, 230, 230, 0, TAU); ctx.fill(); });   // alrededor de la fogata
+  const rotulos = [["comunicacion", .4, 8.7, 82], ["infra", 9.4, 8.7, 100], ["quant", 17.4, 8.7, 100], ["academia", 28.4, 8.7, 100], ["cafeteria", 37.4, 8.7, 100], ["juegos", 46.4, 8.7, 100],
+    ["incubadora", .6, 23.7, 150], ["terraza1", 18.6, 23.5, 130]];
+  for (const [id, x, y, t] of rotulos) {
+    const s = SALAS1.find(s => s.id === id);
+    plano(x, y, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
+  }
+  sueloCache[1] = {c, minX, minY, esc};
 }
 
 function horaDelDia() { const d = new Date(); const h = parametros.get("hora"); return h !== null ? +h : d.getHours() + d.getMinutes() / 60; }
@@ -2377,26 +3220,37 @@ function dibujar() {
   ctx.fillStyle = g; ctx.fillRect(0, 0, vw, vh);
   brillos = [];
   transformarMundo();
-  const s = sueloCache;
+  // en la planta 1 se ve el edificio de la planta baja debajo y todo lo de arriba se dibuja más alto
+  const off = vista ? ALTURA_PLANTA * ZH : 0;
+  if (vista === 1) { edificioBajo(); ctx.translate(0, -off); }
+  const s = sueloCache[vista];
   ctx.drawImage(s.c, s.minX, s.minY, s.c.width / s.esc, s.c.height / s.esc);
-  paredes();
+  paredes(vista);
   // objetos dinámicos, ordenados por profundidad y mezclados con los estáticos
   const mg = 150, vL = cam.x - vw / 2 / cam.zoom - mg, vR = cam.x + vw / 2 / cam.zoom + mg, vA = cam.y - vh / 2 / cam.zoom - mg * 1.5, vB = cam.y + vh / 2 / cam.zoom + mg;
-  const seVe = (x, y) => { const ix = (x - y) * TW / 2, iy = (x + y) * TH / 2; return ix > vL && ix < vR && iy > vA && iy < vB; };
+  const seVe = (x, y) => { const ix = (x - y) * TW / 2, iy = (x + y) * TH / 2 - off; return ix > vL && ix < vR && iy > vA && iy < vB; };
   const dinamicos = [];
-  for (const a of agentes) { if (!seVe(a.x, a.y)) { a.caja = null; continue; } dinamicos.push({k: a.x + a.y + (a.postura === "sentado" ? .02 : .05), f: () => persona(a)}); }
-  for (const p of paquetes) dinamicos.push({k: p.x + p.y + .3, f: () => dibujarPaquete(p)});
-  for (const q of particulas) dinamicos.push({k: q.x + q.y + .5, f: () => dibujarParticula(q)});
-  dinamicos.push({k: HOLO.x + HOLO.y, f: holograma});
-  dinamicos.push({k: GLOBO.x + GLOBO.y, f: globo});
-  dinamicos.push({k: MONEDA.x + MONEDA.y, f: monedaGigante});
-  dinamicos.push({k: BALIZA.x + BALIZA.y, f: baliza});
-  dinamicos.push({k: 62, f: guirnalda});
-  dinamicos.push({k: GATO.x + GATO.y + .3, f: gato});
-  dinamicos.push({k: ROBOT.x + ROBOT.y, f: dibujarRobot});
-  const bola = pelotaPingPong();
-  if (bola) dinamicos.push({k: bola.x + bola.y + .1, f: () => { const [px, py] = iso(bola.x, bola.y, bola.z); circulo(px, py, 2.2, "#fff"); }});
+  for (const a of agentes) {
+    if ((a.planta || 0) !== vista || a.transbordo || !seVe(a.x, a.y)) { a.caja = null; continue; }
+    dinamicos.push({k: a.x + a.y + (a.postura === "sentado" ? .02 : .05), f: () => persona(a)});
+  }
+  for (const q of particulas) if ((q.planta || 0) === vista) dinamicos.push({k: q.x + q.y + .5, f: () => dibujarParticula(q)});
+  if (vista === 0) {
+    for (const p of paquetes) dinamicos.push({k: p.x + p.y + .3, f: () => dibujarPaquete(p)});
+    dinamicos.push({k: HOLO.x + HOLO.y, f: holograma});
+    dinamicos.push({k: GLOBO.x + GLOBO.y, f: globo});
+    dinamicos.push({k: MONEDA.x + MONEDA.y, f: monedaGigante});
+    dinamicos.push({k: BALIZA.x + BALIZA.y, f: baliza});
+    dinamicos.push({k: 62, f: guirnalda});
+    dinamicos.push({k: ROBOT.x + ROBOT.y, f: dibujarRobot});
+    const bola = pelotaPingPong();
+    if (bola) dinamicos.push({k: bola.x + bola.y + .1, f: () => { const [px, py] = iso(bola.x, bola.y, bola.z); circulo(px, py, 2.2, "#fff"); }});
+  } else {
+    dinamicos.push({k: 70, f: guirnaldaTerraza});
+  }
+  if ((GATO.planta || 0) === vista && !GATO.transbordo) dinamicos.push({k: GATO.x + GATO.y + .3, f: gato}); else GATO.caja = null;
   dinamicos.sort((a, b) => a.k - b.k);
+  const estaticos = PLANTAS[vista].estaticos;
   let i = 0, j = 0;
   while (i < estaticos.length || j < dinamicos.length) {
     if (j >= dinamicos.length || (i < estaticos.length && estaticos[i].k <= dinamicos[j].k)) { const e = estaticos[i++]; if (e.x === undefined || seVe(e.x, e.y)) e.f(); }
@@ -2407,6 +3261,7 @@ function dibujar() {
   if (noche > 0) { ctx.fillStyle = `rgba(8,12,36,${noche * .5})`; ctx.fillRect(0, 0, vw, vh); }
   // brillos
   transformarMundo();
+  if (vista === 1) ctx.translate(0, -off);
   ctx.save(); ctx.globalCompositeOperation = "lighter";
   const f = .45 + noche * .75;
   for (const [x, y, z, r, c, a] of brillos) {
@@ -2432,7 +3287,8 @@ function dibujarFlotantes() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.textAlign = "center";
   for (const f of flotantes) {
-    const [sx, sy] = aPantalla(f.x, f.y, f.z), a = f.t < 2 ? 1 : 1 - (f.t - 2) / .6;
+    if ((f.planta || 0) !== vista) continue;
+    const [sx, sy] = aPantalla(f.x, f.y, f.z + (f.planta ? ALTURA_PLANTA : 0)), a = f.t < 2 ? 1 : 1 - (f.t - 2) / .6;
     ctx.font = `800 ${13 + 3 * cam.zoom}px JetBrains Mono, monospace`;
     ctx.fillStyle = rgba(f.color, a); ctx.fillText(f.texto, sx, sy - f.t * 26 * cam.zoom - 40 * cam.zoom);
   }
@@ -2448,10 +3304,10 @@ function partirTexto(texto, max) {
 function dibujarBurbujas() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const puestas = [];
-  const activas = agentes.filter(a => a.burbuja && T < a.burbuja.t1).sort((a, b) => (b.x + b.y) - (a.x + a.y));
+  const activas = agentes.filter(a => a.burbuja && T < a.burbuja.t1 && (a.planta || 0) === vista && !a.transbordo).sort((a, b) => (b.x + b.y) - (a.x + a.y));
   for (const a of activas) {
     const b = a.burbuja;
-    const [sx, sy0] = aPantalla(a.x, a.y, a.z);
+    const [sx, sy0] = aPantalla(a.x, a.y, a.z + (a.planta ? ALTURA_PLANTA : 0));
     ctx.font = "600 12px Inter, sans-serif";
     const lineas = partirTexto(b.texto, b.texto.length > 120 ? 250 : 200);
     const ancho = Math.max(...lineas.map(l => ctx.measureText(l).width), ctx.measureText(a.nombre).width + 10) + 20;
@@ -2477,7 +3333,7 @@ function dibujarBurbujas() {
 }
 function etiqueta(a) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const [sx, sy] = aPantalla(a.x, a.y, a.z);
+  const [sx, sy] = aPantalla(a.x, a.y, (a.z || 0) + (a.planta ? ALTURA_PLANTA : 0));
   const texto = a.nombre + (a.puesto ? " · " + a.puesto : "");
   ctx.font = "700 12px Inter, sans-serif";
   const w = ctx.measureText(texto).width + 16;
@@ -2529,7 +3385,7 @@ const YO = {nombre: "Tú", puesto: "Jefe", tono: "#d4ff3a", camisa: "#d4ff3a"};
 // ======================================================== EL DIRECTOR ==
 // Traduce los cambios del estado real en movimientos, paquetes y charlas.
 const visto = new Set();
-let anterior = null, ultimoComentarioLab = -99, proximoCafe = 10, proximaCharla = 14;
+let anterior = null, ultimoComentarioLab = -99, proximoCafe = 10, proximaCharla = 14, proximaClase = 90;
 function nuevosEventos(lista) {
   if (visto.size > 4000) {   // se vacía de vez en cuando, sin repetir lo que sigue en pantalla
     visto.clear();
@@ -2586,7 +3442,33 @@ function procesarPapel(eventos) {
   for (const e of eventos) {
     if (e.tipo === "freno") { enCanal("riesgos", () => charla([[RIESGOS, e.texto, "malo"], [DIRECTOR, "Recibido. Nadie abre nada hasta que Riesgos diga."]], 3)); enfocar(42, 14, 2, 8); continue; }
     if (e.tipo === "reanuda") { enCanal("riesgos", () => decir(RIESGOS, e.texto, 3, "bueno")); continue; }
-    if (e.tipo === "relevo") { escenaRelevo(e); continue; }
+    if (e.tipo === "relevo") { escenaRelevo(e); if (e.causa) enCanal("analisis", () => decir(QUANTS[2], `Post mortem de ${e.anterior}: ${e.causa}`, 1, "", supervisorDe(e.grupo))); continue; }
+    if (e.tipo === "kill") {
+      enCanal("riesgos", () => charla([[RIESGOS, e.texto, "malo"], [DIRECTOR, "Recibido. Todo cerrado y en pausa hasta nueva orden."]], 3));
+      flotante(BALIZA.x, BALIZA.y, 2.2, "KILL SWITCH", "#ff5a76"); enfocar(42, 14, 2, 8); continue;
+    }
+    if (e.tipo === "incubadora") {
+      const pl = plazaDe({plaza: e.plaza, grupo: e.grupo});
+      enCanal("operaciones", () => decir(LORENA, `${e.id} entra de examen en la plaza ${(e.plaza || 0) + 1}: ${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}, con dinero de prueba que no cuenta en el fondo.`, 2));
+      if (pl) enfocar(pl.asiento.x, pl.asiento.y, 2.2, 6, 1);
+      continue;
+    }
+    if (e.tipo === "aprueba") {
+      const pl = plazaDe({plaza: e.plaza, grupo: e.grupo});
+      enCanal("operaciones", () => charla([[LORENA, `🎓 ${e.texto}`, "bueno"], [COMUNICADORES[1], `Noticia de última hora en TF News: ${e.id} aprueba en la incubadora.`]], 3));
+      if (pl) { confeti(pl.asiento.x, pl.asiento.y, 1.2, 1); flotante(pl.asiento.x, pl.asiento.y, 1.6, "APROBADA", "#2ee6a6", 1); enfocar(pl.asiento.x, pl.asiento.y, 2.4, 8, 1); }
+      continue;
+    }
+    if (e.tipo === "suspende") {
+      const pl = plazaDe({plaza: e.plaza, grupo: e.grupo}), quien = pl && pl.trader;
+      enCanal("operaciones", () => {
+        decir(LORENA, e.texto, 2, "malo");
+        if (quien) decir(quien, pick(["Vaya. Mejor descubrirlo con dinero de prueba que con el del fondo.", "Suspendida. Para eso está el examen.", "Una menos. Que me den la siguiente."]), 1, "", LORENA);
+      });
+      if (pl) { flotante(pl.asiento.x, pl.asiento.y, 1.6, "SUSPENDIDA", "#ff5a76", 1); enfocar(pl.asiento.x, pl.asiento.y, 2.4, 6, 1); }
+      continue;
+    }
+    if (e.tipo === "banquillo") { enCanal("operaciones", () => decir(BANQUERA, `${e.id} espera en el banquillo: la incubadora está llena. Entrará en cuanto quede una plaza libre.`, 1, "oro")); continue; }
     if (e.tipo === "busqueda") { const sup = supervisorDe(e.grupo); enCanal("operaciones", () => charla([[sup, e.texto, ""], [SUPERVISORES[0], "Recibido. Enciendo los servidores: un ciclo y paramos.", "", sup]], 2)); continue; }
     if (e.tipo === "reserva") { enCanal("operaciones", () => decir(BANQUERA, `${e.id} aprobada, pero no hay mesa libre en ${e.grupo === "scalping" ? "scalping" : "trading"}: la guardo en la reserva. Será la primera opción si el supervisor retira alguna.`, 2, "oro")); continue; }
     if (e.tipo === "baja") { enCanal("operaciones", () => decir(supervisorDe(e.grupo) || BANQUERA, e.texto, 2)); continue; }
@@ -2601,11 +3483,12 @@ function procesarPapel(eventos) {
       continue;
     }
     if (!a) continue;
-    if (e.tipo === "alta") {   // una estrategia de la reserva llega a una mesa que ya tenía trader
-      if (a.relevo && T - a.relevo < 120) decir(a, `Me dan ${e.id}, de la reserva del banco: ${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}. Empiezo en la próxima vela.`, 2, "bueno");
+    if (e.tipo === "alta") {   // una aprobada de la incubadora llega a una mesa
+      if (e.graduada) enCanal("operaciones", () => decir(LORENA, `${e.id} sube a la mesa ${(e.mesa || 0) + 1} de ${e.grupo === "scalping" ? "scalping" : "trading"}: ahora opera con dinero del fondo.`, 2, "bueno"));
+      else if (a.relevo && T - a.relevo < 120) decir(a, `Me dan ${e.id}, aprobada en la incubadora: ${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}. Empiezo en la próxima vela.`, 2, "bueno");
       continue;
     }
-    if (a.casa) enfocar(a.casa.x, a.casa.y, 2.4, 6);
+    if (a.casa) enfocar(a.casa.x, a.casa.y, 2.4, 6, a.casa.planta || 0);
     if (e.tipo === "apertura") {
       decir(a, `Abro ${ladoTxt(e.direccion)} en ${moneda(e.simbolo)} a ${fmt.precio(e.precio)}${e.fraccion ? ` con el ${Math.round(e.fraccion * 100)} % de mi capital` : ""}. ${pick(["Stop puesto.", "Sigo el plan.", "Riesgos da el visto bueno."])}`, 2);
       const t = totales();
@@ -2682,9 +3565,9 @@ function escenaRelevo(e) {
   const perdio = e.resultado != null ? ` Deja ${dineroS(e.resultado)}, que siguen contando en el fondo.` : "";
   const hablar = () => enCanal("operaciones", () => charla(a ? [
       [sup, `${a.nombre}, te retiro ${e.anterior}: ${e.motivo}.${perdio}`, "malo", a],
-      [sup, `Te doy ${e.id}, la mejor de la reserva del banco: ${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}. Empiezas en la próxima vela y con un periodo de prueba nuevo.`, "bueno", a],
+      [sup, `Te doy ${e.id}, la mejor aprobada de la incubadora: ${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}. Empiezas en la próxima vela y con un periodo de prueba nuevo.`, "bueno", a],
       [a, pick(["Entendido. Borrón y cuenta nueva.", "Vale, a por la nueva. Esta vez sale.", "Hecho. Lo perdido queda apuntado; toca recuperarlo con esta."]), "", sup]]
-    : [[sup, `Fuera ${e.anterior}: ${e.motivo}.${perdio} No hay ninguna estrategia en la reserva del banco, así que esa mesa espera a la próxima que se apruebe.`, "malo"]], 3));
+    : [[sup, `Fuera ${e.anterior}: ${e.motivo}.${perdio} No hay ninguna aprobada en la incubadora, así que esa mesa espera a la próxima que apruebe el examen.`, "malo"]], 3));
   if (mesa) {
     enfocar(mesa.asiento.x, mesa.asiento.y, 2.4, 10);
     flotante(mesa.asiento.x, mesa.asiento.y - .5, 1.3, a ? "NUEVA ESTRATEGIA" : "ESTRATEGIA RETIRADA", a ? "#d4ff3a" : "#ff5a76");
@@ -2712,7 +3595,7 @@ function mandarDescanso(a, duracion, tipos) {
   const s = sitioLibre(tipos);
   if (!s) return false;
   s.ocupante = a; a.sitio = s; a.tarea = "descanso"; a.hasta = T + duracion;
-  irA(a, s.x, s.y, s.postura, s.mira);
+  irAPlanta(a, s.planta || 0, s.x, s.y, s.postura, s.mira);
   return true;
 }
 function liberarSitio(a) { if (a.sitio) { a.sitio.ocupante = null; a.sitio = null; } }
@@ -2731,14 +3614,22 @@ function planificar() {
   if (T > proximoCafe) {
     proximoCafe = T + rand(7, 15);
     const candidatos = agentes.filter(a => estaLibre(a) && a.postura === "sentado" && (
-      (a.rol === "trader" && !(a.datos && a.datos.posicion)) || (a.rol === "prueba" && T - actividadLab > 20) || ["banco", "macro", "holder", "riesgo2"].includes(a.rol)));
+      (a.rol === "trader" && !(a.datos && a.datos.posicion)) || (a.rol === "prueba" && T - actividadLab > 20) || ["banco", "macro", "holder", "riesgo2", "quant", "comunicacion", "it"].includes(a.rol)));
     if (candidatos.length) mandarDescanso(pick(candidatos), rand(25, 55));
+  }
+  if (T > proximaClase) {   // de vez en cuando, clase en la academia con lo aprendido en real
+    proximaClase = T + rand(150, 240);
+    const alumnos = agentes.filter(a => estaLibre(a) && a.postura === "sentado" && a.rol === "trader" && !(a.datos && a.datos.posicion)).sort(() => Math.random() - .5).slice(0, 4);
+    let n = 0;
+    for (const a of alumnos) if (mandarDescanso(a, rand(50, 80), ["clase"])) n++;
+    const lec = S && S.academia && S.academia.textos || [];
+    if (n) enCanal("analisis", () => decir(PROFESORA, lec.length ? `Clase de hoy: ${lec[0]}` : "Clase de hoy: por qué un buen backtest no garantiza nada en real.", 1));
   }
   if (T > proximaCharla) { proximaCharla = T + rand(16, 28); charlaDeFondo(); }
   planificarSupervision();
   if (Date.now() >= proximoComiteMs) { proximoComiteMs = siguienteComite(); comite(); }
   if (T > proximoRadar) { proximoRadar = T + rand(24, 40); radarDeSenales(); }
-  ascensor = clamp(ascensor + (T < ascensorHasta ? .05 : -.04), 0, 1);
+  for (const p of [0, 1]) ascensorAnim[p] = clamp(ascensorAnim[p] + (T < Math.max(p ? 0 : ascensorHasta, ascensorPlanta[p]) ? .05 : -.04), 0, 1);
 }
 function charlaDeFondo() {
   const enDescanso = agentes.filter(a => a.tarea === "descanso" && !a.andando);
@@ -2757,6 +3648,9 @@ function charlaDeFondo() {
     () => ["¿Por qué solo minamos con el 70 % de los datos?", "Para tener un 30 % que nadie ha visto. Si no, te engañas a ti mismo."],
     () => ["¿Quién va ganando al ping-pong?", "Yo, como siempre 😏"],
     () => ["¿Alguien ha dado de comer a Satoshi?", "Duerme más que los servidores en pausa."],
+    () => [`¿Dónde anda Satoshi?`, `Lo último que sé: ${GATO.donde}.`],
+    () => ["¿Subimos a la terraza a comer?", pick(["Venga, que hoy hace sol.", "Después del cierre de vela.", "Solo si Chema nos sube café."])],
+    () => ["¿Has pasado por la incubadora?", "Sí: allí las estrategias se examinan con dinero de prueba antes de tocar el del fondo."],
   ];
   if (sim) opciones.push(() => [`¿Habéis visto ${moneda(sim)}? ${fmt.pct(precios[sim].cambio_24h_pct)} en 24 horas.`, pick(["Volatilidad: la mejor amiga del minero.", "Yo solo miro el plan.", "Ni lo miro, que me entran los nervios."])]);
   if (e["Generadas"]) opciones.push(() => [`Llevamos ${fmt.n(e["Generadas"])} estrategias minadas y solo ${e["Distinta a las del banco"] || 0} han llegado al banco.`, "Así es esto: casi todo es ruido."]);
@@ -2836,8 +3730,8 @@ function comite() {
   const ts = [...traders.values()].filter(a => estaLibre(a)).slice(0, 3);
   if (!ts.length && !S.holding) return;
   enCanal("comite", () => decir(DIRECTOR, "¡Comité! Traders, Riesgos y Holding: a la sala.", 2));
-  ts.forEach((a, i) => { a.tarea = "comite"; irA(a, SILLAS_SUR[i + 1].x, SILLAS_SUR[i + 1].y, "sentado", "n"); });
-  if (!RIESGOS.tarea && !RIESGOS.andando) { RIESGOS.tarea = "comite"; irA(RIESGOS, SILLAS_NORTE[0].x, SILLAS_NORTE[0].y, "sentado", "s"); ts.push(RIESGOS); }
+  ts.forEach((a, i) => { a.tarea = "comite"; irAPlanta(a, 0, SILLAS_SUR[i + 1].x, SILLAS_SUR[i + 1].y, "sentado", "n"); });
+  if (!RIESGOS.tarea && !RIESGOS.andando) { RIESGOS.tarea = "comite"; irAPlanta(RIESGOS, 0, SILLAS_NORTE[0].x, SILLAS_NORTE[0].y, "sentado", "s"); ts.push(RIESGOS); }
   setTimeout(() => {
     const t = totales();
     const lineas = [[DIRECTOR, `${t.n} traders, patrimonio ${fmt.n(t.patrimonio)} $ (${fmt.pct(t.pct)}).`],
@@ -2891,6 +3785,7 @@ function actualizarHUD() {
     `<p class="nota">Actualizado a las ${fmt.hora(new Date(mc.actualizado))}.</p>`
     : `<p class="vacio">Aún no hay datos macro. Se actualizan cada 15 minutos con la oficina en marcha.</p>`;
   actualizarHolding(); actualizarRiesgo(); actualizarRanking(); actualizarSalas(); actualizarScalping();
+  actualizarIncubadora(); actualizarInforme(); actualizarAcademia(); pintarBotonera();
   // embudo
   const e = m.embudo || {}, base = Math.max(1, e["Generadas"] || 0);
   $("#embudo").innerHTML = ETAPAS.map(k => {
@@ -3005,12 +3900,16 @@ function estadoSalas() {
   const sup = (g, grupo) => {   // lo que vigila el supervisor: periodo de prueba, estrategias a cambiar y reserva
     const ts = g.traders, cambiar = ts.filter(t => t.prueba && t.prueba.estado === "espera_cierre").length;
     const prueba = ts.filter(t => t.prueba && t.prueba.estado === "en_prueba").length;
-    const reserva = (S.papel && S.papel.reserva || []).filter(x => x.grupo === grupo).length;
-    return {cambiar, texto: ` ${prueba} en periodo de prueba${cambiar ? `, ${cambiar} en pérdidas (se les cambiará la estrategia al cerrar)` : ""}${reserva ? `, ${reserva} en reserva` : ""}${g.retiradas ? `; ${g.retiradas} ${g.retiradas === 1 ? "estrategia retirada" : "estrategias retiradas"}` : ""}.`};
+    const listas = Object.values(S.papel && S.papel.incubadora || {}).filter(x => x.grupo === grupo && x.examen && x.examen.estado === "aprobada").length;
+    return {cambiar, texto: ` ${prueba} en periodo de prueba${cambiar ? `, ${cambiar} en pérdidas (se les cambiará la estrategia al cerrar)` : ""}${listas ? `, ${listas} aprobadas en la incubadora esperando mesa` : ""}${g.retiradas ? `; ${g.retiradas} ${g.retiradas === 1 ? "estrategia retirada" : "estrategias retiradas"}` : ""}.`};
   };
   const st = sup(gt, "trading"), ss = sup(gs, "scalping");
   out.trading = [r && r.bloqueo ? "alerta" : gt.hoy < 0 || st.cambiar ? "aviso" : "ok", gt.n ? `${gt.n} traders, ${gt.abiertas} posiciones abiertas, hoy ${dineroS(gt.hoy)} y en total ${dineroS(gt.resultado)}.${lider && lider.total > 0 ? ` Líder: ${lider.a.nombre} (${dineroS(lider.total)}).` : ""}${st.texto}` : "Sala vacía: pulsa «Buscar estrategias»."];
   out.scalping = [r && r.bloqueo ? "alerta" : !gs.n ? "aviso" : gs.hoy < 0 || ss.cambiar ? "aviso" : "ok", gs.n ? `${gs.n} scalpers, ${gs.abiertas} dentro, hoy ${dineroS(gs.hoy)} y en total ${dineroS(gs.resultado)}. Comisiones pagadas: ${fmt.n(gs.comisiones)} $.${ss.texto}` : "Sala vacía: pulsa «Buscar estrategias» → Scalping."];
+  const gi = S.papel && S.papel.grupos_incubadora || {}, enExamen = (gi.trading ? gi.trading.traders : 0) + (gi.scalping ? gi.scalping.traders : 0);
+  const aprob = (gi.trading ? gi.trading.aprobadas : 0) + (gi.scalping ? gi.scalping.aprobadas : 0), banq = (S.papel && S.papel.banquillo || []).length;
+  out.incubadora = [enExamen ? "ok" : "aviso", enExamen ? `${enExamen} estrategias de examen con dinero de prueba, ${aprob} aprobadas esperando mesa${banq ? ` y ${banq} en el banquillo` : ""}. Resultado de prueba: ${dineroS((gi.trading ? gi.trading.resultado : 0) + (gi.scalping ? gi.scalping.resultado : 0))} (no cuenta en el fondo).`
+    : "Incubadora vacía: las estrategias nuevas empiezan aquí. Pulsa «Buscar estrategias»."];
   if (!r) out.riesgos = ["ok", "Esperando al paper trading."];
   else {
     const uso = Math.max(r.posiciones / r.max_posiciones, r.mayor_apuesta / r.max_misma_apuesta, r.perdida_hoy_pct / r.limite_diario_pct, r.caida_pct / r.max_caida_pct);
@@ -3019,13 +3918,26 @@ function estadoSalas() {
   return out;
 }
 let estadosPrevios = null;
+function departamentosP1() {
+  const F = FONDO_ANALITICA, mc = F && F.montecarlo, ac = S.academia || {}, inf = S.informe, p = S.sistema && S.sistema.papel || {};
+  const conKelly = Object.values(S.papel && S.papel.estrategias || {}).filter(t => t.kelly).length;
+  return [
+    ["quant", "Equipo Quant", "Ainara · Bernat · Yago", "ok", `${conKelly} traders con Kelly prudente. ${mc ? `Monte Carlo a 30 días: ${fmt.pct(mc.p5_pct)} a ${fmt.pct(mc.p95_pct)}, ${NF1.format(mc.prob_perdida_pct)} % de probabilidad de perder.` : "El Monte Carlo necesita 10 días de historia."}`],
+    ["academia", "Academia", "Begoña", "ok", (ac.textos || ["Sin lecciones todavía."])[0]],
+    ["comunicacion", "Comunicación", "Rebeca · Gorka", "ok", inf ? `Informe de las ${inf.hora}: ${inf.titular}.` : "Preparando el informe del día."],
+    ["sistemas", "Sistemas", "Néstor", p.errores_seguidos ? "alerta" : "ok", p.errores_seguidos ? `${p.errores_seguidos} errores seguidos en el paper trading: ${p.ultimo_error || ""}` : `Todo funciona. Cada ciclo tarda ${p.ciclo_s == null ? "—" : NF2.format(p.ciclo_s) + " s"}.`],
+    ["cafeteria", "Cafetería", "Chema", "ok", "Café recién hecho. Satoshi vigila la vitrina de los dulces."],
+    ["terraza1", "Terraza", "—", "ok", `Pérgola, piscina, fogata y barbacoa. ${GATO.planta === 1 ? "Satoshi está arriba." : "Satoshi anda por la planta baja."}`],
+  ];
+}
 function actualizarSalas() {
   const est = estadoSalas();
   const cuenta = {ok: 0, aviso: 0, alerta: 0};
   for (const k in est) cuenta[est[k][0]]++;
   $("#salas").innerHTML = `<div class="sala" data-sup="general"><div class="cab2"><span class="luz ${cuenta.alerta ? "alerta" : cuenta.aviso ? "aviso" : "ok"}"></span>Supervisión general<small>Marta</small></div>
       <p>${cuenta.ok} salas en verde, ${cuenta.aviso} en amarillo y ${cuenta.alerta} en rojo.</p></div>` +
-    SALAS_SUP.map((sala, i) => `<div class="sala" data-sup="${i}"><div class="cab2"><span class="luz ${est[sala.id][0]}"></span>${esc(sala.nombre)}<small>${esc(sala.sup)}</small><button class="ir" data-ir="${sala.id}" title="Llevar la cámara a esta sala">📍 Ver</button></div><p>${esc(est[sala.id][1])}</p></div>`).join("");
+    SALAS_SUP.map((sala, i) => `<div class="sala" data-sup="${i}"><div class="cab2"><span class="luz ${est[sala.id][0]}"></span>${esc(sala.nombre)}${sala.planta ? " · planta 1" : ""}<small>${esc(sala.sup)}</small><button class="ir" data-ir="${sala.id}" title="Llevar la cámara a esta sala">📍 Ver</button></div><p>${esc(est[sala.id][1])}</p></div>`).join("") +
+    `<h3 style="margin-top:14px">Planta 1</h3>` + departamentosP1().map(([id, nombre, quien, luz, texto]) => `<div class="sala"><div class="cab2"><span class="luz ${luz}"></span>${esc(nombre)}<small>${esc(quien)}</small><button class="ir" data-ir="${id}" title="Llevar la cámara">📍 Ver</button></div><p>${esc(texto)}</p></div>`).join("");
   if (estadosPrevios) for (const sala of SALAS_SUP) {
     if (est[sala.id][0] === "alerta" && estadosPrevios[sala.id][0] !== "alerta") {
       const sup = SUPERVISORES[SALAS_SUP.indexOf(sala)];
@@ -3049,8 +3961,8 @@ function rondaGeneral(urgente) {
   GENERAL.tarea = "ronda"; sup.tarea = "reunion"; sup.ruta = []; sup.andando = false;
   GENERAL.velocidad = urgente ? 3 : 1.8;
   if (urgente) enCanal("supervision", () => decir(GENERAL, `Voy para ${sala.nombre.toLowerCase()}.`, 3, "", sup));
-  enfocar(sup.x, sup.y, 2.2, 10);
-  irA(GENERAL, sup.x + .8, sup.y + .2, "de_pie", "o", () => {
+  enfocar(sup.x, sup.y, 2.2, 10, sup.planta || 0);
+  irAPlanta(GENERAL, sup.planta || 0, sup.x + .8, sup.y + .2, "de_pie", "o", () => {
     GENERAL.velocidad = 1.8; sup.mira = "e";
     const [estado, texto] = estadoSalas()[sala.id];
     const cierre = estado === "ok" ? pick(["Perfecto, sigue así.", "Bien. Paso a la siguiente sala.", "Todo en orden. Gracias."])
@@ -3223,6 +4135,8 @@ function actualizarResultados() {
     kr.parentElement.querySelector("small").textContent = "Resultado del fondo";
     animar(kr, f.resultado, x => `${dineroS(x)}<small>${pctS(f.rentabilidad_pct)}</small>`);
     animar(kh, f.hoy, x => `${dineroS(x)}<small>${pctS(f.hoy_pct)}</small>`);
+    const kc = $("#kCaida"), c = f.caida_pct || 0;
+    kc.textContent = c < -0.0005 ? `${NF2.format(c)} %` : "0,00 %"; kc.className = c < -2 ? "baja" : "";
   }
   if (t.n) {
     if (!f) {
@@ -3254,26 +4168,39 @@ $("#plegarRes").onclick = () => { const r = $("#resultados"); r.classList.toggle
 
 // ---- modo cine: la cámara recorre las salas y persigue lo que pasa ----
 let cine = false, cineHasta = 0, cineIdx = -1, camObjetivo = null;
-const PARADAS = [[5, 4.5, 1.8], [15.5, 5, 1.6], [26, 5, 1.7], [34.5, 5, 1.7], [42, 4.5, 1.8], [50, 4.5, 1.8], [9, 17.5, 1.25], [24, 14, 1.8], [42, 16, 1.6], [23.5, 20.5, 1.8], [34, 17.5, 1.5], null];
-function objetivoEn(x, y, z, zoom) {
+const PARADAS = [[5, 4.5, 1.8], [15.5, 5, 1.6], [26, 5, 1.7], [34.5, 5, 1.7], [42, 4.5, 1.8], [50, 4.5, 1.8], [9, 17.5, 1.25], [24, 14, 1.8], [42, 16, 1.6], [23.5, 20.5, 1.8],
+  [9, 16.5, 1.25, 1], [22.5, 4.5, 1.7, 1], [32.5, 4.5, 1.8, 1], [41, 4.5, 1.8, 1], [31, 17.5, 1.25, 1], [50, 4.5, 1.8, 1], null];
+function objetivoEn(x, y, z, zoom, planta = vista) {
   const movil = vw <= 760, panelW = !movil && !$("#panel").classList.contains("plegado") ? 390 : 0;
-  const [ix, iy] = iso(x, y, z);
+  const [ix, iy] = iso(x, y, z + (planta ? ALTURA_PLANTA : 0));
   const areaW = vw - panelW - 24, arriba = 66, areaH = vh - arriba - 44;
   return {x: ix - ((12 + areaW / 2) - vw / 2) / zoom, y: iy - ((arriba + areaH / 2) - vh / 2) / zoom, zoom};
 }
-function enfocar(x, y, zoom = 2, segundos = 6) {
+function enfocar(x, y, zoom = 2, segundos = 6, planta = 0) {
   if (!cine) return;
-  camObjetivo = objetivoEn(x, y, .7, zoom); cineHasta = T + segundos;
+  if (planta !== vista) cambiarPlanta(planta);
+  camObjetivo = objetivoEn(x, y, .7, zoom, planta); cineHasta = T + segundos;
+}
+// Cambia la planta que se ve. La cámara se desplaza lo mismo que sube o baja el dibujo, así no da un salto.
+function cambiarPlanta(p) {
+  if (p === vista) return;
+  const d = (p === 1 ? -1 : 1) * ALTURA_PLANTA * ZH;
+  cam.y += d; if (vuelo) vuelo.y += d; if (camObjetivo) camObjetivo.y += d;
+  vista = p; sobre = null;
+  document.querySelectorAll("#plantas [data-planta]").forEach(b => b.classList.toggle("activo", +b.dataset.planta === p));
 }
 // Botones «Ir a una sala»: la cámara vuela hasta allí (sin activar el modo cine).
 const CENTRO_SALA = {mineria: [5, 4.5, 1.8, "Minería", "#ffc24a"], laboratorio: [15.5, 5, 1.6, "Laboratorio", "#5cc0ff"], banco: [26, 5, 1.7, "Cámara", "#ffcf5a"],
   macro: [34.5, 5, 1.7, "Macro", "#5cc0ff"], holding: [42, 4.5, 1.8, "Holding", "#f7931a"], trading: [9, 17.5, 1.2, "Trading", "#d4ff3a"],
   scalping: [50, 4.5, 1.8, "Scalping", "#ff4fd8"], comite: [24, 14, 1.8, "Comité", "#b58cff"], riesgos: [42, 16, 1.6, "Riesgos", "#ff5a76"], descanso: [23.5, 20.5, 1.8, "Descanso", "#ff8a5c"],
-  terraza: [34, 17.5, 1.5, "Terraza", "#2ee6a6"]};
+  terraza: [34, 17.5, 1.5, "Patio", "#2ee6a6"],
+  incubadora: [9, 16.5, 1.25, "Incubadora", "#ff8a5c", 1], quant: [22.5, 4.5, 1.7, "Equipo Quant", "#5cc0ff", 1], academia: [32.5, 4.5, 1.8, "Academia", "#ffcf5a", 1],
+  comunicacion: [4.5, 4.5, 1.8, "Comunicación", "#ff8a5c", 1], sistemas: [13, 4.5, 1.8, "Sistemas", "#2ee6a6", 1], cafeteria: [41, 4.5, 1.8, "Cafetería", "#ffcf5a", 1],
+  juegos: [50, 4.5, 1.8, "Juegos", "#b58cff", 1], terraza1: [31, 17.5, 1.25, "Terraza", "#2ee6a6", 1]};
 let vuelo = null;
 function irASala(id) {
   if (id === "todo") { const guardada = {...cam}; encuadrar(); vuelo = {x: cam.x, y: cam.y, zoom: cam.zoom}; Object.assign(cam, guardada); }
-  else { const c = CENTRO_SALA[id]; if (!c) return; vuelo = objetivoEn(c[0], c[1], .7, c[2]); }
+  else { const c = CENTRO_SALA[id]; if (!c) return; cambiarPlanta(c[5] || 0); vuelo = objetivoEn(c[0], c[1], .7, c[2], c[5] || 0); }
   if (cine) alternarCine(false);
   cam.tocada = true; $("#ayuda").style.opacity = 0;
 }
@@ -3291,7 +4218,7 @@ function moverCamara(dt) {
   if (T > cineHasta) {
     cineIdx = (cineIdx + 1) % PARADAS.length; cineHasta = T + 8;
     const p = PARADAS[cineIdx];
-    if (p) camObjetivo = objetivoEn(p[0], p[1], .7, p[2]);
+    if (p) { cambiarPlanta(p[3] || 0); camObjetivo = objetivoEn(p[0], p[1], .7, p[2], p[3] || 0); }
     else { const guardada = {...cam}; encuadrar(); camObjetivo = {x: cam.x, y: cam.y, zoom: cam.zoom}; Object.assign(cam, guardada); }
   }
   if (!camObjetivo) return;
@@ -3343,7 +4270,7 @@ async function enviarChat(texto) {
     const a = buscarAgente(x.quien) || GENERAL;
     ultimo = a;
     enCanal("jefe", () => decir(a, x.texto, 5, "", YO));
-    if (a.x !== undefined) enfocar(a.x, a.y, 2.3, 7);
+    if (a.x !== undefined) enfocar(a.x, a.y, 2.3, 7, a.planta || 0);
   }
   if (r.propuesta) setTimeout(() => mostrarPropuesta(r.propuesta, ultimo), 1600 * Math.max(1, (r.mensajes || []).length));
 }
@@ -3514,7 +4441,7 @@ async function refrescar() {
   if (primeraVez) {
     primeraVez = false;
     nuevosEventos(m.actividad); nuevosEventos(S.papel && S.papel.actividad); nuevosEventos(S.holding && S.holding.actividad);
-    sincronizarTraders(true);
+    sincronizarTraders(true); sincronizarIncubadora(true);
     anadirChat(null, "Te damos la bienvenida al Trading Floor. Todo lo que ves es real salvo el dinero: es paper trading, con dinero ficticio.");
     const rep = (S.repetidas || []).reduce((n, g) => n + g[1].length, 0);
     if (rep) anadirChat(null, `Hay ${rep} estrategias repetidas en el banco (la misma idea con otros números). Escribe «quita las repetidas» y te propongo retirarlas; de cada idea se queda la que mejor lo hizo fuera de muestra.`);
@@ -3522,7 +4449,7 @@ async function refrescar() {
   } else {
     const nuevaSesion = anterior && anterior.mineria && anterior.mineria.inicio !== m.inicio;
     if (!nuevaSesion && anterior) encolarPaquetes(anterior.mineria && anterior.mineria.embudo || {}, m.embudo || {});
-    enCanal("operaciones", () => sincronizarTraders(false));
+    enCanal("operaciones", () => { sincronizarTraders(false); sincronizarIncubadora(false); });
     const evMineria = nuevosEventos(m.actividad), evPapel = nuevosEventos(S.papel && S.papel.actividad), evHolding = nuevosEventos(S.holding && S.holding.actividad);
     enCanal("mineria", () => procesarMineria(evMineria));
     enCanal("operaciones", () => procesarPapel(evPapel));
@@ -3531,6 +4458,7 @@ async function refrescar() {
       enCanal("mineria", () => decir(pick(MINEROS), pick(["¡Nueva ronda! Vuelta al tajo.", "Se acabó el café: a minar.", "Servidores arriba. Vamos."]), 2));
   }
   procesarMacro();
+  refrescarAnalitica();
   anterior = S;
   actualizarHUD();
   if (fichaAbierta) mostrarFicha(fichaAbierta, false);
@@ -3539,13 +4467,15 @@ async function refrescar() {
 // ============================================== INTERACCIÓN / FICHA ====
 let sobre = null, fichaAbierta = null;
 function agenteEn(sx, sy) {
-  const [ix, iy] = [(sx - vw / 2) / cam.zoom + cam.x, (sy - vh / 2) / cam.zoom + cam.y];
+  const [ix, iy] = [(sx - vw / 2) / cam.zoom + cam.x, (sy - vh / 2) / cam.zoom + cam.y + (vista ? ALTURA_PLANTA * ZH : 0)];
   let mejor = null;
   for (const a of agentes) if (a.caja && ix >= a.caja[0] && ix <= a.caja[2] && iy >= a.caja[1] && iy <= a.caja[3]) if (!mejor || a.x + a.y > mejor.x + mejor.y) mejor = a;
   if (!mejor && GATO.caja && ix >= GATO.caja[0] && ix <= GATO.caja[2] && iy >= GATO.caja[1] && iy <= GATO.caja[3]) return GATO_AGENTE;
   return mejor;
 }
-const GATO_AGENTE = {nombre: "Satoshi", puesto: "Gato de la oficina", x: GATO.x, y: GATO.y, z: GATO.z, camisa: "#e28f3e", explica: "No opera, no mina y no hace backtests. Duerme en el sofá y es, con diferencia, quien mejor gestiona el riesgo de toda la oficina."};
+const GATO_AGENTE = {nombre: "Satoshi", puesto: "Gato de la oficina", camisa: "#e28f3e",
+  get x() { return GATO.x; }, get y() { return GATO.y; }, get z() { return GATO.z; }, get planta() { return GATO.planta; },
+  get explica() { return `No opera, no mina y no hace backtests, pero se pasea por las dos plantas como si fuera el dueño. Es, con diferencia, quien mejor gestiona el riesgo de toda la oficina. Ahora mismo está ${GATO.donde}.`; }};
 function filaMetricas(nombre, m) {
   if (!m) return "";
   return `<tr><td>${esc(nombre)}</td><td>${fmt.pct(m.retorno_pct)}</td><td>${fmt.n(m.operaciones)}</td><td>${NF2.format(m.factor_beneficio)}</td><td>${NF2.format(m.max_dd_pct)} %</td></tr>`;
@@ -3556,13 +4486,46 @@ function cadaCuanto(b) {   // frecuencia de su estrategia en el backtest: "1 vez
   const dias = (Date.parse(t.hasta) - Date.parse(t.desde)) / 864e5 / t.operaciones;
   return dias < 1 ? `unas ${Math.round(1 / dias)} veces al día` : `1 vez cada ${dias < 2 ? NF2.format(dias).replace(/,?0+$/, "") : Math.round(dias)} días`;
 }
+// Trader de la incubadora: su examen con dinero de prueba.
+function fichaIncubada(a) {
+  const d = a.datos;
+  if (!d) return `<div class="desc">Trader en prácticas de la incubadora. Ahora está esperando a que le den una estrategia nueva para examinar.</div>`;
+  const ex = d.examen || {}, b = (S.banco || []).find(x => x.id === a.id) || {}, pos = d.posicion;
+  const barra = (v, txt) => `<div class="prueba-barra"><i style="width:${Math.round(clamp(v, 0, 1) * 100)}%;background:rgba(255,138,92,.25);border-color:#ff8a5c"></i><span>${txt}</span></div>`;
+  return `<div class="desc">${esc(d.descripcion || b.descripcion || "")}</div>
+    <h3>Examen de la incubadora ${estadoExamen(ex)}</h3>
+    ${barra((ex.operaciones || 0) / (ex.operaciones_min || 10), `${ex.operaciones || 0} de ${ex.operaciones_min || 10} operaciones`)}
+    ${barra((ex.dias || 0) / (ex.dias_min || 7), `día ${Math.floor(ex.dias || 0)} (mínimo ${ex.dias_min || 7}, máximo ${ex.dias_max || 60})`)}
+    <table><tr><td>Resultado con dinero de prueba</td><td class="${(ex.resultado_pct || 0) >= 0 ? "sube" : "baja"}">${fmt.pct(ex.resultado_pct || 0)} (${dineroS(d.resultado || 0)})</td></tr>
+      <tr><td>Factor de beneficio</td><td>${ex.factor == null ? "—" : NF2.format(ex.factor)} (hace falta ${NF1.format(ex.factor_min || 1.1)})</td></tr>
+      <tr><td>Acierto</td><td>${ex.aciertos_pct == null ? "—" : NF1.format(ex.aciertos_pct) + " %"}</td></tr>
+      <tr><td>Nota del examen</td><td>${NF2.format(ex.nota || 0)}</td></tr>
+      <tr><td>Suspende si pierde</td><td>−${NF1.format(ex.corte_pct || 4)} %</td></tr>
+      ${pos ? `<tr><td>Posición abierta</td><td class="${pos.retorno_pct >= 0 ? "sube" : "baja"}">${esc(ladoTxt(d.direccion))} ${esc(moneda(d.simbolo))} · ${fmt.pct(pos.retorno_pct)}</td></tr>` : ""}</table>
+    <p class="aviso">${ex.estado === "aprobada" ? "✓ Aprobada: sube a una mesa con dinero del fondo en cuanto quede una libre (la de mejor nota primero)." : ex.estado === "espera_cierre" ? "Ya se puede decidir, pero se espera a que cierre su posición." : "Opera con 1.000 $ de prueba que no cuentan en tu fondo y sin vetos de sala: así se ve cómo funciona de verdad antes de darle dinero."}</p>
+    ${b.fuera ? `<h3>Backtest (datos pasados)</h3><table><tr><th></th><th>Retorno</th><th>Ops</th><th>FB</th><th>Caída</th></tr>${filaMetricas("Minería (70 %)", b.muestra)}${filaMetricas("Fuera de muestra", b.fuera)}</table>` : ""}`;
+}
+// Del trader en su mesa: cómo aprobó el examen de la incubadora y cuánto arriesga según el Kelly prudente.
+function fichaExamenYKelly(d) {
+  let html = "";
+  const ex = d.examen;
+  if (ex) html += `<h3>Examen de la incubadora · aprobado</h3><table><tr><td>Operaciones de examen</td><td>${ex.operaciones}</td></tr>
+    <tr><td>Resultado con dinero de prueba</td><td class="sube">${fmt.pct(ex.resultado_pct || 0)}</td></tr><tr><td>Factor de beneficio · nota</td><td>${ex.factor == null ? "—" : NF2.format(ex.factor)} · ${NF2.format(ex.nota || 0)}</td></tr></table>`;
+  const k = d.kelly;
+  html += k ? `<h3>Kelly prudente</h3><table><tr><td>Operaciones reales</td><td>${k.operaciones}</td></tr><tr><td>Acierto · prudente</td><td>${NF1.format(k.acierto_pct)} % · ${NF1.format(k.acierto_prudente_pct)} %</td></tr>
+      <tr><td>Ganancia media / pérdida media</td><td>${NF2.format(k.ratio)}</td></tr><tr><td>Kelly completo</td><td>${NF2.format(k.kelly_pct)} %</td></tr>
+      <tr><td>Riesgo por operación</td><td><b>${NF2.format(k.riesgo_pct)} %</b> (base ${NF2.format(k.base_pct)} %)</td></tr></table>
+      <p class="aviso">Un cuarto del Kelly, con el acierto rebajado por si ha tenido suerte, entre un 0,25 % y 1,5 veces el riesgo base.</p>`
+    : `<p class="aviso">Kelly prudente: a partir de ${S.kelly_min_operaciones || 30} operaciones reales (contando las del examen). Hasta entonces arriesga el riesgo por operación de siempre.</p>`;
+  return html;
+}
 // Periodo de prueba de un trader con su estrategia: barra de días, operaciones y qué hará el supervisor.
 function textoPrueba(d) {
   const pr = d.prueba, sup = supervisorDe(d.grupo), n = sup ? sup.nombre : "El supervisor";
   if (!pr) return "";
-  if (pr.estado === "espera_cierre") return `⚠ ${pr.motivo[0].toUpperCase() + pr.motivo.slice(1)}. En cuanto cierre la posición abierta, ${n} le cambia la estrategia por la mejor de la reserva.`;
-  if (pr.estado === "rentable") return `✓ Prueba superada y en positivo. ${n} sigue vigilando: si vuelve a pérdidas, le cambia la estrategia por la mejor de la reserva.`;
-  return `Si al acabar la prueba va en pérdidas, o si antes pierde un ${NF1.format(pr.corte_pct)} % de su capital, ${n} le cambia la estrategia por la mejor de la reserva del banco (en la misma mesa).`;
+  if (pr.estado === "espera_cierre") return `⚠ ${pr.motivo[0].toUpperCase() + pr.motivo.slice(1)}. En cuanto cierre la posición abierta, ${n} le cambia la estrategia por la mejor aprobada de la incubadora.`;
+  if (pr.estado === "rentable") return `✓ Prueba superada y en positivo. ${n} sigue vigilando: si vuelve a pérdidas, le cambia la estrategia por la mejor aprobada de la incubadora.`;
+  return `Si al acabar la prueba va en pérdidas, o si antes pierde un ${NF1.format(pr.corte_pct)} % de su capital, ${n} le cambia la estrategia por la mejor aprobada de la incubadora (en la misma mesa).`;
 }
 function fichaPrueba(d) {
   const pr = d.prueba;
@@ -3576,12 +4539,13 @@ function fichaPrueba(d) {
     <tr><td>Corte por pérdidas</td><td>−${NF1.format(pr.corte_pct)} %</td></tr></table>
     <p class="aviso ${clase}">${esc(textoPrueba(d))}</p>`;
 }
-// Ficha del supervisor de trading o de scalping: cómo van sus traders, la reserva del banco y los últimos cambios.
+// Ficha del supervisor de trading o de scalping: cómo van sus traders, las aprobadas que esperan mesa y los últimos cambios.
 function fichaSupervision(grupo) {
   const ts = Object.values(S.papel && S.papel.estrategias || {}).filter(t => (t.grupo || "trading") === grupo);
   const cuenta = k => ts.filter(t => t.prueba && t.prueba.estado === k).length;
   const reglas = S.prueba && S.prueba[grupo] || {}, mesas = S.mesas && S.mesas[grupo] || 0;
-  const reserva = (S.papel && S.papel.reserva || []).filter(r => r.grupo === grupo);
+  const reserva = Object.entries(S.papel && S.papel.incubadora || {}).filter(([, t]) => t.grupo === grupo && t.examen && t.examen.estado === "aprobada")
+    .sort((a, b) => b[1].examen.nota - a[1].examen.nota).map(([id, t]) => ({id, simbolo: t.simbolo, direccion: t.direccion, resultado_pct: t.examen.resultado_pct}));
   const ret = (S.papel && S.papel.retirados || []).filter(r => r.grupo === grupo);
   const vigilados = ts.filter(t => t.prueba && t.prueba.estado === "espera_cierre");
   let html = `<h3>Supervisión de los traders</h3>
@@ -3589,10 +4553,10 @@ function fichaSupervision(grupo) {
     <tr><td>En periodo de prueba</td><td>${cuenta("en_prueba")}</td></tr>
     <tr><td>Prueba superada (en positivo)</td><td class="sube">${cuenta("rentable")}</td></tr>
     <tr><td>En pérdidas, a cambiar al cerrar</td><td class="${vigilados.length ? "baja" : ""}">${vigilados.length}</td></tr>
-    <tr><td>Estrategias en reserva</td><td>${reserva.length}</td></tr>
+    <tr><td>Aprobadas en la incubadora</td><td>${reserva.length}</td></tr>
     <tr><td>Estrategias retiradas</td><td>${ret.length}</td></tr></table>
-    <p class="aviso">Prueba: ${reglas.dias || "—"} días y ${reglas.operaciones || "—"} operaciones. Si al acabarla va en pérdidas, o si antes pierde un ${NF1.format(reglas.corte_pct || 0)} % de su capital, le cambio la estrategia (cuando no tiene nada abierto) por la mejor de la reserva. Si no hay reserva, pido un ciclo de búsqueda.</p>`;
-  if (reserva.length) html += `<h3>Reserva del banco</h3><table>${reserva.slice(0, 6).map((r, i) => `<tr><td>${i + 1}. ${esc(r.id)} · ${esc(moneda(r.simbolo))} ${esc(ladoTxt(r.direccion).toLowerCase())}</td><td>${r.fuera_pct == null ? "—" : fmt.pct(r.fuera_pct)}</td></tr>`).join("")}</table>`;
+    <p class="aviso">Prueba: ${reglas.dias || "—"} días y ${reglas.operaciones || "—"} operaciones. Si al acabarla va en pérdidas, o si antes pierde un ${NF1.format(reglas.corte_pct || 0)} % de su capital, le cambio la estrategia (cuando no tiene nada abierto) por la mejor aprobada de la incubadora. Si no hay ninguna y la incubadora está vacía, pido un ciclo de búsqueda.</p>`;
+  if (reserva.length) html += `<h3>Aprobadas esperando mesa</h3><table>${reserva.slice(0, 6).map((r, i) => `<tr><td>${i + 1}. ${esc(r.id)} · ${esc(moneda(r.simbolo))} ${esc(ladoTxt(r.direccion).toLowerCase())}</td><td>${fmt.pct(r.resultado_pct || 0)}</td></tr>`).join("")}</table>`;
   if (ret.length) html += `<h3>Últimas estrategias retiradas</h3><table>${ret.slice(0, 6).map(r => `<tr><td>${esc(r.id)} · mesa ${r.mesa == null ? "—" : r.mesa + 1} · ${new Date(r.fin).toLocaleDateString("es-ES", {day: "numeric", month: "short"})}<br><small style="color:var(--suave)">${esc(r.motivo || "")}</small></td><td class="${r.resultado >= 0 ? "sube" : "baja"}" style="white-space:nowrap">${dineroS(r.resultado)}</td></tr>`).join("")}</table>`;
   return html;
 }
@@ -3602,7 +4566,8 @@ function mostrarFicha(a, abrir = true) {
   const color = a.tono || a.camisa;
   let html = `<button class="cerrar" aria-label="Cerrar">✕</button>
     <div class="quien"><div class="av" style="background:${color}">${esc(iniciales(a.nombre))}</div><div><h2>${esc(a.nombre)}</h2><div class="puesto">${esc(a.puesto || "")}</div></div></div>`;
-  if (a.rol === "trader") {
+  if (a.rol === "trader" && a.incubadora) html += fichaIncubada(a);
+  else if (a.rol === "trader") {
     const d = a.datos || {}, b = (S.banco || []).find(x => x.id === a.id) || {};
     const r = d.resultado || 0, pos = d.posicion;
     if (S.control && (S.control.traders_pausados || []).includes(a.id)) html += `<div class="desc" style="border-color:rgba(255,194,74,.5)">⏸ Pausado por ti: no abrirá posiciones nuevas. Pídele que vuelva desde el chat.</div>`;
@@ -3612,7 +4577,7 @@ function mostrarFicha(a, abrir = true) {
       <tr><td>Operaciones cerradas</td><td>${(d.operaciones || []).length}</td></tr>
       <tr><td>Opera desde</td><td>${d.inicio ? new Date(d.inicio).toLocaleString("es-ES", {dateStyle: "short", timeStyle: "short"}) : "—"}</td></tr>
       ${cadaCuanto(b) ? `<tr><td>Suele operar (backtest)</td><td>${cadaCuanto(b)}</td></tr>` : ""}</table>
-      ${fichaPrueba(d)}
+      ${fichaPrueba(d)}${fichaExamenYKelly(d)}
       <h3>Cómo aplica su estrategia</h3><ol class="pasos"><li>Cada 30 minutos, al cerrar la vela, mira si se cumplen <b>todas</b> las condiciones de arriba.</li>
       <li>Si falta alguna, espera (el radar dice cuál le falta). Si se cumplen, pide permiso a Riesgos, que decide cuánto invierte o la veta.</li>
       <li>Con el visto bueno entra, y sale sola al tocar el stop, el objetivo o el tiempo máximo.</li></ol>`;
@@ -3661,6 +4626,18 @@ function mostrarFicha(a, abrir = true) {
       if (r) html += `<table><tr><td>Estado</td><td class="${r.bloqueo ? "baja" : "sube"}">${r.bloqueo ? "FRENO" : "normal"}</td></tr><tr><td>Posiciones abiertas</td><td>${r.posiciones} / ${r.max_posiciones}</td></tr>
         <tr><td>Pérdida de hoy</td><td>${NF2.format(r.perdida_hoy_pct)} % / ${NF2.format(r.limite_diario_pct)} %</td></tr><tr><td>Caída desde el máximo</td><td>${NF2.format(r.caida_pct)} % / ${NF2.format(r.max_caida_pct)} %</td></tr>
         <tr><td>Vetos recientes</td><td>${r.vetos.length}</td></tr></table>`;
+    } else if (a.rol === "quant") {
+      const F = FONDO_ANALITICA, mc = F && F.montecarlo;
+      html += `<table><tr><td>Traders con Kelly</td><td>${Object.values(S.papel && S.papel.estrategias || {}).filter(t => t.kelly).length}</td></tr>
+        <tr><td>Monte Carlo a 30 días</td><td>${mc ? `${fmt.pct(mc.p5_pct)} · ${fmt.pct(mc.p95_pct)}` : "faltan días"}</td></tr>
+        <tr><td>Post mortem escritos</td><td>${(S.papel && S.papel.retirados || []).filter(r => r.post_mortem).length + (S.papel && S.papel.suspendidas || []).length}</td></tr></table>`;
+    } else if (a.rol === "profesora") {
+      html += (S.academia && S.academia.textos || []).slice(0, 3).map(t => `<div class="leccion">${esc(t)}</div>`).join("");
+    } else if (a.rol === "comunicacion" && S.informe) {
+      html += `<div class="informe-tit">${esc(S.informe.titular)}</div><p class="aviso">El informe completo está en la pestaña «Informe».</p>`;
+    } else if (a.rol === "it") {
+      const p = S.sistema && S.sistema.papel || {};
+      html += `<table><tr><td>Paper trading</td><td class="${p.errores_seguidos ? "baja" : "sube"}">${p.errores_seguidos ? p.errores_seguidos + " errores" : "funcionando"}</td></tr><tr><td>Ciclo</td><td>${p.ciclo_s == null ? "—" : NF2.format(p.ciclo_s) + " s"}</td></tr></table>`;
     } else if (a.rol === "director") {
       const t = totales();
       html += `<table><tr><td>Patrimonio (ficticio)</td><td>${t.n ? fmt.dinero(t.patrimonio) : "—"}</td></tr><tr><td>Posiciones abiertas</td><td>${t.abiertas} (${t.largos} largas, ${t.cortos} cortas)</td></tr></table>`;
@@ -3719,7 +4696,7 @@ function encuadrar() {
   const margenIzq = !movil && !$("#resultados").classList.contains("plegado") ? 170 : 0;
   const arriba = movil ? 58 : 66, abajo = movil ? (!$("#panel").classList.contains("plegado") ? vh * .42 + 44 : 44) : 44;
   const areaW = vw - panelW - 24 - margenIzq, areaH = vh - arriba - abajo;
-  const minX = -D * TW / 2, maxX = W * TW / 2, minY = -ALTO_MURO * ZH - 10, maxY = (X_ALA + D) * TH / 2 + 10;
+  const minX = -D * TW / 2, maxX = W * TW / 2, minY = -ALTO_MURO * ZH - 10 - (vista ? ALTURA_PLANTA * ZH : 0), maxY = (X_ALA + D) * TH / 2 + 10;
   cam.zoom = clamp(Math.min(areaW / (maxX - minX), areaH / (maxY - minY)), .25, 3);
   const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
   cam.x = cx - ((12 + margenIzq + areaW / 2) - vw / 2) / cam.zoom;
@@ -4083,6 +5060,143 @@ function pintarFondo() {
     : `<p class="vacio">Todavía no se ha cerrado ninguna operación.</p>`;
 }
 
+// ============================================ PLANTA 1, BOTONERA Y PESTAÑAS NUEVAS ==
+document.querySelectorAll("#plantas [data-planta]").forEach(b => b.addEventListener("click", () => { cambiarPlanta(+b.dataset.planta); if (!cam.tocada) encuadrar(); }));
+addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest("input,textarea")) return;
+  if (e.key === "PageUp") cambiarPlanta(1); else if (e.key === "PageDown") cambiarPlanta(0);
+});
+$("#botonera").addEventListener("click", e => {
+  const b = e.target.closest("[data-b]"); if (!b || !S) return;
+  const que = b.dataset.b;
+  if (que === "comite") comite();
+  else if (que === "megafono") {
+    const texto = (prompt("¿Qué quieres decirle a toda la oficina?") || "").trim().slice(0, 200);
+    if (!texto) return;
+    enCanal("jefe", () => decir(YO, `📣 ${texto}`, 5));
+    const oyentes = agentes.filter(a => (a.planta || 0) === vista && !a.transbordo);
+    for (const a of [pick(oyentes), pick(oyentes)].filter(Boolean)) enCanal("charla", () => decir(a, pick(["¡Recibido, jefe!", "Entendido.", "¡Oído cocina!", "Apuntado.", "Ahora mismo."]), 2, "", YO));
+  } else if (que === "trabajar") {
+    let n = 0;
+    for (const a of agentes) if (a.tarea === "descanso") { a.hasta = 0; n++; }
+    enCanal("supervision", () => decir(GENERAL, n ? `¡Todo el mundo a su puesto! ${n} vuelven del descanso.` : "Ya está todo el mundo trabajando.", 3));
+  } else if (que === "descanso") {
+    const libres = agentes.filter(a => estaLibre(a) && a.postura === "sentado" && !(a.datos && a.datos.posicion) && a.rol !== "supervisor" && a.rol !== "general");
+    let n = 0;
+    for (const a of libres.sort(() => Math.random() - .5).slice(0, 8)) if (mandarDescanso(a, rand(40, 90))) n++;
+    enCanal("charla", () => decir(GENERAL, n ? `Pausa de cinco minutos para ${n} personas. Quien tenga algo abierto, sigue en su puesto.` : "No hay nadie libre para descansar ahora.", 2));
+  } else if (que === "pausa") decisionDirecta({accion: S.control && S.control.freno_manual ? "quitar_freno" : "activar_freno"});
+  else if (que === "kill") {
+    if (confirm("Kill switch: se cierran ya todas las posiciones abiertas del fondo al último precio y no se abre nada nuevo hasta que pulses «Reabrir». La incubadora sigue (no usa dinero del fondo).\n\n¿Lo pulsas?"))
+      decisionDirecta({accion: "kill_switch"});
+  }
+});
+function pintarBotonera() {
+  const pausado = !!(S && S.control && S.control.freno_manual), b = $("#bPausa");
+  b.classList.toggle("activo", pausado);
+  b.innerHTML = pausado ? "▶ <span>Reabrir</span>" : "⏸ <span>Pausar todo</span>";
+  b.title = pausado ? "Reabrir: quitar el freno manual y volver a permitir entradas" : "Pausar todo: nadie abre posiciones nuevas (las abiertas siguen con su stop)";
+}
+const nombreDe = id => { const a = traders.get(id); return a ? `${a.nombre} (${id})` : id; };
+const estadoExamen = ex => ex && ex.estado === "aprobada" ? `<span class="estado-ex ok">aprobada</span>` : ex && ex.estado === "espera_cierre" ? `<span class="estado-ex esp">se decide al cerrar</span>` : `<span class="estado-ex">de examen</span>`;
+function actualizarIncubadora() {
+  if (!$("#p-incubadora").classList.contains("activa") && $("#incubadora").children.length) return;
+  const inc = Object.entries(S.papel && S.papel.incubadora || {}).sort((a, b) => ((b[1].examen || {}).nota || 0) - ((a[1].examen || {}).nota || 0));
+  const g = S.papel && S.papel.grupos_incubadora || {}, gt = g.trading || {}, gs = g.scalping || {}, reglas = S.incubadora && S.incubadora.reglas || {};
+  const banq = S.papel && S.papel.banquillo || [], susp = S.papel && S.papel.suspendidas || [];
+  const persona = d => [...PLAZAS.trading, ...PLAZAS.scalping].map(m => m.trader).find(a => a && a.datos === d);
+  const rt = reglas.trading || {}, rs = reglas.scalping || {};
+  $("#incubadora").innerHTML = `<div class="mini-kpis">
+      <div><small>De examen</small><b>${(gt.traders || 0) + (gs.traders || 0)}<span>/${(gt.plazas || 24) + (gs.plazas || 8)}</span></b></div>
+      <div><small>Aprobadas esperando mesa</small><b class="sube">${(gt.aprobadas || 0) + (gs.aprobadas || 0)}</b></div>
+      <div><small>En el banquillo</small><b>${banq.length}</b></div>
+      <div><small>Suspendidas</small><b>${susp.length}</b></div>
+      <div><small>Resultado de prueba</small><b class="${(gt.resultado || 0) + (gs.resultado || 0) >= 0 ? "sube" : "baja"}">${dineroS((gt.resultado || 0) + (gs.resultado || 0))}</b></div>
+      <div><small>Operaciones</small><b>${(gt.operaciones || 0) + (gs.operaciones || 0)}</b></div></div>
+    <p class="nota">Toda estrategia nueva empieza aquí con ${fmt.n(S.incubadora ? S.incubadora.capital : 1000)} $ de prueba que <b>no cuentan en tu fondo</b>. Aprueba con ${rt.operaciones || 10} operaciones (${rs.operaciones || 30} en scalping) y ${rt.dias_min || 7} días como mínimo, ganando y con un factor de beneficio de ${NF1.format(rt.factor_min || 1.1)} o más; suspende si pierde un ${rt.corte_pct || 4} % (${rs.corte_pct || 3} % en scalping) o si en ${rt.dias_max || 60} días no da la talla. Las aprobadas suben a una mesa con dinero del fondo, la de mejor nota primero.</p>
+    ${inc.length ? inc.map(([id, d]) => {
+      const ex = d.examen || {}, a = persona(d), f = clamp((ex.operaciones || 0) / (ex.operaciones_min || 10), 0, 1), r = ex.resultado_pct || 0;
+      return `<div class="inc-fila" data-id="${esc(id)}"><div class="av" style="background:${a ? a.camisa : "#ff8a5c"}">${esc(iniciales(a ? a.nombre : "?"))}</div>
+        <div style="min-width:0"><div class="n">${esc(a ? a.nombre : "")} · ${esc(id)}${estadoExamen(ex)}</div>
+          <div class="d">${esc(moneda(d.simbolo))} ${esc(ladoTxt(d.direccion))} · ${d.grupo === "scalping" ? "scalping · " : ""}${ex.operaciones || 0}/${ex.operaciones_min || 10} operaciones · día ${Math.floor(ex.dias || 0)}${ex.factor != null ? ` · factor ${NF2.format(ex.factor)}` : ""} · nota ${NF2.format(ex.nota || 0)}</div>
+          <div class="barra-ex"><i style="width:${f * 100}%;background:${colorExamen(d)}"></i></div></div>
+        <div class="r ${r > 0 ? "sube" : r < 0 ? "baja" : ""}">${fmt.pct(r)}<small>${d.posicion ? "dentro" : "esperando señal"}</small></div></div>`;
+    }).join("") : `<p class="vacio">No hay ninguna estrategia de examen. Pulsa «🔍 Buscar estrategias»: las que superen las seis pruebas empezarán aquí.</p>`}
+    ${banq.length ? `<h3 style="margin-top:14px">Banquillo</h3><p class="nota">Aprobadas por el laboratorio, esperando plaza en la incubadora (las mejores fuera de muestra primero): ${banq.map(b => esc(b.id)).join(", ")}.</p>` : ""}
+    ${susp.length ? `<h3 style="margin-top:14px">Últimas suspendidas</h3>${susp.slice(0, 6).map(x => postMortemHtml(x.id, x.post_mortem, `${moneda(x.simbolo)} · ${x.motivo || ""}`)).join("")}` : ""}`;
+}
+$("#incubadora").addEventListener("click", e => {
+  const el = e.target.closest(".inc-fila"); if (!el) return;
+  const a = [...PLAZAS.trading, ...PLAZAS.scalping].map(m => m.trader).find(x => x && x.id === el.dataset.id);
+  if (a) { cambiarPlanta(1); mostrarFicha(a); }
+});
+function postMortemHtml(id, pm, sub) {
+  if (!pm) return `<div class="pm"><b>${esc(id)}</b><small> ${esc(sub || "")}</small></div>`;
+  const v = pm.vivo || {}, b = pm.backtest || {};
+  return `<details class="pm"><summary>${esc(id)} · ${pm.fase === "incubadora" ? "suspendida en la incubadora" : "retirada de su mesa"}<small>${esc(sub || pm.motivo || "")}</small></summary>
+    <p>${esc(pm.conclusion || "")}</p>
+    <table class="tabla-eq"><tr><th></th><th>Backtest</th><th>En real</th></tr>
+      <tr><td>Acierto</td><td>${b.aciertos_pct == null ? "—" : NF1.format(b.aciertos_pct) + " %"}</td><td>${v.aciertos_pct == null ? "—" : NF1.format(v.aciertos_pct) + " %"}</td></tr>
+      <tr><td>Media por operación</td><td>${b.media_pct == null ? "—" : fmt.pct(b.media_pct)}</td><td>${v.media_pct == null ? "—" : fmt.pct(v.media_pct)}</td></tr>
+      <tr><td>Factor de beneficio</td><td>${b.factor == null ? "—" : NF2.format(b.factor)}</td><td>${v.factor == null ? "—" : NF2.format(v.factor)}</td></tr>
+      <tr><td>Operaciones al mes</td><td>${b.por_mes == null ? "—" : NF1.format(b.por_mes)}</td><td>${v.por_mes == null ? "—" : NF1.format(v.por_mes)}</td></tr></table>
+    <ul>${(pm.causas || []).map(c => `<li>${esc(c.texto)}</li>`).join("")}</ul></details>`;
+}
+function filaEquipo(nombre, x, prueba) {
+  if (!x) return "";
+  const r = x.resultado || 0;
+  return `<tr class="${prueba ? "prueba" : ""}"><td>${esc(nombre)}${prueba ? "<small>prueba, no cuenta</small>" : ""}</td><td>${x.operaciones || 0}</td>
+    <td class="${r > 0 ? "sube" : r < 0 ? "baja" : ""}">${dineroS(r)}</td><td>${x.media_op_pct == null ? "—" : fmt.pct(x.media_op_pct)}</td>
+    <td>${x.aciertos_pct == null ? "—" : NF0.format(x.aciertos_pct) + " %"}</td><td title="${x.abiertas ? `Resultado de lo abierto: ${dineroS(x.abiertas_usd || 0)}` : ""}">${x.abiertas || 0}</td></tr>`;
+}
+function actualizarInforme() {
+  if (!$("#p-informe").classList.contains("activa") && $("#informe").children.length) return;
+  refrescarAnalitica();
+  const g = S.papel && S.papel.grupos || {}, gi = S.papel && S.papel.grupos_incubadora || {}, inf = S.informe, F = FONDO_ANALITICA, mc = F && F.montecarlo, mt = F && F.metricas || {};
+  const sis = S.sistema || {}, p = sis.papel || {}, ho = sis.holding || {};
+  const nombres = Object.fromEntries([...traders.values()].map(a => [a.id, a.nombre]));
+  const conNombres = t => String(t).replace(/E-[0-9A-F]{6}/g, id => nombres[id] ? `${nombres[id]} (${id})` : id).replace(/\(([^()]+) \((E-[0-9A-F]{6})\), /g, "($1 · $2, ");
+  $("#informe").innerHTML = `<h3>Equipos · resultado desde el inicio</h3>
+    <div class="d-scroll"><table class="tabla-eq"><tr><th>Equipo</th><th>Ops.</th><th>Resultado</th><th>Media/op.</th><th>Acierto</th><th>Abiertas</th></tr>
+      ${filaEquipo("Trading", g.trading)}${filaEquipo("Scalping", g.scalping)}
+      ${filaEquipo("Incubadora trading", gi.trading, true)}${filaEquipo("Incubadora scalping", gi.scalping, true)}</table></div>
+    <p class="nota">Hacen falta unas 30 operaciones cerradas por equipo para sacar conclusiones; con menos, el resultado es casi todo azar. «Media/op.» es lo que se mueve de media cada operación, ya con comisiones.</p>
+    <h3 style="margin-top:14px">Informe del día${inf ? ` · ${esc(inf.hora)}` : ""}</h3>
+    ${inf ? `<div class="informe-tit">${esc(inf.titular)}</div>${inf.puntos.map(x => `<div class="informe-punto ${esc(x.tono || "")}"><b>${esc(x.tema.toUpperCase())}</b>${esc(conNombres(x.texto))}</div>`).join("")}` : `<p class="vacio">Sin informe todavía.</p>`}
+    <h3 style="margin-top:14px">Equipo Quant · Monte Carlo del fondo</h3>
+    ${mc ? `<table class="tabla-eq"><tr><td>Rango probable a 30 días (P5 · P50 · P95)</td><td>${fmt.pct(mc.p5_pct)} · ${fmt.pct(mc.p50_pct)} · ${fmt.pct(mc.p95_pct)}</td></tr>
+      <tr><td>Probabilidad de perder en 30 días</td><td>${NF1.format(mc.prob_perdida_pct)} %</td></tr><tr><td>Probabilidad de caer un 5 % o más</td><td>${NF1.format(mc.prob_caida5_pct)} %</td></tr>
+      <tr><td>Peor día probable (VaR 95 %)</td><td>−${NF2.format(mc.var95_dia_pct)} %</td></tr></table>
+      <p class="nota">${fmt.n(mc.simulaciones)} futuros simulados barajando los ${mc.muestra_dias} días reales del fondo. Con pocos días, el rango es poco fiable.</p>`
+      : `<p class="vacio">El Monte Carlo necesita al menos 10 días de historia del fondo.</p>`}
+    <table class="tabla-eq"><tr><td>Sharpe · Sortino · Calmar</td><td>${mt.sharpe == null ? "—" : NF2.format(mt.sharpe)} · ${mt.sortino == null ? "—" : NF2.format(mt.sortino)} · ${mt.calmar == null ? "—" : NF2.format(mt.calmar)}</td></tr></table>
+    <h3 style="margin-top:14px">Sistemas</h3>
+    <table class="tabla-eq"><tr><td>Paper trading</td><td class="${p.errores_seguidos ? "baja" : "sube"}">${p.errores_seguidos ? `${p.errores_seguidos} errores seguidos` : p.ok ? "funcionando" : "—"}</td></tr>
+      <tr><td>Duración de cada ciclo</td><td>${p.ciclo_s == null ? "—" : NF2.format(p.ciclo_s) + " s"}</td></tr>
+      <tr><td>Holding</td><td class="${ho.errores_seguidos ? "baja" : "sube"}">${ho.errores_seguidos ? `${ho.errores_seguidos} errores` : ho.ok ? "funcionando" : "—"}</td></tr>
+      <tr><td>Mercados con datos en vivo</td><td>${(p.mercados || []).length}</td></tr></table>
+    ${p.ultimo_error && p.errores_seguidos ? `<p class="nota">Último error: ${esc(p.ultimo_error)}</p>` : ""}`;
+}
+function actualizarAcademia() {
+  if (!$("#p-academia").classList.contains("activa") && $("#academia").children.length) return;
+  const ac = S.academia || {}, ret = (S.papel && S.papel.retirados || []).filter(r => r.post_mortem), susp = S.papel && S.papel.suspendidas || [];
+  const pms = [...ret.map(r => ({id: r.id, fin: r.fin, pm: r.post_mortem, sub: `${moneda(r.simbolo)} · ${r.motivo || ""}`})),
+    ...susp.map(x => ({id: x.id, fin: x.fin, pm: x.post_mortem, sub: `${moneda(x.simbolo)} · ${x.motivo || ""}`}))].sort((a, b) => String(b.fin).localeCompare(String(a.fin)));
+  const kelly = [...traders.values()].filter(a => a.datos && a.datos.kelly).sort((a, b) => b.datos.kelly.riesgo_pct - a.datos.kelly.riesgo_pct);
+  $("#academia").innerHTML = `<div class="mini-kpis"><div><small>Juzgadas en real</small><b>${ac.juzgadas || 0}</b></div><div><small>Funcionan</small><b class="sube">${ac.funcionan || 0}</b></div><div><small>Fallan</small><b class="baja">${ac.fallan || 0}</b></div></div>
+    ${(ac.textos || []).map(t => `<div class="leccion">${esc(t)}</div>`).join("")}
+    <p class="nota">La minería busca más a menudo lo que funciona en real y menos lo que falla, pero un ${ac.exploracion_pct || 30} % sigue siendo al azar y cada estrategia nueva pasa igualmente las seis pruebas y el examen de la incubadora. Una estrategia nunca se cambia sola: eso sería adaptarse a la casualidad.</p>
+    ${(ac.tipos || []).length ? `<h3 style="margin-top:12px">Tipos de condición</h3><table class="tabla-eq"><tr><th>Condición</th><th>Funcionan</th><th>Fallan</th><th>La minería la busca</th></tr>
+      ${ac.tipos.map(t => `<tr><td>${esc(t.nombre)}</td><td>${t.funcionan}</td><td>${t.fallan}</td><td class="${t.peso > 1 ? "sube" : t.peso < 1 ? "baja" : ""}">×${NF2.format(t.peso)}</td></tr>`).join("")}</table>` : ""}
+    ${(ac.causas || []).length ? `<h3 style="margin-top:12px">Causas de fallo más repetidas</h3><table class="tabla-eq">${ac.causas.map(c => `<tr><td>${esc(c.texto)}</td><td>${c.veces}</td></tr>`).join("")}</table>` : ""}
+    <h3 style="margin-top:12px">Kelly prudente (equipo Quant)</h3>
+    ${kelly.length ? `<table class="tabla-eq"><tr><th>Trader</th><th>Ops.</th><th>Acierto</th><th>Prudente</th><th>Gana/pierde</th><th>Riesgo</th></tr>
+      ${kelly.map(a => { const k = a.datos.kelly; return `<tr><td>${esc(a.nombre)}</td><td>${k.operaciones}</td><td>${NF1.format(k.acierto_pct)} %</td><td>${NF1.format(k.acierto_prudente_pct)} %</td><td>${NF2.format(k.ratio)}</td><td>${NF2.format(k.riesgo_pct)} %</td></tr>`; }).join("")}</table>`
+      : `<p class="nota">Ningún trader tiene todavía ${S.kelly_min_operaciones || 30} operaciones reales (contando las del examen): todos arriesgan el ${NF1.format(S.papel && S.papel.riesgo ? S.papel.riesgo.riesgo_por_operacion_pct : 1)} % de siempre.</p>`}
+    <h3 style="margin-top:12px">Post mortem</h3>
+    ${pms.length ? pms.slice(0, 12).map(x => postMortemHtml(x.id, x.pm, x.sub)).join("") : `<p class="vacio">Todavía no se ha retirado ninguna estrategia.</p>`}`;
+}
+
 // ========================================================== BUCLE =====
 let ultimo = performance.now(), acumulado = 0;
 function bucle(ahora) {
@@ -4090,6 +5204,7 @@ function bucle(ahora) {
   ultimo = ahora; T += dt;
   noche = calcularNoche();
   for (const a of agentes) moverAgente(a, dt);
+  moverAgente(GATO, dt); planificarGato();
   moverPaquetes(dt); moverParticulas(dt); robot(dt); procesarChat(); moverCamara(dt); pasoAnimaciones(ahora);
   acumulado += dt; if (acumulado > .5) { acumulado = 0; planificar(); }
   if (!document.hidden && !vistaFondo) dibujar();   // con «Mi fondo» abierto no se pinta la oficina (ahorra CPU)
@@ -4098,7 +5213,7 @@ function bucle(ahora) {
   $("#pComite").textContent = `Comité en ${String(Math.floor(falta / 60)).padStart(2, "0")}:${String(falta % 60).padStart(2, "0")}`;
   requestAnimationFrame(bucle);
 }
-crearSuelo();
+crearSuelo(0); crearSuelo(1);
 redimensionar();
 refrescar();
 setInterval(refrescar, 2000);

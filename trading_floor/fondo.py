@@ -197,6 +197,11 @@ def _metricas(vl: pd.Series) -> dict:
         "anio_pct": round(float(vl.iloc[-1] / inicio_anio.iloc[-1] - 1) * 100, 3) if len(inicio_anio) else round(total * 100, 3),
         "volatilidad_pct": round(float(rend.std() * np.sqrt(365)) * 100, 2) if len(rend) >= 5 else None,
         "sharpe": round(float(rend.mean() / rend.std() * np.sqrt(365)), 2) if len(rend) >= 7 and rend.std() > 0 else None,
+        # Sortino: como el Sharpe, pero solo penaliza los días malos. Calmar: rentabilidad anual entre la peor caída.
+        "sortino": (round(float(rend.mean() / rend[rend < 0].std() * np.sqrt(365)), 2)
+                    if len(rend) >= 7 and (rend < 0).sum() >= 2 and rend[rend < 0].std() > 0 else None),
+        "calmar": (round(float(((1 + total) ** (365 / dias) - 1) / abs(caidas.min())), 2)
+                   if dias >= 30 and caidas.min() < 0 else None),
         "caida_max_pct": round(float(caidas.min()) * 100, 3),
         "caida_actual_pct": round(float(caidas.iloc[-1]) * 100, 3),
         "mejor_dia": [rend.idxmax().date().isoformat(), round(float(rend.max()) * 100, 3)] if len(rend) else None,
@@ -204,6 +209,27 @@ def _metricas(vl: pd.Series) -> dict:
         "dias_positivos_pct": round(float((rend > 0).mean()) * 100, 1) if len(rend) else None,
         "dias": round(dias, 1),
     }
+
+
+def _montecarlo(vl: pd.Series, dias: int = 30, n: int = 5000) -> dict | None:
+    """Monte Carlo del equipo Quant: se barajan los rendimientos diarios reales del fondo para simular `n` futuros de
+    `dias` días. Da el rango probable (percentiles 5, 50 y 95), la probabilidad de perder y la de caer un 5 % o más
+    en algún momento. Con menos de 10 días de historia no se calcula (sería inventar)."""
+    local = vl.copy()
+    local.index = local.index.tz_convert(dt.datetime.now().astimezone().tzinfo)
+    rend = local.resample("1D").last().dropna().pct_change().dropna().to_numpy()
+    if len(rend) < 10:
+        return None
+    rng = np.random.default_rng(7)
+    caminos = np.cumprod(1 + rng.choice(rend, size=(n, dias), replace=True), axis=1)
+    final = caminos[:, -1] - 1
+    caida = (caminos / np.maximum.accumulate(np.hstack([np.ones((n, 1)), caminos]), axis=1)[:, 1:] - 1).min(axis=1)
+    return {"dias": dias, "muestra_dias": int(len(rend)), "simulaciones": n,
+            "p5_pct": round(float(np.percentile(final, 5)) * 100, 2), "p50_pct": round(float(np.percentile(final, 50)) * 100, 2),
+            "p95_pct": round(float(np.percentile(final, 95)) * 100, 2),
+            "prob_perdida_pct": round(float((final < 0).mean()) * 100, 1),
+            "prob_caida5_pct": round(float((caida <= -.05).mean()) * 100, 1),
+            "var95_dia_pct": round(float(-np.percentile(rend, 5)) * 100, 3)}
 
 
 def _mensual(vl: pd.Series) -> list[list]:
@@ -321,6 +347,7 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
         "hoy_pct": round(float(vl[-1] / base_hoy - 1) * 100, 3),
         "hoy": round(float((vl[-1] - base_hoy) * participaciones[-1]), 2),
         "por_area": {k: round(float(v.iloc[-1]), 2) for k, v in areas.items()},
+        "caida_pct": round(float(vl[-1] / max(vl.max(), 1e-9) - 1) * 100, 3),
         "reparto": reparto(f),
     }
     if not completo:
@@ -352,6 +379,7 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
     return {
         "resumen": resumen,
         "metricas": _metricas(vl_s),
+        "montecarlo": _montecarlo(vl_s),
         "btc_pct": btc_pct,
         "mensual": _mensual(vl_s),
         "serie": serie,
@@ -368,6 +396,8 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
         "ultimas": ultimas,
         "areas": {g: dict((papel.get("grupos") or {}).get(g) or {}) for g in ("trading", "scalping")} | {
             "holding": dict(holding.get("resumen") or {})},
+        # la incubadora opera con dinero de prueba: se enseña aparte y NO suma en el fondo
+        "incubadora": {g: dict(v) for g, v in (papel.get("grupos_incubadora") or {}).items()},
         "mejores": ranking[:5],
         "peores": [r for r in ranking[::-1][:5] if r["resultado"] < 0],
         "movimientos": [dict(m) for m in f["movimientos"]][::-1],

@@ -184,14 +184,34 @@ def _condicion_de_familia(rng: np.random.Generator, familia: str) -> dict:
     return _condicion(rng, _elegir(rng, list(FAMILIAS[familia])))
 
 
-def aleatoria(rng: np.random.Generator, simbolo: str, intervalo: str) -> Estrategia:
+def aleatoria(rng: np.random.Generator, simbolo: str, intervalo: str, pesos: dict | None = None) -> Estrategia:
+    """Estrategia al azar. Con `pesos` (de la academia), los tipos de condición y la dirección que funcionan en real
+    salen más a menudo y los que fallan, menos; una parte (la exploración) sigue siendo al azar."""
     n = int(rng.choice([1, 2, 3], p=[0.25, 0.5, 0.25]))
-    familias = [list(FAMILIAS)[i] for i in rng.permutation(len(FAMILIAS))[:n]]
+    if not pesos:
+        familias = [list(FAMILIAS)[i] for i in rng.permutation(len(FAMILIAS))[:n]]
+        condiciones = [_condicion_de_familia(rng, f) for f in familias]
+        direccion = _elegir(rng, ["largo", "corto"])
+    else:
+        explora = float(pesos.get("exploracion", 0.3))
+        tipos = list(TIPOS)
+        w = np.array([float(pesos.get("tipos", {}).get(t, 1.0)) for t in tipos])
+        prob = (1 - explora) * w / w.sum() + explora / len(tipos)
+        condiciones, usadas = [], set()
+        for _ in range(50):
+            if len(condiciones) >= n:
+                break
+            tipo = tipos[int(rng.choice(len(tipos), p=prob))]
+            if TIPOS[tipo][0] not in usadas:
+                usadas.add(TIPOS[tipo][0])
+                condiciones.append(_condicion(rng, tipo))
+        wd = np.array([float(pesos.get("direcciones", {}).get(d, 1.0)) for d in ("largo", "corto")])
+        direccion = ["largo", "corto"][int(rng.choice(2, p=(1 - explora) * wd / wd.sum() + explora / 2))]
     return Estrategia(
         simbolo=simbolo,
         intervalo=intervalo,
-        direccion=_elegir(rng, ["largo", "corto"]),
-        condiciones=[_condicion_de_familia(rng, f) for f in familias],
+        direccion=direccion,
+        condiciones=condiciones,
         **{k: _elegir(rng, v) for k, v in SALIDAS.items()},
     )
 

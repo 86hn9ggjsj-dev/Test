@@ -14,7 +14,7 @@ from typing import Callable
 
 import numpy as np
 
-from . import almacen, banco, control
+from . import academia, almacen, banco, control
 from .backtest import simular
 from .config import (DIAS_HISTORICO, INTERVALO, PARTE_EN_MUESTRA, SCALPING_DIAS, SCALPING_INTERVALO, SCALPING_SIMBOLOS,
                      cupo_banco)
@@ -191,10 +191,14 @@ def minar(simbolo: str, intervalo: str = INTERVALO, estrategias: int = 2000, gen
         if d["estrategia"]["simbolo"] == simbolo and d["estrategia"]["intervalo"] == intervalo:
             ocupadas.append({**_huella(Estrategia.de_dict(d["estrategia"]), m, d["id"]), "descartada": d.get("motivo", "retirada")})
     tam = max(20, estrategias // generaciones)
+    pesos = academia.pesos()   # lo aprendido en real: se genera más de lo que funciona (sin dejar de explorar)
+    if pesos:
+        estado.evento("La academia me pasa lo aprendido en real: busco más de lo que funciona y menos de lo que falla, "
+                      f"pero un {int(pesos['exploracion'] * 100)} % sigue siendo al azar.", "academia")
     vistas: set[str] = set()
     puntuadas: list[tuple[float, Estrategia]] = []
     aprobadas: list[dict] = []
-    poblacion = [aleatoria(rng, simbolo, intervalo) for _ in range(tam)]
+    poblacion = [aleatoria(rng, simbolo, intervalo, pesos) for _ in range(tam)]
 
     for g in range(1, generaciones + 1):
         if not seguir():
@@ -233,7 +237,7 @@ def minar(simbolo: str, intervalo: str = INTERVALO, estrategias: int = 2000, gen
                 a, b = (elite[int(i)] for i in rng.choice(len(elite), 2, replace=False))
                 hija = cruzar(a, b, rng)
             else:
-                hija = aleatoria(rng, simbolo, intervalo)
+                hija = aleatoria(rng, simbolo, intervalo, pesos)
             if hija.id not in vistas and hija.id not in nuevas:
                 nuevas.add(hija.id)
                 poblacion.append(hija)

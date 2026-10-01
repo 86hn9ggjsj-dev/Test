@@ -6,10 +6,17 @@ descargan las velas nuevas y se simula la estrategia desde el momento en que ent
 con exactamente las mismas reglas que el backtest (backtest.py). Encima va la gestión de riesgo
 (riesgo.py): decide qué parte del capital usa cada operación y puede vetar entradas nuevas.
 
-Cada trader tiene su mesa (48 en trading y 12 en scalping). Si no hay mesa libre, la estrategia espera en la reserva
-del banco. El supervisor de cada sala vigila el periodo de prueba de sus traders (config.PRUEBA): al que no es rentable
-le retira la estrategia, cuando no tiene nada abierto, y le da la mejor de la reserva. Lo que ganó o perdió la
-estrategia retirada queda congelado y sigue contando en la sala y en tu fondo.
+El camino de una estrategia nueva:
+1. Incubadora (config.INCUBADORA): opera con dinero de prueba que NO es del fondo y sin vetos de sala, hasta que
+   aprueba su examen (operaciones mínimas, ganando y con factor de beneficio suficiente) o lo suspende. Si la
+   incubadora está llena, espera en el banquillo.
+2. Mesa: las aprobadas suben a una mesa libre con capital del fondo (la mejor nota primero). Cada trader tiene su
+   mesa (48 en trading y 12 en scalping).
+3. Supervisor (config.PRUEBA): vigila a cada trader en su mesa; al que no es rentable le retira la estrategia,
+   cuando no tiene nada abierto, y le da la mejor aprobada de la incubadora.
+Cada estrategia que sale lleva su post mortem (postmortem.py). Lo que ganó o perdió con dinero del fondo queda
+congelado y sigue contando en la sala y en tu fondo. Con 30 operaciones reales o más, el tamaño de cada operación
+sale del Kelly prudente. El kill switch cierra todo lo abierto del fondo.
 Nunca se envía ninguna orden a ningún exchange.
 """
 
@@ -22,9 +29,10 @@ import time
 import numpy as np
 import pandas as pd
 
-from . import almacen, banco, control, fondo, riesgo
+from . import almacen, banco, control, fondo, postmortem, riesgo
 from .backtest import simular
-from .config import CAPITAL_POR_ESTRATEGIA, MESAS, PRUEBA, coste_de, dias_de, es_scalping
+from .config import (CAPITAL_INCUBADORA, CAPITAL_POR_ESTRATEGIA, INCUBADORA, KELLY_FRACCION, KELLY_MIN_OPERACIONES,
+                     KELLY_MINIMO, KELLY_TOPE, MESAS, PRUEBA, coste_de, dias_de, es_scalping)
 from .datos import velas
 from .estrategia import Estrategia
 from .mercado import Mercado
@@ -149,14 +157,13 @@ def _serie_horaria(curvas: list[pd.Series]) -> list[list]:
     return [[t.isoformat(), round(float(v), 2)] for t, v in horas.items()]
 
 
-def _resumen_grupo(grupo: str, traders: dict, retirados: dict, medianoche: pd.Timestamp) -> dict:
-    """Cifras de una sala (trading o scalping): resultado, hoy, operaciones, acierto y comisiones.
-    Las estrategias retiradas siguen contando con lo que hicieron mientras operaron."""
-    ts = [t for t in traders.values() if t.get("grupo") == grupo]
-    rs = [r for r in retirados.values() if r.get("grupo") == grupo]
+def _resumen_grupo(ts: list[dict], rs: list[dict], medianoche: pd.Timestamp) -> dict:
+    """Cifras de un equipo (una sala o la incubadora): resultado, hoy, operaciones, acierto, media por operación,
+    posiciones abiertas y comisiones. Las estrategias retiradas siguen contando con lo que hicieron mientras operaron."""
     ops = [o for t in ts for o in t["operaciones"]] + [o for r in rs for o in r["operaciones"]]
     hoy = [o for o in ops if pd.Timestamp(o["salida_t"]) >= medianoche]
     hoy_retiradas = sum(r["resultado"] - _valor_en(r["serie"], medianoche) for r in rs if pd.Timestamp(r["fin"]) >= medianoche)
+    abiertas = [t["posicion"] for t in ts if t.get("posicion")]
     return {
         "traders": len(ts),
         "capital": round(sum(t.get("capital", CAPITAL_POR_ESTRATEGIA) for t in ts), 2),
@@ -168,7 +175,9 @@ def _resumen_grupo(grupo: str, traders: dict, retirados: dict, medianoche: pd.Ti
         "operaciones": len(ops),
         "operaciones_hoy": len(hoy),
         "aciertos_pct": round(sum(o["retorno_pct"] > 0 for o in ops) / len(ops) * 100, 1) if ops else None,
-        "abiertas": sum(1 for t in ts if t["posicion"]),
+        "media_op_pct": round(float(np.mean([o.get("movimiento_pct", 0.0) for o in ops])), 3) if ops else None,
+        "abiertas": len(abiertas),
+        "abiertas_usd": round(sum(p.get("resultado_usd", 0.0) for p in abiertas), 2),
         "comisiones": round(sum(t.get("comisiones", 0.0) for t in ts) + sum(r.get("comisiones", 0.0) for r in rs), 2),
     }
 
@@ -209,29 +218,38 @@ def _nuevo_trader(b: dict, m: Mercado, mesa: int) -> dict:
     }
 
 
-def _calidad(b: dict) -> str:
-    """Cómo lo hizo en datos que no vio al minarse, en pocas palabras."""
-    fuera = b.get("fuera") or {}
-    if "retorno_pct" not in fuera:
-        return "sin datos fuera de muestra"
-    caida = f"{fuera.get('max_dd_pct', 0):.1f}".replace(".", ",")
-    return f"fuera de muestra {_pct(fuera['retorno_pct'])} con caída máx. {caida} %"
+def _nuevo_incubado(b: dict, m: Mercado, plaza: int) -> dict:
+    """Una estrategia que entra en la incubadora: opera con dinero de prueba (no del fondo) desde la próxima vela."""
+    t = _nuevo_trader(b, m, 0)
+    del t["mesa"]
+    t.update(plaza=plaza, capital=CAPITAL_INCUBADORA, patrimonio=CAPITAL_INCUBADORA)
+    return t
 
 
 def _simular(t: dict, est: Estrategia, m: Mercado, fin: int | None = None):
-    """Simula a un trader desde que entró en la sala (y, si se retiró, hasta ese momento)."""
+    """Simula a un trader desde que entró (y, si se retiró, hasta ese momento). Las entradas vetadas por riesgo se
+    ignoran y, si se pulsó el kill switch, lo abierto en ese momento se cierra al cierre de la última vela."""
     inicio = int(np.searchsorted(m.tiempo, pd.Timestamp(t["inicio"]), side="right"))
     if inicio >= (len(m) if fin is None else fin):
         return None
     vetadas = {int(i) for i in np.searchsorted(m.tiempo, pd.to_datetime(t["vetadas"])) if i < len(m)} if t.get("vetadas") else set()
-    return est, m, inicio, simular(est, m, inicio=inicio, fin=fin, cerrar_al_final=fin is not None, vetadas=vetadas)
+    forzadas = set()
+    if t.get("forzadas"):
+        cierre = m.tiempo + pd.Timedelta(minutes=m.minutos)
+        forzadas = {int(k) for k in np.searchsorted(cierre, pd.to_datetime(t["forzadas"]), side="right") - 1 if 0 <= k < len(m)}
+    return est, m, inicio, simular(est, m, inicio=inicio, fin=fin, cerrar_al_final=fin is not None, vetadas=vetadas,
+                                   forzadas=forzadas)
 
 
-def _calcular(t: dict, sim, tramos: list, medianoche: pd.Timestamp) -> tuple[pd.Series | None, list[dict], dict | None]:
+def _calcular(t: dict, sim, tramos: list | None, medianoche: pd.Timestamp, capital: float | None = None,
+              riesgo_op: float | None = None) -> tuple[pd.Series | None, list[dict], dict | None]:
     """Resultados de un trader, con el tamaño de cada operación según el riesgo. Rellena capital, patrimonio,
-    resultado, comisiones, hoy y semana, y devuelve su curva de resultado en $, las operaciones cerradas y la abierta."""
+    resultado, comisiones, hoy y semana, y devuelve su curva de resultado en $, las operaciones cerradas y la abierta.
+    Con `capital` (la incubadora) el capital es fijo; si no, sigue el reparto del fondo (`tramos`)."""
+    if capital is not None:
+        tramos = [(pd.Timestamp("2000-01-01", tz="UTC"), capital, capital)]
     t["hoy"] = t["semana"] = 0.0
-    t["capital"] = t["patrimonio"] = fondo.capital_mesa(t["grupo"])
+    t["capital"] = t["patrimonio"] = capital if capital is not None else fondo.capital_mesa(t["grupo"])
     t["resultado"] = t["comisiones"] = 0.0
     if not sim:
         return None, [], None
@@ -240,10 +258,10 @@ def _calcular(t: dict, sim, tramos: list, medianoche: pd.Timestamp) -> tuple[pd.
     est, m, inicio, res = sim
     atr = m.ind("atr", 14)
     d = 1 if est.direccion == "largo" else -1
-    # el tamaño de cada operación se decide al entrar y se guarda: si luego cambias el riesgo
-    # por operación, solo afecta a las operaciones nuevas
+    # el tamaño de cada operación se decide al entrar y se guarda: si luego cambia el riesgo (tuyo o el de Kelly),
+    # solo afecta a las operaciones nuevas
     guardadas = t.setdefault("fracciones", {})
-    riesgo_ahora = riesgo.limites()["riesgo_por_operacion"]
+    riesgo_ahora = riesgo.limites()["riesgo_por_operacion"] if riesgo_op is None else riesgo_op
     fracciones = []
     for e, pe in zip(res.entradas, res.precio_entrada):
         clave = m.tiempo[e].isoformat()
@@ -291,7 +309,8 @@ def _calcular(t: dict, sim, tramos: list, medianoche: pd.Timestamp) -> tuple[pd.
     return curva, cerradas, posicion
 
 
-def _congelar(id_: str, t: dict, curva: pd.Series | None, cerradas: list[dict], motivo: str, por: str, fin: str) -> dict:
+def _congelar(id_: str, t: dict, curva: pd.Series | None, cerradas: list[dict], motivo: str, por: str, fin: str,
+              post_mortem: dict | None = None) -> dict:
     """Lo que queda de un trader cuando se retira su estrategia: su resultado ya no cambia, pero sigue contando en la
     sala y en tu fondo (lo perdido no desaparece al quitar la estrategia)."""
     serie = []
@@ -309,11 +328,12 @@ def _congelar(id_: str, t: dict, curva: pd.Series | None, cerradas: list[dict], 
         "motivo": motivo, "por": por, "capital": t.get("capital"), "resultado": t.get("resultado", 0.0),
         "comisiones": t.get("comisiones", 0.0), "operaciones": [{**o, "motivo": "retirada" if o["motivo"] == "fin" else o["motivo"]}
                                                                 for o in cerradas], "serie": serie,
+        **({"post_mortem": post_mortem} if post_mortem else {}),
     }
 
 
 def _prueba(t: dict, ahora: pd.Timestamp) -> tuple[dict, str | None]:
-    """El periodo de prueba de un trader con su estrategia, y el motivo para retirársela si no es rentable.
+    """El periodo de prueba de un trader en su mesa, y el motivo para retirarle la estrategia si no es rentable.
     El supervisor solo actúa cuando el trader no tiene ninguna posición abierta."""
     p = PRUEBA[t["grupo"]]
     dias = max(0.0, (ahora - pd.Timestamp(t["inicio"])).total_seconds() / 86400)
@@ -336,20 +356,96 @@ def _prueba(t: dict, ahora: pd.Timestamp) -> tuple[dict, str | None]:
     return info, motivo if estado_ == "retirar" else None
 
 
+def _factor(movs: list[float]) -> float | None:
+    """Factor de beneficio: lo ganado entre lo perdido (None si aún no ha perdido nada)."""
+    perdido = -sum(x for x in movs if x < 0)
+    ganado = sum(x for x in movs if x > 0)
+    return round(ganado / perdido, 2) if perdido > 0 else (99.0 if ganado > 0 else None)
+
+
+def _nota(movs: list[float]) -> float:
+    """Nota del examen: media de sus operaciones entre su dispersión, por la raíz del número de operaciones (cuanto
+    más alta, más clara es su ventaja). Sirve para elegir la mejor aprobada."""
+    if len(movs) < 2:
+        return 0.0
+    sd = float(np.std(movs, ddof=1))
+    return round(float(np.mean(movs)) / sd * len(movs) ** .5, 2) if sd > 0 else 9.99
+
+
+def _examen(t: dict, ahora: pd.Timestamp) -> dict:
+    """Examen de una estrategia en la incubadora: «en_examen», «aprobada» o «suspendida», con el motivo. Se decide solo
+    cuando no tiene nada abierto (si no, el estado es el que tenía)."""
+    p = INCUBADORA[t["grupo"]]
+    dias = max(0.0, (ahora - pd.Timestamp(t["inicio"])).total_seconds() / 86400)
+    movs = [o["retorno_pct"] for o in t["operaciones"]]   # en % del dinero de prueba, como el resultado
+    n = len(movs)
+    pct = t["resultado"] / CAPITAL_INCUBADORA * 100
+    factor = _factor(movs)
+    gana = t["resultado"] > 0 and (factor or 0) >= p["factor_min"]
+    estado_, motivo = "en_examen", None
+    fmt_f = f"{factor:g}".replace(".", ",") if factor is not None else "—"
+    if pct <= -p["corte_pct"]:
+        estado_, motivo = "suspendida", f"pierde un {_pct(-pct)[1:]} del dinero de prueba (el corte es un {p['corte_pct']:g} %)"
+    elif n >= p["operaciones"] and dias >= p["dias_min"]:
+        if gana:
+            estado_, motivo = "aprobada", f"gana un {_pct(pct)[1:]} con {n} operaciones (factor de beneficio {fmt_f})"
+        else:
+            estado_, motivo = "suspendida", (f"tras {n} operaciones {'pierde' if t['resultado'] <= 0 else 'gana demasiado poco'} "
+                                             f"({_pct(pct)}, factor de beneficio {fmt_f}; hace falta {p['factor_min']:g})")
+    elif dias >= p["dias_max"]:
+        if n >= p["operaciones_al_final"] and gana:
+            estado_, motivo = "aprobada", f"en {p['dias_max']} días gana un {_pct(pct)[1:]} con {n} operaciones (factor {fmt_f})"
+        else:
+            estado_, motivo = "suspendida", (f"en {p['dias_max']} días solo ha hecho {n} operaciones" if n < p["operaciones_al_final"]
+                                             else f"en {p['dias_max']} días no gana lo suficiente ({_pct(pct)}, factor {fmt_f})")
+    pendiente = estado_ != "en_examen" and bool(t.get("posicion"))
+    if pendiente:   # con una posición abierta no se decide nada: se espera a que cierre
+        estado_ = "espera_cierre"
+    return {"estado": estado_, "motivo": motivo.replace(".", ",") if motivo else None, "dias": round(dias, 1),
+            "dias_min": p["dias_min"], "dias_max": p["dias_max"], "operaciones": n, "operaciones_min": p["operaciones"],
+            "operaciones_al_final": p["operaciones_al_final"], "resultado_pct": round(pct, 2), "factor": factor,
+            "factor_min": p["factor_min"], "corte_pct": p["corte_pct"], "nota": _nota(movs),
+            "aciertos_pct": round(sum(x > 0 for x in movs) / n * 100, 1) if n else None}
+
+
+def _kelly(movs: list[float], base: float) -> dict | None:
+    """Kelly prudente: con KELLY_MIN_OPERACIONES operaciones reales o más, el riesgo por operación es una cuarta parte
+    de lo que da la fórmula de Kelly (f = A − (1 − A) / R), usando un acierto A rebajado en un error estándar (por si
+    ha tenido suerte) y R = ganancia media / pérdida media. Siempre entre KELLY_MINIMO y KELLY_TOPE veces tu riesgo."""
+    n = len(movs)
+    if n < KELLY_MIN_OPERACIONES:
+        return None
+    ganadas, perdidas = [x for x in movs if x > 0], [-x for x in movs if x <= 0]
+    acierto = len(ganadas) / n
+    prudente = max(0.0, acierto - (acierto * (1 - acierto) / n) ** .5)
+    ratio = (np.mean(ganadas) / np.mean(perdidas)) if ganadas and perdidas and np.mean(perdidas) > 0 else (9.99 if ganadas else 0.0)
+    f = prudente - (1 - prudente) / ratio if ratio > 0 else -1.0
+    riesgo_k = min(KELLY_TOPE * base, max(KELLY_MINIMO, f * KELLY_FRACCION)) if f > 0 else KELLY_MINIMO
+    return {"operaciones": n, "acierto_pct": round(acierto * 100, 1), "acierto_prudente_pct": round(prudente * 100, 1),
+            "ratio": round(float(ratio), 2), "kelly_pct": round(f * 100, 2), "riesgo_pct": round(riesgo_k * 100, 3),
+            "base_pct": round(base * 100, 3)}
+
+
 def ciclo(estado: dict) -> list[dict]:
     """Actualiza el estado del paper trading con las velas nuevas. Devuelve los eventos nuevos."""
     en_banco = {b["id"]: b for b in banco.cargar()}
-    traders = estado.setdefault("estrategias", {})
+    traders = estado.setdefault("estrategias", {})       # en su mesa, con dinero del fondo
+    incubadora = estado.setdefault("incubadora", {})     # de examen, con dinero de prueba
     retirados = estado.setdefault("retirados", {})
+    suspendidas = estado.setdefault("suspendidas", [])
     precios = estado.setdefault("precios", {})
     precios_scalping = estado.setdefault("precios_scalping", {})
+    estado.pop("reserva", None)   # versión anterior: las estrategias sin mesa ahora van a la incubadora
     fuera = [i for i in traders if i not in en_banco]   # las que han salido del banco desde el último ciclo
-    descartadas = {d["id"]: d for d in banco.descartadas()} if fuera else {}
+    fuera_inc = [i for i in incubadora if i not in en_banco]
+    descartadas = {d["id"]: d for d in banco.descartadas()} if fuera or fuera_inc else {}
 
     eventos: list[dict] = []
     medianoche = pd.Timestamp(dt.datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0))
     ahora = pd.Timestamp.now(tz="UTC")
     tramos = fondo.capitales()
+    lim = riesgo.limites()
+    base = lim["riesgo_por_operacion"]
 
     def evento(tipo: str, texto: str, **datos) -> None:
         eventos.append({"t": _ahora(), "tipo": tipo, "texto": texto, **datos})
@@ -358,17 +454,20 @@ def ciclo(estado: dict) -> list[dict]:
         b = en_banco.get(id_) or descartadas.get(id_)
         return b["estrategia"] if b else None
 
+    def mercado_de(b: dict) -> Mercado:
+        return mercados[(b["estrategia"]["simbolo"], b["estrategia"]["intervalo"])]
+
     # 1) Mercados y precios. Cada mercado se descarga con historia suficiente para simular a su trader más antiguo
     #    desde el principio (si no, sus primeras operaciones se perderían).
     edad: dict[tuple[str, str], int] = {}
-    for id_, t in traders.items():
+    for id_, t in [*traders.items(), *incubadora.items()]:
         e = estrategia_de(id_)
         if e:
             clave = (e["simbolo"], e["intervalo"])
             edad[clave] = max(edad.get(clave, 0), (ahora - pd.Timestamp(t["inicio"])).days)
     mercados: dict[tuple[str, str], Mercado] = {}
     claves = [(b["estrategia"]["simbolo"], b["estrategia"]["intervalo"]) for b in en_banco.values()]
-    claves += [(e["simbolo"], e["intervalo"]) for e in map(estrategia_de, fuera) if e]
+    claves += [(e["simbolo"], e["intervalo"]) for e in map(estrategia_de, fuera + fuera_inc) if e]
     for clave in claves:
         if clave in mercados:
             continue
@@ -380,9 +479,26 @@ def ciclo(estado: dict) -> list[dict]:
             "serie": [float(x) for x in m.c[-72:]],
             "vela": m.tiempo[-1].isoformat(),
         }
+    estado["datos_mercado"] = [{"simbolo": s, "intervalo": iv, "ultima_vela": m.tiempo[-1].isoformat(),
+                                "minutos": m.minutos} for (s, iv), m in mercados.items()]
 
-    # 2) Las que has retirado tú (o repetidas): su trader deja la mesa. Si tenía algo abierto se cierra al precio del
-    #    momento de la retirada, y lo que ganó o perdió queda congelado y sigue contando.
+    # 2) Kill switch: todo lo abierto con dinero del fondo se cierra al cierre de la última vela, y el freno manual
+    #    impide abrir nada nuevo hasta que pulses «Reabrir». La incubadora sigue: no usa dinero del fondo.
+    kill = control.cargar().get("kill_switch")
+    if kill and estado.get("kill_aplicado") != kill:
+        abiertas_kill = [t for t in traders.values() if t.get("posicion")]
+        for t in abiertas_kill:
+            t.setdefault("forzadas", []).append(kill)
+        estado["kill_aplicado"] = kill
+        n_kill = len(abiertas_kill)
+        que = "no había ninguna posición abierta" if not n_kill else (
+            "se cierra la única posición abierta" if n_kill == 1 else f"se cierran las {n_kill} posiciones abiertas")
+        evento("kill", f"¡Kill switch! {que[0].upper() + que[1:]} del fondo al último precio y no se abre nada nuevo hasta que "
+                       "pulses «Reabrir». La incubadora sigue: no usa dinero del fondo.",
+               cerradas=len(abiertas_kill))
+
+    # 3) Las que se han retirado desde fuera (tú, o por repetidas). En su mesa: lo abierto se cierra al precio del
+    #    momento de la retirada y su resultado queda congelado (sigue contando). En la incubadora: no contaba en el fondo.
     for id_ in fuera:
         t, d = traders.pop(id_), descartadas.get(id_)
         if not d or "resultado" not in t:
@@ -393,16 +509,26 @@ def ciclo(estado: dict) -> list[dict]:
         cierre = m.tiempo + pd.Timedelta(minutes=m.minutos)
         corte = int(np.searchsorted(cierre, pd.Timestamp(d["retirada"]), side="right"))
         curva, cerradas, _ = _calcular(t, _simular(t, est, m, fin=corte), tramos, medianoche)
-        retirados[id_] = _congelar(id_, t, curva, cerradas, d.get("motivo", "retirada"), d.get("por", "jefe"), d["retirada"])
+        pm = postmortem.informe(d, cerradas, t["inicio"], pd.Timestamp(d["retirada"]), m, d.get("motivo", "retirada"), "mesa")
+        banco.anotar(id_, post_mortem=pm)
+        retirados[id_] = _congelar(id_, t, curva, cerradas, d.get("motivo", "retirada"), d.get("por", "jefe"), d["retirada"], pm)
         evento("baja", f"{id_} deja {_sala(t['grupo'])} ({d.get('motivo', 'retirada')}). Resultado final: "
                        f"{_precio(t['resultado'])} $, que sigue contando en tu fondo.",
                id=id_, mesa=t.get("mesa"), grupo=t["grupo"], simbolo=est.simbolo, resultado=t["resultado"])
+    for id_ in fuera_inc:
+        t, d = incubadora.pop(id_), descartadas.get(id_)
+        if d:
+            pm = postmortem.informe(d, t.get("operaciones", []), t["inicio"], pd.Timestamp(d["retirada"]),
+                                    mercados.get((d["estrategia"]["simbolo"], d["estrategia"]["intervalo"])), d.get("motivo", ""), "incubadora")
+            banco.anotar(id_, post_mortem=pm)
+            suspendidas.insert(0, _suspendida(id_, t, d.get("motivo", "retirada"), d.get("por", "jefe"), pm))
 
-    # 3) Mesas: cada trader tiene la suya. Las estrategias nuevas ocupan las mesas libres (primero las mejores fuera de
-    #    muestra); si no hay mesa libre, esperan en la reserva del banco.
-    for id_, t in traders.items():
-        e = en_banco[id_]["estrategia"]
-        t["intervalo"], t["grupo"] = e["intervalo"], _grupo(e["intervalo"])
+    # 4) Mesas e incubadora. Cada trader tiene su mesa; cada estrategia en examen, su plaza en la incubadora. Las nuevas
+    #    entran en la incubadora (primero las mejores fuera de muestra); si está llena, esperan en el banquillo.
+    for lista in (traders, incubadora):
+        for id_, t in lista.items():
+            e = en_banco[id_]["estrategia"]
+            t["intervalo"], t["grupo"] = e["intervalo"], _grupo(e["intervalo"])
     ocupadas = {g: {t["mesa"] for t in traders.values() if t["grupo"] == g and t.get("mesa") is not None} for g in MESAS}
     for id_ in sorted((i for i in traders if traders[i].get("mesa") is None), key=lambda i: (str(traders[i]["inicio"]), i)):
         g = traders[id_]["grupo"]   # traders de versiones anteriores: en el orden en que llegaron, como en la oficina
@@ -410,30 +536,30 @@ def ciclo(estado: dict) -> list[dict]:
         if libres:
             traders[id_]["mesa"] = libres[0]
             ocupadas[g].add(libres[0])
-    antes_en_reserva = {r["id"] for r in estado.get("reserva", [])}
-    reserva = []
-    for b in sorted((b for b in en_banco.values() if b["id"] not in traders), key=banco.calidad, reverse=True):
-        clave = (b["estrategia"]["simbolo"], b["estrategia"]["intervalo"])
-        g = _grupo(clave[1])
-        libres = sorted(set(range(MESAS[g])) - ocupadas[g])
+    plazas = {g: {t["plaza"] for t in incubadora.values() if t["grupo"] == g} for g in INCUBADORA}
+    antes_en_banquillo = {r["id"] for r in estado.get("banquillo", [])}
+    banquillo = []
+    for b in sorted((b for b in en_banco.values() if b["id"] not in traders and b["id"] not in incubadora),
+                    key=banco.calidad, reverse=True):
+        g = _grupo(b["estrategia"]["intervalo"])
+        libres = sorted(set(range(INCUBADORA[g]["plazas"])) - plazas[g])
         if not libres:
-            reserva.append(b)
-            if b["id"] not in antes_en_reserva:
-                evento("reserva", f"{b['id']} ha superado las pruebas, pero las {MESAS[g]} mesas de {_sala(g)} están ocupadas: "
-                                  "espera en la reserva del banco. Entrará cuando el supervisor retire una estrategia que no funcione.",
-                       id=b["id"], simbolo=clave[0], grupo=g)
+            banquillo.append(b)
+            if b["id"] not in antes_en_banquillo:
+                evento("banquillo", f"{b['id']} ha superado las seis pruebas, pero las {INCUBADORA[g]['plazas']} plazas de la "
+                                    f"incubadora de {'scalping' if g == 'scalping' else 'trading'} están ocupadas: espera en el banquillo.",
+                       id=b["id"], simbolo=b["estrategia"]["simbolo"], grupo=g)
             continue
-        ocupadas[g].add(libres[0])
-        t = traders[b["id"]] = _nuevo_trader(b, mercados[clave], libres[0])
-        lado = "LARGO" if t["direccion"] == "largo" else "CORTO"
-        if b["id"] in antes_en_reserva:
-            texto = f"{b['id']} sale de la reserva del banco y ocupa la mesa {libres[0] + 1} de {_sala(g)}"
-        else:
-            texto = f"{b['id']} ha superado las pruebas y se pone en marcha en la mesa {libres[0] + 1} de {_sala(g)}"
-        evento("alta", f"{texto}: {lado} en {clave[0]}, desde la próxima vela, con {_precio(t['capital'])} $ ficticios",
-               id=b["id"], simbolo=clave[0], direccion=t["direccion"], grupo=g, mesa=libres[0])
+        plazas[g].add(libres[0])
+        t = incubadora[b["id"]] = _nuevo_incubado(b, mercado_de(b), libres[0])
+        p = INCUBADORA[g]
+        evento("incubadora", f"{b['id']} entra en la incubadora (plaza {libres[0] + 1}): {('LARGO' if t['direccion'] == 'largo' else 'CORTO')} en "
+                             f"{t['simbolo']} con {_precio(CAPITAL_INCUBADORA)} $ de prueba que no cuentan en tu fondo. Para subir a una "
+                             f"mesa tiene que aprobar el examen: {p['operaciones']} operaciones ganando, con factor de beneficio de "
+                             f"{p['factor_min']:g} o más.".replace("1.1", "1,1"),
+               id=b["id"], simbolo=t["simbolo"], direccion=t["direccion"], grupo=g, plaza=libres[0])
 
-    # 4) Simulación con la gestión de riesgo: cada entrada nueva se aprueba o se veta una sola vez.
+    # 5) Simulación de las mesas con la gestión de riesgo: cada entrada nueva se aprueba o se veta una sola vez.
     def simular_trader(id_: str):
         b, t = en_banco[id_], traders[id_]
         est = Estrategia.de_dict(b["estrategia"])
@@ -447,7 +573,6 @@ def ciclo(estado: dict) -> list[dict]:
             t["aprobadas"] = [sim[1].tiempo[e].isoformat() for e in sim[3].entradas] if sim else []
     bloqueo = riesgo.bloqueo_general(estado.get("resumen"), estado.get("curva"))
     vetos = estado.get("riesgo", {}).get("vetos", [])
-    lim = riesgo.limites()
 
     def abiertas_en(momento: pd.Timestamp, scalping: bool, salvo: str) -> list[tuple[str, str]]:
         """Posiciones aprobadas de la misma sala que estaban abiertas justo cuando entra `salvo`."""
@@ -497,11 +622,15 @@ def ciclo(estado: dict) -> list[dict]:
         for id_ in cambiados:
             sims[id_] = simular_trader(id_)
 
-    # 5) Resultados de cada trader, con el tamaño de cada operación según el riesgo.
+    # 6) Resultados de cada trader. El tamaño de cada operación sale del riesgo por operación o, con 30 operaciones
+    #    reales o más (contando las del examen), del Kelly prudente.
     curvas: dict[str, pd.Series] = {}
     for id_, t in traders.items():
+        movs = list((t.get("examen") or {}).get("movimientos", [])) + [o["movimiento_pct"] for o in t.get("operaciones", [])]
+        t["kelly"] = _kelly(movs, base)
         sim = sims[id_]
-        curva, cerradas, posicion = _calcular(t, sim, tramos, medianoche)
+        curva, cerradas, posicion = _calcular(t, sim, tramos, medianoche,
+                                              riesgo_op=t["kelly"]["riesgo_pct"] / 100 if t["kelly"] else base)
         if curva is not None:
             curvas[id_] = curva
         lado = "LARGO" if t["direccion"] == "largo" else "CORTO"
@@ -520,8 +649,49 @@ def ciclo(estado: dict) -> list[dict]:
         if sim:
             t["radar"] = _radar(sim[0], sim[1])
 
-    # 6) El supervisor de cada sala revisa el periodo de prueba de sus traders. Al que no es rentable le retira la
-    #    estrategia (cuando no tiene nada abierto) y le da la mejor de la reserva del banco, en la misma mesa.
+    # 7) La incubadora: opera todas sus señales (sin vetos de sala: no usa dinero del fondo) con un capital de prueba
+    #    fijo y el riesgo por operación de siempre. Después, el examen.
+    for id_, t in list(incubadora.items()):
+        b = en_banco[id_]
+        est, m = Estrategia.de_dict(b["estrategia"]), mercado_de(b)
+        sim = _simular(t, est, m)
+        _, t["operaciones"], t["posicion"] = _calcular(t, sim, None, medianoche, capital=CAPITAL_INCUBADORA, riesgo_op=base)
+        if sim:
+            t["radar"] = _radar(est, m)
+        t["examen"] = _examen(t, ahora)
+        ex = t["examen"]
+        if ex["estado"] == "suspendida":
+            pm = postmortem.informe(b, t["operaciones"], t["inicio"], ahora, m, ex["motivo"], "incubadora")
+            banco.descartar(id_, f"suspende el examen de la incubadora: {ex['motivo']}", por="incubadora", post_mortem=pm)
+            del incubadora[id_], en_banco[id_]
+            suspendidas.insert(0, _suspendida(id_, t, ex["motivo"], "incubadora", pm))
+            evento("suspende", f"{id_} suspende el examen de la incubadora: {ex['motivo']}. Se descarta sin haber tocado tu dinero; "
+                               f"el post mortem dice: {pm['causas'][0]['texto']}",
+                   id=id_, grupo=t["grupo"], plaza=t.get("plaza"), simbolo=t["simbolo"], resultado=t["resultado"])
+        elif ex["estado"] == "aprobada" and not t.get("aviso_aprobada"):
+            t["aviso_aprobada"] = True
+            evento("aprueba", f"{id_} aprueba el examen de la incubadora: {ex['motivo']}. Sube a una mesa con dinero del fondo "
+                              "en cuanto haya una libre.", id=id_, grupo=t["grupo"], plaza=t.get("plaza"), simbolo=t["simbolo"])
+    del suspendidas[40:]
+
+    def aprobadas_de(g: str) -> list[str]:   # las aprobadas sin nada abierto, de la mejor nota a la peor
+        return sorted((i for i, t in incubadora.items() if t["grupo"] == g and t["examen"]["estado"] == "aprobada"),
+                      key=lambda i: incubadora[i]["examen"]["nota"], reverse=True)
+
+    def promover(id_: str, mesa: int) -> dict:
+        """Una aprobada de la incubadora sube a una mesa con dinero del fondo (desde la próxima vela)."""
+        inc = incubadora.pop(id_)
+        b = en_banco[id_]
+        nuevo = traders[id_] = _nuevo_trader(b, mercado_de(b), mesa)
+        ex = inc["examen"]
+        nuevo["examen"] = {**{k: ex[k] for k in ("estado", "operaciones", "resultado_pct", "factor", "nota", "aciertos_pct", "dias")},
+                           "inicio": inc["inicio"], "fin": _ahora(), "plaza": inc.get("plaza"),
+                           "movimientos": [o["movimiento_pct"] for o in inc["operaciones"]]}
+        nuevo["prueba"], _ = _prueba(nuevo, ahora)
+        return nuevo
+
+    # 8) El supervisor de cada sala revisa el periodo de prueba de sus traders. Al que no es rentable le retira la
+    #    estrategia (cuando no tiene nada abierto) y le da la mejor aprobada de la incubadora, en la misma mesa.
     sin_recambio = set()
     for id_ in sorted(traders, key=lambda i: (traders[i]["grupo"], traders[i].get("mesa") or 0)):
         t = traders[id_]
@@ -530,43 +700,67 @@ def ciclo(estado: dict) -> list[dict]:
             continue
         g, mesa = t["grupo"], t.get("mesa")
         sup = SUPERVISORES[g]
-        retirados[id_] = _congelar(id_, t, curvas.pop(id_, None), t["operaciones"], f"no era rentable: {motivo}", "supervisor", _ahora())
-        banco.descartar(id_, f"no era rentable: {motivo}", por="supervisor")
+        b = en_banco[id_]
+        pm = postmortem.informe(b, t["operaciones"], t["inicio"], ahora, mercado_de(b), motivo, "mesa")
+        retirados[id_] = _congelar(id_, t, curvas.pop(id_, None), t["operaciones"], f"no era rentable: {motivo}", "supervisor",
+                                   _ahora(), pm)
+        banco.descartar(id_, f"no era rentable: {motivo}", por="supervisor", post_mortem=pm)
         del traders[id_], en_banco[id_]
-        candidatas = [b for b in reserva if _grupo(b["estrategia"]["intervalo"]) == g]
-        datos = dict(anterior=id_, mesa=mesa, grupo=g, motivo=motivo, supervisor=sup, resultado=retirados[id_]["resultado"])
+        candidatas = aprobadas_de(g)
+        datos = dict(anterior=id_, mesa=mesa, grupo=g, motivo=motivo, supervisor=sup, resultado=retirados[id_]["resultado"],
+                     causa=pm["causas"][0]["texto"])
         if candidatas and mesa is not None:
-            b = candidatas[0]   # la reserva está ordenada: la primera es la mejor fuera de muestra
-            reserva.remove(b)
-            nuevo = traders[b["id"]] = _nuevo_trader(b, mercados[(b["estrategia"]["simbolo"], b["estrategia"]["intervalo"])], mesa)
-            nuevo["prueba"], _ = _prueba(nuevo, ahora)
+            nuevo = promover(candidatas[0], mesa)
+            ex = nuevo["examen"]
             lado = "LARGO" if nuevo["direccion"] == "largo" else "CORTO"
             evento("relevo", f"{sup} cambia la estrategia de la mesa {mesa + 1}: retira {id_} porque {motivo}. Ahora opera "
-                             f"{b['id']}, la mejor de la reserva del banco ({_calidad(b)}): {lado} en {nuevo['simbolo']}, "
-                             "desde la próxima vela.",
-                   id=b["id"], simbolo=nuevo["simbolo"], direccion=nuevo["direccion"], **datos)
+                             f"{candidatas[0]}, la mejor aprobada de la incubadora (ganó un {_pct(ex['resultado_pct'])[1:]} en "
+                             f"{ex['operaciones']} operaciones de examen): {lado} en {nuevo['simbolo']}, desde la próxima vela.",
+                   id=candidatas[0], simbolo=nuevo["simbolo"], direccion=nuevo["direccion"], **datos)
         else:
             donde = "" if mesa is None else f" de la mesa {mesa + 1}"
-            evento("relevo", f"{sup} retira {id_}{donde} porque {motivo}. No hay ninguna estrategia en la reserva del banco: "
-                             "la mesa espera a la próxima que se apruebe.",
+            evento("relevo", f"{sup} retira {id_}{donde} porque {motivo}. No hay ninguna estrategia aprobada en la incubadora: "
+                             "la mesa espera a la próxima que apruebe el examen.",
                    id=None, simbolo=t["simbolo"], direccion=t["direccion"], **datos)
             sin_recambio.add(g)
-    for g in sin_recambio:
-        if control.pedir_busqueda(g, por="supervisor"):
-            evento("busqueda", f"{SUPERVISORES[g]} pide una búsqueda de estrategias {'de scalping ' if g == 'scalping' else ''}"
-                               "para tener recambio (un solo ciclo).", grupo=g, supervisor=SUPERVISORES[g])
 
-    # 7) Cifras de las salas (con lo que hicieron las estrategias retiradas) y estado de riesgo.
+    # 9) Las aprobadas suben a las mesas libres, la mejor nota primero.
+    for g in MESAS:
+        libres = sorted(set(range(MESAS[g])) - {t["mesa"] for t in traders.values() if t["grupo"] == g and t.get("mesa") is not None})
+        for id_, mesa in zip(aprobadas_de(g), libres):
+            nuevo = promover(id_, mesa)
+            ex = nuevo["examen"]
+            lado = "LARGO" if nuevo["direccion"] == "largo" else "CORTO"
+            evento("alta", f"{id_} aprueba en la incubadora y sube a la mesa {mesa + 1} de {_sala(g)}: {lado} en {nuevo['simbolo']}, "
+                           f"con {_precio(nuevo['capital'])} $ del fondo desde la próxima vela (examen: {_pct(ex['resultado_pct'])} "
+                           f"en {ex['operaciones']} operaciones).",
+                   id=id_, simbolo=nuevo["simbolo"], direccion=nuevo["direccion"], grupo=g, mesa=mesa,
+                   plaza=ex.get("plaza"), graduada=True)
+
+    # 10) Si el supervisor ha dejado una mesa sin recambio y no queda nada en la incubadora ni en el banquillo de esa
+    #     sala, pide un ciclo de búsqueda (uno solo).
+    for g in sin_recambio:
+        en_camino = sum(t["grupo"] == g for t in incubadora.values()) + sum(_grupo(b["estrategia"]["intervalo"]) == g for b in banquillo)
+        if not en_camino and control.pedir_busqueda(g, por="supervisor"):
+            evento("busqueda", f"{SUPERVISORES[g]} pide una búsqueda de estrategias {'de scalping ' if g == 'scalping' else ''}"
+                               "para tener recambio: la incubadora está vacía (un solo ciclo).", grupo=g, supervisor=SUPERVISORES[g])
+
+    # 11) Cifras de las salas (con lo que hicieron las estrategias retiradas), de la incubadora y estado de riesgo.
     pnl = list(curvas.values()) + [_serie(r["serie"]) for r in retirados.values() if r["serie"]]
     estado["resumen"], estado["curva"], estado["diarios"] = _resumen(pnl, traders, retirados)
-    estado["grupos"] = {g: _resumen_grupo(g, traders, retirados, medianoche) for g in ("trading", "scalping")}
+    estado["grupos"] = {g: _resumen_grupo([t for t in traders.values() if t["grupo"] == g],
+                                          [r for r in retirados.values() if r.get("grupo") == g], medianoche) for g in MESAS}
+    estado["grupos_incubadora"] = {g: {**_resumen_grupo([t for t in incubadora.values() if t["grupo"] == g], [], medianoche),
+                                       "plazas": INCUBADORA[g]["plazas"],
+                                       "aprobadas": sum(t["grupo"] == g and t["examen"]["estado"] == "aprobada" for t in incubadora.values()),
+                                       "suspendidas": sum(s["grupo"] == g for s in suspendidas)} for g in INCUBADORA}
     estado["series"] = {g: _serie_horaria([c for i, c in curvas.items() if traders[i]["grupo"] == g]
                                           + [_serie(r["serie"]) for r in retirados.values() if r["grupo"] == g and r["serie"]])
                         for g in ("trading", "scalping")}   # para el fondo: toda la historia, hora a hora
-    estado["reserva"] = [{"id": b["id"], "grupo": _grupo(b["estrategia"]["intervalo"]), "simbolo": b["estrategia"]["simbolo"],
-                          "direccion": b["estrategia"]["direccion"], "descripcion": b["descripcion"],
-                          "calidad": round(banco.calidad(b), 3), "fuera_pct": (b.get("fuera") or {}).get("retorno_pct"),
-                          "fuera_dd_pct": (b.get("fuera") or {}).get("max_dd_pct")} for b in reserva]
+    estado["banquillo"] = [{"id": b["id"], "grupo": _grupo(b["estrategia"]["intervalo"]), "simbolo": b["estrategia"]["simbolo"],
+                            "direccion": b["estrategia"]["direccion"], "descripcion": b["descripcion"],
+                            "calidad": round(banco.calidad(b), 3), "fuera_pct": (b.get("fuera") or {}).get("retorno_pct")}
+                           for b in banquillo]
     nuevo_bloqueo = riesgo.bloqueo_general(estado["resumen"], estado["curva"])
     anterior = estado.get("riesgo", {}).get("bloqueo")
     if nuevo_bloqueo and not anterior:
@@ -585,19 +779,34 @@ def ciclo(estado: dict) -> list[dict]:
     return eventos
 
 
+def _suspendida(id_: str, t: dict, motivo: str, por: str, pm: dict) -> dict:
+    """Lo que se guarda de una estrategia que deja la incubadora sin aprobar (no contaba en tu fondo)."""
+    return {"id": id_, "grupo": t["grupo"], "plaza": t.get("plaza"), "simbolo": t["simbolo"], "direccion": t["direccion"],
+            "descripcion": t.get("descripcion", ""), "inicio": t["inicio"], "fin": _ahora(), "motivo": motivo, "por": por,
+            "resultado": t.get("resultado", 0.0), "operaciones": len(t.get("operaciones", [])),
+            "examen": {k: v for k, v in (t.get("examen") or {}).items() if k != "motivo"}, "post_mortem": pm}
+
+
 def operar(segundos: float = 20, telegram: bool = False, parar: threading.Event | None = None) -> None:
-    """Bucle del paper trading: un ciclo cada `segundos` hasta que se pida parar."""
+    """Bucle del paper trading: un ciclo cada `segundos` hasta que se pida parar. Cada vuelta deja en
+    sistema.json cuánto ha tardado y si ha habido errores (lo enseña el equipo de infraestructura)."""
     parar = parar or threading.Event()
     print(f"[papel] Paper trading en marcha (dinero ficticio). Reviso el mercado cada {segundos:g} s.", flush=True)
     ultima_vela = None
+    sistema = almacen.cargar("sistema", {})
     while not parar.is_set():
+        t0 = time.monotonic()
+        papel = sistema.setdefault("papel", {})
         try:
             estado = almacen.cargar("papel", {})
             eventos = ciclo(estado)
             almacen.guardar("papel", estado)
+            papel.update(ok=_ahora(), ciclo_s=round(time.monotonic() - t0, 2), errores_seguidos=0,
+                         traders=len(estado.get("estrategias", {})), incubadora=len(estado.get("incubadora", {})),
+                         mercados=estado.get("datos_mercado", []))
             for ev in eventos:
                 print(f"[papel {dt.datetime.now():%H:%M}] {ev['texto']}", flush=True)
-                if telegram and ev["tipo"] in ("apertura", "cierre"):
+                if telegram and ev["tipo"] in ("apertura", "cierre", "relevo", "kill"):
                     _telegram(f"📊 {ev['texto']}")
             traders = estado.get("estrategias", {})
             vela = max((p["vela"] for p in estado.get("precios", {}).values()), default=None)
@@ -608,9 +817,12 @@ def operar(segundos: float = 20, telegram: bool = False, parar: threading.Event 
                 abiertas = sum(1 for t in traders.values() if t["posicion"])
                 print(f"[papel {dt.datetime.now():%H:%M}] Patrimonio {_precio(total)} $ "
                       f"({_pct((total / inicial - 1) * 100)}) · {len(traders)} traders · "
-                      f"{abiertas} posiciones abiertas", flush=True)
+                      f"{len(estado.get('incubadora', {}))} en la incubadora · {abiertas} posiciones abiertas", flush=True)
         except Exception as e:  # sin conexión, etc.: se reintenta en el siguiente ciclo
+            papel.update(errores_seguidos=papel.get("errores_seguidos", 0) + 1, ultimo_error=f"{type(e).__name__}: {e}"[:300],
+                         error_t=_ahora())
             print(f"[papel] Error en el ciclo (lo reintento): {e}", flush=True)
+        hold = sistema.setdefault("holding", {})
         try:
             from .holding import actualizar
 
@@ -618,8 +830,16 @@ def operar(segundos: float = 20, telegram: bool = False, parar: threading.Event 
                 print(f"[holding {dt.datetime.now():%H:%M}] {ev['texto']}", flush=True)
                 if telegram and ev["tipo"] in ("compra", "venta", "aportacion"):
                     _telegram(f"💎 {ev['texto']}")
+            hold.update(ok=_ahora(), errores_seguidos=0)
         except Exception as e:
+            hold.update(errores_seguidos=hold.get("errores_seguidos", 0) + 1, ultimo_error=f"{type(e).__name__}: {e}"[:300],
+                        error_t=_ahora())
             print(f"[holding] Error en el ciclo (lo reintento): {e}", flush=True)
+        papel["vuelta_s"] = round(time.monotonic() - t0, 2)
+        try:
+            almacen.guardar("sistema", sistema)
+        except OSError:
+            pass
         # Espera al siguiente ciclo, pero si entra una estrategia en el banco se pone en marcha ya.
         fin = time.monotonic() + segundos
         while not parar.is_set() and not banco.nueva.is_set() and time.monotonic() < fin:

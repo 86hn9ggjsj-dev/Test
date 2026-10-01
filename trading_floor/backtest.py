@@ -51,12 +51,14 @@ def simular(
     cerrar_al_final: bool = True,
     senal: np.ndarray | None = None,
     vetadas: set[int] | frozenset[int] = frozenset(),
+    forzadas: set[int] | frozenset[int] = frozenset(),
 ) -> Resultado:
     """Simula la estrategia con entradas en las velas [inicio, fin).
 
     Con cerrar_al_final=False, una operación que sigue viva al acabar los datos se
     marca como "abierta" (lo usa el paper trading); si no, se cierra en la última vela.
     `vetadas` son velas de entrada que la gestión de riesgo no permitió: esas señales se ignoran.
+    `forzadas` son velas en cuyo cierre se cierra lo que haya abierto (el «kill switch» del paper trading).
     """
     coste = coste_de(est.intervalo) if coste is None else coste
     fin = len(m) if fin is None else min(fin, len(m))
@@ -96,6 +98,11 @@ def simular(
         else:
             j = fin - 1
             salida, motivo = m.c[j], ("fin" if cerrar_al_final else "abierta")
+        if forzadas:   # cierre de emergencia antes de la salida normal: al precio de cierre de esa vela
+            limite = j + 1 if motivo in ("fin", "abierta") else j
+            k_f = min((k for k in forzadas if e <= k < limite), default=None)
+            if k_f is not None:
+                j, salida, motivo = k_f, m.c[k_f], "kill switch"
         entradas.append(e)
         salidas.append(j)
         p_ent.append(precio)

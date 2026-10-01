@@ -1,8 +1,9 @@
 """Banco de estrategias: las que han superado todo el embudo de pruebas.
 
-Las que tienen mesa libre las opera un trader; el resto espera en la reserva (papel.py). Cuando una estrategia
-sale del banco (el supervisor la retira por no ser rentable, o la retiras tú) pasa a la lista de descartadas:
-lo que ganó o perdió sigue contando en el fondo y la minería no vuelve a buscar esa misma idea.
+Cada estrategia nueva pasa primero por la incubadora (dinero de prueba, papel.py) y, si aprueba su examen, la opera un
+trader en una mesa con dinero del fondo. Cuando una estrategia sale del banco (suspende el examen, el supervisor la
+retira por no ser rentable o la retiras tú) pasa a la lista de descartadas con su post mortem: lo que ganó o perdió
+con dinero del fondo sigue contando y la minería no vuelve a buscar esa misma idea.
 """
 
 from __future__ import annotations
@@ -33,8 +34,9 @@ def descartadas() -> list[dict]:
     return almacen.cargar("descartadas", [])
 
 
-def descartar(id_: str, motivo: str, por: str = "jefe") -> dict | None:
-    """Saca una estrategia del banco y la guarda como descartada (con cuándo, por qué y quién). Devuelve la entrada."""
+def descartar(id_: str, motivo: str, por: str = "jefe", post_mortem: dict | None = None) -> dict | None:
+    """Saca una estrategia del banco y la guarda como descartada (con cuándo, por qué, quién y, si lo hay, su post
+    mortem). `por` es «jefe», «supervisor» o «incubadora». Devuelve la entrada."""
     with _cerrojo:
         items = cargar()
         fuera = [b for b in items if b["id"].upper() == id_.upper()]
@@ -42,9 +44,19 @@ def descartar(id_: str, motivo: str, por: str = "jefe") -> dict | None:
             return None
         almacen.guardar("banco", [b for b in items if b["id"].upper() != id_.upper()])
         entrada = {**fuera[0], "retirada": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
-                   "motivo": motivo, "por": por}
+                   "motivo": motivo, "por": por, **({"post_mortem": post_mortem} if post_mortem else {})}
         almacen.guardar("descartadas", [d for d in descartadas() if d["id"] != entrada["id"]] + [entrada])
     return entrada
+
+
+def anotar(id_: str, **campos) -> None:
+    """Añade datos (por ejemplo el post mortem) a una estrategia ya descartada."""
+    with _cerrojo:
+        lista = descartadas()
+        for d in lista:
+            if d["id"] == id_:
+                d.update(campos)
+        almacen.guardar("descartadas", lista)
 
 
 def borrar(id_: str, motivo: str = "retirada por decisión del jefe") -> bool:

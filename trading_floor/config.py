@@ -34,16 +34,16 @@ PARTE_EN_MUESTRA = 0.7
 
 # Mesas de cada sala: 6 activos x 8 = las 48 mesas de trading (las mesas no son de un activo: se reparten según llegan).
 MAX_POR_SIMBOLO = 8
-# Además de lo que cabe en las mesas, cada activo puede tener estrategias de reserva en el banco: cuando el supervisor
-# retira una estrategia que no funciona, su trader recibe la mejor de la reserva.
-RESERVA_POR_SIMBOLO = 2
+# Además de lo que cabe en las mesas, cada activo puede tener en el banco estrategias que aún están en la incubadora o
+# esperando plaza en ella (el banquillo).
+RESERVA_POR_SIMBOLO = 6
 
 # Sala de scalping: operaciones cortas con velas de 5 minutos, en los activos más líquidos.
 SCALPING_INTERVALO = "5m"
 SCALPING_DIAS = 120  # historia para minar scalping: 120 días de velas de 5 minutos
 SCALPING_SIMBOLOS = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
 MAX_SCALPERS_POR_SIMBOLO = 4  # 3 activos x 4 = las 12 mesas de la sala de scalping
-RESERVA_SCALPING_POR_SIMBOLO = 1
+RESERVA_SCALPING_POR_SIMBOLO = 3
 # Los scalpers trabajan con órdenes límite: pagan comisión de «maker» (0,02 % en Binance Futures) en vez de la de
 # «taker» (0,05 %). Se añade un poco de deslizamiento para no ser optimistas: 0,06 % ida y vuelta, frente al 0,14 %.
 COMISION_SCALPING = 0.0002
@@ -75,9 +75,21 @@ def cupo_banco(intervalo: str) -> int:
     return MAX_POR_SIMBOLO + RESERVA_POR_SIMBOLO
 
 
-# Supervisor de cada sala (papel.py): cada trader tiene un periodo de prueba con su estrategia. Si al acabarlo va en
-# pérdidas (o si antes pierde demasiado), el supervisor le retira la estrategia, cuando no tiene nada abierto, y le da
-# la mejor de la reserva del banco. Después sigue vigilando: si vuelve a pérdidas, se repite.
+# Incubadora (papel.py): toda estrategia nueva opera primero aquí, con dinero de prueba que NO es del fondo, hasta que
+# aprueba su examen. Solo entonces pasa a una mesa con capital del fondo. Si suspende, se descarta sin haberte costado nada.
+CAPITAL_INCUBADORA = 1_000.0
+INCUBADORA = {
+    # trading: aprueba con 10 operaciones y 7 días como mínimo, ganando y con un factor de beneficio de 1,1 o más;
+    # si en 60 días no llega a 10 operaciones, se le examina con 5. Suspende si pierde un 4 % del dinero de prueba.
+    "trading": {"plazas": 24, "operaciones": 10, "dias_min": 7, "dias_max": 60, "operaciones_al_final": 5,
+                "factor_min": 1.1, "corte_pct": 4.0},
+    "scalping": {"plazas": 8, "operaciones": 30, "dias_min": 2, "dias_max": 14, "operaciones_al_final": 12,
+                 "factor_min": 1.1, "corte_pct": 3.0},
+}
+
+# Supervisor de cada sala (papel.py): ya en su mesa, cada trader tiene un periodo de prueba con su estrategia. Si al
+# acabarlo va en pérdidas (o si antes pierde demasiado), el supervisor le retira la estrategia, cuando no tiene nada
+# abierto, y le da la mejor aprobada de la incubadora. Después sigue vigilando: si vuelve a pérdidas, se repite.
 PRUEBA = {
     "trading": {"dias": 14, "operaciones": 6, "corte_pct": 5.0},   # 2 semanas y 6 operaciones; fuera si pierde un 5 %
     "scalping": {"dias": 3, "operaciones": 20, "corte_pct": 4.0},  # 3 días y 20 operaciones; fuera si pierde un 4 %
@@ -91,6 +103,13 @@ MAX_POSICIONES_SCALPING = 12  # posiciones abiertas a la vez en la sala de scalp
 MAX_MISMA_APUESTA = 3  # posiciones abiertas en el mismo símbolo y la misma dirección (en cada sala)
 LIMITE_PERDIDA_DIARIA = 0.02  # si el día pierde un 2 % del capital, no se abren más posiciones hoy
 MAX_CAIDA = 0.06  # si el resultado cae un 6 % del capital desde su máximo, se pausan las entradas
+
+# Kelly prudente (papel.py): con suficientes operaciones reales, el riesgo de cada operación sale de la fórmula de
+# Kelly con una estimación conservadora del acierto, y se usa solo una cuarta parte, entre un mínimo y un tope.
+KELLY_MIN_OPERACIONES = 30
+KELLY_FRACCION = 0.25
+KELLY_TOPE = 1.5        # como mucho 1,5 veces el riesgo por operación que tengas puesto
+KELLY_MINIMO = 0.0025   # y como poco un 0,25 % del capital
 
 # Tu fondo (fondo.py): capital ficticio que aportas al empezar y valor inicial de cada participación.
 FONDO_CAPITAL_INICIAL = 100_000.0
