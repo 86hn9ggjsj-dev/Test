@@ -199,6 +199,12 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
 - **Botonera** (abajo): Comité, Megáfono (dices algo a toda la oficina), A trabajar, Descanso, Pausar todo
   o Reabrir, y Kill switch (con confirmación). En la cabecera, junto al patrimonio, está la caída del fondo
   desde su máximo.
+- **Pestaña «Abiertas»** (con el número de operaciones abiertas al lado): cómo va cada operación abierta,
+  con los precios en vivo. Cada una enseña quién la lleva, la moneda y si apuesta a que sube o a que baja,
+  cuánto dinero tiene, cuánto va ganando o perdiendo y una barra entre su stop 🛑 y su objetivo 🎯 con el
+  precio de ahora. Debajo dice cuánto le falta para cada uno y cuándo se cierra sola si no llega. Se ordenan
+  por recientes, las que van mejor o las que van peor. Al pulsar una, la cámara va a su mesa y se abre su
+  ficha. Debajo están las de la incubadora (dinero de prueba) y los traders más cerca de entrar.
 - **Pestañas nuevas**: «Incubadora» (exámenes, banquillo y suspendidas con su post mortem), «Informe»
   (resultado por equipos, informe del día, Monte Carlo y sistemas) y «Academia» (lecciones, tipos de
   condición que funcionan o fallan, Kelly de cada trader y todos los post mortem).
@@ -220,7 +226,7 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
   - **Modo básico (gratis)**: entiende órdenes sencillas («busca estrategias de SOL», «para la búsqueda»,
     «pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX»,
     «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?»,
-    «riesgo 0,5», «¿cómo va el holding?», «¿cómo vamos?», «¿cómo paseo por la oficina?»,
+    «riesgo 0,5», «¿cómo va el holding?», «¿cómo vamos?», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?»,
     «¿quién es el mejor?»).
   - **Con Claude (opcional, de pago)**: si pones `ANTHROPIC_API_KEY=...` en el archivo `.env` de la
     raíz del proyecto, contestan de verdad a cualquier cosa. Cada mensaje cuesta unos céntimos de tu

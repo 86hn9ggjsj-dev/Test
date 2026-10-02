@@ -445,6 +445,27 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                           + (f", próxima salida a {_precio(salida['precio'])} (+{_es(salida['sobre_coste_pct'], False)} % sobre coste)"
                              if salida else ""))
         return dice("Diego", "Holding sin stop: " + "; ".join(partes) + ".")
+    if not ident and re.search(r"abiert|trades? abierto|posicion(es)? abierta|operaciones (en curso|abiertas)|dentro del mercado", t):
+        vivo, abiertas = E.get("vivo") or {}, []
+        for i, x in (papel.get("estrategias") or {}).items():
+            pos = x.get("posicion")
+            if not pos or not pos.get("entrada"):
+                continue
+            lado = 1 if x["direccion"] == "largo" else -1
+            precio = vivo.get(x["simbolo"]) or pos.get("salida") or pos["entrada"]
+            coste = E.get("coste_scalping", 0) if x.get("grupo") == "scalping" else E.get("coste_ida_vuelta", 0)
+            capital = x.get("patrimonio", 1000) / (1 + pos.get("retorno_pct", 0) / 100)
+            usd = capital * pos.get("fraccion", 1) * (lado * (precio / pos["entrada"] - 1) - coste)
+            abiertas.append((usd, nombres.get(i, i), x["simbolo"].replace("USDT", ""), "a que sube" if lado > 0 else "a que baja"))
+        if not abiertas:
+            return dice("Julia", "Ahora mismo no hay ninguna operación abierta con dinero del fondo: los traders esperan a que el mercado "
+                                 "cumpla sus condiciones. Las verás en la pestaña «Abiertas» en cuanto entren.")
+        abiertas.sort(reverse=True)
+        total = sum(a[0] for a in abiertas)
+        lista = "; ".join(f"{n} ({sim}, {lado}): {_es(u)} $" for u, n, sim, lado in abiertas[:5])
+        return dice("Julia", f"Hay {len(abiertas)} {'operación abierta' if len(abiertas) == 1 else 'operaciones abiertas'} y en conjunto van "
+                             f"{_es(total)} $. {lista}{' y más' if len(abiertas) > 5 else ''}. Tienes el detalle, con lo que le falta a cada una "
+                             "para su objetivo y su stop, en la pestaña «Abiertas».")
     if re.search(r"mejor|ranking|lider|quien gana", t):
         ts = sorted(papel.get("estrategias", {}).items(), key=lambda x: -x[1].get("resultado", 0))
         if ts and ts[0][1].get("resultado", 0) > 0:
@@ -474,7 +495,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                              f"{len(papel.get('estrategias', {}))} traders, minería {m.get('estado', 'parada')}"
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
     return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «para la búsqueda», «quita las repetidas», "
-                         "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», «¿cómo paseo por la oficina?», "
+                         "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?», "
                          "«¿cómo va el holding?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 
 

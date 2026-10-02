@@ -213,6 +213,29 @@ h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--suav
 .trader .r{font:700 13px var(--mono);text-align:right}
 .trader .r small{display:block;font:500 10px Inter,sans-serif;color:var(--suave)}
 .vacio{color:var(--suave);font-size:13px;text-align:center;padding:30px 10px}
+/* pestaña «Abiertas»: cada operación con su barra entre el stop y el objetivo */
+.orden-ab{display:flex;gap:6px;align-items:center;margin:0 0 10px;font-size:11px;color:var(--suave)}
+.orden-ab button{border:1px solid var(--borde);background:none;color:var(--suave);border-radius:999px;padding:3px 10px;font:700 11px Inter,sans-serif;cursor:pointer}
+.orden-ab button.activo{background:var(--texto);color:#0a0d12;border-color:var(--texto)}
+.op{border:1px solid var(--borde);border-radius:12px;padding:10px 11px 9px;margin-bottom:8px;background:var(--panel2);cursor:pointer}
+.op:hover{border-color:rgba(212,255,58,.45)}
+.op-cab{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center}
+.op-cab .n{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-cab .d{font-size:11px;color:var(--suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op-cab .r{font:800 14px var(--mono);text-align:right;white-space:nowrap}
+.op-cab .r small{display:block;font:600 10px var(--mono);color:var(--suave)}
+.op-cab .sube{color:var(--verde)}.op-cab .baja{color:var(--rojo)}
+.op .etq{display:inline-block;margin-left:4px;padding:0 5px;border-radius:5px;font-size:10px;line-height:15px;vertical-align:1px;background:rgba(255,255,255,.07);color:var(--suave)}
+.op .etq.prueba{background:rgba(255,138,92,.16);color:#ff8a5c}
+.op-pista{position:relative;height:8px;border-radius:4px;margin:12px 4px 4px;background:linear-gradient(90deg,rgba(255,90,118,.28),rgba(255,255,255,.08) var(--e),rgba(46,230,166,.28))}
+.op-pista .tramo{position:absolute;top:0;bottom:0;border-radius:4px}
+.op-pista .entrada{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--texto);opacity:.55}
+.op-pista .ahora{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;border:2px solid var(--panel2)}
+.op-ext{display:flex;justify-content:space-between;font:600 10px var(--mono);color:var(--suave);margin:0 2px}
+.op p{margin:6px 0 0;font-size:11.5px;line-height:1.45;color:#c9d0db}
+.cerca{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:6px 2px;border-bottom:1px solid var(--borde);font-size:12px;cursor:pointer}
+.cerca span{color:var(--suave);font-size:11px;grid-column:1/-1}
+.ab-nota{font-size:12px;color:var(--suave);margin:-4px 0 10px;line-height:1.45}
 .info p{margin:0 0 10px;font-size:13px;color:#c9d0db}
 .info b{color:var(--texto)}
 
@@ -264,6 +287,7 @@ h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--suav
 #resultados .cab > button{background:none;border:1px solid var(--borde);border-radius:8px;width:26px;height:26px;cursor:pointer;color:var(--suave)}
 .gordo{font:800 34px/1.05 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums;text-shadow:0 0 30px currentColor}
 .gordo small{font-size:15px;font-weight:700;margin-left:8px;text-shadow:none;opacity:.9}
+.gordo em{display:block;font:600 11px Inter,sans-serif;font-style:normal;color:var(--suave);text-shadow:none;margin-top:3px;letter-spacing:0}
 .fila-hoy{display:flex;gap:10px;align-items:center;margin:8px 0 10px}
 .chip{font:700 12px var(--mono);padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--borde);white-space:nowrap}
 .chip em{font-style:normal;font-family:Inter,sans-serif;color:var(--suave);font-weight:700;letter-spacing:.1em;font-size:10px;margin-right:6px}
@@ -571,6 +595,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <button data-p="chat" class="activa">Chat<span class="num" id="nChat" hidden>0</span></button>
     <button data-p="embudo">Embudo</button>
     <button data-p="traders">Resultados</button>
+    <button data-p="abiertas" title="Cómo van ahora mismo las operaciones abiertas">Abiertas<span class="num" id="nAbiertas" hidden>0</span></button>
     <button data-p="ranking">Ranking</button>
     <button data-p="scalping">Scalping</button>
     <button data-p="incubadora">Incubadora</button>
@@ -601,6 +626,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <h3 style="margin-top:14px">Resultado por día</h3>
     <canvas class="grafica" id="gDias" height="96"></canvas>
     <h3 style="margin-top:16px">Ranking de traders</h3><div id="traders"></div></section>
+  <section class="pagina" id="p-abiertas"><h3>Operaciones abiertas ahora</h3><div id="abiertas"></div></section>
   <section class="pagina" id="p-ranking">
     <div style="display:flex;align-items:center;margin-bottom:6px"><h3 style="margin:0">Ranking de traders</h3>
       <div class="rangos" id="criterios" style="flex-wrap:wrap;justify-content:flex-end"><button data-c="total" class="activo">Total</button><button data-c="hoy">Hoy</button><button data-c="semana">Semana</button><button data-c="acierto">Acierto</button><button data-c="backtest">Backtest</button></div></div>
@@ -3873,7 +3899,7 @@ function actualizarHUD() {
     Object.values(mc.indicadores).map(d => `<div class="ind"><span>${esc(d.nombre)}</span><b>${d.valor >= 100 ? fmt.n(d.valor) : NF2.format(d.valor)}</b><span class="${d.dia_pct >= 0 ? "sube" : "baja"}">${fmt.pct(d.dia_pct)}</span></div>`).join("") +
     `<p class="nota">Actualizado a las ${fmt.hora(new Date(mc.actualizado))}.</p>`
     : `<p class="vacio">Aún no hay datos macro. Se actualizan cada 15 minutos con la oficina en marcha.</p>`;
-  actualizarHolding(); actualizarRiesgo(); actualizarRanking(); actualizarSalas(); actualizarScalping();
+  actualizarHolding(); actualizarRiesgo(); actualizarRanking(); actualizarSalas(); actualizarScalping(); actualizarAbiertas();
   actualizarIncubadora(); actualizarInforme(); actualizarAcademia(); pintarBotonera();
   // embudo
   const e = m.embudo || {}, base = Math.max(1, e["Generadas"] || 0);
@@ -4098,6 +4124,87 @@ function actualizarScalping() {
 $("#scalping").addEventListener("click", e => { const el = e.target.closest(".trader"); if (el) { const a = traders.get(el.dataset.id); if (a) mostrarFicha(a); } });
 
 // ============================================== HOLDING Y RIESGO ======
+// ---- pestaña «Abiertas»: cómo va cada operación abierta, con los precios en vivo ----
+let ordenAbiertas = "recientes";
+const MINUTOS_VELA = iv => { const m = String(iv || "").match(/(\d+)\s*([mhd])/); return m ? +m[1] * {m: 1, h: 60, d: 1440}[m[2]] : 60; };
+function duracion(min) {
+  min = Math.max(0, min);
+  if (min < 60) return `${Math.round(min)} min`;
+  if (min < 48 * 60) { const h = Math.floor(min / 60), m = Math.round(min % 60); return h < 10 && m ? `${h} h ${m} min` : `${Math.round(min / 60)} h`; }
+  return `${Math.round(min / 1440)} días`;
+}
+function agentePorId(id) {   // trader de una mesa o de una plaza de la incubadora
+  return traders.get(id) || [...PLAZAS.trading, ...PLAZAS.scalping].map(m => m.trader).find(a => a && a.id === id) || null;
+}
+function operacionesAbiertas() {
+  const papel = S && S.papel || {}, vivo = S && S.vivo || {}, ahora = Date.now(), lista = [];
+  const fuentes = [[papel.estrategias || {}, false], [papel.incubadora || {}, true]];
+  for (const [ts, prueba] of fuentes) for (const [id, d] of Object.entries(ts)) {
+    const p = d.posicion;
+    if (!p || !p.entrada) continue;
+    const dir = d.direccion === "largo" ? 1 : -1, f = p.fraccion ?? 1;
+    const coste = d.grupo === "scalping" ? (S.coste_scalping || 0) : (S.coste_ida_vuelta || 0);
+    const precio = vivo[d.simbolo] || p.salida || p.entrada;
+    const capital = (d.patrimonio ?? 1000) / (1 + (p.retorno_pct || 0) / 100);   // dinero del trader al entrar
+    const r = f * (dir * (precio / p.entrada - 1) - coste) * 100;                    // en % de ese dinero
+    const min = MINUTOS_VELA(d.intervalo), desde = Date.parse(p.entrada_t);
+    lista.push({id, d, p, prueba, dir, precio, r, usd: capital * r / 100, invertido: capital * f, movimiento: dir * (precio / p.entrada - 1) * 100,
+      abierta: (ahora - desde) / 6e4, queda: p.max_velas ? (desde + p.max_velas * min * 6e4 - ahora) / 6e4 : null, desde});
+  }
+  return lista;
+}
+function barraOperacion(o) {
+  const {p, precio} = o;
+  if (!p.stop || !p.objetivo || p.stop === p.objetivo) return "";
+  const pos = v => clamp((v - p.stop) / (p.objetivo - p.stop) * 100, 0, 100);   // 0 = stop, 100 = objetivo (largos y cortos)
+  const e = pos(p.entrada), a = pos(precio), col = a >= e ? "var(--verde)" : "var(--rojo)";
+  return `<div class="op-pista" style="--e:${e}%"><div class="tramo" style="left:${Math.min(e, a)}%;width:${Math.abs(a - e)}%;background:${col};opacity:.55"></div>
+      <i class="entrada" style="left:${e}%"></i><i class="ahora" style="left:${a}%;background:${col}"></i></div>
+    <div class="op-ext"><span>🛑 stop ${esc(fmt.precio(p.stop))}</span><span>entró a ${esc(fmt.precio(p.entrada))}</span><span>🎯 ${esc(fmt.precio(p.objetivo))}</span></div>`;
+}
+function tarjetaOperacion(o) {
+  const {id, d, p, prueba} = o, a = agentePorId(id), cl = o.usd > .004 ? "sube" : o.usd < -.004 ? "baja" : "";
+  const falta = (v, nombre) => v ? `${NF1.format(Math.abs(v / o.precio - 1) * 100)} % para ${nombre}` : "";
+  const faltas = [falta(p.objetivo, "el objetivo"), falta(p.stop, "el stop")].filter(Boolean);
+  return `<div class="op" data-id="${esc(id)}" title="${esc(id)} · clic para ir a su mesa y ver su ficha"><div class="op-cab"><div class="av" style="background:${a ? a.camisa : "#3a4252"}">${esc(iniciales(a ? a.nombre : "?"))}</div>
+      <div style="min-width:0"><div class="n">${esc(a ? a.nombre : id)}<span class="etq ${prueba ? "prueba" : ""}">${prueba ? "incubadora" : d.grupo === "scalping" ? "scalping" : "trading"}</span></div>
+        <div class="d">${esc(moneda(d.simbolo))} ${d.direccion === "largo" ? "a que sube ▲" : "a que baja ▼"} · ${esc(fmt.n(o.invertido))} $</div></div>
+      <div class="r ${cl}">${esc(dineroS(o.usd))}<small>precio ${esc(pctS(o.movimiento))}</small></div></div>
+    ${barraOperacion(o)}
+    <p>Ahora a ${esc(fmt.precio(o.precio))}. ${faltas.length ? `Le falta un ${faltas.join(" y un ")}.` : ""} Abierta hace ${esc(duracion(o.abierta))}${o.queda != null ? `; si no llega antes, se cierra sola en ${esc(duracion(o.queda))}` : ""}.</p></div>`;
+}
+function actualizarAbiertas() {
+  const ops = operacionesAbiertas(), fondo = ops.filter(o => !o.prueba), prueba = ops.filter(o => o.prueba);
+  const n = $("#nAbiertas"); n.textContent = ops.length; n.hidden = !ops.length;
+  if (!$("#p-abiertas").classList.contains("activa")) return;
+  const orden = {recientes: (x, y) => y.desde - x.desde, mejor: (x, y) => y.usd - x.usd, peor: (x, y) => x.usd - y.usd}[ordenAbiertas];
+  const suma = fondo.reduce((t, o) => t + o.usd, 0), inv = fondo.reduce((t, o) => t + o.invertido, 0), cl = suma > .004 ? "sube" : suma < -.004 ? "baja" : "";
+  const ganando = fondo.filter(o => o.usd > .004).length;
+  // los que están más cerca de entrar (cumplen más condiciones de su estrategia)
+  const cerca = Object.entries(S.papel && S.papel.estrategias || {}).filter(([, d]) => !d.posicion && d.radar && d.radar.total)
+    .sort((a, b) => b[1].radar.cumplidas / b[1].radar.total - a[1].radar.cumplidas / a[1].radar.total).slice(0, 4);
+  $("#abiertas").innerHTML = `<div class="mini-kpis">
+      <div><small>Abiertas</small><b>${fondo.length}</b></div>
+      <div><small>Invertido</small><b>${fmt.n(inv)} $</b></div>
+      <div><small>Van</small><b class="${cl}">${dineroS(suma)}</b></div></div>
+    ${fondo.length ? `<p class="ab-nota">${ganando} de ${fondo.length} ${fondo.length === 1 ? "va" : "van"} ganando. Cada una se cierra sola al llegar a su objetivo 🎯 (gana), a su stop 🛑 (pierde poco) o cuando se le acaba el tiempo.</p>
+      <div class="orden-ab">Ordenar: ${[["recientes", "Recientes"], ["mejor", "Van mejor"], ["peor", "Van peor"]].map(([k, t]) => `<button type="button" data-orden="${k}" class="${k === ordenAbiertas ? "activo" : ""}">${t}</button>`).join("")}</div>
+      ${fondo.sort(orden).map(tarjetaOperacion).join("")}`
+    : `<p class="vacio">Ahora mismo no hay ninguna operación abierta con dinero del fondo: los traders esperan a que el mercado cumpla las condiciones de su estrategia.</p>`}
+    ${prueba.length ? `<h3 style="margin-top:16px">En la incubadora · dinero de prueba</h3><p class="ab-nota">No cuentan en tu fondo: son estrategias haciendo su examen.</p>${prueba.sort(orden).map(tarjetaOperacion).join("")}` : ""}
+    ${cerca.length ? `<h3 style="margin-top:16px">Los más cerca de entrar</h3>${cerca.map(([id, d]) => { const a = agentePorId(id); return `<div class="cerca" data-id="${esc(id)}"><b>${esc(a ? a.nombre : id)} · ${esc(moneda(d.simbolo))} ${d.direccion === "largo" ? "▲" : "▼"}</b><b>${d.radar.cumplidas} de ${d.radar.total}</b>
+        ${d.radar.faltan && d.radar.faltan.length ? `<span>Le falta: ${esc(d.radar.faltan.slice(0, 2).join(" · "))}</span>` : ""}</div>`; }).join("")}` : ""}`;
+}
+$("#abiertas").addEventListener("click", e => {
+  const b = e.target.closest("[data-orden]");
+  if (b) { ordenAbiertas = b.dataset.orden; actualizarAbiertas(); return; }
+  const el = e.target.closest("[data-id]"), a = el && agentePorId(el.dataset.id);
+  if (!a) return;
+  if ((a.planta || 0) !== vista) cambiarPlanta(a.planta || 0);   // la cámara va a su mesa y se abre su ficha
+  if (cine) alternarCine(false);
+  vuelo = objetivoEn(a.x, a.y, .7, Math.max(cam.zoom, 2), a.planta || 0); cam.tocada = true;
+  mostrarFicha(a);
+});
 function actualizarHolding() {
   const hs = S.holding || {}, ps = planesHolding(), r = hs.resumen;
   const kh = $("#kHolding");
@@ -4248,7 +4355,7 @@ function actualizarResultados() {
     const vr = tr ? tr.resultado : t.resultado, pr = tr ? tr.pct : t.pct, en = tr ? NOMBRE_RANGO[rango.tarjeta] : "en total";
     rt.className = "gordo " + clase(vr);
     rt.title = `Resultado de los traders ${en} (con lo que ganaron o perdieron las estrategias ya retiradas)`;
-    animar(rt, vr, x => `${dineroS(x)}<small>${pctS(pr)} ${en}</small>`);
+    animar(rt, vr, x => `${dineroS(x)}<small>${pctS(pr)}</small><em>${en}</em>`);
     animar(rh, t.hoy, x => `<em>HOY</em>${dineroS(x)} · ${pctS(t.hoyPct)}`);
     animar($("#rPatr"), t.patrimonio, x => `<em>PATRIMONIO</em>${fmt.n(x)} $`);
   } else {
@@ -4846,6 +4953,7 @@ PESTANAS.forEach(b => b.onclick = () => {
   b.scrollIntoView({block: "nearest", inline: "center"}); flechasPestanas();
   if (b.dataset.p === "chat") setTimeout(flechasCanales, 0);
   if (b.dataset.p === "traders" && S) actualizarResultados();
+  if (b.dataset.p === "abiertas" && S) actualizarAbiertas();
   if (b.dataset.p === "holding" && S) { $("#holding").innerHTML = ""; actualizarHolding(); }
   if (b.dataset.p === "chat") { sinLeer = 0; $("#nChat").hidden = true; const c = $("#chatScroll"); c.scrollTop = c.scrollHeight; }
 });
