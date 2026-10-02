@@ -349,14 +349,10 @@ body.en-paseo #lienzo,body.en-paseo #panel,body.en-paseo #plegar,body.en-paseo #
 #plantas button#bPasear.cargando{opacity:.6;cursor:progress}
 body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-fondo #ayuda,body.en-fondo #plegar,body.en-fondo #ficha,body.en-fondo #plantas,body.en-fondo #botonera{display:none!important}
 #dash{--d-sup:#10151d;--d-ink:#e9edf3;--d-ink2:#c3c8d1;--d-mute:#898781;--d-grid:rgba(255,255,255,.07);position:fixed;top:60px;left:0;right:0;bottom:0;overflow:auto;background:var(--fondo);z-index:8;padding:22px 24px 40px;transition:opacity .3s}
-#dash.recargando .d-rejilla,#dash.recargando .d-kpis{opacity:.6}
+#dash.recargando .d-rejilla,#dash.recargando .d-kpis,#dash.recargando .d-claves{opacity:.6}
 .d-cab{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
 .d-hero small{display:block;color:var(--d-ink2);font-size:13px;margin-bottom:4px}
 .d-hero > b{display:block;font:800 52px/1.05 Inter,system-ui,sans-serif;letter-spacing:-.02em;color:var(--d-ink)}
-.d-deltas{display:flex;gap:10px 22px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--d-ink2)}
-.d-deltas span{display:flex;flex-direction:column;gap:2px}
-.d-deltas b{font:700 13px var(--mono);color:var(--d-ink);font-variant-numeric:tabular-nums}
-.d-deltas .sube{color:#2ee6a6}.d-deltas .baja{color:#ff5a76}
 .d-mover{background:var(--d-sup);border:1px solid var(--borde);border-radius:14px;padding:12px 14px;max-width:420px}
 .d-mover label{font-size:11px;color:var(--d-mute);text-transform:uppercase;letter-spacing:.1em}
 .d-fila{display:flex;gap:8px;align-items:center;margin:6px 0}
@@ -422,6 +418,43 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
 .d-stats small{display:block;font-size:11px;color:var(--d-mute)}
 .d-stats b{font:700 16px Inter,system-ui,sans-serif;color:var(--d-ink)}
 .d-nota{font-size:12px;color:var(--d-mute);margin-top:18px;max-width:900px}
+.d-frase{margin:10px 0 0;font-size:15px;line-height:1.55;color:var(--d-ink2);max-width:780px}
+.d-frase b{color:var(--d-ink);font-weight:700}
+.d-frase .sube{color:#2ee6a6}.d-frase .baja{color:#ff5a76}
+.d-claves{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:22px}
+.d-clave{background:var(--d-sup);border:1px solid var(--borde);border-top:3px solid #5b606b;border-radius:12px;padding:12px 14px}
+.d-clave.bueno{border-top-color:#2ee6a6}.d-clave.malo{border-top-color:#ff5a76}.d-clave.aviso{border-top-color:#ffc24a}
+.d-clave small{display:block;font-size:12px;font-weight:700;color:var(--d-ink2)}
+.d-clave > b{display:block;font:800 22px Inter,system-ui,sans-serif;color:var(--d-ink);margin:5px 0 4px}
+.d-clave p b{font-weight:700;color:var(--d-ink)}
+.d-clave p .sube{color:#2ee6a6}.d-clave p .baja{color:#ff5a76}
+.d-clave .estado{display:inline-block;font:700 11px Inter,sans-serif;border-radius:999px;padding:2px 9px;margin-bottom:7px;border:1px solid var(--borde);color:var(--d-ink2)}
+.d-clave.bueno .estado{color:#2ee6a6;border-color:rgba(46,230,166,.4)}.d-clave.malo .estado{color:#ff5a76;border-color:rgba(255,90,118,.4)}.d-clave.aviso .estado{color:#ffc24a;border-color:rgba(255,194,74,.4)}
+.d-clave p{margin:0;font-size:12.5px;line-height:1.5;color:var(--d-ink2)}
+.d-tarjeta.doble{grid-column:span 2}
+.d-cifra{font:800 26px Inter,system-ui,sans-serif;color:var(--d-ink);margin:2px 0 8px}
+.d-cifra small{font-size:14px;font-weight:700;margin-left:8px;color:var(--d-ink2)}
+.d-areas{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.d-area .fila{display:grid;grid-template-columns:118px minmax(0,1fr) 84px;align-items:center;gap:10px}
+.d-area .nombre{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--d-ink)}
+.d-area .nombre i{width:10px;height:10px;border-radius:3px;flex:none}
+.d-area .pista{position:relative;height:18px}
+.d-area .eje{position:absolute;left:50%;top:-5px;bottom:-5px;width:1px;background:#383835}
+.d-area .barra{position:absolute;top:2px;height:14px;min-width:2px}
+.d-area .valor{font:700 12px var(--mono);color:var(--d-ink);white-space:nowrap;text-align:right}
+.d-area em{display:block;font-style:normal;font-size:11px;color:var(--d-mute);margin:4px 0 0 128px}
+.d-leyenda-rep{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px 16px;margin:10px 0 4px}
+.d-leyenda-rep div{font-size:12px;color:var(--d-ink2);line-height:1.4}
+.d-leyenda-rep i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.d-leyenda-rep b{display:block;color:var(--d-ink);font:700 14px Inter,system-ui,sans-serif}
+.d-mas{margin-top:22px;border:1px solid var(--borde);border-radius:14px;padding:0 16px;background:rgba(255,255,255,.015)}
+.d-mas > summary{cursor:pointer;padding:14px 0;font:700 14px Inter,sans-serif;color:var(--d-ink);list-style:none}
+.d-mas > summary::-webkit-details-marker{display:none}
+.d-mas > summary::before{content:"▸";display:inline-block;width:18px;color:var(--d-mute);transition:transform .2s}
+.d-mas[open] > summary::before{transform:rotate(90deg)}
+.d-mas[open]{padding-bottom:16px}
+.d-kpi p{margin:4px 0 0;font-size:11px;line-height:1.4;color:var(--d-mute)}
+@media (max-width:1240px){.d-tarjeta.doble{grid-column:1/-1}}
 #dTip{position:fixed;z-index:30;pointer-events:none;background:#0a0e14;border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--d-ink2);box-shadow:0 10px 30px rgba(0,0,0,.5);min-width:150px}
 #dTip .t{color:var(--d-mute);font-size:11px;margin-bottom:4px}
 #dTip .f{display:flex;align-items:center;gap:8px;margin-top:2px}
@@ -433,6 +466,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
   .d-hero > b{font-size:38px}
   .d-rejilla{grid-template-columns:1fr}
   .d-stats{grid-template-columns:repeat(2,1fr)}
+  .d-area em{margin-left:0}
 }
 </style>
 </head>
@@ -473,48 +507,60 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
 <main id="dash" hidden aria-label="Mi fondo">
   <div class="d-cab">
     <div class="d-hero">
-      <small>Patrimonio de tu fondo · dinero ficticio</small>
+      <small>Tu fondo · dinero ficticio</small>
       <b id="dPatr">—</b>
-      <div class="d-deltas" id="dDeltas"></div>
+      <p class="d-frase" id="dFrase"></p>
     </div>
     <div class="d-mover">
-      <label for="dImporte">Importe</label>
+      <label for="dImporte">Meter o sacar dinero</label>
       <div class="d-fila"><input id="dImporte" type="number" min="100" step="100" value="1000" inputmode="decimal"><span>$</span>
-        <button type="button" data-m="aportar">＋ Aportar</button><button type="button" data-m="retirar">− Retirar</button></div>
-      <small id="dMovido">Al aportar recibes participaciones al valor liquidativo de ese momento; al retirar, vendes las tuyas. El valor liquidativo no cambia.</small>
+        <button type="button" data-m="aportar">＋ Meter</button><button type="button" data-m="retirar">− Sacar</button></div>
+      <small id="dMovido">Es dinero ficticio. Meter o sacar dinero no cambia lo que has ganado: solo cuánto tienes invertido.</small>
     </div>
   </div>
-  <div class="d-kpis" id="dKpis"></div>
+  <section class="d-claves" id="dClaves" aria-label="Tu fondo en pocas palabras"></section>
   <div class="d-filtro" role="group" aria-label="Periodo de las gráficas">
     <span>Periodo de las gráficas</span>
-    <button type="button" data-r="7">7 días</button><button type="button" data-r="30" class="activo">30 días</button><button type="button" data-r="90">90 días</button><button type="button" data-r="0">Todo</button>
+    <button type="button" data-r="7">7 días</button><button type="button" data-r="30" class="activo">30 días</button><button type="button" data-r="90">90 días</button><button type="button" data-r="0">Desde el principio</button>
   </div>
   <div class="d-rejilla">
-    <section class="d-tarjeta ancha" id="cVl"><h4>Rentabilidad en el periodo: tu fondo frente a BTC</h4><p class="d-sub">Valor liquidativo del fondo y precio de BTC, los dos en % desde el inicio del periodo.</p><div class="d-graf"></div></section>
-    <section class="d-tarjeta" id="cCaida"><h4>Caída desde el máximo</h4><p class="d-sub">Cuánto está el valor liquidativo por debajo de su máximo anterior.</p><div class="d-graf"></div></section>
-    <section class="d-tarjeta" id="cAreas"><h4>Resultado acumulado por área</h4><p class="d-sub">Lo que ha ganado o perdido cada parte del fondo desde el inicio, en $.</p><div class="d-graf"></div></section>
-    <section class="d-tarjeta" id="cDias"><h4>Rentabilidad de cada día</h4><p class="d-sub">Cambio del valor liquidativo día a día.</p><div class="d-graf"></div></section>
-    <section class="d-tarjeta ancha" id="cReparto"><h4>Dónde está tu dinero · tu reparto</h4><p class="d-sub">Arriba, el reparto que eliges (en % del fondo); abajo, lo que está en uso ahora. En trading y scalping el % se divide entre sus mesas; en holding es el presupuesto de las carteras. Lo que no asignas es liquidez.</p>
+    <section class="d-tarjeta ancha" id="cGanado"><h4>Cuánto has ganado</h4><p class="d-sub" id="sGanado"></p><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cAreas"><h4>Qué parte del fondo gana y cuál pierde</h4><p class="d-sub" id="sAreas"></p><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cVl"><h4>¿Y si hubieras comprado BTC?</h4><p class="d-sub" id="sVl"></p><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cDias"><h4>Días buenos y días malos</h4><p class="d-sub" id="sDias"></p><div class="d-graf"></div></section>
+    <section class="d-tarjeta ancha" id="cReparto"><h4>Dónde está tu dinero</h4><p class="d-sub" id="sReparto"></p>
       <div class="d-reparto-caja"><div class="d-graf"></div>
         <form class="d-editor" id="dEditor" autocomplete="off">
-          <b>Cambiar el reparto</b>
+          <b>Cómo quieres repartirlo</b>
           <label><i style="background:#3987e5"></i>Sala de trading<input type="number" name="trading" min="0" max="100" step="1"><span>%</span></label>
           <label><i style="background:#d95926"></i>Scalping<input type="number" name="scalping" min="0" max="100" step="1"><span>%</span></label>
           <label><i style="background:#199e70"></i>Holding<input type="number" name="holding" min="0" max="100" step="1"><span>%</span></label>
-          <div class="d-liq"><i style="background:#5b606b"></i>Liquidez <b id="dLiq">—</b></div>
+          <div class="d-liq"><i style="background:#5b606b"></i>Sin invertir <b id="dLiq">—</b></div>
           <p id="dPrevia" class="d-sub"></p>
-          <button type="submit">Aplicar reparto</button>
-          <small id="dRepartoMsg">Se aplica desde ahora: lo ganado hasta hoy se conserva. Al aportar o retirar dinero se reajusta solo para mantener tus %.</small>
+          <button type="submit">Guardar reparto</button>
+          <small id="dRepartoMsg">Se aplica desde ahora y lo ganado hasta hoy se conserva. Si metes o sacas dinero, se reajusta solo para mantener tus %.</small>
         </form></div></section>
-    <section class="d-tarjeta" id="cExpo"><h4>Exposición por activo</h4><p class="d-sub">Dinero en posiciones abiertas: a la derecha largos, a la izquierda cortos.</p><div class="d-graf"></div></section>
-    <section class="d-tarjeta" id="cMeses"><h4>Rentabilidad de cada mes</h4><div class="d-graf"></div></section>
-    <section class="d-tarjeta" id="cOps"><h4>Operaciones de los traders</h4><div class="d-graf"></div></section>
-    <section class="d-tarjeta ancha" id="cAbiertas"><h4>Posiciones abiertas</h4><div class="d-graf"></div></section>
-    <section class="d-tarjeta" id="cRanking"><h4>Mejores y peores estrategias</h4><div class="d-graf"></div></section>
-    <section class="d-tarjeta" id="cMovs"><h4>Aportaciones y reembolsos</h4><div class="d-graf"></div></section>
-    <section class="d-tarjeta ancha" id="cUltimas"><h4>Últimas operaciones cerradas</h4><div class="d-graf"></div></section>
+    <section class="d-tarjeta" id="cOps"><h4>Cómo les va a los traders</h4><p class="d-sub" id="sOps"></p><div class="d-graf"></div></section>
+    <section class="d-tarjeta doble" id="cAbiertas"><h4>Operaciones abiertas ahora</h4><p class="d-sub">Lo que tienen en marcha los traders en este momento. Cada una se cierra sola al llegar a su objetivo (ganando) o a su stop (perdiendo poco).</p><div class="d-graf"></div></section>
   </div>
-  <p class="d-nota">Funciona como un fondo de verdad (participaciones, valor liquidativo, aportaciones y reembolsos, métricas de riesgo), pero con dinero ficticio y operaciones simuladas con precios reales. Rentabilidades pasadas no garantizan resultados futuros.</p>
+  <details class="d-mas" id="dExpertos">
+    <summary>Para expertos: indicadores, caídas, monedas, meses y aportaciones</summary>
+    <div class="d-kpis" id="dKpis"></div>
+    <div class="d-rejilla">
+      <section class="d-tarjeta" id="cCaida"><h4>Caída desde el máximo</h4><p class="d-sub">Cuánto está el fondo por debajo de lo más alto que había llegado. 0 % es que está en máximos.</p><div class="d-graf"></div></section>
+      <section class="d-tarjeta" id="cExpo"><h4>En qué monedas está el dinero</h4><p class="d-sub">Dinero en operaciones abiertas y en el holding. A la derecha, apuestas a que sube; a la izquierda, a que baja.</p><div class="d-graf"></div></section>
+      <section class="d-tarjeta" id="cMeses"><h4>Rentabilidad de cada mes</h4><div class="d-graf"></div></section>
+      <section class="d-tarjeta" id="cMovs"><h4>Lo que has metido y sacado</h4><div class="d-graf"></div></section>
+    </div>
+  </details>
+  <details class="d-mas" id="dDetalle">
+    <summary>Todas las estrategias y las últimas operaciones cerradas</summary>
+    <div class="d-rejilla">
+      <section class="d-tarjeta" id="cRanking"><h4>Las que más ganan y las que más pierden</h4><div class="d-graf"></div></section>
+      <section class="d-tarjeta doble" id="cUltimas"><h4>Últimas operaciones cerradas</h4><div class="d-graf"></div></section>
+    </div>
+  </details>
+  <p class="d-nota">Es un fondo de práctica: el dinero es ficticio y las operaciones se simulan con precios reales del mercado. Que haya ido bien hasta ahora no garantiza que siga yendo bien.</p>
   <div id="dTip" role="tooltip" hidden></div>
 </main>
 
@@ -4177,7 +4223,7 @@ function actualizarResultados() {
   const clase = x => x > 0.004 ? "sube" : x < -0.004 ? "baja" : "";
   const kr = $("#kResultado"), kh = $("#kHoy"), rt = $("#rTotal"), rh = $("#rHoy");
   kr.className = clase(t.resultado); kh.className = clase(t.hoy); rt.className = "gordo " + clase(t.resultado); rh.className = "chip " + clase(t.hoy);
-  if (vistaFondo && F) { const d = $("#dPatr"); if (d && S.fondo) d.textContent = fmt.dinero(S.fondo.patrimonio); }
+  if (vistaFondo && F && S.fondo) cabeceraFondo();
   const f = S.fondo;
   if (f) {   // cabecera = tu fondo: aportado + resultado de todas las áreas (un trader nuevo no cambia el patrimonio)
     kr.className = clase(f.resultado); kh.className = clase(f.hoy);
@@ -4898,7 +4944,7 @@ $("#dash").addEventListener("click", e => {
 });
 
 /** Gráfica de líneas con cruz que sigue al ratón. series: [{nombre, color, puntos: [[ms, valor]], grosor}] */
-function lineasSvg(el, series, {formato = v => fmt.n(v), alto = 230, area = false, cero = false, minimo = 0} = {}) {
+function lineasSvg(el, series, {formato = v => fmt.n(v), eje = formato, alto = 230, area = false, cero = false, minimo = 0} = {}) {
   const W = Math.max(280, el.clientWidth || 600), H = alto, m = {l: 58, r: 70, t: 10, b: 24};
   const xs = series[0].puntos.map(p => p[0]);
   const vals = series.flatMap(s => s.puntos.map(p => p[1])).filter(v => v != null && isFinite(v));
@@ -4911,8 +4957,8 @@ function lineasSvg(el, series, {formato = v => fmt.n(v), alto = 230, area = fals
   const x0 = xs[0], x1 = xs[xs.length - 1];
   const X = t => m.l + (t - x0) / Math.max(1, x1 - x0) * (W - m.l - m.r), Y = v => m.t + (hi - v) / (hi - lo) * (H - m.t - m.b);
   let svg = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img">`;
-  for (const v of marcas(lo, hi, 4)) svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${Math.abs(v) < 1e-12 ? COL.eje : COL.rejilla}" stroke-width="1"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${esc(formato(v))}</text>`;
-  const nx = Math.min(5, xs.length);
+  for (const v of marcas(lo, hi, 4)) svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${Math.abs(v) < 1e-12 ? COL.eje : COL.rejilla}" stroke-width="1"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${esc(eje(v))}</text>`;
+  const nx = Math.min(Math.max(2, Math.floor((W - m.l - m.r) / 95)), 5, xs.length);   // las fechas que caben sin pisarse
   for (let k = 0; k < nx; k++) { const t = x0 + (x1 - x0) * k / (nx - 1); svg += `<text x="${X(t)}" y="${H - 6}" text-anchor="${k === 0 ? "start" : k === nx - 1 ? "end" : "middle"}">${esc(diaF(t))}</text>`; }
   for (const s of series) {
     const pts = s.puntos.filter(p => p[1] != null && isFinite(p[1]));
@@ -4943,13 +4989,13 @@ function barraRedonda(x, base, fin, w, r = 4) {   // columna con el extremo de d
   return `M${x},${base}V${fin - r}Q${x},${fin} ${x + r},${fin}H${x + w - r}Q${x + w},${fin} ${x + w},${fin - r}V${base}Z`;
 }
 /** Columnas por encima/debajo de cero (verde gana, rojo pierde) con tooltip en cada una. puntos: [[ms, valor %]] */
-function columnasSvg(el, puntos, alto = 170) {
+function columnasSvg(el, puntos, alto = 170, formato = pctF, palabras = ["sube", "baja"], eje = formato) {
   if (!puntos.length) { el.innerHTML = `<p class="vacio">Todavía no hay días completos en este periodo.</p>`; return; }
   const W = Math.max(280, el.clientWidth || 600), H = alto, m = {l: 50, r: 10, t: 10, b: 24};
   const vals = puntos.map(p => p[1]), ext = Math.max(...vals.map(Math.abs), 1e-6) * 1.1;
   const Y = v => m.t + (ext - v) / (2 * ext) * (H - m.t - m.b), banda = (W - m.l - m.r) / puntos.length, ancho = Math.max(2, Math.min(24, banda - 2));
   let svg = `<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img">`;
-  for (const v of marcas(-ext, ext, 4)) svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${Math.abs(v) < 1e-12 ? COL.eje : COL.rejilla}"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${esc(pctF(v))}</text>`;
+  for (const v of marcas(-ext, ext, 4)) svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${Math.abs(v) < 1e-12 ? COL.eje : COL.rejilla}"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${esc(eje(v))}</text>`;
   puntos.forEach(([t, v], i) => {
     const x = m.l + i * banda + (banda - ancho) / 2;
     svg += `<path d="${barraRedonda(x, Y(0), Y(v), ancho)}" fill="${v >= 0 ? COL.bueno : COL.malo}"/>`;
@@ -4959,7 +5005,7 @@ function columnasSvg(el, puntos, alto = 170) {
   puntos.forEach(([t], i) => { if (i % cada === 0) svg += `<text x="${m.l + i * banda + banda / 2}" y="${H - 6}" text-anchor="middle">${esc(diaF(t))}</text>`; });
   el.innerHTML = svg + "</svg>";
   el.querySelectorAll(".caza").forEach(r => {
-    r.addEventListener("pointermove", ev => { const [t, v] = puntos[+r.dataset.i]; tip(ev, `<div class="t">${esc(diaF(t))}</div>` + filaTip(v >= 0 ? COL.bueno : COL.malo, pctF(v), v >= 0 ? "sube" : "baja")); });
+    r.addEventListener("pointermove", ev => { const [t, v] = puntos[+r.dataset.i]; tip(ev, `<div class="t">${esc(diaF(t))}</div>` + filaTip(v >= 0 ? COL.bueno : COL.malo, formato(v), v >= 0 ? palabras[0] : palabras[1])); });
     r.addEventListener("pointerleave", ev => tip(ev, null));
   });
 }
@@ -4982,7 +5028,7 @@ function previaReparto() {
   f.querySelector("button").disabled = liq < 0 || !repartoTocado;
   $("#dPrevia").innerHTML = liq < 0 ? "Entre las tres áreas pasan del 100 %."
     : `Quedaría: ${fmt.n(v("trading") / 100 * patr / (ob.mesas.trading || 48))} $ por trader, ${fmt.n(v("scalping") / 100 * patr / (ob.mesas.scalping || 12))} $ por scalper y ${fmt.n(v("holding") / 100 * patr)} $ para el holding.`
-      + (liq < v("holding") * .5 ? " <span style='color:#ffc24a'>Ojo: la reserva del holding (hasta un 50 % más) sale de la liquidez.</span>" : "");
+      + (liq < v("holding") * .5 ? " <span style='color:#ffc24a'>Ojo: el holding puede usar hasta un 50 % más como reserva, y eso sale del dinero sin invertir.</span>" : "");
 }
 $("#dEditor").addEventListener("input", () => { repartoTocado = true; previaReparto(); });
 $("#dEditor").addEventListener("submit", async e => {
@@ -4999,126 +5045,193 @@ $("#dEditor").addEventListener("submit", async e => {
   if (r.ok) { repartoTocado = false; enCanal("jefe", () => decir(GENERAL, r.texto, 3, "bueno", YO)); cargarFondo(); refrescar(); }
   else previaReparto();
 });
+// Mi fondo en castellano llano: primero cinco respuestas cortas («¿ganas o pierdes?», «¿mejor que BTC?», «¿está
+// trabajando tu dinero?», «¿qué parte va mejor?», «¿cuánto riesgo?»), luego las gráficas y, plegado, lo técnico.
+const NOMBRE_PERIODO = {7: "En los últimos 7 días", 30: "En los últimos 30 días", 90: "En los últimos 90 días", 0: "Desde el principio"};
+const AREA_NOMBRE = {trading: "Sala de trading", scalping: "Scalping", holding: "Holding", liquidez: "Sin invertir"};
+const MOTIVO_TXT = {objetivo: "llegó al objetivo", stop: "saltó el stop", tiempo: "se acabó su tiempo", "kill switch": "kill switch", relevo: "relevo", retirada: "retirada"};
+const fechaLarga = iso => new Date(iso).toLocaleDateString("es-ES", {day: "numeric", month: "long"});
+const signoD = x => (x > 0.005 ? "+" : x < -0.005 ? "−" : "") + NF2.format(Math.abs(x)) + " $";   // +12,34 $
+const signoEje = x => (x > 0 ? "+" : x < 0 ? "−" : "") + NF0.format(Math.abs(x)) + " $";              // +200 $ (ejes)
+const claseS = x => x > 0.005 ? "sube" : x < -0.005 ? "baja" : "";
+function clave(titulo, valor, estado, tono, texto) {
+  return `<article class="d-clave ${tono}"><small>${esc(titulo)}</small><b>${valor}</b><span class="estado">${esc(estado)}</span><p>${texto}</p></article>`;
+}
+/** Cifra grande y frase de arriba: cuánto has puesto, cuánto tienes y cuánto llevas hoy (con los precios en vivo). */
+function cabeceraFondo() {
+  const R = F.resumen, vivo = S && S.fondo;
+  const patrimonio = vivo ? vivo.patrimonio : R.patrimonio, resultado = vivo ? vivo.resultado : R.resultado;
+  const rent = vivo ? vivo.rentabilidad_pct : R.rentabilidad_pct, hoy = vivo ? vivo.hoy : R.hoy;
+  $("#dPatr").textContent = fmt.dinero(patrimonio);
+  $("#dFrase").innerHTML = `Has puesto <b>${fmt.dinero(R.aportado)}</b> y ahora tienes <b>${fmt.dinero(patrimonio)}</b>: `
+    + (Math.abs(resultado) < .005 ? "de momento ni ganas ni pierdes" : `${resultado > 0 ? "has ganado" : "has perdido"} <b class="${claseS(resultado)}">${signoD(resultado)}</b> (${pctS(rent)})`)
+    + ` desde el ${esc(fechaLarga(R.inicio))}. Hoy llevas <b class="${claseS(hoy)}">${signoD(hoy)}</b>.`;
+}
 function pintarFondo() {
   const R = F.resumen, M = F.metricas || {}, cols = Object.fromEntries(F.columnas.map((c, i) => [c, i]));
-  const vivo = S && S.fondo;   // la cabecera lleva los precios en vivo; el dashboard, el último cálculo completo
-  const patrimonio = vivo ? vivo.patrimonio : R.patrimonio;
-  $("#dPatr").textContent = fmt.dinero(patrimonio);
-  $("#dDeltas").innerHTML = `<span>Hoy <b class="${claseF(R.hoy_pct)}">${pctF(vivo ? vivo.hoy_pct : R.hoy_pct)}</b></span>
-    <span>Desde el inicio <b class="${claseF(R.rentabilidad_pct)}">${pctF(vivo ? vivo.rentabilidad_pct : R.rentabilidad_pct)}</b></span>
-    <span>BTC en el mismo tiempo <b class="${claseF(F.btc_pct)}">${pctF(F.btc_pct)}</b></span>
-    <span>Valor liquidativo <b>${NF2.format(vivo ? vivo.vl : R.vl)} $</b></span>
-    <span>Participaciones <b>${fmt.n(R.participaciones)}</b></span>
-    <span>Inicio del fondo <b>${esc(new Date(R.inicio).toLocaleDateString("es-ES", {day: "numeric", month: "short", year: "numeric"}))}</b></span>`;
-  const kpi = (t, v, e) => `<div class="d-kpi"><small>${esc(t)}</small><b>${v}</b>${e ? `<em>${esc(e)}</em>` : ""}</div>`;
-  $("#dKpis").innerHTML = [
-    kpi("Aportado neto", fmt.n(R.aportado) + " $"),
-    kpi("Resultado", dineroF(vivo ? vivo.resultado : R.resultado), "trading + scalping + holding"),
-    kpi("Últimos 30 días", pctF(M.r30d_pct), M.r30d_pct == null ? "el fondo tiene menos de 30 días" : ""),
-    kpi("Rentabilidad anualizada", pctF(M.anualizada_pct), M.anualizada_pct == null ? "se calcula a partir de 30 días" : ""),
-    kpi("Volatilidad anual", M.volatilidad_pct == null ? "—" : NF1.format(M.volatilidad_pct) + " %", "cuánto se mueve el VL"),
-    kpi("Ratio de Sharpe", M.sharpe == null ? "—" : NF2.format(M.sharpe), "rentabilidad por unidad de riesgo"),
-    kpi("Caída máxima", pctF(M.caida_max_pct), `ahora ${pctF(M.caida_actual_pct)}`),
-    kpi("Liquidez", fmt.n(F.reparto.liquidez) + " $", "sin asignar a ningún área"),
-    kpi("Comisiones pagadas", fmt.dinero(F.operaciones.comisiones), "traders y scalpers"),
-    kpi("Días en positivo", M.dias_positivos_pct == null ? "—" : NF1.format(M.dias_positivos_pct) + " %", `mejor ${M.mejor_dia ? pctF(M.mejor_dia[1]) : "—"} · peor ${M.peor_dia ? pctF(M.peor_dia[1]) : "—"}`),
-  ].join("");
-  // series del periodo elegido
-  const desde = rangoFondo ? Date.now() - rangoFondo * 864e5 : -Infinity;
-  let filas = F.serie.filter(f => Date.parse(f[0]) >= desde);
-  if (filas.length < 2) filas = F.serie.slice(-2);
-  const ms = filas.map(f => Date.parse(f[0])), base = filas[0];
-  const rel = (f, c) => f[cols[c]] == null || base[cols[c]] == null ? null : (f[cols[c]] / base[cols[c]] - 1) * 100;
-  // 1) VL frente a BTC
-  const sVl = [{nombre: "Tu fondo (valor liquidativo)", color: COL.fondo, grosor: 2.5, puntos: filas.map((f, i) => [ms[i], rel(f, "vl")])},
-               {nombre: "BTC", color: COL.btc, puntos: filas.map((f, i) => [ms[i], rel(f, "btc_vl")])}];
-  const diarias = [];   // un punto por día (el último de cada día) para las tablas
-  filas.forEach((f, i) => { const d = new Date(ms[i]).toDateString(); if (diarias.length && diarias[diarias.length - 1].d === d) diarias[diarias.length - 1] = {d, i}; else diarias.push({d, i}); });
-  const gVl = $("#cVl .d-graf");
-  gVl.innerHTML = conTabla("vl", "<div class='g'></div>", tablaHtml(["Día", "Fondo", "BTC", "Valor liquidativo"],
-    diarias.map(({i}) => [diaF(ms[i]), {texto: pctF(rel(filas[i], "vl")), clase: claseF(rel(filas[i], "vl"))}, {texto: pctF(rel(filas[i], "btc_vl")), clase: claseF(rel(filas[i], "btc_vl"))}, NF2.format(filas[i][cols.vl])]).reverse(), [1, 2, 3]));
-  if (!tablasAbiertas.has("vl")) lineasSvg(gVl.querySelector(".g"), sVl, {formato: pctF, alto: 260, minimo: 1});
-  // 2) caída desde el máximo
-  const gC = $("#cCaida .d-graf");
-  gC.innerHTML = conTabla("caida", "<div class='g'></div>", tablaHtml(["Día", "Caída"], diarias.map(({i}) => [diaF(ms[i]), pctF(filas[i][cols.caida_pct])]).reverse(), [1]));
-  if (!tablasAbiertas.has("caida")) lineasSvg(gC.querySelector(".g"), [{nombre: "Caída", color: COL.malo, puntos: filas.map((f, i) => [ms[i], f[cols.caida_pct]])}], {formato: pctF, area: true, cero: true, alto: 190, minimo: .5});
-  // 3) resultado por área
-  const gA = $("#cAreas .d-graf");
-  gA.innerHTML = conTabla("areas", "<div class='g'></div>", tablaHtml(["Día", ...AREAS_F.map(a => a[1])],
-    diarias.map(({i}) => [diaF(ms[i]), ...AREAS_F.map(([k]) => ({texto: dineroF(filas[i][cols[k]]), clase: claseF(filas[i][cols[k]])}))]).reverse(), [1, 2, 3]));
-  if (!tablasAbiertas.has("areas")) lineasSvg(gA.querySelector(".g"), AREAS_F.map(([k, n]) => ({nombre: n, color: COL[k], puntos: filas.map((f, i) => [ms[i], f[cols[k]]])})), {formato: dineroF, cero: true, alto: 210, minimo: 20});
-  // 4) rentabilidad de cada día (a partir del último VL de cada día)
-  const porDia = [];
-  F.serie.forEach(f => { const t = Date.parse(f[0]), d = new Date(t).toDateString(); if (porDia.length && porDia[porDia.length - 1].d === d) porDia[porDia.length - 1] = {d, t, v: f[cols.vl]}; else porDia.push({d, t, v: f[cols.vl]}); });
-  const dias = porDia.slice(1).map((x, k) => [x.t, (x.v / porDia[k].v - 1) * 100]).filter(p => p[0] >= desde);
-  const gD = $("#cDias .d-graf");
-  gD.innerHTML = conTabla("dias", "<div class='g'></div>", tablaHtml(["Día", "Rentabilidad"], dias.map(([t, v]) => [diaF(t), {texto: pctF(v), clase: claseF(v)}]).reverse(), [1]));
-  if (!tablasAbiertas.has("dias")) columnasSvg(gD.querySelector(".g"), dias);
-  // 5) reparto: el que eliges (objetivo) y el que está en uso
+  const vivo = S && S.fondo;   // la cabecera y «¿ganas o pierdes?» llevan los precios en vivo; el resto, el último cálculo completo (cada 30 s)
+  const resultado = vivo ? vivo.resultado : R.resultado, rent = vivo ? vivo.rentabilidad_pct : R.rentabilidad_pct;
+  const inicio = fechaLarga(R.inicio), res = f => f[cols.patrimonio] - f[cols.aportado];
+  const serie = F.serie, ult = serie[serie.length - 1];
+  const haceDias = d => { const t = Date.parse(ult[0]) - d * 864e5; let f = serie[0]; for (const x of serie) { if (Date.parse(x[0]) <= t) f = x; else break; } return f; };
+  cabeceraFondo();
+  // ---- en pocas palabras ---- <b>${fmt.dinero(R.aportado)}</b> y ahora tienes <b>${fmt.dinero(patrimonio)}</b>: `
+    + (Math.abs(resultado) < .005 ? "de momento ni ganas ni pierdes" : `${resultado > 0 ? "has ganado" : "has perdido"} <b class="${claseS(resultado)}">${signoD(resultado)}</b> (${pctS(rent)})`)
+  const r7 = res(ult) - res(haceDias(7)), joven = (Date.parse(ult[0]) - Date.parse(R.inicio)) / 864e5 < 7;
+  const btc = F.btc_pct, caidaMax = M.caida_max_pct ?? 0, caidaAct = M.caida_actual_pct ?? R.caida_pct ?? 0;
+  let picoBtc = 0, caidaBtc = 0;
+  for (const f of serie) { const v = f[cols.btc_vl]; if (v == null) continue; picoBtc = Math.max(picoBtc, v); caidaBtc = Math.min(caidaBtc, (v / picoBtc - 1) * 100); }
   const rep = F.reparto, ob = F.objetivo || {pct: {}, usd: {}, capital_mesa: {}, mesas: {}, ocupadas: {}};
-  const AREAS_R = [["trading", "Sala de trading"], ["scalping", "Scalping"], ["holding", "Holding"], ["liquidez", "Liquidez"]];
-  const barra = (valores, etq) => {
-    const total = AREAS_R.reduce((a, [k]) => a + Math.max(0, valores[k] || 0), 0) || 1;
-    return `<div class="d-reparto-etq">${esc(etq)}</div><div class="d-reparto" data-etq="${esc(etq)}">${AREAS_R.filter(([k]) => (valores[k] || 0) > 0)
-      .map(([k, n]) => `<div data-k="${k}" data-v="${valores[k]}" data-p="${(valores[k] / total * 100).toFixed(1)}" style="flex:${valores[k]};background:${COL[k]}"></div>`).join("")}</div>`;
+  const invertido = rep.trading + rep.scalping + rep.holding, parado = rep.liquidez, total = invertido + Math.max(0, parado) || 1;
+  const pctInv = invertido / total * 100;
+  const vacias = Math.max(0, (ob.mesas.trading || 0) - (ob.ocupadas.trading || 0)) + Math.max(0, (ob.mesas.scalping || 0) - (ob.ocupadas.scalping || 0));
+  const areas = ["trading", "scalping", "holding"].map(k => [k, (R.por_area || {})[k] || 0]).sort((a, b) => b[1] - a[1]);
+  const riesgo = S && S.papel && S.papel.riesgo || {}, nivel = caidaMax > -3 ? ["Bajo", "bueno", "● Riesgo bajo"] : caidaMax > -10 ? ["Medio", "aviso", "⚠ Riesgo medio"] : ["Alto", "malo", "▲ Riesgo alto"];
+  $("#dClaves").innerHTML = [
+    clave("¿Ganas o pierdes?", signoD(resultado), resultado > .005 ? "▲ Ganando" : resultado < -.005 ? "▼ Perdiendo" : "= Igual", resultado > .005 ? "bueno" : resultado < -.005 ? "malo" : "",
+      `Desde el ${esc(inicio)}, un ${esc(pctS(rent))} de lo que has puesto. ${joven ? "El fondo tiene menos de una semana." : `En los últimos 7 días: <b>${esc(signoD(r7))}</b>.`}`),
+    clave("¿Mejor que comprar BTC?", `BTC ${esc(pctS(btc))}`, rent >= btc ? "▲ Vas mejor que BTC" : "BTC va por delante", rent >= btc ? "bueno" : "",
+      `Si el ${esc(inicio)} hubieras comprado BTC con el mismo dinero, llevarías un ${esc(pctS(btc))}; tu fondo lleva un ${esc(pctS(rent))}.`
+      + (caidaBtc < caidaMax ? ` A cambio, se mueve mucho menos: lo más que ha bajado es un ${esc(pctF(caidaMax))}, y BTC llegó a bajar un ${esc(pctF(caidaBtc))}.` : "")),
+    clave("¿Está trabajando tu dinero?", `${NF0.format(pctInv)} % invertido`, parado > total * .25 ? "⚠ Mucho dinero parado" : "✓ Casi todo trabajando", parado > total * .25 ? "aviso" : "bueno",
+      parado < 0 ? "Hay más dinero en uso que en el fondo: mete más dinero o baja el reparto."
+        : `${fmt.n(invertido)} $ trabajan en ${ob.ocupadas.trading || 0} mesas de trading, ${ob.ocupadas.scalping || 0} de scalping y las carteras de holding. `
+          + `<b>${fmt.n(parado)} $ esperan sin invertir</b>` + (vacias ? `: hay ${vacias} mesas vacías, que se llenarán cuando la incubadora apruebe estrategias nuevas.` : ".")),
+    clave("¿Qué parte va mejor?", esc(AREA_NOMBRE[areas[0][0]]), areas[0][1] > 0 ? `▲ ${signoD(areas[0][1])}` : "Ninguna gana todavía", areas[0][1] > 0 ? "bueno" : "",
+      areas.map(([k, v]) => `${esc(AREA_NOMBRE[k])} <b class="${claseS(v)}">${esc(signoD(v))}</b>`).join(" · ") + ", desde el principio."),
+    clave("¿Cuánto riesgo corres?", nivel[0], nivel[2], nivel[1],
+      `Lo más que ha bajado el fondo desde un máximo es un ${esc(pctF(caidaMax))} (ahora está a ${esc(pctF(caidaAct))}). Cada operación arriesga como mucho un `
+      + `${esc(NF1.format(riesgo.riesgo_por_operacion_pct || 1))} % del dinero de su trader y, si un día se pierde más de un ${esc(NF1.format(riesgo.limite_diario_pct || 2))} %, salta un freno automático.`),
+  ].join("");
+  // ---- datos del periodo elegido ----
+  const desde = rangoFondo ? Date.parse(ult[0]) - rangoFondo * 864e5 : -Infinity;
+  let filas = serie.filter(f => Date.parse(f[0]) >= desde);
+  if (filas.length < 2) filas = serie.slice(-2);
+  const ms = filas.map(f => Date.parse(f[0])), base = filas[0], fin = filas[filas.length - 1];
+  const masJoven = rangoFondo && Date.parse(serie[0][0]) > desde, edad = Math.max(1, Math.round((Date.parse(ult[0]) - Date.parse(serie[0][0])) / 864e5));
+  const periodo = masJoven ? `Desde el principio (el fondo tiene ${edad} ${edad === 1 ? "día" : "días"})` : NOMBRE_PERIODO[rangoFondo];
+  const rel = (f, c) => f[cols[c]] == null || base[cols[c]] == null ? null : (f[cols[c]] / base[cols[c]] - 1) * 100;
+  const diarias = [];   // el último punto de cada día, para las tablas
+  filas.forEach((f, i) => { const d = new Date(ms[i]).toDateString(); if (diarias.length && diarias[diarias.length - 1].d === d) diarias[diarias.length - 1] = {d, i}; else diarias.push({d, i}); });
+  // 1) cuánto has ganado en el periodo
+  const ganado = res(fin) - res(base), ganadoPct = rel(fin, "vl");
+  $("#sGanado").innerHTML = `${esc(periodo)}: <b class="${claseS(ganado)}">${esc(signoD(ganado))}</b> (${esc(pctS(ganadoPct || 0))}). La línea es lo ganado o perdido desde el principio del periodo; meter o sacar dinero no cuenta.`;
+  const gG = $("#cGanado .d-graf");
+  gG.innerHTML = conTabla("ganado", "<div class='g'></div>", tablaHtml(["Día", "Ganado en el periodo", "Tienes"],
+    diarias.map(({i}) => [diaF(ms[i]), {texto: signoD(res(filas[i]) - res(base)), clase: claseS(res(filas[i]) - res(base))}, fmt.dinero(filas[i][cols.patrimonio])]).reverse(), [1, 2]));
+  if (!tablasAbiertas.has("ganado")) lineasSvg(gG.querySelector(".g"), [{nombre: "Ganado", color: COL.fondo, grosor: 2.5, puntos: filas.map((f, i) => [ms[i], res(f) - res(base)])}],
+    {formato: signoD, eje: signoEje, area: true, cero: true, alto: 250, minimo: 20});
+  // 2) qué parte gana y cuál pierde (en el periodo)
+  const porArea = ["trading", "scalping", "holding"].map(k => [k, (fin[cols[k]] || 0) - (base[cols[k]] || 0)]);
+  const maxA = Math.max(1e-9, ...porArea.map(([, v]) => Math.abs(v)));
+  const A = F.areas || {};
+  const detalleArea = k => {
+    const a = A[k] || {};
+    if (k === "holding") return a.valor ? `carteras de largo plazo: ${fmt.n(a.aportado || a.presupuesto || 0)} $ invertidos, ahora valen ${fmt.n(a.valor)} $` : "sin carteras todavía";
+    return a.traders ? `${a.traders} ${k === "scalping" ? "scalpers" : "traders"} · ${fmt.n(a.operaciones || 0)} operaciones cerradas` + (a.aciertos_pct != null ? ` · aciertan el ${NF0.format(a.aciertos_pct)} %` : "") : "sin traders todavía";
   };
-  const detalle = k => k === "trading" || k === "scalping" ? `${ob.ocupadas[k] || 0} de ${ob.mesas[k] || 0} mesas · ${fmt.n(ob.capital_mesa[k] || 0)} $ por mesa`
-    : k === "holding" ? `presupuesto de las carteras: ${fmt.n(ob.presupuesto_holding || 0)} $` : "sin invertir (incluye las mesas vacías)";
-  $("#cReparto .d-graf").innerHTML = barra(ob.usd || {}, "Tu reparto (objetivo)") + barra(rep, "En uso ahora") +
-    tablaHtml(["Área", "Objetivo", "Objetivo $", "En uso $", "Detalle"], AREAS_R.map(([k, n]) => [{texto: n, color: COL[k]},
-      NF1.format((ob.pct || {})[k] || 0) + " %", fmt.dinero((ob.usd || {})[k] || 0), fmt.dinero(rep[k] || 0), detalle(k)]), [1, 2, 3]) +
-    (rep.liquidez < 0 ? `<p class="d-sub" style="color:#ff5a76">Hay más capital en uso que patrimonio: aporta más o baja el reparto.</p>` : "");
+  $("#sAreas").textContent = `${periodo}, en dólares. A la derecha lo que gana; a la izquierda, lo que pierde.`;
+  const gA = $("#cAreas .d-graf");
+  gA.innerHTML = conTabla("areas", `<div class="d-areas">${porArea.map(([k, v]) => {
+      const w = Math.abs(v) / maxA * 48, pos = v >= 0;
+      return `<div class="d-area"><div class="fila"><span class="nombre"><i style="background:${COL[k]}"></i>${esc(AREA_NOMBRE[k])}</span>
+        <div class="pista"><div class="eje"></div><div class="barra" style="${pos ? `left:50%;border-radius:0 4px 4px 0` : `right:50%;border-radius:4px 0 0 4px`};width:${w}%;background:${COL[k]}"></div></div>
+        <span class="valor">${esc(signoD(v))}</span></div>
+        <em>${esc(detalleArea(k))}</em></div>`;
+    }).join("")}</div>`,
+    tablaHtml(["Parte del fondo", "En el periodo", "Desde el principio"], porArea.map(([k, v]) => [{texto: AREA_NOMBRE[k], color: COL[k]}, {texto: signoD(v), clase: claseS(v)},
+      {texto: signoD((R.por_area || {})[k] || 0), clase: claseS((R.por_area || {})[k] || 0)}]), [1, 2]));
+  // 3) frente a BTC
+  const fondoP = rel(fin, "vl") || 0, btcP = rel(fin, "btc_vl");
+  $("#sVl").textContent = `${periodo}, tu fondo ha hecho ${pctS(fondoP)}` + (btcP == null ? "." : ` y BTC ${pctS(btcP)}. Las dos líneas empiezan en 0 % para poder compararlas.`);
+  const gVl = $("#cVl .d-graf");
+  gVl.innerHTML = conTabla("vl", "<div class='g'></div>", tablaHtml(["Día", "Tu fondo", "BTC"],
+    diarias.map(({i}) => [diaF(ms[i]), {texto: pctF(rel(filas[i], "vl")), clase: claseF(rel(filas[i], "vl"))}, {texto: pctF(rel(filas[i], "btc_vl")), clase: claseF(rel(filas[i], "btc_vl"))}]).reverse(), [1, 2]));
+  if (!tablasAbiertas.has("vl")) lineasSvg(gVl.querySelector(".g"), [{nombre: "Tu fondo", color: COL.fondo, grosor: 2.5, puntos: filas.map((f, i) => [ms[i], rel(f, "vl")])},
+    {nombre: "BTC", color: COL.btc, puntos: filas.map((f, i) => [ms[i], rel(f, "btc_vl")])}], {formato: pctF, alto: 210, minimo: 1});
+  // 4) días buenos y malos (en $: lo ganado o perdido cada día, sin contar lo que metes o sacas)
+  const porDia = [];
+  serie.forEach(f => { const t = Date.parse(f[0]), d = new Date(t).toDateString(); if (porDia.length && porDia[porDia.length - 1].d === d) porDia[porDia.length - 1] = {d, t, v: res(f)}; else porDia.push({d, t, v: res(f)}); });
+  const dias = porDia.slice(1).map((x, k) => [x.t, x.v - porDia[k].v]).filter(p => p[0] >= desde);
+  const buenos = dias.filter(d => d[1] > .005).length, malos = dias.filter(d => d[1] < -.005).length;
+  const mejor = dias.reduce((a, d) => !a || d[1] > a[1] ? d : a, null), peor = dias.reduce((a, d) => !a || d[1] < a[1] ? d : a, null);
+  $("#sDias").textContent = dias.length ? `${periodo}: ${buenos} ${buenos === 1 ? "día bueno" : "días buenos"} y ${malos} ${malos === 1 ? "malo" : "malos"}.`
+    + (mejor && mejor[1] > 0 ? ` El mejor, el ${fechaLarga(mejor[0])} (${signoD(mejor[1])})` : "") + (peor && peor[1] < 0 ? `; el peor, el ${fechaLarga(peor[0])} (${signoD(peor[1])}).` : ".") : "Todavía no hay días completos.";
+  const gD = $("#cDias .d-graf");
+  gD.innerHTML = conTabla("dias", "<div class='g'></div>", tablaHtml(["Día", "Ganado o perdido"], dias.map(([t, v]) => [diaF(t), {texto: signoD(v), clase: claseS(v)}]).reverse(), [1]));
+  if (!tablasAbiertas.has("dias")) columnasSvg(gD.querySelector(".g"), dias, 170, signoD, ["ganó", "perdió"], signoEje);
+  // 5) dónde está tu dinero: lo que trabaja ahora en cada parte y lo que espera
+  const AREAS_R = ["trading", "scalping", "holding", "liquidez"];
+  const porque = k => k === "trading" || k === "scalping" ? `${ob.ocupadas[k] || 0} de ${ob.mesas[k] || 0} mesas con ${k === "scalping" ? "scalper" : "trader"}, ${fmt.n(ob.capital_mesa[k] || 0)} $ cada una`
+    : k === "holding" ? `presupuesto de las carteras: ${fmt.n(ob.presupuesto_holding || 0)} $` : "lo que no repartes y el dinero de las mesas vacías";
+  $("#sReparto").innerHTML = `Ahora trabajan <b>${fmt.n(invertido)} $</b> de ${fmt.n(Math.max(total, 1))} $. Tú eliges qué parte va a cada área (a la derecha); `
+    + `en trading y scalping, ese dinero se reparte entre sus mesas, así que una mesa sin trader deja su parte sin invertir.`;
+  const segs = AREAS_R.filter(k => (rep[k] || 0) > 0);
+  $("#cReparto .d-graf").innerHTML = `<div class="d-reparto" data-etq="Ahora">${segs.map(k => `<div data-k="${k}" data-v="${rep[k]}" style="flex:${rep[k]};background:${COL[k]}"></div>`).join("")}</div>
+    <div class="d-leyenda-rep">${AREAS_R.map(k => `<div><i style="background:${COL[k]}"></i>${esc(AREA_NOMBRE[k])}<b>${fmt.n(Math.max(0, rep[k] || 0))} $ · ${NF0.format(Math.max(0, rep[k] || 0) / total * 100)} %</b></div>`).join("")}</div>`
+    + tablaHtml(["Parte", "Quieres", "Trabajando ahora", "Por qué"], AREAS_R.map(k => [{texto: AREA_NOMBRE[k], color: COL[k]},
+      `${NF0.format((ob.pct || {})[k] || 0)} % (${fmt.n((ob.usd || {})[k] || 0)} $)`, fmt.dinero(rep[k] || 0), porque(k)]), [1, 2])
+    + (parado < 0 ? `<p class="d-sub" style="color:#ff5a76">Hay más dinero en uso que en el fondo: mete más o baja el reparto.</p>` : "");
   $("#cReparto .d-graf").querySelectorAll(".d-reparto div").forEach(d => {
-    const n = AREAS_R.find(x => x[0] === d.dataset.k)[1];
-    d.addEventListener("pointermove", ev => tip(ev, `<div class="t">${esc(d.parentElement.dataset.etq)}</div>` + filaTip(COL[d.dataset.k], `${fmt.dinero(+d.dataset.v)} · ${NF1.format(+d.dataset.p)} %`, n)));
+    d.addEventListener("pointermove", ev => tip(ev, `<div class="t">Ahora</div>` + filaTip(COL[d.dataset.k], `${fmt.dinero(+d.dataset.v)} · ${NF1.format(+d.dataset.v / total * 100)} %`, AREA_NOMBRE[d.dataset.k])));
     d.addEventListener("pointerleave", ev => tip(ev, null));
   });
   pintarEditor();
-  // 6) exposición
+  // 6) cómo les va a los traders
+  const O = F.operaciones, ganadas = O.aciertos_pct == null ? 0 : Math.round(O.cerradas * O.aciertos_pct / 100);
+  $("#sOps").innerHTML = O.cerradas ? `Han cerrado <b>${fmt.n(O.cerradas)}</b> operaciones: ${ganadas} ganaron y ${O.cerradas - ganadas} perdieron.`
+    + (O.factor_beneficio != null ? ` Por cada 1 $ perdido han ganado <b>${NF2.format(O.factor_beneficio)} $</b>: ${O.factor_beneficio >= 1 ? "ganan más de lo que pierden" : "de momento pierden algo más de lo que ganan"}.` : "")
+    : "Todavía no se ha cerrado ninguna operación.";
+  const st = (t, v, e) => `<div><small>${esc(t)}</small><b>${v}</b>${e ? `<small>${esc(e)}</small>` : ""}</div>`;
+  $("#cOps .d-graf").innerHTML = `<div class="d-stats">${[st("Aciertan", O.aciertos_pct == null ? "—" : NF0.format(O.aciertos_pct) + " %", "de las operaciones"),
+    st("Ganan por cada 1 $ perdido", O.factor_beneficio == null ? "—" : NF2.format(O.factor_beneficio) + " $", "más de 1 $ es bueno"), st("De media", signoD(O.media || 0), "por operación"),
+    st("La mejor", signoD(O.mejor || 0)), st("La peor", signoD(O.peor || 0)), st("Comisiones", fmt.dinero(O.comisiones), "pagadas al exchange")].join("")}</div>`;
+  // 7) operaciones abiertas
+  const ab = F.abiertas || [];
+  $("#cAbiertas .d-graf").innerHTML = ab.length ? tablaHtml(["Estrategia", "Sala", "Moneda", "Apuesta", "Invertido", "Va", "Entró a", "Stop", "Objetivo", "Desde"],
+    ab.map(p => [p.id, p.grupo === "scalping" ? "Scalping" : "Trading", moneda(p.simbolo), p.direccion === "largo" ? "a que sube ▲" : "a que baja ▼", fmt.dinero(p.nocional),
+      {texto: pctF(p.retorno_pct), clase: claseF(p.retorno_pct)}, fmt.precio(p.entrada), p.stop ? fmt.precio(p.stop) : "—", p.objetivo ? fmt.precio(p.objetivo) : "—", fechaF(Date.parse(p.entrada_t))]), [4, 5, 6, 7, 8])
+    : `<p class="vacio">Ahora mismo no hay nada abierto: los traders esperan a que se cumplan sus condiciones para entrar.</p>`;
+  // ---- para expertos ----
+  const kpi = (t, v, e) => `<div class="d-kpi"><small>${esc(t)}</small><b>${v}</b><p>${esc(e)}</p></div>`;
+  const mc = F.montecarlo;
+  $("#dKpis").innerHTML = [
+    kpi("Valor liquidativo", NF2.format(vivo ? vivo.vl : R.vl) + " $", `Lo que vale una participación. Empezó en ${NF2.format(R.vl_inicial || 10)} $: si sube, el fondo gana.`),
+    kpi("Participaciones", fmt.n(R.participaciones), "Las partes en que está dividido tu fondo. Al meter dinero compras más; al sacarlo, vendes."),
+    kpi("Rentabilidad anualizada", pctF(M.anualizada_pct), M.anualizada_pct == null ? "Lo que ganarías en un año a este ritmo. Se calcula a partir de 30 días." : "Lo que ganarías en un año a este ritmo (no es una promesa)."),
+    kpi("Volatilidad anual", M.volatilidad_pct == null ? "—" : NF1.format(M.volatilidad_pct) + " %", "Cuánto sube y baja el fondo. Cuanto más baja, más tranquilo."),
+    kpi("Ratio de Sharpe", M.sharpe == null ? "—" : NF2.format(M.sharpe), "Ganancia por cada unidad de sustos. Más de 1 es bueno; más de 2, muy bueno."),
+    kpi("Ratio de Sortino", M.sortino == null ? "—" : NF2.format(M.sortino), "Como el Sharpe, pero solo cuenta las bajadas."),
+    kpi("Caída máxima", pctF(M.caida_max_pct), "Lo más que ha llegado a bajar desde un máximo."),
+    kpi("Días en positivo", M.dias_positivos_pct == null ? "—" : NF0.format(M.dias_positivos_pct) + " %", `De los días que lleva el fondo, los que acabaron ganando.`),
+    kpi("Probabilidad de perder en 30 días", mc ? NF0.format(mc.prob_perdida_pct) + " %" : "—", mc ? `Según ${fmt.n(mc.simulaciones)} simulaciones con los días pasados (equipo Quant).` : "Hacen falta 10 días de historia."),
+  ].join("");
+  const gC = $("#cCaida .d-graf");
+  gC.innerHTML = conTabla("caida", "<div class='g'></div>", tablaHtml(["Día", "Caída"], diarias.map(({i}) => [diaF(ms[i]), pctF(filas[i][cols.caida_pct])]).reverse(), [1]));
+  if (!tablasAbiertas.has("caida")) lineasSvg(gC.querySelector(".g"), [{nombre: "Caída", color: COL.malo, puntos: filas.map((f, i) => [ms[i], f[cols.caida_pct]])}], {formato: pctF, area: true, cero: true, alto: 190, minimo: .5});
   const expo = F.exposicion || [], maxE = Math.max(1, ...expo.map(e => Math.max(e.largo, e.corto)));
   $("#cExpo .d-graf").innerHTML = expo.length ? `<div class="d-expo">${expo.map(e => `<span>${esc(moneda(e.simbolo))}</span>
       <div class="izq">${e.corto ? `<small>${fmt.n(e.corto)} $</small><div class="barra" style="width:${e.corto / maxE * 80}%"></div>` : ""}</div>
-      <div class="der">${e.largo ? `<div class="barra" style="width:${e.largo / maxE * 80}%"></div><small>${fmt.n(e.largo)} $</small>` : ""}</div>`).join("")}</div>
-    <p class="d-sub" style="margin-top:10px">Incluye las posiciones abiertas de los traders y las monedas del holding.</p>`
-    : `<p class="vacio">Ahora mismo no hay dinero en posiciones abiertas.</p>`;
-  // 7) meses
-  const meses = F.mensual || [], anios = [...new Set(meses.map(m => m[0]))];
-  const NOMBRES_MES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-  $("#cMeses .d-graf").innerHTML = meses.length ? `<div class="d-scroll"><table class="d-tabla d-meses"><thead><tr><th>Año</th>${NOMBRES_MES.map(n => `<th class="num">${n}</th>`).join("")}</tr></thead><tbody>${anios.map(a => `<tr><td>${a}</td>${NOMBRES_MES.map((_, k) => {
-      const x = meses.find(m => m[0] === a && m[1] === k + 1);
-      if (!x) return "<td></td>";
-      const fuerza = Math.min(1, Math.abs(x[2]) / 5) * .75 + .2;
-      return `<td class="celda" style="background:${rgba(x[2] >= 0 ? COL.bueno : COL.malo, fuerza)}">${esc(pctF(x[2]))}</td>`;
-    }).join("")}</tr>`).join("")}</tbody></table></div>` : `<p class="vacio">Aún no hay meses.</p>`;
-  // 8) operaciones
-  const O = F.operaciones;
-  const st = (t, v) => `<div><small>${esc(t)}</small><b>${v}</b></div>`;
-  $("#cOps .d-graf").innerHTML = `<div class="d-stats">${[st("Cerradas", fmt.n(O.cerradas)), st("Acierto", O.aciertos_pct == null ? "—" : NF1.format(O.aciertos_pct) + " %"),
-    st("Factor de beneficio", O.factor_beneficio == null ? "—" : NF2.format(O.factor_beneficio)), st("Media por operación", dineroF(O.media)),
-    st("Mejor", dineroF(O.mejor)), st("Peor", dineroF(O.peor))].join("")}</div>
-    <p class="d-sub" style="margin-top:10px">Coste por operación (ida y vuelta): ${NF2.format(O.coste_ida_vuelta_pct)} % en trading, ${NF2.format(O.coste_scalping_pct)} % en scalping. Comisiones pagadas: ${fmt.dinero(O.comisiones)}.</p>`;
-  // 9) posiciones abiertas
-  const ab = F.abiertas || [];
-  $("#cAbiertas .d-graf").innerHTML = ab.length ? tablaHtml(["Estrategia", "Sala", "Activo", "Lado", "Entrada", "Desde", "Invertido", "Ahora", "Stop", "Objetivo"],
-    ab.map(p => [p.id, p.grupo === "scalping" ? "Scalping" : "Trading", moneda(p.simbolo), ladoTxt(p.direccion), fmt.precio(p.entrada), fechaF(Date.parse(p.entrada_t)),
-      fmt.dinero(p.nocional), {texto: pctF(p.retorno_pct), clase: claseF(p.retorno_pct)}, p.stop ? fmt.precio(p.stop) : "—", p.objetivo ? fmt.precio(p.objetivo) : "—"]), [4, 6, 7, 8, 9])
-    : `<p class="vacio">No hay posiciones abiertas: los traders esperan a que se cumplan sus condiciones.</p>`;
-  // 10) ranking
+      <div class="der">${e.largo ? `<div class="barra" style="width:${e.largo / maxE * 80}%"></div><small>${fmt.n(e.largo)} $</small>` : ""}</div>`).join("")}</div>`
+    : `<p class="vacio">Ahora mismo no hay dinero en operaciones abiertas.</p>`;
+  const meses = F.mensual || [], NOMBRES_MES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  $("#cMeses .d-graf").innerHTML = meses.length ? tablaHtml(["Mes", "Rentabilidad"], [...meses].reverse().map(m => [`${NOMBRES_MES[m[1] - 1]} de ${m[0]}`, {texto: pctF(m[2]), clase: claseF(m[2])}]), [1])
+    : `<p class="vacio">Aún no hay meses.</p>`;
+  $("#cMovs .d-graf").innerHTML = tablaHtml(["Fecha", "Qué", "Importe", "Participaciones"], (F.movimientos || []).map(m => [
+    new Date(m.t).toLocaleDateString("es-ES"), m.tipo === "aportacion" ? (m.nota === "capital inicial" ? "Dinero inicial" : m.nota || "Metiste") : "Sacaste",
+    {texto: (m.tipo === "aportacion" ? "+" : "−") + fmt.dinero(m.importe), clase: m.tipo === "aportacion" ? "sube" : "baja"}, m.participaciones ? fmt.n(m.participaciones) : "—"]), [2, 3]);
+  // ---- todas las estrategias y operaciones ----
   const rk = [...(F.mejores || []), ...(F.peores || []).filter(x => !(F.mejores || []).some(y => y.id === x.id))];
-  $("#cRanking .d-graf").innerHTML = rk.length ? tablaHtml(["Estrategia", "Sala", "Activo", "Operaciones", "Resultado"],
-    rk.map(r => [r.id, r.grupo === "scalping" ? "Scalping" : "Trading", `${moneda(r.simbolo)} ${ladoTxt(r.direccion)}`, r.operaciones, {texto: dineroF(r.resultado), clase: claseF(r.resultado)}]), [3, 4])
+  $("#cRanking .d-graf").innerHTML = rk.length ? tablaHtml(["Estrategia", "Sala", "Moneda", "Apuesta", "Operaciones", "Resultado"],
+    rk.map(r => [r.id, r.grupo === "scalping" ? "Scalping" : "Trading", moneda(r.simbolo), r.direccion === "largo" ? "a que sube" : "a que baja", r.operaciones, {texto: signoD(r.resultado), clase: claseS(r.resultado)}]), [4, 5])
     : `<p class="vacio">Todavía no hay estrategias operando.</p>`;
-  // 11) movimientos
-  $("#cMovs .d-graf").innerHTML = tablaHtml(["Fecha", "Movimiento", "Importe", "VL", "Participaciones"], (F.movimientos || []).map(m => [
-    new Date(m.t).toLocaleDateString("es-ES"), m.tipo === "aportacion" ? (m.nota || "Aportación") : "Reembolso",
-    {texto: (m.tipo === "aportacion" ? "+" : "−") + fmt.dinero(m.importe), clase: m.tipo === "aportacion" ? "sube" : "baja"}, m.vl ? NF2.format(m.vl) : "—", m.participaciones ? fmt.n(m.participaciones) : "—"]), [2, 3, 4]);
-  // 12) últimas operaciones
   const ul = F.ultimas || [];
-  $("#cUltimas .d-graf").innerHTML = ul.length ? tablaHtml(["Cierre", "Estrategia", "Sala", "Activo", "Lado", "Entrada", "Salida", "Motivo", "Resultado"],
-    ul.map(o => [fechaF(Date.parse(o.salida_t)), o.id, o.grupo === "scalping" ? "Scalping" : "Trading", moneda(o.simbolo), ladoTxt(o.direccion), fmt.precio(o.entrada), fmt.precio(o.salida), o.motivo,
-      {texto: pctF(o.retorno_pct), clase: claseF(o.retorno_pct)}]), [5, 6, 8])
+  $("#cUltimas .d-graf").innerHTML = ul.length ? tablaHtml(["Cierre", "Estrategia", "Sala", "Moneda", "Apuesta", "Entró a", "Salió a", "Por qué cerró", "Resultado"],
+    ul.map(o => [fechaF(Date.parse(o.salida_t)), o.id, o.grupo === "scalping" ? "Scalping" : "Trading", moneda(o.simbolo), o.direccion === "largo" ? "a que sube" : "a que baja",
+      fmt.precio(o.entrada), fmt.precio(o.salida), MOTIVO_TXT[o.motivo] || o.motivo, {texto: pctF(o.retorno_pct), clase: claseF(o.retorno_pct)}]), [5, 6, 8])
     : `<p class="vacio">Todavía no se ha cerrado ninguna operación.</p>`;
 }
+document.querySelectorAll("#dash details").forEach(d => d.addEventListener("toggle", () => { if (d.open && F) pintarFondo(); }));   // las gráficas plegadas se dibujan al abrirlas
 
 // ============================================ PLANTA 1, BOTONERA Y PESTAÑAS NUEVAS ==
 document.querySelectorAll("#plantas [data-planta]").forEach(b => b.addEventListener("click", () => { cambiarPlanta(+b.dataset.planta); if (!cam.tocada) encuadrar(); }));

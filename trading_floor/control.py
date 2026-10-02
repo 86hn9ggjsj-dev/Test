@@ -232,10 +232,9 @@ def _aplicar(propuesta: dict) -> str:
         fondo.mover("aportacion" if accion == "aportar" else "reembolso", importe, liquidez)
         m = fondo.calcular(completo=False)["resumen"]
         _repartir({a: v for a, v in fondo.reparto().items() if a in fondo.AREAS})   # se mantiene tu reparto en %
-        hecho = (f"{'Aportados' if accion == 'aportar' else 'Retirados'} {_dinero(importe)} $ ficticios "
-                 f"{'al' if accion == 'aportar' else 'del'} fondo. Patrimonio: {_dinero(m['patrimonio'])} $; "
-                 f"valor liquidativo: {_dinero(m['vl'], 4)} $ por participación. El capital de cada área se "
-                 "ha reajustado para mantener tu reparto.")
+        hecho = (f"{'Has metido' if accion == 'aportar' else 'Has sacado'} {_dinero(importe)} $ ficticios. Ahora el fondo "
+                 f"tiene {_dinero(m['patrimonio'])} $; lo que habías ganado no cambia. Cada área se ha reajustado "
+                 "para mantener tu reparto.")
     else:  # convocar_comite: lo hace la oficina al recibir la decisión
         hecho = "Comité convocado."
     c["decisiones"] = ([{"t": dt.datetime.now().astimezone().isoformat(timespec="seconds"), "accion": accion,

@@ -147,7 +147,7 @@ Telegram de Jarvis, si lo tienes configurado.
    Al cambiarlo, cada área opera con su capital nuevo **desde ese momento** y lo ganado antes se conserva
    (el resultado de cada trader se calcula por tramos de capital; las carteras de holding reciben o
    devuelven capital, y si les falta efectivo venden lo justo). Al aportar o retirar dinero se reajusta
-   solo para mantener tus %. Se cambia en «Mi fondo» → «Cambiar el reparto» o por el chat («dedica un
+   solo para mantener tus %. Se cambia en «Mi fondo» → «Cómo quieres repartirlo» o por el chat («dedica un
    20 % al holding»).
 11. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
    (Yahoo Finance) y el Fear & Greed de cripto (alternative.me). Con ellos se calcula un régimen
@@ -158,11 +158,19 @@ fuera de muestra y 3 entraron en el banco. Así es esto: casi todo es ruido.
 
 ## La oficina
 
-Arriba a la izquierda eliges la vista: **🏢 Oficina** o **📊 Mi fondo**, tu dashboard personal con
-todas las gráficas y los datos del fondo (rentabilidad frente a BTC, caída desde el máximo, resultado
-por área, rentabilidad de cada día y de cada mes, dónde está tu dinero, exposición por activo,
-operaciones, posiciones abiertas, mejores y peores estrategias, últimas operaciones y aportaciones).
-Cada gráfica tiene su «tabla de datos» y el filtro de periodo (7, 30, 90 días o todo) está encima.
+Arriba a la izquierda eliges la vista: **🏢 Oficina** o **📊 Mi fondo**, tu dashboard personal, explicado
+en castellano llano:
+- Arriba, cuánto tienes y una frase: cuánto has puesto, cuánto has ganado o perdido y cuánto llevas hoy.
+- Cinco respuestas cortas: **¿ganas o pierdes?**, **¿mejor que comprar BTC?**, **¿está trabajando tu
+  dinero?** (cuánto está invertido y cuánto espera en mesas vacías), **¿qué parte va mejor?** y
+  **¿cuánto riesgo corres?**
+- Las gráficas del periodo que elijas (7, 30, 90 días o desde el principio): cuánto has ganado, qué parte
+  del fondo gana y cuál pierde, tu fondo frente a BTC, días buenos y malos, dónde está tu dinero (con el
+  editor del reparto), cómo les va a los traders y las operaciones abiertas. Cada gráfica tiene su «tabla
+  de datos».
+- Plegado, «Para expertos» (valor liquidativo, participaciones, Sharpe, Sortino, volatilidad, caída
+  máxima, probabilidad de perder en 30 días… cada uno con una frase que lo explica, más la caída desde el
+  máximo, las monedas, los meses y lo que has metido y sacado) y todas las estrategias y operaciones.
 
 Todo lo que pasa en la oficina sale del estado real: los cubos de la cinta son estrategias
 pasando pruebas, los lingotes de la cámara son las estrategias del banco, las pantallas de los

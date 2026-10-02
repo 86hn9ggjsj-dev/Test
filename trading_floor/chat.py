@@ -335,18 +335,18 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                              + "? Se aplica desde ahora y lo ganado hasta hoy se conserva; lo que no se asigna queda como liquidez.",
                     _propuesta("asignar", f"Dedicar un {_es(numero, False)} % del fondo al {area}", area, numero))
     if numero is not None and re.search(r"\baport|\bmete|\bingres|\bdeposit", t):
-        return dice("Marta", f"¿Aporto {_es(numero, False)} $ ficticios a tu fondo? Recibirás participaciones al valor liquidativo de ahora.",
+        return dice("Marta", f"¿Meto {_es(numero, False)} $ ficticios en tu fondo? Lo que ya has ganado no cambia: solo tendrás más dinero invertido.",
                     _propuesta("aportar", f"Aportar {_es(numero, False)} $ al fondo", valor=numero))
     if numero is not None and re.search(r"\bretir|\bsaca|\breembols", t) and "repetid" not in t:
-        return dice("Marta", f"¿Retiro {_es(numero, False)} $ ficticios del fondo? Solo se puede retirar la liquidez que no está invertida.",
+        return dice("Marta", f"¿Saco {_es(numero, False)} $ ficticios del fondo? Solo se puede sacar el dinero que no está invertido.",
                     _propuesta("retirar", f"Retirar {_es(numero, False)} $ del fondo", valor=numero))
     if "fondo" in t or "rentabilidad" in t or "valor liquidativo" in t:
         f = E.get("fondo") or {}
         if not f:
             return dice("Marta", "El fondo todavía se está calculando. Dame un momento.")
-        return dice("Marta", f"Tu fondo vale {_precio(f['patrimonio'])} $ de {_precio(f['aportado'])} $ aportados: "
-                             f"{_es(f['rentabilidad_pct'])} % desde el inicio y {_es(f['hoy_pct'])} % hoy. Valor liquidativo: "
-                             f"{_precio(f['vl'])} $ por participación. Tienes todos los detalles en la pestaña «Mi fondo».")
+        return dice("Marta", f"Has puesto {_precio(f['aportado'])} $ y tu fondo vale {_precio(f['patrimonio'])} $: "
+                             f"{_es(f['rentabilidad_pct'])} % desde el inicio y {_es(f['hoy_pct'])} % hoy. Lo tienes todo, explicado, "
+                             "en «📊 Mi fondo».")
     if re.search(r"repetid|duplicad", t) and re.search(r"quit|limpi|elimin|borr|retir|fuera", t):
         return dice("Irene", "Propongo retirar las estrategias repetidas (misma idea con otros números). De cada grupo me quedo "
                              "con la que mejor lo hizo fuera de muestra.", _propuesta("limpiar_repetidas", "Retirar las estrategias repetidas"))
