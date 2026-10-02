@@ -245,8 +245,12 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
   **Esc** suelta el ratón y «✕ Salir del paseo» (o P) vuelve a la vista de siempre, justo donde estabas.
   La escena 3D se construye sola a partir de la oficina isométrica: las mismas mesas, tabiques, carteles y
   pantallas (con los datos en vivo), la misma gente con sus bocadillos, el gato, el robot, el holograma, la
-  piscina, la fogata, el cielo según la hora y la ciudad alrededor. En el móvil se anda con el pulgar
-  izquierdo y se mira con el derecho. Usa [Three.js](https://threejs.org) (licencia MIT, incluido en
+  piscina, la fogata, el cielo según la hora y la ciudad alrededor. Tiene luz realista: materiales que
+  reaccionan a la luz, sombras suaves bajo mesas, sillas y personas, reflejos en suelos y cristales, y techo
+  de placas con luces empotradas. Las personas tienen cuerpo redondeado, cara, manos, pelo y los accesorios
+  de su puesto. La calidad de los gráficos es automática: si el ordenador va justo, baja sola (primero
+  sombras más sencillas y luego sin sombras). Con **G** o el botón «Gráficos» se elige alta, media o baja. En
+  el móvil se anda con el pulgar izquierdo y se mira con el derecho. Usa [Three.js](https://threejs.org) (licencia MIT, incluido en
   `web/vendor/`, así que funciona sin Internet).
 - 🎬 activa el **modo cine**: la cámara recorre las salas y persigue lo que va pasando.
 - ◐ cambia entre día, noche y automático (según tu hora).
