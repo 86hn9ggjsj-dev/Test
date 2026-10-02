@@ -746,7 +746,9 @@ function shade(hex, f) {
   const k = hex + f;
   let r = tonos.get(k);
   if (r) return r;
-  const n = parseInt(hex.slice(1), 16);
+  let h = hex.slice(1);
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];   // "#666" es "#666666", no un azul marino
+  const n = parseInt(h, 16);
   let R = n >> 16, G = (n >> 8) & 255, B = n & 255;
   if (f >= 1) { R += (255 - R) * (f - 1); G += (255 - G) * (f - 1); B += (255 - B) * (f - 1); }
   else { R *= f; G *= f; B *= f; }
