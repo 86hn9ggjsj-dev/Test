@@ -124,14 +124,21 @@ def _resumen(pnl: list[pd.Series], traders: dict, retirados: dict) -> tuple[dict
     resultado = sum(t["resultado"] for t in traders.values()) + sum(r["resultado"] for r in retirados.values())
     zona = dt.datetime.now().astimezone().tzinfo
     medianoche = pd.Timestamp(dt.datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0))
-    curva, diarios, hoy = [], [], 0.0
+    curva, diarios, hoy, tramos = [], [], 0.0, {}
     if pnl:
         total = pd.concat(pnl, axis=1).sort_index().ffill().fillna(0).sum(axis=1)
         antes = total[total.index <= medianoche]
         hoy = float(total.iloc[-1] - (antes.iloc[-1] if len(antes) else 0.0))
+        # resultado de las últimas 24 horas, 7 días y 30 días (si hay menos historia, desde el principio)
+        ahora = pd.Timestamp.now(tz="UTC")
+        for horas in (24, 168, 720):
+            previo = total[total.index <= ahora - pd.Timedelta(hours=horas)]
+            v = float(total.iloc[-1] - previo.iloc[-1]) if len(previo) else resultado
+            tramos[str(horas)] = {"resultado": round(v, 2), "pct": round(v / inicial * 100, 3) if inicial else 0.0}
         local = total.copy()
         local.index = local.index.tz_convert(zona)
-        ultima = local.iloc[-24 * 30 :]
+        # un punto por hora (las velas de scalping son de 5 minutos): así 30 días son de verdad 30 días
+        ultima = local.resample("1h").last().ffill().iloc[-24 * 30 :]
         curva = [[t.isoformat(), round(float(v), 2)] for t, v in ultima.items()]
         por_dia = local.resample("1D").last().ffill()
         cambio = por_dia.diff()
@@ -144,6 +151,7 @@ def _resumen(pnl: list[pd.Series], traders: dict, retirados: dict) -> tuple[dict
         "resultado_pct": round(resultado / inicial * 100, 3) if inicial else 0.0,
         "hoy": round(hoy, 2),
         "hoy_pct": round(hoy / inicial * 100, 3) if inicial else 0.0,
+        "tramos": tramos,
     }
     return resumen, curva, diarios
 

@@ -261,7 +261,7 @@ h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--suav
 #resultados.plegado{transform:translateY(calc(100% - 44px))}
 #resultados .cab{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 #resultados .cab span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--suave);font-weight:700}
-#resultados .cab button{background:none;border:1px solid var(--borde);border-radius:8px;width:26px;height:26px;cursor:pointer;color:var(--suave)}
+#resultados .cab > button{background:none;border:1px solid var(--borde);border-radius:8px;width:26px;height:26px;cursor:pointer;color:var(--suave)}
 .gordo{font:800 34px/1.05 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums;text-shadow:0 0 30px currentColor}
 .gordo small{font-size:15px;font-weight:700;margin-left:8px;text-shadow:none;opacity:.9}
 .fila-hoy{display:flex;gap:10px;align-items:center;margin:8px 0 10px}
@@ -550,7 +550,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p class="nota">Cada estrategia pasa las pruebas en orden y se descarta en la primera que falla. Por eso casi ninguna llega al final: si pruebas miles al azar, muchas parecen buenas por pura suerte.</p></section>
   <section class="pagina" id="p-traders">
     <div style="display:flex;align-items:center;margin-bottom:8px"><h3 style="margin:0">Resultado acumulado</h3>
-      <div class="rangos" data-grafica="panel"><button data-r="24">24H</button><button data-r="168" class="activo">7D</button><button data-r="720">30D</button></div></div>
+      <div class="rangos" data-grafica="panel"><button data-r="24">24H</button><button data-r="168" class="activo">7D</button><button data-r="720">30D</button><button data-r="0" title="Desde el principio">TODO</button></div></div>
     <canvas class="grafica" id="gPanel" height="170"></canvas>
     <h3 style="margin-top:14px">Resultado por día</h3>
     <canvas class="grafica" id="gDias" height="96"></canvas>
@@ -625,8 +625,8 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
   <button type="button" data-b="kill" class="peligro" title="Kill switch: cerrar ya todas las posiciones abiertas del fondo y pausar">⛔ <span>Kill switch</span></button>
 </nav>
 <section id="resultados">
-  <div class="cab"><span>Traders · resultado en papel</span>
-    <div class="rangos" data-grafica="tarjeta"><button data-r="24">24H</button><button data-r="168" class="activo">7D</button><button data-r="720">30D</button></div>
+  <div class="cab"><span title="Resultado de los traders en papel (dinero ficticio)">Traders</span>
+    <div class="rangos" data-grafica="tarjeta"><button data-r="24" title="Últimas 24 horas">24H</button><button data-r="168" class="activo" title="Últimos 7 días">7D</button><button data-r="720" title="Últimos 30 días">30D</button><button data-r="0" title="Desde el principio">TODO</button></div>
     <button id="plegarRes" title="Plegar" style="margin-left:6px">▾</button></div>
   <div class="gordo" id="rTotal">—</div>
   <div class="fila-hoy"><span class="chip" id="rHoy"><em>HOY</em>—</span><span class="chip" id="rPatr"><em>PATRIMONIO</em>—</span></div>
@@ -4084,7 +4084,8 @@ function actualizarRiesgo() {
 }
 
 // ============================================== GRÁFICAS Y NÚMEROS ====
-const rango = {tarjeta: 168, panel: 168};
+const rango = {tarjeta: 168, panel: 168};   // horas que enseña cada gráfica (0 = desde el principio)
+const NOMBRE_RANGO = {24: "en 24 h", 168: "en 7 días", 720: "en 30 días", 0: "en total"};
 function prepararLienzo(cv) {
   if (!cv.dataset.h) cv.dataset.h = cv.getAttribute("height");
   const w = cv.clientWidth, h = +cv.dataset.h, r = Math.min(devicePixelRatio || 1, 2);
@@ -4095,9 +4096,18 @@ function prepararLienzo(cv) {
   return [g, w, h];
 }
 function fechaCorta(iso) { return new Date(iso).toLocaleString("es-ES", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}); }
+/** Puntos de la curva de las últimas `horas` horas (0 = desde el principio), contados desde el inicio del tramo:
+ *  así la gráfica sube en verde si en ese periodo se ha ganado, igual que el número grande de la tarjeta. */
+function tramoCurva(puntos, horas) {
+  if (!horas) return puntos;
+  const desde = Date.now() - horas * 3600e3, i = puntos.findIndex(p => Date.parse(p[0]) >= desde);
+  const tramo = i < 0 ? puntos.slice(-1) : puntos.slice(Math.max(0, i - 1));
+  const base = i > 0 ? tramo[0][1] : 0;   // si la historia es más corta que el tramo, desde cero
+  return tramo.map(([t, v]) => [t, v - base]);
+}
 function dibujarCurva(cv, puntos, horas) {
   const l = prepararLienzo(cv); if (!l) return;
-  const [g, w, h] = l, datos = puntos.slice(-horas);
+  const [g, w, h] = l, datos = tramoCurva(puntos, horas);
   if (datos.length < 2) {
     g.fillStyle = "#6f7a8c"; g.font = "600 12px Inter, sans-serif"; g.textAlign = "center";
     g.fillText("La curva aparecerá cuando los traders lleven un rato operando", w / 2, h / 2); return;
@@ -4187,7 +4197,12 @@ function actualizarResultados() {
       animar(kr, t.resultado, x => `${dineroS(x)}<small>${pctS(t.pct)}</small>`);
       animar(kh, t.hoy, x => `${dineroS(x)}<small>${pctS(t.hoyPct)}</small>`);
     }
-    animar(rt, t.resultado, x => `${dineroS(x)}<small>${pctS(t.pct)}</small>`);
+    // el número grande es el resultado del periodo elegido (24 h, 7 días, 30 días o desde el principio)
+    const tr = rango.tarjeta && papel.resumen && papel.resumen.tramos && papel.resumen.tramos[rango.tarjeta];
+    const vr = tr ? tr.resultado : t.resultado, pr = tr ? tr.pct : t.pct, en = tr ? NOMBRE_RANGO[rango.tarjeta] : "en total";
+    rt.className = "gordo " + clase(vr);
+    rt.title = `Resultado de los traders ${en} (con lo que ganaron o perdieron las estrategias ya retiradas)`;
+    animar(rt, vr, x => `${dineroS(x)}<small>${pctS(pr)} ${en}</small>`);
     animar(rh, t.hoy, x => `<em>HOY</em>${dineroS(x)} · ${pctS(t.hoyPct)}`);
     animar($("#rPatr"), t.patrimonio, x => `<em>PATRIMONIO</em>${fmt.n(x)} $`);
   } else {
@@ -4444,6 +4459,7 @@ function aplicarVivo(E) {
   if (r && r.inicial) {
     r.patrimonio += delta; r.resultado += delta; r.hoy += delta;
     r.resultado_pct = r.resultado / r.inicial * 100; r.hoy_pct = r.hoy / r.inicial * 100;
+    for (const t of Object.values(r.tramos || {})) { t.resultado += delta; t.pct = t.resultado / r.inicial * 100; }   // 24 h, 7 y 30 días
     if (papel.curva && papel.curva.length) papel.curva = [...papel.curva, [new Date().toISOString(), r.resultado]];
   }
   const hs = E.holding;
