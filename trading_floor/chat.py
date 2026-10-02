@@ -45,6 +45,8 @@ PLANTILLA = {
     "Paula": "holding de BTC y ETH",
     "Íñigo": "holding de SOL y gestión de la reserva de capital",
     "Diego": "supervisor del holding",
+    "Marina": "sala de tendencia (en la sala de holding): sigue la tendencia de BTC, ETH y SOL con velas diarias",
+    "Vicente": "sala de tendencia (en la sala de holding): sigue la tendencia de BNB, XRP y DOGE con velas diarias",
     "Clara": "supervisora de la sala de trading: vigila el periodo de prueba de cada trader y cambia las estrategias que no son rentables",
     "Álex": "supervisor de la sala de scalping: vigila el periodo de prueba de cada scalper y cambia las estrategias que no son rentables",
     "Lorena": "supervisora de la incubadora (planta 1): examina a las estrategias nuevas con dinero de prueba",
@@ -86,7 +88,15 @@ recorrer la oficina en primera persona, en 3D, con el botón «🚶 Pasear» o l
 mirar, E para ver la ficha de alguien o coger el ascensor). Botones de \
 emergencia: «Pausar todo» (freno manual), «Reabrir» y «Kill switch» (cierra ya todo lo abierto del fondo). \
 Todo forma parte del FONDO del jefe: él aporta capital ficticio y recibe participaciones; el valor liquidativo \
-(VL) sube o baja con los resultados de trading, scalping y holding. Lo que no está asignado es liquidez. Hay control de riesgos, una sala de holding a largo plazo (BTC, ETH, SOL) con un plan \
+(VL) sube o baja con los resultados de trading, scalping, holding y tendencia. Lo que no está asignado es liquidez. \
+SALA DE TENDENCIA (Marina y Vicente, sentados en la sala de holding): reglas fijas y clásicas con velas diarias, no minadas. \
+Su presupuesto (el % de tendencia del reparto) se reparte a partes iguales entre BTC, ETH, SOL, BNB, XRP y DOGE, y cada moneda \
+tiene dos mitades: la «media» está dentro mientras el cierre diario esté por encima de su media de 50 días; la «ruptura» \
+entra al superar el máximo de los 20 días anteriores y sale al perder el mínimo de los 10 días anteriores. Solo compra, sin \
+cortos ni apalancamiento; lo que no está invertido espera en efectivo. Con 5 años de datos reales (2021-2026), seguir la \
+tendencia ganó más que comprar y mantener y con caídas mucho menores, mientras que las estrategias minadas de la sala de \
+trading apenas tenían ventaja tras las comisiones (pierden de media en los meses siguientes; la incubadora y el supervisor \
+limitan el daño). Nada de esto es una garantía. Hay control de riesgos, una sala de holding a largo plazo (BTC, ETH, SOL) con un plan \
 adaptativo SIN stop loss (promedia a la baja cada cierto % de caída, usa una reserva de capital si se acaba \
 el presupuesto y vende por partes en puntos de salida sobre el coste medio), y una sala de macroeconomía. Nunca se envía ninguna orden a ningún exchange.
 
@@ -114,8 +124,8 @@ cambiar_riesgo, "objetivo" es uno de estos límites y "valor" el nuevo valor:
 que tengan mesas libres, y "tipo" es "scalping" si es para la sala de scalping (velas de 5 minutos; solo BTC, \
 ETH y SOL) o "" para la sala de trading. En el resto de acciones, "tipo" es "".
   Para aportar o retirar: "valor" es el importe en dólares ficticios.
-  Para asignar: "objetivo" es el área (trading, scalping u holding) y "valor" el % del fondo que se le dedica \
-(el reparto actual está en «fondo.reparto»; lo que no se asigna es liquidez y entre las tres no pueden pasar del 100 %).
+  Para asignar: "objetivo" es el área (trading, scalping, holding o tendencia) y "valor" el % del fondo que se le dedica \
+(el reparto actual está en «fondo.reparto»; lo que no se asigna es liquidez y entre las cuatro no pueden pasar del 100 %).
   Para nuevo_plan_holding: "objetivo" es el activo (BTC, ETH, SOL...), "valor" el presupuesto en dólares \
 ficticios, "paso" el % de caída desde la última compra para volver a comprar, "tramo" el tamaño de cada \
 compra en % del presupuesto, "reserva" el capital extra en % del presupuesto y "salidas" los puntos de salida \
@@ -217,6 +227,13 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
         "banco": [{"id": b["id"], "activo": b["estrategia"]["simbolo"]} for b in E.get("banco", [])],
         "riesgo": riesgo,
         "holding": hold,
+        "tendencia": {"resumen": (E.get("tendencia") or {}).get("resumen"),
+                      "monedas": [{k: p.get(k) for k in ("simbolo", "peso", "precio", "media", "maximo", "minimo", "en_media", "en_ruptura",
+                                                         "invertido", "efectivo", "resultado", "resultado_pct")}
+                                  for p in ((E.get("tendencia") or {}).get("monedas") or {}).values()],
+                      "ultimas_operaciones": [{"moneda": s.replace("USDT", ""), **{k: o.get(k) for k in ("t", "tipo", "precio", "importe", "motivo")}}
+                                              for s, p in ((E.get("tendencia") or {}).get("monedas") or {}).items()
+                                              for o in (p.get("operaciones") or [])[-2:]]},
         "macro": {"regimen": mac.get("regimen"), "explicacion": mac.get("explicacion"), "fear_greed": mac.get("fear_greed", {}) and
                   {k: mac["fear_greed"][k] for k in ("valor", "clase")},
                   "indicadores": {i["nombre"]: [i["valor"], i["dia_pct"]] for i in (mac.get("indicadores") or {}).values()}},
@@ -326,14 +343,15 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
 
     if re.search(r"miner|busqueda|mina\b", t) and re.search(r"paus|para|deten|cancel", t):
         return dice("Tomás", "Entendido. Si lo apruebas, paro la búsqueda al terminar la generación en curso.", _propuesta("parar_busqueda", "Parar la búsqueda de estrategias"))
-    area = next((a for a in ("holding", "scalping", "trading") if a in t), None)
+    area = next((a for a in ("tendencia", "holding", "scalping", "trading") if a in t), None)
     if numero is not None and area and ("%" in texto or re.search(r"\bdedic|\basign|\bpon\b|\bsube|\bbaja|\bporcentaje|\bpor ciento", t)):
         f = E.get("fondo") or {}
         actual = (f.get("reparto") or {}).get(area)
-        return dice("Marta", f"¿Dedico un {_es(numero, False)} % del fondo al {area}"
+        return dice("Marta", f"¿Dedico un {_es(numero, False)} % del fondo {'a la sala de tendencia' if area == 'tendencia' else 'al ' + area}"
                              + (f" (ahora tiene un {_es(actual, False)} %)" if actual is not None else "")
                              + "? Se aplica desde ahora y lo ganado hasta hoy se conserva; lo que no se asigna queda como liquidez.",
-                    _propuesta("asignar", f"Dedicar un {_es(numero, False)} % del fondo al {area}", area, numero))
+                    _propuesta("asignar", f"Dedicar un {_es(numero, False)} % del fondo {'a la sala de tendencia' if area == 'tendencia' else 'al ' + area}",
+                               area, numero))
     if numero is not None and re.search(r"\baport|\bmete|\bingres|\bdeposit", t):
         return dice("Marta", f"¿Meto {_es(numero, False)} $ ficticios en tu fondo? Lo que ya has ganado no cambia: solo tendrás más dinero invertido.",
                     _propuesta("aportar", f"Aportar {_es(numero, False)} $ al fondo", valor=numero))
@@ -431,6 +449,17 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         if ret:
             txt += f" La última: {ret[0]['id']} ({ret[0].get('motivo', '')})."
         return dice("Clara", txt)
+    if "tendencia" in t:
+        td = E.get("tendencia") or {}
+        if not td.get("monedas"):
+            return dice("Marina", "La sala de tendencia aún no tiene dinero. Ponle un % en «Mi fondo» (o dime «pon un 20 % en tendencia»): "
+                                  "compramos solo las monedas que suben (por encima de su media de 50 días o rompiendo su máximo de 20 días) "
+                                  "y nos apartamos cuando caen.")
+        rs = td.get("resumen") or {}
+        partes = [f"{p['simbolo'].replace('USDT', '')} {'todo dentro' if p['peso'] >= 1 else 'medio dentro' if p['peso'] > 0 else 'fuera'}"
+                  for p in td["monedas"].values()]
+        return dice("Marina", f"Tendencia: {_es(rs.get('resultado', 0))} $ ({_es(rs.get('resultado_pct', 0))} %). Ahora "
+                              + ", ".join(partes) + f". Invertido el {_es(rs.get('invertido_pct', 0), False)} %; el resto espera en efectivo.")
     if "holding" in t or "promedi" in t or "reserva" in t:
         planes = (E.get("holding") or {}).get("planes", {})
         if not planes:
@@ -496,7 +525,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
     return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «para la búsqueda», «quita las repetidas», "
                          "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?», "
-                         "«¿cómo va el holding?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
+                         "«¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 
 
 def responder(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> dict:

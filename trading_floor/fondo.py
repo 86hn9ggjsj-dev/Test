@@ -4,14 +4,15 @@ Funciona como un fondo de verdad:
 - Tú aportas capital y recibes participaciones. El valor liquidativo (VL) es lo que vale cada
   participación: patrimonio del fondo / participaciones. Aportar o retirar dinero no cambia el VL;
   solo lo mueven las ganancias y las pérdidas, así que la rentabilidad del VL es la del fondo.
-- El capital se reparte entre la sala de trading, la de scalping y las carteras de holding según el
-  reparto que elijas (en %); lo que no está asignado es liquidez. En trading y scalping, el % se divide
-  entre sus mesas (capital de cada trader); en holding es el presupuesto de las carteras. Al cambiar el
+- El capital se reparte entre la sala de trading, la de scalping, las carteras de holding y la sala de tendencia
+  según el reparto que elijas (en %); lo que no está asignado es liquidez. En trading y scalping, el % se divide
+  entre sus mesas (capital de cada trader); en holding y en tendencia es el presupuesto de sus carteras. Al cambiar el
   reparto, o al aportar o retirar dinero, el capital se reajusta desde ese momento: lo ganado antes se
   conserva.
 - Patrimonio = dinero aportado − dinero retirado + resultado de todas las áreas.
 
-Se calcula a partir de las curvas de resultado del paper trading (papel.py) y del holding (holding.py),
+Se calcula a partir de las curvas de resultado del paper trading (papel.py), del holding (holding.py) y de la
+sala de tendencia (tendencia.py),
 hora a hora desde el inicio del fondo, y se compara con haber comprado BTC el mismo día.
 Nunca toca dinero real.
 """
@@ -29,7 +30,7 @@ from . import almacen
 from .config import (CAPITAL_HOLDING, CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, FONDO_CAPITAL_INICIAL,
                      FONDO_VL_INICIAL, MESAS)
 
-AREAS = ("trading", "scalping", "holding")
+AREAS = ("trading", "scalping", "holding", "tendencia")
 _cerrojo = threading.RLock()
 _cache: dict = {"t": 0.0, "datos": None}
 
@@ -44,13 +45,13 @@ def _serie(puntos: list | None) -> pd.Series:
     return pd.Series([float(v) for _, v in puntos], index=pd.to_datetime([t for t, _ in puntos], utc=True)).sort_index()
 
 
-def _series_areas(papel: dict, holding: dict) -> dict[str, pd.Series]:
+def _series_areas(papel: dict, holding: dict, tendencia: dict | None = None) -> dict[str, pd.Series]:
     series = papel.get("series") or {}
     return {"trading": _serie(series.get("trading")), "scalping": _serie(series.get("scalping")),
-            "holding": _serie(holding.get("serie"))}
+            "holding": _serie(holding.get("serie")), "tendencia": _serie((tendencia or {}).get("serie"))}
 
 
-def cargar(papel: dict | None = None, holding: dict | None = None) -> dict:
+def cargar(papel: dict | None = None, holding: dict | None = None, tendencia: dict | None = None) -> dict:
     """Estado del fondo (inicio y movimientos). La primera vez se abre con el capital inicial, con fecha del
     primer resultado que haya (así la historia del fondo incluye lo que ya se ha operado)."""
     with _cerrojo:
@@ -59,13 +60,14 @@ def cargar(papel: dict | None = None, holding: dict | None = None) -> dict:
             return f
         papel = almacen.cargar("papel", {}) if papel is None else papel
         holding = almacen.cargar("holding", {}) if holding is None else holding
-        inicios = [s.index[0] for s in _series_areas(papel, holding).values() if len(s)]
+        tendencia = almacen.cargar("tendencia", {}) if tendencia is None else tendencia
+        inicios = [s.index[0] for s in _series_areas(papel, holding, tendencia).values() if len(s)]
         inicio = ((min(inicios) - pd.Timedelta(hours=1)) if inicios else pd.Timestamp.now(tz="UTC")).floor("h")
         f = {"inicio": inicio.isoformat(), "movimientos": [
             {"t": inicio.isoformat(), "tipo": "aportacion", "importe": FONDO_CAPITAL_INICIAL, "nota": "capital inicial"}]}
         # Si ya hay traders o carteras pero aún no se han calculado sus curvas (primer arranque de esta versión),
         # no se guarda: así el fondo empieza con el primer resultado y no «hoy».
-        hay_actividad = bool(papel.get("estrategias")) or bool(holding.get("planes"))
+        hay_actividad = bool(papel.get("estrategias")) or bool(holding.get("planes")) or bool(tendencia.get("cartera"))
         if inicios or not hay_actividad:
             almacen.guardar("fondo", f)
         return f
@@ -75,13 +77,14 @@ def _reparto_inicial() -> dict:
     """El reparto de antes de poder elegirlo: 1.000 $ por mesa y el presupuesto de holding de config.py."""
     return {"trading": round(MESAS["trading"] * CAPITAL_POR_ESTRATEGIA / FONDO_CAPITAL_INICIAL * 100, 2),
             "scalping": round(MESAS["scalping"] * CAPITAL_POR_ESTRATEGIA / FONDO_CAPITAL_INICIAL * 100, 2),
-            "holding": round(sum(CAPITAL_HOLDING.values()) / FONDO_CAPITAL_INICIAL * 100, 2)}
+            "holding": round(sum(CAPITAL_HOLDING.values()) / FONDO_CAPITAL_INICIAL * 100, 2), "tendencia": 0.0}
 
 
 def reparto(f: dict | None = None) -> dict:
     """Reparto objetivo en % de cada área (la liquidez es lo que queda hasta 100)."""
     f = almacen.cargar("fondo", {}) if f is None else f
     r = dict(f.get("reparto") or _reparto_inicial())
+    r.setdefault("tendencia", 0.0)   # repartos guardados antes de existir la sala de tendencia
     r["liquidez"] = round(100 - sum(r[a] for a in AREAS), 2)
     return r
 
@@ -105,12 +108,12 @@ def capital_mesa(grupo: str, momento: pd.Timestamp | None = None) -> float:
 
 def asignar(nuevo: dict, patrimonio: float) -> dict:
     """Guarda un reparto nuevo (en %) y el capital de cada mesa que sale de él desde ahora."""
-    r = {a: round(float(nuevo[a]), 2) for a in AREAS}
+    r = {a: round(float(nuevo.get(a, 0.0)), 2) for a in AREAS}
     for a, v in r.items():
         if not 0 <= v <= 100:
             raise ValueError(f"El % de {a} tiene que estar entre 0 y 100.")
     if sum(r.values()) > 100.001:
-        raise ValueError(f"Entre trading, scalping y holding suman {sum(r.values()):g} %: no puede pasar del 100 %."
+        raise ValueError(f"Entre trading, scalping, holding y tendencia suman {sum(r.values()):g} %: no puede pasar del 100 %."
                          .replace(f"{sum(r.values()):g}", f"{sum(r.values()):g}".replace(".", ",")))
     if patrimonio <= 0:
         raise ValueError("El fondo no tiene patrimonio que repartir.")
@@ -124,7 +127,8 @@ def asignar(nuevo: dict, patrimonio: float) -> dict:
         almacen.guardar("fondo", f)
     _cache["t"] = _cache_resumen["t"] = 0.0
     return {**reparto(f), "trader": trader, "scalper": scalper, "holding_pct": r["holding"],
-            "holding": round(r["holding"] / 100 * patrimonio, 2)}
+            "holding": round(r["holding"] / 100 * patrimonio, 2), "tendencia_pct": r["tendencia"],
+            "tendencia": round(r["tendencia"] / 100 * patrimonio, 2)}
 
 
 def mover(tipo: str, importe: float, liquidez: float) -> dict:
@@ -265,12 +269,14 @@ def _operaciones(traders: dict) -> tuple[dict, list[dict]]:
                                            "retorno_pct", "resultado_usd", "motivo")} for o in ultimas]
 
 
-def _reparto(papel: dict, holding: dict, patrimonio: float, vivo: dict) -> tuple[dict, list[dict], list[dict]]:
+def _reparto(papel: dict, holding: dict, patrimonio: float, vivo: dict,
+             tendencia: dict | None = None) -> tuple[dict, list[dict], list[dict]]:
     """Dónde está el dinero (por área) y cuánta exposición hay en cada activo."""
     traders = papel.get("estrategias") or {}
     area = {g: sum(t.get("patrimonio", CAPITAL_POR_ESTRATEGIA) for t in traders.values() if t.get("grupo", "trading") == g)
             for g in ("trading", "scalping")}
     area["holding"] = sum(p.get("valor", 0.0) for p in (holding.get("planes") or {}).values())
+    area["tendencia"] = sum(p.get("valor", 0.0) for p in ((tendencia or {}).get("monedas") or {}).values())
     area["liquidez"] = patrimonio - sum(area.values())
     exposicion: dict[str, dict] = {}
     abiertas = []
@@ -286,6 +292,10 @@ def _reparto(papel: dict, holding: dict, patrimonio: float, vivo: dict) -> tuple
                          "nocional": round(nocional, 2), "retorno_pct": p["retorno_pct"], "stop": p.get("stop"),
                          "objetivo": p.get("objetivo")})
     for s, p in (holding.get("planes") or {}).items():
+        precio = vivo.get(s) or p.get("precio") or 0
+        e = exposicion.setdefault(s, {"largo": 0.0, "corto": 0.0})
+        e["largo"] += p.get("unidades", 0) * precio
+    for s, p in ((tendencia or {}).get("monedas") or {}).items():
         precio = vivo.get(s) or p.get("precio") or 0
         e = exposicion.setdefault(s, {"largo": 0.0, "corto": 0.0})
         e["largo"] += p.get("unidades", 0) * precio
@@ -307,25 +317,28 @@ def _btc(indice: pd.DatetimeIndex) -> pd.Series | None:
         return None
 
 
-def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict | None = None, completo: bool = True) -> dict:
+def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict | None = None, completo: bool = True,
+             tendencia: dict | None = None) -> dict:
     """Todo lo que muestra el dashboard «Mi fondo». Con completo=False, solo el resumen para la cabecera."""
     papel = almacen.cargar("papel", {}) if papel is None else papel
     holding = almacen.cargar("holding", {}) if holding is None else holding
+    tendencia = almacen.cargar("tendencia", {}) if tendencia is None else tendencia
     vivo = vivo or {}
-    f = cargar(papel, holding)
+    f = cargar(papel, holding, tendencia)
     inicio = pd.Timestamp(f["inicio"])
     ahora = pd.Timestamp.now(tz="UTC")
     indice = pd.date_range(inicio.floor("h"), max(ahora.floor("h"), inicio.floor("h")), freq="h")
     if ahora > indice[-1]:
         indice = indice.append(pd.DatetimeIndex([ahora]))   # el último punto es «ahora» (incluye aportaciones recientes)
     areas = {}
-    for nombre, s in _series_areas(papel, holding).items():
+    for nombre, s in _series_areas(papel, holding, tendencia).items():
         s = s[~s.index.duplicated(keep="last")]
         areas[nombre] = s.reindex(indice.union(s.index)).sort_index().ffill().fillna(0).reindex(indice) if len(s) else pd.Series(0.0, index=indice)
     # el último punto se ajusta a los resultados actuales (incluye la vela en curso)
     ultimo = {"trading": (papel.get("grupos") or {}).get("trading", {}).get("resultado"),
               "scalping": (papel.get("grupos") or {}).get("scalping", {}).get("resultado"),
-              "holding": (holding.get("resumen") or {}).get("resultado")}
+              "holding": (holding.get("resumen") or {}).get("resultado"),
+              "tendencia": (tendencia.get("resumen") or {}).get("resultado")}
     for nombre, v in ultimo.items():
         if v is not None:
             areas[nombre].iloc[-1] = v
@@ -352,7 +365,7 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
     }
     if not completo:
         return {"resumen": resumen}
-    en_uso, exposicion, abiertas = _reparto(papel, holding, resumen["patrimonio"], vivo)
+    en_uso, exposicion, abiertas = _reparto(papel, holding, resumen["patrimonio"], vivo, tendencia)
     resumen["liquidez"] = en_uso["liquidez"]
     objetivo = reparto(f)
     traders = papel.get("estrategias") or {}
@@ -368,7 +381,8 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
     serie = [[indice[i].isoformat(), round(float(vl[i]), 4), round(float(patrimonio[i]), 2), round(float(aportado[i]), 2),
               round(float(areas["trading"].iloc[i]), 2), round(float(areas["scalping"].iloc[i]), 2),
               round(float(areas["holding"].iloc[i]), 2), round(float(caida.iloc[i]) * 100, 3),
-              round(float(btc.iloc[i] / btc.iloc[0] * FONDO_VL_INICIAL), 4) if btc is not None and btc.iloc[0] > 0 and not np.isnan(btc.iloc[i]) else None]
+              round(float(btc.iloc[i] / btc.iloc[0] * FONDO_VL_INICIAL), 4) if btc is not None and btc.iloc[0] > 0 and not np.isnan(btc.iloc[i]) else None,
+              round(float(areas["tendencia"].iloc[i]), 2)]
              for i in idx]
     ranking = sorted(({"id": i, "simbolo": t["simbolo"], "direccion": t["direccion"], "grupo": t.get("grupo", "trading"),
                        "resultado": t.get("resultado", 0.0), "operaciones": len(t.get("operaciones", []))}
@@ -383,19 +397,20 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
         "btc_pct": btc_pct,
         "mensual": _mensual(vl_s),
         "serie": serie,
-        "columnas": ["t", "vl", "patrimonio", "aportado", "trading", "scalping", "holding", "caida_pct", "btc_vl"],
+        "columnas": ["t", "vl", "patrimonio", "aportado", "trading", "scalping", "holding", "caida_pct", "btc_vl", "tendencia"],
         "reparto": en_uso,
         "objetivo": {"pct": objetivo, "usd": {a: round(objetivo[a] / 100 * resumen["patrimonio"], 2) for a in (*AREAS, "liquidez")},
                      "capital_mesa": {"trading": capital_mesa("trading"), "scalping": capital_mesa("scalping")},
                      "mesas": MESAS, "ocupadas": ocupadas,
                      "presupuesto_holding": round(sum(p.get("presupuesto_actual", p.get("presupuesto", 0))
-                                                      for p in (holding.get("planes") or {}).values()), 2)},
+                                                      for p in (holding.get("planes") or {}).values()), 2),
+                     "presupuesto_tendencia": (tendencia.get("resumen") or {}).get("presupuesto", 0.0)},
         "exposicion": exposicion,
         "abiertas": abiertas,
         "operaciones": ops_stats,
         "ultimas": ultimas,
         "areas": {g: dict((papel.get("grupos") or {}).get(g) or {}) for g in ("trading", "scalping")} | {
-            "holding": dict(holding.get("resumen") or {})},
+            "holding": dict(holding.get("resumen") or {}), "tendencia": dict(tendencia.get("resumen") or {})},
         # la incubadora opera con dinero de prueba: se enseña aparte y NO suma en el fondo
         "incubadora": {g: dict(v) for g, v in (papel.get("grupos_incubadora") or {}).items()},
         "mejores": ranking[:5],
@@ -408,11 +423,11 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
 _cache_resumen: dict = {"t": 0.0, "datos": None}
 
 
-def resumen_rapido(papel: dict, holding: dict) -> dict | None:
+def resumen_rapido(papel: dict, holding: dict, tendencia: dict | None = None) -> dict | None:
     """Resumen para la cabecera de la oficina (se recalcula como mucho cada 5 segundos)."""
     if _cache_resumen["datos"] is None or time.time() - _cache_resumen["t"] > 5:
         try:
-            _cache_resumen["datos"] = calcular(papel, holding, completo=False)["resumen"]
+            _cache_resumen["datos"] = calcular(papel, holding, completo=False, tendencia=tendencia)["resumen"]
         except Exception:  # sin datos todavía: la oficina funciona igual
             _cache_resumen["datos"] = None
         _cache_resumen["t"] = time.time()

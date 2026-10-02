@@ -579,7 +579,12 @@ def ciclo(estado: dict) -> list[dict]:
         if "aprobadas" not in t:
             t["vetadas"] = []
             t["aprobadas"] = [sim[1].tiempo[e].isoformat() for e in sim[3].entradas] if sim else []
-    bloqueo = riesgo.bloqueo_general(estado.get("resumen"), estado.get("curva"))
+    pausa_caida = estado.setdefault("pausa_caida", {})
+    reabierto = control.cargar().get("reabierto")
+    if reabierto and pausa_caida.get("hasta") and pd.Timestamp(reabierto) > pd.Timestamp(pausa_caida["desde"]):
+        pausa_caida["hasta"] = reabierto   # pulsaste «Reabrir»: la pausa por caída termina ya y la caída se mide desde aquí
+        riesgo.vigilar_caida(pausa_caida, estado.get("resumen"), estado.get("curva"))
+    bloqueo = riesgo.bloqueo_general(estado.get("resumen"), estado.get("curva"), pausa_caida)
     vetos = estado.get("riesgo", {}).get("vetos", [])
 
     def abiertas_en(momento: pd.Timestamp, scalping: bool, salvo: str) -> list[tuple[str, str]]:
@@ -769,17 +774,19 @@ def ciclo(estado: dict) -> list[dict]:
                             "direccion": b["estrategia"]["direccion"], "descripcion": b["descripcion"],
                             "calidad": round(banco.calidad(b), 3), "fuera_pct": (b.get("fuera") or {}).get("retorno_pct")}
                            for b in banquillo]
-    nuevo_bloqueo = riesgo.bloqueo_general(estado["resumen"], estado["curva"])
+    cambio_caida = riesgo.vigilar_caida(pausa_caida, estado["resumen"], estado["curva"])
+    nuevo_bloqueo = riesgo.bloqueo_general(estado["resumen"], estado["curva"], pausa_caida)
     anterior = estado.get("riesgo", {}).get("bloqueo")
-    if nuevo_bloqueo and not anterior:
+    if nuevo_bloqueo and (not anterior or cambio_caida == "pausa"):
         evento("freno", f"¡Freno de riesgo! {nuevo_bloqueo[0].upper() + nuevo_bloqueo[1:]}. No se abren posiciones nuevas.",
                motivo=nuevo_bloqueo)
     elif anterior and not nuevo_bloqueo:
-        evento("reanuda", "Se levanta el freno de riesgo: se vuelven a permitir entradas.")
+        evento("reanuda", "Se levanta el freno de riesgo: se vuelven a permitir entradas."
+               + (" Acaba la pausa por caída y la caída se vuelve a contar desde el resultado de ahora." if cambio_caida == "reanuda" else ""))
     abiertas = {g: [(t["simbolo"], t["direccion"]) for t in traders.values() if t["posicion"] and t["grupo"] == g]
                 for g in ("trading", "scalping")}
     estado["riesgo"] = riesgo.estado(estado["resumen"], estado["curva"], abiertas["trading"], nuevo_bloqueo, vetos,
-                                     abiertas["scalping"])
+                                     abiertas["scalping"], pausa_caida)
     estado["capital_por_estrategia"] = fondo.capital_mesa("trading")
     estado["capital_scalper"] = fondo.capital_mesa("scalping")
     estado["actividad"] = (eventos[::-1] + estado.get("actividad", []))[:ACTIVIDAD_MAX]
@@ -800,6 +807,13 @@ def operar(segundos: float = 20, telegram: bool = False, parar: threading.Event 
     sistema.json cuánto ha tardado y si ha habido errores (lo enseña el equipo de infraestructura)."""
     parar = parar or threading.Event()
     print(f"[papel] Paper trading en marcha (dinero ficticio). Reviso el mercado cada {segundos:g} s.", flush=True)
+    try:   # la primera vez con sala de tendencia, recibe parte del % de la sala de trading (una sola vez)
+        from .tendencia import estrenar
+
+        if texto := estrenar():
+            print(f"[tendencia] {texto}", flush=True)
+    except Exception as e:
+        print(f"[tendencia] No he podido estrenar la sala de tendencia (lo reintento al volver a arrancar): {e}", flush=True)
     ultima_vela = None
     sistema = almacen.cargar("sistema", {})
     while not parar.is_set():
@@ -843,6 +857,19 @@ def operar(segundos: float = 20, telegram: bool = False, parar: threading.Event 
             hold.update(errores_seguidos=hold.get("errores_seguidos", 0) + 1, ultimo_error=f"{type(e).__name__}: {e}"[:300],
                         error_t=_ahora())
             print(f"[holding] Error en el ciclo (lo reintento): {e}", flush=True)
+        tend = sistema.setdefault("tendencia", {})
+        try:
+            from .tendencia import actualizar as actualizar_tendencia
+
+            for ev in actualizar_tendencia():
+                print(f"[tendencia {dt.datetime.now():%H:%M}] {ev['texto']}", flush=True)
+                if telegram and ev["tipo"] in ("compra", "venta"):
+                    _telegram(f"📈 {ev['texto']}")
+            tend.update(ok=_ahora(), errores_seguidos=0)
+        except Exception as e:
+            tend.update(errores_seguidos=tend.get("errores_seguidos", 0) + 1, ultimo_error=f"{type(e).__name__}: {e}"[:300],
+                        error_t=_ahora())
+            print(f"[tendencia] Error en el ciclo (lo reintento): {e}", flush=True)
         papel["vuelta_s"] = round(time.monotonic() - t0, 2)
         try:
             almacen.guardar("sistema", sistema)

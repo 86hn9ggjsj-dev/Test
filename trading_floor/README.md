@@ -3,7 +3,8 @@
 Una versión propia del "fondo gestionado con IA" de los vídeos de Instagram, pero honesta:
 una **minería de estrategias** de verdad, un **embudo de pruebas de robustez**, **paper trading**
 con precios reales y dinero ficticio, **control de riesgos**, una sala de **holding** a largo plazo,
-otra de **macroeconomía**, y todo ello visto como una **oficina isométrica** animada en el navegador.
+una sala de **tendencia** con reglas clásicas, otra de **macroeconomía**, y todo ello visto como una
+**oficina isométrica** animada en el navegador.
 
 > Nunca envía órdenes a ningún exchange ni usa dinero real. Los buenos resultados en datos
 > pasados (backtest) no garantizan nada sobre el futuro.
@@ -18,6 +19,7 @@ otra de **macroeconomía**, y todo ello visto como una **oficina isométrica** a
 | Ver las estrategias aprobadas | `trading.bat banco` | `./trading.sh banco` |
 | Resumen macro en la terminal | `trading.bat macro` | `./trading.sh macro` |
 | Ver las carteras de holding | `trading.bat holding` | `./trading.sh holding` |
+| Ver la sala de tendencia | `trading.bat tendencia` | `./trading.sh tendencia` |
 | Oficina + paper trading, sin minar | `trading.bat --sin-minar` | `./trading.sh --sin-minar` |
 
 La primera vez instala lo necesario solo (hace falta Python 3). La oficina se abre en
@@ -109,7 +111,10 @@ Telegram de Jarvis, si lo tienes configurado.
      dirección, también por sala) en ese momento, o si está activado un freno (los frenos son comunes).
      Se evalúa con las posiciones que estaban abiertas justo cuando llega la señal.
    - **Frenos**: si el día pierde un 2 % del capital, no se abren más posiciones hasta mañana; si el
-     resultado cae un 6 % del capital desde su máximo, se pausan las entradas.
+     resultado cae un 6 % del capital desde su máximo, se pausan las entradas **24 horas**. Después se
+     vuelve a operar y la caída se cuenta desde ese momento (si vuelve a caer otro 6 %, otra pausa).
+     Antes la pausa no se levantaba nunca si el resultado total quedaba por debajo del límite: sin
+     entradas no podía recuperarse. «Reabrir» también termina la pausa.
 8. **Holding** (`holding.py`). Carteras de largo plazo (por defecto 5.000 $ en BTC, 3.000 $ en ETH y
    2.000 $ en SOL, ficticios) con un plan adaptativo y **sin stop loss**:
    - **Compra inicial** del 25 % del presupuesto.
@@ -126,15 +131,33 @@ Telegram de Jarvis, si lo tienes configurado.
    ```bash
    ./trading.sh holding --nuevo BTCUSDT --presupuesto 5000 --paso 10 --tramo 15 --reserva 50 --salidas 30,60,100
    ```
-9. **Scalping** (misma minería y paper trading, con velas de 5 minutos). Una sala aparte con 12 mesas
+9. **Tendencia** (`tendencia.py`). Una sala con **reglas fijas y clásicas** (no salen de la minería,
+   así que no se han ajustado a estos datos), con velas diarias y seis monedas (BTC, ETH, SOL, BNB, XRP
+   y DOGE), cada una con la misma parte del presupuesto:
+   - Mitad «media»: está dentro mientras el cierre diario esté por encima de su **media de 50 días**.
+   - Mitad «ruptura»: entra cuando el cierre supera el **máximo de los 20 días** anteriores y sale
+     cuando baja del **mínimo de los 10 días** anteriores (la regla de «las tortugas», simplificada).
+   - Así cada moneda está al 0, al 50 o al 100 % de su parte. Solo compra: sin cortos ni dinero
+     prestado. Lo que no está invertido espera en efectivo. Se decide al cerrar el día (00:00 UTC) y se
+     opera a la apertura siguiente, pagando comisión y deslizamiento.
+
+   Su presupuesto es el % de «tendencia» de tu reparto. La llevan Marina (BTC, ETH y SOL) y Vicente
+   (BNB, XRP y DOGE), sentados en la sala de holding; tiene su pestaña «Tendencia» en el panel.
+
+   **Por qué existe.** Se midió qué gana de verdad cada sala con datos que la minería no había visto
+   (ver «Lo que dicen los datos», más abajo). Las estrategias minadas de 30 minutos apenas tienen
+   ventaja una vez pagadas las comisiones; seguir la tendencia en velas diarias, en cambio, ganó más que
+   comprar y mantener y con caídas mucho menores, con cualquier variante razonable de las reglas.
+10. **Scalping** (misma minería y paper trading, con velas de 5 minutos). Una sala aparte con 12 mesas
    (4 para BTC, 4 para ETH y 4 para SOL, los más líquidos). Se mina con 120 días de velas de 5 minutos y
    el mismo embudo de seis pruebas. Como los scalpers trabajan con órdenes límite, pagan comisión de
    «maker» (0,02 % por lado en Binance Futures) más un poco de deslizamiento: 0,06 % ida y vuelta, frente
    al 0,14 % de la sala de trading. Con la comisión de «taker» casi ninguna estrategia de 5 minutos
    sobrevive; con la de «maker» sí algunas. La sala enseña cuánto se paga en comisiones.
-10. **Tu fondo** (`fondo.py`). Todo junto funciona como un fondo de inversión, con dinero ficticio:
+11. **Tu fondo** (`fondo.py`). Todo junto funciona como un fondo de inversión, con dinero ficticio:
    aportas capital (100.000 $ al empezar) y recibes participaciones a 10 $. El **valor liquidativo**
-   (patrimonio / participaciones) solo sube o baja con los resultados de trading, scalping y holding;
+   (patrimonio / participaciones) solo sube o baja con los resultados de trading, scalping, holding y
+   tendencia;
    aportar o retirar dinero no lo cambia. Así la cabecera muestra tu patrimonio de verdad y un trader
    nuevo ya no «suma» 1.000 $. Calcula rentabilidad (hoy, 7 y 30 días, año, anualizada), volatilidad,
    Sharpe, caída máxima, mejor y peor día, rentabilidad mensual, la comparación con haber comprado BTC,
@@ -143,18 +166,50 @@ Telegram de Jarvis, si lo tienes configurado.
 
    **Tu reparto**: eliges qué % del fondo va a cada área (al principio, trading 48 %, scalping 12 %,
    holding 10 % y liquidez 30 %). En trading y scalping el % se divide entre sus mesas (48 y 12), así que
-   marca el capital de cada trader; en holding es el presupuesto de las carteras, repartido según su peso.
+   marca el capital de cada trader; en holding es el presupuesto de las carteras, repartido según su peso,
+   y en tendencia el presupuesto de la sala, a partes iguales entre sus seis monedas.
    Al cambiarlo, cada área opera con su capital nuevo **desde ese momento** y lo ganado antes se conserva
    (el resultado de cada trader se calcula por tramos de capital; las carteras de holding reciben o
    devuelven capital, y si les falta efectivo venden lo justo). Al aportar o retirar dinero se reajusta
    solo para mantener tus %. Se cambia en «Mi fondo» → «Cómo quieres repartirlo» o por el chat («dedica un
    20 % al holding»).
-11. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
+12. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
    (Yahoo Finance) y el Fear & Greed de cripto (alternative.me). Con ellos se calcula un régimen
    RISK-ON / RISK-OFF. Es contexto para el comité: **las estrategias no usan estos datos**.
 
 Un ejemplo real de embudo (2.000 estrategias de BTC): 362 parecían rentables, 17 aguantaron
 fuera de muestra y 3 entraron en el banco. Así es esto: casi todo es ruido.
+
+## Lo que dicen los datos (medido en octubre de 2026)
+
+Para saber qué gana de verdad cada sala, se repitió el trabajo de la oficina con datos del pasado que la
+minería no había visto, y se miró qué habría pasado después:
+
+- **Sala de trading.** Con 5 años de velas de 30 minutos de las 6 monedas, se minó como la oficina (3 años
+  y 2.000 estrategias por activo) hasta una fecha y se siguió a las aprobadas los 6 meses siguientes, en 4
+  semestres distintos (2024-2026) y con 6 semillas: 213 estrategias. De media perdieron un 1,3 % cada una
+  (con el 1 % de riesgo por operación) y solo ganaron 34 de cada 100. Su operación media gana un 0,07 %
+  antes de comisiones, y las comisiones cuestan un 0,14 %. La incubadora y el supervisor frenan casi todo
+  el daño (la sala queda prácticamente en tablas), pero no hay ventaja que aprovechar. Lo que se ve fuera
+  de muestra no anticipa lo que pasa después (las que mejor salían, peor lo hicieron) y el examen de la
+  incubadora tampoco. Se probaron filtros más duros (prueba estadística, margen sobre las comisiones, stops
+  más amplios, operaciones más largas con tendencias más largas, que la misma regla gane también en otras
+  monedas): ninguno cambió el resultado.
+- **Scalping.** Lo mismo con un año de velas de 5 minutos (minando 120 días y mirando el mes siguiente,
+  en 8 meses distintos): las aprobadas perdieron un 1,7 % de media el mes siguiente y solo ganaron 33 de
+  cada 100, aun con comisión de «maker».
+- **Holding** (el plan sin stop): en periodos de 12 meses empezando cada semestre desde 2022, de media
+  +32 % en BTC, ETH y SOL, pero entre −45 % y −91 % en los años malos.
+- **Tendencia** (las reglas de la sala, tal cual): desde 2022 y con las 6 monedas, +29 % al año con una
+  caída máxima del −29 %, frente a +10 % al año y −69 % de comprar y mantener las mismas monedas. Todas
+  las variantes razonables (media de 50, 100 o 200 días; rupturas 20/10, 30/15 o 55/20) también ganaron a
+  comprar y mantener (entre +14 % y +31 % al año). En el último año, con el mercado cayendo entre un 23 %
+  y un 59 % según la moneda, la sala habría acabado casi en tablas (−2 %).
+
+Por eso, al estrenar la sala de tendencia, recibe la mitad del % que tenía la sala de trading (como mucho
+25 puntos; una sola vez, después decides tú en «Mi fondo»). Nada de esto garantiza el futuro: son
+simulaciones con datos pasados y dinero ficticio. Las salas de trading y scalping siguen como laboratorio:
+si la minería encuentra algo que funcione de verdad, la incubadora y el supervisor lo dejarán pasar.
 
 ## La oficina
 
@@ -208,6 +263,10 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
 - **Pestañas nuevas**: «Incubadora» (exámenes, banquillo y suspendidas con su post mortem), «Informe»
   (resultado por equipos, informe del día, Monte Carlo y sistemas) y «Academia» (lecciones, tipos de
   condición que funcionan o fallan, Kelly de cada trader y todos los post mortem).
+- **Pestaña «Tendencia»**: cómo va la sala de tendencia y, por moneda, si está dentro, a medias o fuera,
+  una gráfica de 90 días con su media de 50 días, a qué precio entraría o saldría cada mitad y sus
+  últimas compras y ventas. Marina y Vicente avisan en el chat (canal de holding) de cada cambio. En «Mi
+  fondo», la tendencia es una parte más del reparto, con su color en todas las gráficas.
 
 - **Supervisión**: cada sala tiene su supervisor, que la patrulla y conoce sus números; la
   supervisión general hace rondas preguntándoles y acude corriendo si una sala se pone en rojo.
@@ -226,7 +285,7 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
   - **Modo básico (gratis)**: entiende órdenes sencillas («busca estrategias de SOL», «para la búsqueda»,
     «pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX»,
     «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?»,
-    «riesgo 0,5», «¿cómo va el holding?», «¿cómo vamos?», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?»,
+    «riesgo 0,5», «¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿cómo vamos?», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?»,
     «¿quién es el mejor?»).
   - **Con Claude (opcional, de pago)**: si pones `ANTHROPIC_API_KEY=...` en el archivo `.env` de la
     raíz del proyecto, contestan de verdad a cualquier cosa. Cada mensaje cuesta unos céntimos de tu
@@ -273,6 +332,7 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
 | `fondo.py` | Tu fondo: participaciones, valor liquidativo, aportaciones, métricas (Sharpe, Sortino, Calmar), Monte Carlo y comparación con BTC |
 | `riesgo.py` | Tamaño de las operaciones, límites, vetos y frenos |
 | `holding.py` | Carteras de largo plazo sin stop: promedian a la baja y salen por partes sobre el coste medio |
+| `tendencia.py` | Sala de tendencia: media de 50 días y ruptura 20/10 en velas diarias, solo compras |
 | `macro.py` | Datos macroeconómicos y régimen de mercado |
 | `control.py` | Tus decisiones: búsqueda de estrategias, pausar todo, reabrir, kill switch, traders, límites de riesgo |
 | `chat.py` | Chat con la oficina: modo básico o con Claude, y propuestas de decisiones |

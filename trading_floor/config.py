@@ -102,7 +102,8 @@ MAX_POSICIONES = 16  # posiciones abiertas a la vez en toda la sala
 MAX_POSICIONES_SCALPING = 12  # posiciones abiertas a la vez en la sala de scalping (una por mesa: son operaciones cortas)
 MAX_MISMA_APUESTA = 3  # posiciones abiertas en el mismo símbolo y la misma dirección (en cada sala)
 LIMITE_PERDIDA_DIARIA = 0.02  # si el día pierde un 2 % del capital, no se abren más posiciones hoy
-MAX_CAIDA = 0.06  # si el resultado cae un 6 % del capital desde su máximo, se pausan las entradas
+MAX_CAIDA = 0.06  # si el resultado cae un 6 % del capital desde su máximo, se pausan las entradas...
+PAUSA_CAIDA_HORAS = 24  # ...durante 24 horas; después se reanuda y la caída se mide desde ese momento
 
 # Kelly prudente (papel.py): con suficientes operaciones reales, el riesgo de cada operación sale de la fórmula de
 # Kelly con una estimación conservadora del acierto, y se usa solo una cuarta parte, entre un mínimo y un tope.

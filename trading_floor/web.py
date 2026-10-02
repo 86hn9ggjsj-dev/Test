@@ -56,7 +56,8 @@ def precios_en_vivo(simbolos: set[str]) -> dict[str, float]:
 
 def estado() -> dict:
     papel, holding, lista = almacen.cargar("papel", {}), almacen.cargar("holding", {}), banco.cargar()
-    resumen_fondo = fondo.resumen_rapido(papel, holding)
+    tendencia = almacen.cargar("tendencia", {})
+    resumen_fondo = fondo.resumen_rapido(papel, holding, tendencia)
     # las curvas largas solo las necesita el dashboard del fondo (/api/fondo): aquí se quitan para no cargar la oficina
     papel.pop("series", None)
     # de las estrategias retiradas, solo las últimas y sin su curva ni sus operaciones
@@ -71,6 +72,10 @@ def estado() -> dict:
     holding.pop("serie", None)
     for plan in (holding.get("planes") or {}).values():
         plan.pop("serie", None)
+    tendencia.pop("serie", None)
+    for mon in (tendencia.get("monedas") or {}).values():
+        mon.pop("serie", None)
+        mon["operaciones"] = mon.get("operaciones", [])[-12:]
     simbolos = set(SIMBOLOS) | set(papel.get("precios", {})) | set(holding.get("planes", {}))
     E = {
         "vivo": precios_en_vivo(simbolos),
@@ -85,6 +90,7 @@ def estado() -> dict:
         "papel": papel,
         "macro": almacen.cargar("macro", {}),
         "holding": holding,
+        "tendencia": tendencia,
         "fondo": resumen_fondo,
         "capital_por_estrategia": CAPITAL_POR_ESTRATEGIA,
         "simbolos": SIMBOLOS,

@@ -100,7 +100,8 @@ Para el modo voz: `pip install -r requirements-voz.txt`. En Linux puede que nece
 ## Trading Floor
 
 En este repositorio también está el **Trading Floor**: minería de estrategias de trading, un
-embudo de pruebas de robustez, paper trading con precios reales y dinero ficticio, y una oficina
+embudo de pruebas de robustez, paper trading con precios reales y dinero ficticio, una sala de tendencia
+con reglas clásicas en velas diarias, y una oficina
 isométrica animada para verlo todo (que también se puede recorrer en primera persona, en 3D). Se arranca con `trading.bat` (Windows) o `./trading.sh`
 (Mac/Linux). Detalles en [`trading_floor/README.md`](trading_floor/README.md).
 

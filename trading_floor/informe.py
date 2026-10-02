@@ -77,6 +77,11 @@ def generar(E: dict, nombres: dict[str, str] | None = None) -> dict:
     if hold:
         punto("Holding", f"Las carteras de largo plazo valen {_d(hold.get('valor', 0))[1:]} ({_p(hold.get('resultado_pct', 0))}).",
               "bueno" if hold.get("resultado", 0) > 0 else "malo" if hold.get("resultado", 0) < 0 else "")
+    tend = (E.get("tendencia") or {}).get("resumen") or {}
+    if tend:
+        punto("Tendencia", f"La sala de tendencia vale {_d(tend.get('valor', 0))[1:]} ({_p(tend.get('resultado_pct', 0))}). Hay tendencia en "
+                           f"{tend.get('dentro', 0)} de {tend.get('monedas', 0)} monedas y está invertido el {tend.get('invertido_pct', 0):.0f} %; "
+                           "el resto espera en efectivo.", "bueno" if tend.get("resultado", 0) > 0 else "malo" if tend.get("resultado", 0) < 0 else "")
     lecc = (E.get("academia") or {}).get("textos") or []
     if lecc:
         punto("Academia", lecc[0])

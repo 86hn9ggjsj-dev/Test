@@ -110,6 +110,7 @@ canvas#lienzo.sobre{cursor:pointer}
 .veto b{color:var(--texto)}
 .regla{font-size:12px;margin-bottom:7px;color:#c9d0db} .regla b{color:var(--texto);font-family:var(--mono)}
 .macro-reg{border:1px solid var(--borde);border-radius:12px;padding:10px 12px;margin-bottom:12px;background:var(--panel2)}
+.macro-reg .ir-fondo{margin-top:8px;min-height:34px;padding:0 14px;border-radius:9px;border:1px solid #c98500;background:transparent;color:#ffcf5a;font:700 12px Inter,sans-serif;cursor:pointer}
 .macro-reg b{font:800 16px var(--mono)}
 .macro-reg p{margin:4px 0 0;font-size:12px;color:#c9d0db}
 .ind{display:grid;grid-template-columns:1fr auto auto;gap:10px;padding:7px 2px;border-bottom:1px solid var(--borde);font-size:12px;align-items:baseline}
@@ -559,6 +560,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
           <label><i style="background:#3987e5"></i>Sala de trading<input type="number" name="trading" min="0" max="100" step="1"><span>%</span></label>
           <label><i style="background:#d95926"></i>Scalping<input type="number" name="scalping" min="0" max="100" step="1"><span>%</span></label>
           <label><i style="background:#199e70"></i>Holding<input type="number" name="holding" min="0" max="100" step="1"><span>%</span></label>
+          <label><i style="background:#c98500"></i>Tendencia<input type="number" name="tendencia" min="0" max="100" step="1"><span>%</span></label>
           <div class="d-liq"><i style="background:#5b606b"></i>Sin invertir <b id="dLiq">—</b></div>
           <p id="dPrevia" class="d-sub"></p>
           <button type="submit">Guardar reparto</button>
@@ -572,7 +574,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <div class="d-kpis" id="dKpis"></div>
     <div class="d-rejilla">
       <section class="d-tarjeta" id="cCaida"><h4>Caída desde el máximo</h4><p class="d-sub">Cuánto está el fondo por debajo de lo más alto que había llegado. 0 % es que está en máximos.</p><div class="d-graf"></div></section>
-      <section class="d-tarjeta" id="cExpo"><h4>En qué monedas está el dinero</h4><p class="d-sub">Dinero en operaciones abiertas y en el holding. A la derecha, apuestas a que sube; a la izquierda, a que baja.</p><div class="d-graf"></div></section>
+      <section class="d-tarjeta" id="cExpo"><h4>En qué monedas está el dinero</h4><p class="d-sub">Dinero en operaciones abiertas, en el holding y en la sala de tendencia. A la derecha, apuestas a que sube; a la izquierda, a que baja.</p><div class="d-graf"></div></section>
       <section class="d-tarjeta" id="cMeses"><h4>Rentabilidad de cada mes</h4><div class="d-graf"></div></section>
       <section class="d-tarjeta" id="cMovs"><h4>Lo que has metido y sacado</h4><div class="d-graf"></div></section>
     </div>
@@ -603,6 +605,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <button data-p="academia">Academia</button>
     <button data-p="salas">Salas</button>
     <button data-p="holding">Holding</button>
+    <button data-p="tendencia" title="Sala de tendencia: compra solo las monedas que suben y se aparta cuando caen">Tendencia</button>
     <button data-p="riesgo">Riesgo</button>
     <button data-p="macro">Macro</button>
     <button data-p="info">¿Qué es?</button>
@@ -642,6 +645,8 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <h3>Supervisión de las salas</h3><div id="salas"></div></section>
   <section class="pagina" id="p-holding"><h3>Sala de holding</h3><div id="holding"></div>
     <p class="nota">Carteras de largo plazo con dinero ficticio y <b>sin stop loss</b>: compra inicial del 25 %, otra compra cada vez que el precio cae un 8 % desde la última (promediando el coste), capital de reserva si se acaba el presupuesto y ventas parciales en los puntos de salida, que se miden sobre el coste medio. Puedes pedir otro plan por el chat («@Diego rehaz el plan de SOL con 3000 $ y salidas a 40, 80 y 150») o con <code>trading holding --nuevo BTCUSDT --presupuesto 5000 --paso 10 --salidas 30,60,100</code>.</p></section>
+  <section class="pagina" id="p-tendencia"><h3>Sala de tendencia</h3><div id="tendencia"></div>
+    <p class="nota">Reglas fijas y clásicas, con velas diarias. Cada moneda tiene la misma parte del dinero, partida en dos mitades: la mitad «media» está dentro mientras el precio cierre por encima de su media de 50 días; la mitad «ruptura» entra cuando el precio supera el máximo de los 20 días anteriores y sale cuando pierde el mínimo de los 10 días anteriores. Solo compra (sin cortos ni dinero prestado) y lo que no está invertido espera en efectivo. Con 5 años de datos reales, seguir la tendencia ganó más que comprar y mantener y con caídas mucho menores, pero no es una garantía. Cuánto dinero le das lo decides tú en «Mi fondo».</p></section>
   <section class="pagina" id="p-riesgo"><h3>Control de riesgos</h3><div id="riesgo"></div></section>
   <section class="pagina" id="p-macro"><h3>Sala de macroeconomía</h3><div id="macro"></div>
     <p class="nota">Datos diarios de Yahoo Finance y el índice Fear &amp; Greed de alternative.me. Es contexto para el comité: las estrategias minadas no usan estos datos para operar.</p></section>
@@ -653,10 +658,11 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p><b>Sala de trading.</b> Cada mesa tiene su trader, que opera una estrategia del banco con su capital ficticio (el % del fondo que dedicas al trading, repartido entre sus 48 mesas; al principio, 1.000 $) que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
     <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). Primero se examina en la incubadora (planta 1) con dinero de prueba; si aprueba, un trader se sienta con ella en una mesa libre. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 48 mesas (8 por activo).</p>
     <p><b>Radar de señales.</b> El equipo de análisis mira, para cada trader, cuántas condiciones de su estrategia se cumplen ahora mismo y le avisa cuando le falta una para entrar (con la hora del próximo cierre de vela, soporte, resistencia y ATR).</p>
-    <p><b>Mi fondo.</b> Todo es tu fondo de inversión (con dinero ficticio): tú aportas capital y recibes participaciones; el valor liquidativo sube o baja solo con los resultados de trading, scalping y holding, así que un trader nuevo no cambia tu patrimonio. Tú decides el reparto: qué % va a trading (se divide entre sus 48 mesas), a scalping (12 mesas) y a holding; el resto es liquidez. Se cambia en «Mi fondo» o por el chat («dedica un 20 % al holding») y se aplica desde ese momento, sin perder lo ganado. En la pestaña «Mi fondo» (arriba) tienes tu dashboard: rentabilidad frente a BTC, caídas, volatilidad, Sharpe, reparto del dinero, exposición, meses, operaciones y aportaciones o reembolsos.</p>
+    <p><b>Mi fondo.</b> Todo es tu fondo de inversión (con dinero ficticio): tú aportas capital y recibes participaciones; el valor liquidativo sube o baja solo con los resultados de trading, scalping, holding y tendencia, así que un trader nuevo no cambia tu patrimonio. Tú decides el reparto: qué % va a trading (se divide entre sus 48 mesas), a scalping (12 mesas), a holding y a la sala de tendencia; el resto es liquidez. Se cambia en «Mi fondo» o por el chat («dedica un 20 % al holding») y se aplica desde ese momento, sin perder lo ganado. En la pestaña «Mi fondo» (arriba) tienes tu dashboard: rentabilidad frente a BTC, caídas, volatilidad, Sharpe, reparto del dinero, exposición, meses, operaciones y aportaciones o reembolsos.</p>
     <p><b>Scalping.</b> Una sala aparte con operaciones cortas en velas de 5 minutos (BTC, ETH y SOL, 12 mesas). Los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta) y pasan el mismo embudo de seis pruebas. Aun así, las comisiones pesan mucho: la sala muestra cuánto se paga.</p>
     <p><b>Sin repetidas.</b> Una estrategia no entra en el banco si es la misma idea que otra (mismas condiciones con otros números), si entra en los mismos momentos o si está en el mercado a la vez la mayor parte del tiempo. Tampoco si se parece a una que ya se retiró por no funcionar. Si tenías repetidas de antes, pídele por el chat «quita las repetidas».</p>
     <p><b>Holding.</b> Carteras de largo plazo (BTC, ETH y SOL) sin stop loss: si el precio baja, promedian comprando más cada −8 % (y si se acaba el presupuesto, meten capital de la reserva); si sube, venden una parte en sus puntos de salida (+30, +60 y +100 % sobre el coste medio). Siempre se queda una parte en cartera.</p>
+    <p><b>Tendencia.</b> En la sala de holding se sientan también Marina y Vicente, que siguen la tendencia de BTC, ETH, SOL, BNB, XRP y DOGE con velas diarias: compran la mitad de la parte de una moneda cuando cierra por encima de su media de 50 días, y la otra mitad cuando rompe su máximo de 20 días; venden cuando pierde la media o su mínimo de 10 días. Así están dentro cuando sube y se apartan cuando cae. Su dinero sale del reparto de «Mi fondo».</p>
     <p><b>Control de riesgos.</b> Decide cuánto invierte cada operación (arriesgando como mucho un 1 % del capital del trader) y veta entradas si hay demasiadas posiciones, demasiadas iguales, o si el día o la caída acumulada pierden demasiado.</p>
     <p><b>Macroeconomía.</b> Cuatro analistas siguen la bolsa, el VIX, el dólar, el oro, el petróleo, los bonos y el sentimiento cripto, y deciden si el mercado está en modo RISK-ON (apetito por el riesgo) o RISK-OFF.</p>
     <p><b>Supervisión.</b> Cada sala tiene su supervisor, que la patrulla y sabe cómo va. La supervisión general hace rondas por toda la oficina preguntando a cada uno, y acude corriendo si una sala se pone en rojo. El estado de cada sala está en la pestaña «Salas».</p>
@@ -1474,6 +1480,32 @@ SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
 const PUESTOS_HOLDING = [[38.7, 3.2], [38.7, 5.8]].map(([x, y], i) =>
   puesto({x, y, w: 1.6, color: "#3a2a12", colorSilla: "#5a3d16", pintar: (w, h) => pantallaHolder(i, w, h), brilla: () => "#f7931a"}));
 function planesHolding() { return Object.values(S && S.holding && S.holding.planes || {}); }
+// ---- TENDENCIA (en la sala de holding): dos mesas, cada una sigue la tendencia de tres monedas con velas diarias ----
+const PUESTOS_TENDENCIA = [[44.1, 2.6], [44.1, 5.9]].map(([x, y], i) =>
+  puesto({x, y, w: 1.6, color: "#2e2408", colorSilla: "#6b5410", pintar: (w, h, j) => pantallaTendencia(i, j || 0, w, h), brilla: () => "#c98500"}));
+function monedasTendencia() { return Object.values(S && S.tendencia && S.tendencia.monedas || {}); }
+function pintarTendencia(g, w, h, p, letra = 5) {
+  const sr = p.precios || [], md = (p.medias || []).slice(-sr.length), desfase = sr.length - md.length;
+  const vals = [...sr, ...md.filter(v => v != null)];
+  if (vals.length < 2) return;
+  const lo = Math.min(...vals), hi = Math.max(...vals), m = letra + 3;
+  const X = k => 2 + k * (w - 4) / Math.max(1, sr.length - 1), Y = v => h - 3 - (v - lo) / (hi - lo || 1) * (h - m - 4);
+  g.strokeStyle = "rgba(255,255,255,.4)"; g.lineWidth = letra > 6 ? 1.2 : .7; g.setLineDash(letra > 6 ? [4, 3] : []); g.beginPath();
+  let dentro = false;
+  md.forEach((v, k) => { if (v == null) { dentro = false; return; } dentro ? g.lineTo(X(k + desfase), Y(v)) : g.moveTo(X(k + desfase), Y(v)); dentro = true; });
+  g.stroke(); g.setLineDash([]);
+  g.strokeStyle = p.peso > 0 ? "#2ee6a6" : "#c98500"; g.lineWidth = letra > 6 ? 2 : 1; g.beginPath();
+  sr.forEach((v, k) => g.lineTo(X(k), Y(v))); g.stroke();
+}
+function pantallaTendencia(i, j, w, h) {
+  const grupo = monedasTendencia().slice(i * 3, i * 3 + 3);
+  ctx.fillStyle = "#120e02"; ctx.fillRect(0, 0, w, h);
+  ctx.font = "800 5px JetBrains Mono, monospace";
+  if (!grupo.length) { ctx.fillStyle = "#8a6d1c"; ctx.fillText("SIN DINERO", 2, 6); return; }
+  const p = grupo[(j + Math.floor(T / 6)) % grupo.length];
+  pintarTendencia(ctx, w, h, p);
+  ctx.fillStyle = "#ffe7a8"; ctx.fillText(`${moneda(p.simbolo)} ${Math.round(p.peso * 100)}%`, 2, 6);
+}
 const proximaCompra = p => (p.compras || []).find(z => !z.sin_dinero && !z.llena);
 const proximaSalida = p => (p.ventas || []).find(z => !z.llena && z.precio);
 const fmtPct = x => String(x).replace(".", ",");
@@ -1780,7 +1812,8 @@ function pantallaSistema(w, h) {
   const hace = t => t ? Math.max(0, Math.round((Date.now() - Date.parse(t)) / 1000)) : null;
   const filas = [["Paper trading", p.errores_seguidos ? `${p.errores_seguidos} errores` : hace(p.ok) == null ? "—" : `ok hace ${hace(p.ok)} s`, !p.errores_seguidos],
     ["Ciclo", p.ciclo_s == null ? "—" : `${NF2.format(p.ciclo_s)} s`, (p.ciclo_s || 0) < 15], ["Holding", ho.errores_seguidos ? `${ho.errores_seguidos} errores` : "ok", !ho.errores_seguidos],
-    ["Minería", m.estado || "—", true], ["Mercados", String((p.mercados || []).length), true]];
+    ["Tendencia", (sis.tendencia || {}).errores_seguidos ? `${sis.tendencia.errores_seguidos} errores` : "ok", !(sis.tendencia || {}).errores_seguidos],
+    ["Minería", m.estado || "—", true]];
   filas.forEach(([t, v, ok], k) => {
     const y = 38 + k * 16;
     circulo(16, y - 4, 4, ok ? "#2ee6a6" : "#ff5a76");
@@ -2059,6 +2092,7 @@ const ROLES = {
   riesgos: {puesto: "Riesgos", camisa: "#6a4bc4", pantalon: "#2a2440", accesorio: null, tono: "#b58cff"},
   macro: {puesto: "Macroeconomía", camisa: "#1f8fa3", pantalon: "#23303d", accesorio: "gafas_pasta"},
   holder: {puesto: "Holding", camisa: "#f7931a", pantalon: "#2b2b30", accesorio: null},
+  tendencia: {puesto: "Sala de tendencia", camisa: "#8a6a12", pantalon: "#2a2418", accesorio: "gafas", tono: "#c98500"},
   supervisor: {puesto: "Supervisión", camisa: "#2c313c", pantalon: "#1d2128", accesorio: "tablet"},
   general: {puesto: "Supervisión general", camisa: "#f1ece2", pantalon: "#2b2f38", accesorio: "general", tono: "#ffcf5a"},
   riesgo2: {puesto: "Control de riesgos", camisa: "#8a2c45", pantalon: "#241820", accesorio: "gafas_pasta", tono: "#ff7a95"},
@@ -2141,6 +2175,11 @@ const EQUIPO_RIESGO = [RIESGOS, ...[["Óscar", "Vigila la exposición: cuántas 
   empleado({nombre: n, rol: "riesgo2", explica: e}, PUESTOS_RIESGO[i === 0 ? 0 : 2]))];
 const HOLDERS = [["Paula", "Lleva el holding de BTC y ETH: si baja, promedia comprando más; si sube, vende una parte en los puntos de salida. Nunca vende por miedo: aquí no hay stop."], ["Íñigo", "Lleva el holding de SOL y la reserva de capital: cuando a una cartera se le acaba el presupuesto, mete dinero de la reserva para seguir promediando."]].map(([n, e], i) =>
   empleado({nombre: n, rol: "holder", explica: e + " Todo con dinero ficticio."}, PUESTOS_HOLDING[i]));
+const EQUIPO_TENDENCIA = [["Marina", "BTC, ETH y SOL"], ["Vicente", "BNB, XRP y DOGE"]].map(([n, monedas], i) =>
+  empleado({nombre: n, rol: "tendencia", puesto: "Sala de tendencia · " + monedas, explica: `Sigue la tendencia de ${monedas} con velas diarias. `
+    + "Media parte de cada moneda está dentro si el precio cierra por encima de su media de 50 días; la otra media entra al romper el "
+    + "máximo de 20 días y sale al perder el mínimo de 10. Si no hay tendencia, el dinero espera en efectivo. Todo con dinero ficticio."},
+    PUESTOS_TENDENCIA[i]));
 const EXPLICA_MACRO = {
   "^GSPC": "Sigue la bolsa (S&P 500 y Nasdaq) y el VIX, el «índice del miedo». Con ellos decide si el mercado está en RISK-ON o RISK-OFF.",
   "DX-Y.NYB": "Sigue las divisas: el índice del dólar (DXY) y el EUR/USD. Un dólar fuerte suele poner las cosas difíciles a los activos de riesgo.",
@@ -2276,7 +2315,7 @@ function planificarGato() {
 // ---- dibujo de una persona (en coordenadas del mundo) ----
 // Cuerpo con hombros, manos y zapatos; cara con ojos que parpadean, cejas y boca según el ánimo;
 // ropa según el puesto (bata, americana, chaleco, sudadera...) y gestos cuando no teclean.
-const ROPA = {minero: "chaleco", prueba: "bata", banco: "traje", director: "traje", supervisor: "americana", general: "americana",
+const ROPA = {minero: "chaleco", prueba: "bata", banco: "traje", director: "traje", supervisor: "americana", general: "americana", tendencia: "jersey",
   riesgos: "americana", riesgo2: "jersey", macro: "jersey", holder: "sudadera", trader: "camisa", quant: "jersey", profesora: "americana",
   comunicacion: "camisa", it: "sudadera", barista: "camisa"};
 function torsoRuta(cx, top, h, wa, wb) {
@@ -3506,7 +3545,7 @@ let anterior = null, ultimoComentarioLab = -99, proximoCafe = 10, proximaCharla 
 function nuevosEventos(lista) {
   if (visto.size > 4000) {   // se vacía de vez en cuando, sin repetir lo que sigue en pantalla
     visto.clear();
-    for (const l of [S.mineria && S.mineria.actividad, S.papel && S.papel.actividad, S.holding && S.holding.actividad]) for (const e of l || []) visto.add(e.t + "|" + e.texto);
+    for (const l of [S.mineria && S.mineria.actividad, S.papel && S.papel.actividad, S.holding && S.holding.actividad, S.tendencia && S.tendencia.actividad]) for (const e of l || []) visto.add(e.t + "|" + e.texto);
   }
   const out = [];
   for (const e of lista || []) { const k = e.t + "|" + e.texto; if (!visto.has(k)) { visto.add(k); out.push(e); } }
@@ -3617,6 +3656,15 @@ function procesarPapel(eventos) {
       if (a.casa) flotante(a.casa.x, a.casa.y - .5, .9, (r > 0 ? "+" : "−") + NF2.format(Math.abs(r * (S.capital_por_estrategia || 1000) / 100)) + " $", bien ? "#2ee6a6" : "#ff5a76");
       if (r > 1.5) { const otro = pick([...traders.values()].filter(t => t !== a)); if (otro) decir(otro, pick(["¡Buena!", "Eso es seguir el plan.", "👏"]), 1); }
     }
+  }
+}
+function procesarTendencia(eventos) {
+  const quien = simbolo => EQUIPO_TENDENCIA[["BNBUSDT", "XRPUSDT", "DOGEUSDT"].includes(simbolo) ? 1 : 0];
+  for (const e of eventos) {
+    if (e.tipo === "plan" || e.tipo === "estreno") decir(EQUIPO_TENDENCIA[0], "📈 " + e.texto, e.tipo === "estreno" ? 3 : 1);
+    else if (e.tipo === "compra") { decir(quien(e.simbolo), `📈 ${e.texto}`, 2, "bueno"); flotante(44.9, 4.6, 1.6, "TENDENCIA " + moneda(e.simbolo), "#2ee6a6"); }
+    else if (e.tipo === "venta") { decir(quien(e.simbolo), `📉 ${e.texto} Me aparto hasta que vuelva la tendencia.`, 2); flotante(44.9, 4.6, 1.6, "FUERA " + moneda(e.simbolo), "#ffc24a"); }
+    else decir(quien(e.simbolo), e.texto, 1);
   }
 }
 function procesarHolding(eventos) {
@@ -3857,6 +3905,8 @@ function comite() {
     if (rv && rv.vetos && rv.vetos.length) lineas.push([RIESGOS, `Llevamos ${rv.vetos.length} vetos recientes. El último, a ${rv.vetos[0].id}: ${rv.vetos[0].motivo}.`]);
     const hr = S.holding && S.holding.resumen;
     if (hr) lineas.push([HOLDERS[0], `Holding: ${fmt.n(hr.valor)} $ de ${fmt.n(hr.aportado || hr.presupuesto)} $ aportados (${fmt.pct(hr.resultado_pct)}). Seguimos el plan: promediar si baja y salir por partes si sube.`]);
+    const tr = S.tendencia && S.tendencia.resumen;
+    if (tr) lineas.push([EQUIPO_TENDENCIA[0], `Tendencia: ${fmt.n(tr.valor)} $ (${fmt.pct(tr.resultado_pct)}). Hay tendencia en ${tr.dentro} de ${tr.monedas} monedas y tenemos invertido el ${NF0.format(tr.invertido_pct)} %; el resto espera en efectivo.`]);
     const gs = grupoVivo("scalping");
     if (gs.n) lineas.push([SUPERVISORES[7], `Scalping: ${gs.n} scalpers, ${gs.operaciones_hoy} operaciones hoy, ${dineroS(gs.hoy)} hoy y ${fmt.n(gs.comisiones)} $ pagados en comisiones.`]);
     if (S.fondo) lineas.push([GENERAL, `El fondo del jefe vale ${fmt.n(S.fondo.patrimonio)} $: ${fmt.pct(S.fondo.rentabilidad_pct)} desde el inicio, con un valor liquidativo de ${NF2.format(S.fondo.vl)} $.`]);
@@ -3901,7 +3951,7 @@ function actualizarHUD() {
     Object.values(mc.indicadores).map(d => `<div class="ind"><span>${esc(d.nombre)}</span><b>${d.valor >= 100 ? fmt.n(d.valor) : NF2.format(d.valor)}</b><span class="${d.dia_pct >= 0 ? "sube" : "baja"}">${fmt.pct(d.dia_pct)}</span></div>`).join("") +
     `<p class="nota">Actualizado a las ${fmt.hora(new Date(mc.actualizado))}.</p>`
     : `<p class="vacio">Aún no hay datos macro. Se actualizan cada 15 minutos con la oficina en marcha.</p>`;
-  actualizarHolding(); actualizarRiesgo(); actualizarRanking(); actualizarSalas(); actualizarScalping(); actualizarAbiertas();
+  actualizarHolding(); actualizarTendencia(); actualizarRiesgo(); actualizarRanking(); actualizarSalas(); actualizarScalping(); actualizarAbiertas();
   actualizarIncubadora(); actualizarInforme(); actualizarAcademia(); pintarBotonera();
   // embudo
   const e = m.embudo || {}, base = Math.max(1, e["Generadas"] || 0);
@@ -3926,6 +3976,8 @@ function actualizarHUD() {
     `<span><em>EVALUADAS</em>${fmt.n(e["Generadas"] || 0)}</span>`, `<span><em>MODO</em>paper trading · dinero ficticio</span>`);
   const hr = S.holding && S.holding.resumen;
   if (hr) trozos.push(`<span><em>HOLDING</em>${fmt.n(hr.valor)} $ <b class="${hr.resultado >= 0 ? "sube" : "baja"}">${fmt.pct(hr.resultado_pct)}</b></span>`);
+  const tdr = S.tendencia && S.tendencia.resumen;
+  if (tdr) trozos.push(`<span><em>TENDENCIA</em>${fmt.n(tdr.valor)} $ <b class="${tdr.resultado >= 0 ? "sube" : "baja"}">${fmt.pct(tdr.resultado_pct)}</b> · ${tdr.dentro}/${tdr.monedas} dentro</span>`);
   const rv = S.papel && S.papel.riesgo;
   if (rv) trozos.push(`<span><em>RIESGO</em><b class="${rv.bloqueo ? "baja" : "sube"}">${rv.bloqueo ? "FRENO ACTIVADO" : "operativa normal"}</b></span>`);
   const html = trozos.join("");
@@ -4226,6 +4278,30 @@ function actualizarHolding() {
     : `<p class="vacio">Los planes de holding se crean solos cuando arranca el paper trading.</p>`;
   ps.forEach((p, i) => { const cv = $("#gPlan" + i), l = cv && prepararLienzo(cv); if (l) pintarZonas(l[0], l[1], l[2], p, false); });
 }
+function actualizarTendencia() {
+  if (!$("#p-tendencia").classList.contains("activa") && $("#tendencia").children.length) return;
+  const ts = S.tendencia || {}, ms = monedasTendencia(), r = ts.resumen;
+  if (!ms.length) {
+    $("#tendencia").innerHTML = `<div class="macro-reg"><b>Sin dinero asignado</b><p>La sala de tendencia empieza a operar en cuanto le des una parte del fondo: abre «Mi fondo» y, en «Cómo quieres repartirlo», pon un % en Tendencia. También puedes pedirlo por el chat («pon un 20 % en tendencia»).</p><button type="button" class="ir-fondo">Abrir «Mi fondo»</button></div>`;
+    $("#tendencia .ir-fondo").addEventListener("click", () => cambiarVista("fondo"));
+    return;
+  }
+  const nivel = p => p.peso >= 1 ? "todo dentro" : p.peso > 0 ? "medio dentro" : "fuera (en efectivo)";
+  const proxima = r && ms[0] && ms[0].proxima_decision ? new Date(ms[0].proxima_decision).toLocaleString("es-ES", {weekday: "long", hour: "2-digit", minute: "2-digit"}) : null;
+  $("#tendencia").innerHTML = (r ? `<div class="macro-reg"><b class="${r.resultado >= 0 ? "sube" : "baja"}">${dineroS(r.resultado)} · ${pctS(r.resultado_pct)}</b><p>Valor ${fmt.dinero(r.valor)} de ${fmt.n(r.aportado)} $ ficticios. Ahora hay tendencia en <b>${r.dentro} de ${r.monedas}</b> monedas y está invertido el ${NF0.format(r.invertido_pct)} %; el resto espera en efectivo.${proxima ? ` Próxima decisión: ${esc(proxima)} (al cerrar el día).` : ""}</p></div>` : "") +
+    ms.map((p, i) => {
+      const ops = (p.operaciones || []).filter(o => o.tipo !== "ajuste").slice(-3).reverse();
+      const mitad = (dentro, si, no) => `<div class="zona ${dentro ? "c llena" : "v"}"><small>${si[0]}</small>${dentro ? "DENTRO · " + si[1] : "FUERA · " + no}</div>`;
+      return `<div class="plan"><div class="tit"><b>${esc(moneda(p.simbolo))} · ${nivel(p)}</b><span class="${p.resultado >= 0 ? "sube" : "baja"}">${dineroS(p.resultado)} (${pctS(p.resultado_pct)})</span></div>
+      <div class="sub">Precio ${fmt.precio(p.precio)} · invertido ${fmt.n(p.invertido)} $ · efectivo ${fmt.n(p.efectivo)} $</div>
+      <canvas class="grafica" id="gTend${i}" height="110" aria-label="Precio de los últimos 90 días (línea de color) y su media de 50 días (línea discontinua)"></canvas>
+      <div class="sub" style="margin:4px 0 8px"><i style="display:inline-block;width:14px;height:2px;background:${p.peso > 0 ? "#2ee6a6" : "#c98500"};vertical-align:middle"></i> precio diario (90 días) · <i style="display:inline-block;width:14px;border-top:2px dashed rgba(255,255,255,.5);vertical-align:middle"></i> media de 50 días</div>
+      <div class="zonas">${mitad(p.en_media, ["Mitad «media»", "cierra por encima de su media de 50 días" + (p.media ? ` (${fmt.precio(p.media)})` : "")], p.media ? `entra si cierra por encima de ${fmt.precio(p.media)}` : "aún sin media")}
+      ${mitad(p.en_ruptura, ["Mitad «ruptura»", p.minimo ? `sale si cierra por debajo de ${fmt.precio(p.minimo)} (mínimo de 10 días)` : "rompió el máximo de 20 días"], p.maximo ? `entra si cierra por encima de ${fmt.precio(p.maximo)} (máximo de 20 días)` : "aún sin datos")}</div>
+      <div class="sub" style="margin-top:8px">${ops.length ? ops.map(o => `${new Date(o.t).toLocaleDateString("es-ES")}: ${o.tipo === "compra" ? "compra" : "venta"} de ${fmt.n(o.importe)} $ a ${fmt.precio(o.precio)} (${esc(o.motivo)})`).join("<br>") : "Sin cambios desde que empezó."}</div></div>`;
+    }).join("");
+  ms.forEach((p, i) => { const cv = $("#gTend" + i), l = cv && prepararLienzo(cv); if (l) pintarTendencia(l[0], l[1], l[2], p, 9); });
+}
 function actualizarRiesgo() {
   const r = S.papel && S.papel.riesgo;
   if (!r) { $("#riesgo").innerHTML = `<p class="vacio">El control de riesgos empieza a trabajar con el paper trading.</p>`; return; }
@@ -4339,7 +4415,7 @@ function actualizarResultados() {
     animar($("#kPatrimonio"), f.patrimonio, x => fmt.dinero(x));
     const kp = $("#kPatrimonio").parentElement;
     kp.querySelector("small").textContent = "Patrimonio del fondo";
-    kp.title = `Has aportado ${fmt.n(f.aportado)} $ ficticios. El patrimonio sube o baja solo con los resultados de trading, scalping y holding. Detalles en «Mi fondo».`;
+    kp.title = `Has aportado ${fmt.n(f.aportado)} $ ficticios. El patrimonio sube o baja solo con los resultados de trading, scalping, holding y tendencia. Detalles en «Mi fondo».`;
     kr.parentElement.querySelector("small").textContent = "Resultado del fondo";
     animar(kr, f.resultado, x => `${dineroS(x)}<small>${pctS(f.rentabilidad_pct)}</small>`);
     animar(kh, f.hoy, x => `${dineroS(x)}<small>${pctS(f.hoy_pct)}</small>`);
@@ -4628,9 +4704,19 @@ function aplicarVivo(E) {
     }
     if (hs.resumen && total) Object.assign(hs.resumen, {valor, resultado: valor - total, resultado_pct: (valor / total - 1) * 100});
   }
+  const tn = E.tendencia;
+  if (tn && tn.monedas && tn.resumen) {   // la sala de tendencia, también con los precios en vivo
+    let valor = 0, aportado = 0, invertido = 0;
+    for (const p of Object.values(tn.monedas)) {
+      const v = vivo[p.simbolo];
+      if (v) { p.precio = v; p.invertido = p.unidades * v; p.valor = p.efectivo + p.invertido; p.resultado = p.valor - p.aportado; p.resultado_pct = p.aportado ? (p.valor / p.aportado - 1) * 100 : 0; }
+      valor += p.valor; aportado += p.aportado; invertido += p.invertido;
+    }
+    if (aportado) Object.assign(tn.resumen, {valor, resultado: valor - aportado, resultado_pct: (valor / aportado - 1) * 100, invertido, invertido_pct: valor ? invertido / valor * 100 : 0});
+  }
   const f = E.fondo;
-  if (f && f.participaciones) {   // el fondo con los precios en vivo: aportado + resultado de trading, scalping y holding
-    const res = (papel.resumen ? papel.resumen.resultado : 0) + (hs && hs.resumen ? hs.resumen.resultado : 0);
+  if (f && f.participaciones) {   // el fondo con los precios en vivo: aportado + resultado de trading, scalping, holding y tendencia
+    const res = (papel.resumen ? papel.resumen.resultado : 0) + (hs && hs.resumen ? hs.resumen.resultado : 0) + (tn && tn.resumen ? tn.resumen.resultado : 0);
     const cambio = f.aportado + res - f.patrimonio;
     f.patrimonio += cambio; f.resultado = f.patrimonio - f.aportado; f.hoy += cambio;
     f.vl = f.patrimonio / f.participaciones;
@@ -4656,6 +4742,15 @@ async function refrescar() {
   if (primeraVez) {
     primeraVez = false;
     nuevosEventos(m.actividad); nuevosEventos(S.papel && S.papel.actividad); nuevosEventos(S.holding && S.holding.actividad);
+    nuevosEventos(S.tendencia && S.tendencia.actividad);
+    // el estreno de la sala de tendencia pasa al arrancar, antes de abrir la oficina: se cuenta una vez aunque sea «de antes»
+    const estreno = (S.tendencia && S.tendencia.actividad || []).find(e => e.tipo === "estreno");
+    let estrenoVisto = false;
+    try { estrenoVisto = !estreno || localStorage.getItem("tf-estreno-tendencia") === estreno.t; } catch (err) { estrenoVisto = false; }
+    if (estreno && !estrenoVisto) {
+      anadirChat(EQUIPO_TENDENCIA[0], "📈 " + estreno.texto, "oro", "holding");
+      try { localStorage.setItem("tf-estreno-tendencia", estreno.t); } catch (err) { /* sin almacenamiento: se volverá a contar */ }
+    }
     sincronizarTraders(true); sincronizarIncubadora(true);
     anadirChat(null, "Te damos la bienvenida al Trading Floor. Todo lo que ves es real salvo el dinero: es paper trading, con dinero ficticio.");
     const rep = (S.repetidas || []).reduce((n, g) => n + g[1].length, 0);
@@ -4669,6 +4764,8 @@ async function refrescar() {
     enCanal("mineria", () => procesarMineria(evMineria));
     enCanal("operaciones", () => procesarPapel(evPapel));
     enCanal("holding", () => procesarHolding(evHolding));
+    const evTendencia = nuevosEventos(S.tendencia && S.tendencia.actividad);
+    enCanal("holding", () => procesarTendencia(evTendencia));
     if (anterior && anterior.mineria && anterior.mineria.estado !== "minando" && m.estado === "minando")
       enCanal("mineria", () => decir(pick(MINEROS), pick(["¡Nueva ronda! Vuelta al tajo.", "Se acabó el café: a minar.", "Servidores arriba. Vamos."]), 2));
   }
@@ -4957,6 +5054,7 @@ PESTANAS.forEach(b => b.onclick = () => {
   if (b.dataset.p === "traders" && S) actualizarResultados();
   if (b.dataset.p === "abiertas" && S) actualizarAbiertas();
   if (b.dataset.p === "holding" && S) { $("#holding").innerHTML = ""; actualizarHolding(); }
+  if (b.dataset.p === "tendencia" && S) { $("#tendencia").innerHTML = ""; actualizarTendencia(); }
   if (b.dataset.p === "chat") { sinLeer = 0; $("#nChat").hidden = true; const c = $("#chatScroll"); c.scrollTop = c.scrollHeight; }
 });
 document.querySelector(".canales").addEventListener("click", e => {
@@ -4976,9 +5074,10 @@ setTimeout(() => { $("#ayuda").style.opacity = 0; }, 9000);
 // ========================================== MI FONDO (dashboard) ======
 // Colores validados (categóricos 1-3 en todas las parejas, también con daltonismo) sobre la superficie #10151d:
 // áreas = azul/naranja/aguamarina; el fondo va destacado en el lima de la marca y BTC en gris de contexto.
-const COL = {fondo: "#d4ff3a", btc: "#898781", trading: "#3987e5", scalping: "#d95926", holding: "#199e70", liquidez: "#5b606b",
+const COL = {fondo: "#d4ff3a", btc: "#898781", trading: "#3987e5", scalping: "#d95926", holding: "#199e70", tendencia: "#c98500", liquidez: "#5b606b",
   bueno: "#0ca30c", malo: "#d03b3b", superficie: "#10151d", rejilla: "rgba(255,255,255,.07)", eje: "#383835"};
-const AREAS_F = [["trading", "Sala de trading"], ["scalping", "Scalping"], ["holding", "Holding"]];
+const AREAS_F = [["trading", "Sala de trading"], ["scalping", "Scalping"], ["holding", "Holding"], ["tendencia", "Tendencia"]];
+const AREAS_K = AREAS_F.map(([k]) => k);
 let vistaFondo = false, F = null, rangoFondo = 30, cargandoFondo = false;
 const tablasAbiertas = new Set();
 function cambiarVista(v) {
@@ -5126,24 +5225,24 @@ let repartoTocado = false;
 function pintarEditor() {
   const f = $("#dEditor"), ob = F.objetivo;
   if (!ob) return;
-  if (!repartoTocado) for (const k of ["trading", "scalping", "holding"]) f.elements[k].value = Math.round((ob.pct[k] || 0) * 100) / 100;
+  if (!repartoTocado) for (const k of AREAS_K) f.elements[k].value = Math.round((ob.pct[k] || 0) * 100) / 100;
   previaReparto();
 }
 function previaReparto() {
   const f = $("#dEditor"), ob = F && F.objetivo;
   if (!ob) return;
-  const v = k => Math.max(0, +f.elements[k].value || 0), suma = v("trading") + v("scalping") + v("holding"), liq = 100 - suma;
+  const v = k => Math.max(0, +f.elements[k].value || 0), suma = AREAS_K.reduce((x, k) => x + v(k), 0), liq = 100 - suma;
   const patr = (S && S.fondo ? S.fondo.patrimonio : F.resumen.patrimonio);
   $("#dLiq").textContent = NF1.format(liq) + " %"; $("#dLiq").className = liq < 0 ? "mal" : "";
   f.querySelector("button").disabled = liq < 0 || !repartoTocado;
-  $("#dPrevia").innerHTML = liq < 0 ? "Entre las tres áreas pasan del 100 %."
-    : `Quedaría: ${fmt.n(v("trading") / 100 * patr / (ob.mesas.trading || 48))} $ por trader, ${fmt.n(v("scalping") / 100 * patr / (ob.mesas.scalping || 12))} $ por scalper y ${fmt.n(v("holding") / 100 * patr)} $ para el holding.`
+  $("#dPrevia").innerHTML = liq < 0 ? "Entre las cuatro áreas pasan del 100 %."
+    : `Quedaría: ${fmt.n(v("trading") / 100 * patr / (ob.mesas.trading || 48))} $ por trader, ${fmt.n(v("scalping") / 100 * patr / (ob.mesas.scalping || 12))} $ por scalper, ${fmt.n(v("holding") / 100 * patr)} $ para el holding y ${fmt.n(v("tendencia") / 100 * patr)} $ para la sala de tendencia.`
       + (liq < v("holding") * .5 ? " <span style='color:#ffc24a'>Ojo: el holding puede usar hasta un 50 % más como reserva, y eso sale del dinero sin invertir.</span>" : "");
 }
 $("#dEditor").addEventListener("input", () => { repartoTocado = true; previaReparto(); });
 $("#dEditor").addEventListener("submit", async e => {
   e.preventDefault();
-  const f = $("#dEditor"), reparto = Object.fromEntries(["trading", "scalping", "holding"].map(k => [k, +f.elements[k].value || 0]));
+  const f = $("#dEditor"), reparto = Object.fromEntries(AREAS_K.map(k => [k, +f.elements[k].value || 0]));
   f.querySelector("button").disabled = true;
   let r;
   try {
@@ -5158,7 +5257,7 @@ $("#dEditor").addEventListener("submit", async e => {
 // Mi fondo en castellano llano: primero cinco respuestas cortas («¿ganas o pierdes?», «¿mejor que BTC?», «¿está
 // trabajando tu dinero?», «¿qué parte va mejor?», «¿cuánto riesgo?»), luego las gráficas y, plegado, lo técnico.
 const NOMBRE_PERIODO = {7: "En los últimos 7 días", 30: "En los últimos 30 días", 90: "En los últimos 90 días", 0: "Desde el principio"};
-const AREA_NOMBRE = {trading: "Sala de trading", scalping: "Scalping", holding: "Holding", liquidez: "Sin invertir"};
+const AREA_NOMBRE = {trading: "Sala de trading", scalping: "Scalping", holding: "Holding", tendencia: "Tendencia", liquidez: "Sin invertir"};
 const MOTIVO_TXT = {objetivo: "llegó al objetivo", stop: "saltó el stop", tiempo: "se acabó su tiempo", "kill switch": "kill switch", relevo: "relevo", retirada: "retirada"};
 const fechaLarga = iso => new Date(iso).toLocaleDateString("es-ES", {day: "numeric", month: "long"});
 const signoD = x => (x > 0.005 ? "+" : x < -0.005 ? "−" : "") + NF2.format(Math.abs(x)) + " $";   // +12,34 $
@@ -5192,10 +5291,10 @@ function pintarFondo() {
   let picoBtc = 0, caidaBtc = 0;
   for (const f of serie) { const v = f[cols.btc_vl]; if (v == null) continue; picoBtc = Math.max(picoBtc, v); caidaBtc = Math.min(caidaBtc, (v / picoBtc - 1) * 100); }
   const rep = F.reparto, ob = F.objetivo || {pct: {}, usd: {}, capital_mesa: {}, mesas: {}, ocupadas: {}};
-  const invertido = rep.trading + rep.scalping + rep.holding, parado = rep.liquidez, total = invertido + Math.max(0, parado) || 1;
+  const invertido = AREAS_K.reduce((x, k) => x + (rep[k] || 0), 0), parado = rep.liquidez, total = invertido + Math.max(0, parado) || 1;
   const pctInv = invertido / total * 100;
   const vacias = Math.max(0, (ob.mesas.trading || 0) - (ob.ocupadas.trading || 0)) + Math.max(0, (ob.mesas.scalping || 0) - (ob.ocupadas.scalping || 0));
-  const areas = ["trading", "scalping", "holding"].map(k => [k, (R.por_area || {})[k] || 0]).sort((a, b) => b[1] - a[1]);
+  const areas = AREAS_K.map(k => [k, (R.por_area || {})[k] || 0]).sort((a, b) => b[1] - a[1]);
   const riesgo = S && S.papel && S.papel.riesgo || {}, nivel = caidaMax > -3 ? ["Bajo", "bueno", "● Riesgo bajo"] : caidaMax > -10 ? ["Medio", "aviso", "⚠ Riesgo medio"] : ["Alto", "malo", "▲ Riesgo alto"];
   $("#dClaves").innerHTML = [
     clave("¿Ganas o pierdes?", signoD(resultado), resultado > .005 ? "▲ Ganando" : resultado < -.005 ? "▼ Perdiendo" : "= Igual", resultado > .005 ? "bueno" : resultado < -.005 ? "malo" : "",
@@ -5205,7 +5304,7 @@ function pintarFondo() {
       + (caidaBtc < caidaMax ? ` A cambio, se mueve mucho menos: lo más que ha bajado es un ${esc(pctF(caidaMax))}, y BTC llegó a bajar un ${esc(pctF(caidaBtc))}.` : "")),
     clave("¿Está trabajando tu dinero?", `${NF0.format(pctInv)} % invertido`, parado > total * .25 ? "⚠ Mucho dinero parado" : "✓ Casi todo trabajando", parado > total * .25 ? "aviso" : "bueno",
       parado < 0 ? "Hay más dinero en uso que en el fondo: mete más dinero o baja el reparto."
-        : `${fmt.n(invertido)} $ trabajan en ${ob.ocupadas.trading || 0} mesas de trading, ${ob.ocupadas.scalping || 0} de scalping y las carteras de holding. `
+        : `${fmt.n(invertido)} $ trabajan en ${ob.ocupadas.trading || 0} mesas de trading, ${ob.ocupadas.scalping || 0} de scalping, las carteras de holding y la sala de tendencia. `
           + `<b>${fmt.n(parado)} $ esperan sin invertir</b>` + (vacias ? `: hay ${vacias} mesas vacías, que se llenarán cuando la incubadora apruebe estrategias nuevas.` : ".")),
     clave("¿Qué parte va mejor?", esc(AREA_NOMBRE[areas[0][0]]), areas[0][1] > 0 ? `▲ ${signoD(areas[0][1])}` : "Ninguna gana todavía", areas[0][1] > 0 ? "bueno" : "",
       areas.map(([k, v]) => `${esc(AREA_NOMBRE[k])} <b class="${claseS(v)}">${esc(signoD(v))}</b>`).join(" · ") + ", desde el principio."),
@@ -5232,12 +5331,13 @@ function pintarFondo() {
   if (!tablasAbiertas.has("ganado")) lineasSvg(gG.querySelector(".g"), [{nombre: "Ganado", color: COL.fondo, grosor: 2.5, puntos: filas.map((f, i) => [ms[i], res(f) - res(base)])}],
     {formato: signoD, eje: signoEje, area: true, cero: true, alto: 250, minimo: 20});
   // 2) qué parte gana y cuál pierde (en el periodo)
-  const porArea = ["trading", "scalping", "holding"].map(k => [k, (fin[cols[k]] || 0) - (base[cols[k]] || 0)]);
+  const porArea = AREAS_K.map(k => [k, (fin[cols[k]] || 0) - (base[cols[k]] || 0)]);
   const maxA = Math.max(1e-9, ...porArea.map(([, v]) => Math.abs(v)));
   const A = F.areas || {};
   const detalleArea = k => {
     const a = A[k] || {};
     if (k === "holding") return a.valor ? `carteras de largo plazo: ${fmt.n(a.aportado || a.presupuesto || 0)} $ invertidos, ahora valen ${fmt.n(a.valor)} $` : "sin carteras todavía";
+    if (k === "tendencia") return a.valor ? `sigue la tendencia de ${a.monedas} monedas: ahora tiene invertido el ${NF0.format(a.invertido_pct || 0)} % (hay tendencia en ${a.dentro} de ${a.monedas})` : "sin dinero todavía: ponle un % en «Cómo quieres repartirlo»";
     return a.traders ? `${a.traders} ${k === "scalping" ? "scalpers" : "traders"} · ${fmt.n(a.operaciones || 0)} operaciones cerradas` + (a.aciertos_pct != null ? ` · aciertan el ${NF0.format(a.aciertos_pct)} %` : "") : "sin traders todavía";
   };
   $("#sAreas").textContent = `${periodo}, en dólares. A la derecha lo que gana; a la izquierda, lo que pierde.`;
@@ -5271,9 +5371,11 @@ function pintarFondo() {
   gD.innerHTML = conTabla("dias", "<div class='g'></div>", tablaHtml(["Día", "Ganado o perdido"], dias.map(([t, v]) => [diaF(t), {texto: signoD(v), clase: claseS(v)}]).reverse(), [1]));
   if (!tablasAbiertas.has("dias")) columnasSvg(gD.querySelector(".g"), dias, 170, signoD, ["ganó", "perdió"], signoEje);
   // 5) dónde está tu dinero: lo que trabaja ahora en cada parte y lo que espera
-  const AREAS_R = ["trading", "scalping", "holding", "liquidez"];
+  const AREAS_R = [...AREAS_K, "liquidez"];
   const porque = k => k === "trading" || k === "scalping" ? `${ob.ocupadas[k] || 0} de ${ob.mesas[k] || 0} mesas con ${k === "scalping" ? "scalper" : "trader"}, ${fmt.n(ob.capital_mesa[k] || 0)} $ cada una`
-    : k === "holding" ? `presupuesto de las carteras: ${fmt.n(ob.presupuesto_holding || 0)} $` : "lo que no repartes y el dinero de las mesas vacías";
+    : k === "holding" ? `presupuesto de las carteras: ${fmt.n(ob.presupuesto_holding || 0)} $`
+    : k === "tendencia" ? `presupuesto: ${fmt.n(ob.presupuesto_tendencia || 0)} $; solo se invierte en las monedas con tendencia al alza, el resto espera en efectivo`
+    : "lo que no repartes y el dinero de las mesas vacías";
   $("#sReparto").innerHTML = `Ahora trabajan <b>${fmt.n(invertido)} $</b> de ${fmt.n(Math.max(total, 1))} $. Tú eliges qué parte va a cada área (a la derecha); `
     + `en trading y scalping, ese dinero se reparte entre sus mesas, así que una mesa sin trader deja su parte sin invertir.`;
   const segs = AREAS_R.filter(k => (rep[k] || 0) > 0);
@@ -5481,6 +5583,7 @@ function actualizarInforme() {
     <table class="tabla-eq"><tr><td>Paper trading</td><td class="${p.errores_seguidos ? "baja" : "sube"}">${p.errores_seguidos ? `${p.errores_seguidos} errores seguidos` : p.ok ? "funcionando" : "—"}</td></tr>
       <tr><td>Duración de cada ciclo</td><td>${p.ciclo_s == null ? "—" : NF2.format(p.ciclo_s) + " s"}</td></tr>
       <tr><td>Holding</td><td class="${ho.errores_seguidos ? "baja" : "sube"}">${ho.errores_seguidos ? `${ho.errores_seguidos} errores` : ho.ok ? "funcionando" : "—"}</td></tr>
+      <tr><td>Tendencia</td><td class="${(sis.tendencia || {}).errores_seguidos ? "baja" : "sube"}">${(sis.tendencia || {}).errores_seguidos ? `${sis.tendencia.errores_seguidos} errores` : (sis.tendencia || {}).ok ? "funcionando" : "—"}</td></tr>
       <tr><td>Mercados con datos en vivo</td><td>${(p.mercados || []).length}</td></tr></table>
     ${p.ultimo_error && p.errores_seguidos ? `<p class="nota">Último error: ${esc(p.ultimo_error)}</p>` : ""}`;
 }

@@ -36,7 +36,7 @@ ACCIONES = {
     "cambiar_riesgo": "Cambiar un límite de riesgo",
     "nuevo_plan_holding": "Rehacer un plan de holding (presupuesto, caída para promediar, reserva y puntos de salida)",
     "convocar_comite": "Convocar el comité ahora",
-    "asignar": "Cambiar el reparto del fondo: «objetivo» es el área (trading, scalping u holding) y «valor» el % del fondo que se le dedica; lo que queda es liquidez",
+    "asignar": "Cambiar el reparto del fondo: «objetivo» es el área (trading, scalping, holding o tendencia) y «valor» el % del fondo que se le dedica; lo que queda es liquidez",
     "aportar": "Aportar dinero (ficticio) a tu fondo: «valor» es el importe en dólares",
     "retirar": "Retirar dinero (ficticio) de tu fondo: «valor» es el importe; como mucho la liquidez disponible",
 }
@@ -80,18 +80,21 @@ def cargar() -> dict:
 
 
 def _repartir(nuevo: dict) -> str:
-    """Aplica un reparto en % (trading, scalping, holding): capital por mesa desde ahora y presupuesto del holding."""
-    from . import fondo, holding
+    """Aplica un reparto en % (trading, scalping, holding, tendencia): capital por mesa desde ahora y presupuesto del
+    holding y de la sala de tendencia."""
+    from . import fondo, holding, tendencia
 
     patrimonio = fondo.calcular(completo=False)["resumen"]["patrimonio"]
     info = fondo.asignar(nuevo, patrimonio)
     holding.ajustar_total(info["holding"])
+    tendencia.ajustar_total(info["tendencia"])
     aviso = ""
     if info["liquidez"] < info["holding_pct"] * 0.5:
         aviso = " Ojo: la reserva del holding (hasta un 50 % más) sale de la liquidez, y queda poca."
     return (f"Nuevo reparto del fondo: trading {_num(info['trading'])} % ({_dinero(info['trader'])} $ por trader), "
             f"scalping {_num(info['scalping'])} % ({_dinero(info['scalper'])} $ por scalper), holding {_num(info['holding_pct'])} % "
-            f"({_dinero(info['holding'])} $ de presupuesto) y liquidez {_num(info['liquidez'])} %. Se aplica desde ahora; "
+            f"({_dinero(info['holding'])} $ de presupuesto), tendencia {_num(info['tendencia_pct'])} % "
+            f"({_dinero(info['tendencia'])} $) y liquidez {_num(info['liquidez'])} %. Se aplica desde ahora; "
             f"lo ganado hasta hoy se conserva.{aviso}")
 
 
@@ -149,7 +152,9 @@ def _aplicar(propuesta: dict) -> str:
     elif accion == "activar_freno":
         c["freno_manual"], hecho = True, "Freno manual activado: no se abren posiciones nuevas."
     elif accion == "quitar_freno":
-        c["freno_manual"], hecho = False, "Reabierto: se quita el freno manual y se vuelven a permitir entradas."
+        c["freno_manual"], hecho = False, ("Reabierto: se quita el freno manual (y la pausa por caída, si la había) y se "
+                                           "vuelven a permitir entradas.")
+        c["reabierto"] = dt.datetime.now().astimezone().isoformat(timespec="seconds")
     elif accion == "kill_switch":
         c["freno_manual"] = True
         c["kill_switch"] = dt.datetime.now().astimezone().isoformat(timespec="seconds")
@@ -216,7 +221,7 @@ def _aplicar(propuesta: dict) -> str:
         if objetivo:
             area = objetivo.lower().strip()
             if area not in fondo.AREAS:
-                raise ValueError("El área tiene que ser trading, scalping u holding.")
+                raise ValueError("El área tiene que ser trading, scalping, holding o tendencia.")
             cambios_[area] = valor
         if not cambios_:
             raise ValueError("Dime qué % quieres dedicar a cada área.")

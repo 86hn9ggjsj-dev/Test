@@ -7,6 +7,7 @@ Uso:
     python -m trading_floor papel           # solo el paper trading
     python -m trading_floor macro           # resumen macroeconómico
     python -m trading_floor holding         # carteras de largo plazo: promedian a la baja, sin stop
+    python -m trading_floor tendencia       # sala de tendencia: media de 50 días y ruptura 20/10, en velas diarias
     python -m trading_floor web             # solo la oficina
 """
 
@@ -64,6 +65,27 @@ def _ver_holding(args) -> None:
     if r:
         print(f"\nTotal: {_es(r['valor'])} $ de {_es(r['aportado'], 0)} $ aportados ({_es(r['resultado_pct'])} %). "
               "Dinero ficticio.")
+
+
+def _ver_tendencia() -> None:
+    from . import almacen, tendencia
+
+    tendencia.actualizar()
+    estado = almacen.cargar("tendencia", {})
+    if not estado.get("cartera"):
+        print("La sala de tendencia no tiene dinero todavía: ponle un % en «Mi fondo» o por el chat («pon un 20 % en tendencia»).")
+        return
+    pr = lambda x: _es(x, 2 if x >= 10 else 4) if x else "—"  # noqa: E731
+    for p in estado.get("monedas", {}).values():
+        nivel = "todo dentro" if p["peso"] >= 1 else "medio dentro" if p["peso"] > 0 else "fuera"
+        print(f"\n{p['simbolo']}  {nivel} · valor {_es(p['valor'])} $ ({_es(p['resultado_pct'])} %) · precio {pr(p['precio'])}")
+        print(f"   media de 50 días {pr(p.get('media'))} ({'dentro' if p['en_media'] else 'fuera'}) · "
+              f"máximo de 20 días {pr(p.get('maximo'))} · mínimo de 10 días "
+              f"{pr(p.get('minimo'))} ({'ruptura dentro' if p['en_ruptura'] else 'ruptura fuera'})")
+    r = estado.get("resumen")
+    if r:
+        print(f"\nTotal: {_es(r['valor'])} $ de {_es(r['aportado'], 0)} $ ({_es(r['resultado_pct'])} %), invertido el "
+              f"{_es(r['invertido_pct'], 0)} %. Dinero ficticio.")
 
 
 def _opciones_mineria(p: argparse.ArgumentParser) -> None:
@@ -148,6 +170,8 @@ def main() -> None:
                         help="puntos de salida en %% sobre el coste medio, separados por comas (por defecto 30,60,100)")
     p_hold.add_argument("--borrar", metavar="SIMBOLO", help="borra el plan de un símbolo")
 
+    sub.add_parser("tendencia", help="sala de tendencia: media de 50 días y ruptura 20/10 en velas diarias, solo compras")
+
     p_web = sub.add_parser("web", help="abrir solo la oficina")
     p_web.add_argument("--puerto", type=int, default=8050)
     p_web.add_argument("--no-abrir", action="store_true", help="no abrir el navegador")
@@ -189,6 +213,8 @@ def main() -> None:
                 print(f"  {i['nombre']:<26} {_es(i['valor']):>12}   día {_es(i['dia_pct'])} %   semana {_es(i['semana_pct'])} %")
         elif args.orden == "holding":
             _ver_holding(args)
+        elif args.orden == "tendencia":
+            _ver_tendencia()
         elif args.orden == "web":
             from .web import servir
 
