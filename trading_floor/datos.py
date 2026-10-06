@@ -85,6 +85,9 @@ def _descargar(simbolo: str, intervalo: str, dias: int, ahora_ms: int) -> pd.Dat
         columns=COLUMNAS,
     )
     df = nuevas if cache is None else pd.concat([cache, nuevas])
+    # Siempre en nanosegundos: según la versión de pandas y de dónde vengan (descarga o caché), las horas salían en
+    # milisegundos o en microsegundos, y comparar con una hora guardada con decimales de segundo fallaba.
+    df.index = pd.DatetimeIndex(df.index).as_unit("ns")
     df = df[~df.index.duplicated(keep="last")].sort_index()
     if len(nuevas) or cache is None:
         df.to_csv(ruta)

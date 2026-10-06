@@ -4281,6 +4281,11 @@ function actualizarHolding() {
 function actualizarTendencia() {
   if (!$("#p-tendencia").classList.contains("activa") && $("#tendencia").children.length) return;
   const ts = S.tendencia || {}, ms = monedasTendencia(), r = ts.resumen;
+  if (!ms.length && ts.cartera) {
+    const err = (S.sistema || {}).tendencia || {};
+    $("#tendencia").innerHTML = `<div class="macro-reg"><b>Arrancando…</b><p>La sala tiene ${fmt.n(ts.cartera.presupuesto)} $ asignados y está descargando las velas de sus seis monedas. En un par de minutos empieza a operar.${err.errores_seguidos ? ` Ahora mismo da un error (${esc(err.ultimo_error || "")}); lo reintenta cada vuelta.` : ""}</p></div>`;
+    return;
+  }
   if (!ms.length) {
     $("#tendencia").innerHTML = `<div class="macro-reg"><b>Sin dinero asignado</b><p>La sala de tendencia empieza a operar en cuanto le des una parte del fondo: abre «Mi fondo» y, en «Cómo quieres repartirlo», pon un % en Tendencia. También puedes pedirlo por el chat («pon un 20 % en tendencia»).</p><button type="button" class="ir-fondo">Abrir «Mi fondo»</button></div>`;
     $("#tendencia .ir-fondo").addEventListener("click", () => cambiarVista("fondo"));
