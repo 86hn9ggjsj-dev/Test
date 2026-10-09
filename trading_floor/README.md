@@ -156,8 +156,8 @@ Telegram de Jarvis, si lo tienes configurado.
    sobrevive; con la de «maker» sí algunas. La sala enseña cuánto se paga en comisiones.
 11. **Tu fondo** (`fondo.py`). Todo junto funciona como un fondo de inversión, con dinero ficticio:
    aportas capital (100.000 $ al empezar) y recibes participaciones a 10 $. El **valor liquidativo**
-   (patrimonio / participaciones) solo sube o baja con los resultados de trading, scalping, holding y
-   tendencia;
+   (patrimonio / participaciones) solo sube o baja con los resultados de trading, scalping, holding,
+   tendencia y los intereses de la liquidez;
    aportar o retirar dinero no lo cambia. Así la cabecera muestra tu patrimonio de verdad y un trader
    nuevo ya no «suma» 1.000 $. Calcula rentabilidad (hoy, 7 y 30 días, año, anualizada), volatilidad,
    Sharpe, caída máxima, mejor y peor día, rentabilidad mensual, la comparación con haber comprado BTC,
@@ -173,9 +173,19 @@ Telegram de Jarvis, si lo tienes configurado.
    devuelven capital, y si les falta efectivo venden lo justo). Al aportar o retirar dinero se reajusta
    solo para mantener tus %. Se cambia en «Mi fondo» → «Cómo quieres repartirlo» o por el chat («dedica un
    20 % al holding»).
-12. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años
-   (Yahoo Finance) y el Fear & Greed de cripto (alternative.me). Con ellos se calcula un régimen
-   RISK-ON / RISK-OFF. Es contexto para el comité: **las estrategias no usan estos datos**.
+12. **Macro** (`macro.py`). S&P 500, Nasdaq, VIX, dólar, EUR/USD, oro, petróleo, bono a 10 años, letras
+   del Tesoro de EE. UU. a 3 meses (Yahoo Finance) y el Fear & Greed de cripto (alternative.me). Con ellos
+   se calcula un régimen RISK-ON / RISK-OFF. Es contexto para el comité: **las estrategias no usan estos
+   datos** (el tipo de las letras solo se usa para los intereses de la liquidez).
+13. **Liquidez remunerada** (`liquidez.py`). Un fondo de verdad no deja su dinero parado: lo tiene en
+   letras del Tesoro o en un monetario. Aquí, todo lo que no está dentro del mercado cobra el tipo de las
+   letras del Tesoro de EE. UU. a 3 meses (ahora, un 4 % al año; si no hay dato, el `TIPO_LIQUIDEZ` de
+   `config.py`): el % del fondo que no repartes, el capital de las mesas vacías y de los traders sin
+   posición, y el efectivo que guardan el holding y la sala de tendencia. Lo invertido (posiciones
+   abiertas y monedas) no cobra. Los intereses se suman en cada vuelta del paper trading; el tiempo que el
+   programa estuvo cerrado también cuenta, hasta 7 días. Cuentan en tu fondo como una parte más,
+   «Intereses», con su color en las gráficas, y salen en el informe del día. En el chat: «¿cuánto cobramos
+   de intereses?».
 
 Un ejemplo real de embudo (2.000 estrategias de BTC): 362 parecían rentables, 17 aguantaron
 fuera de muestra y 3 entraron en el banco. Así es esto: casi todo es ruido.
@@ -205,6 +215,27 @@ minería no había visto, y se miró qué habría pasado después:
   las variantes razonables (media de 50, 100 o 200 días; rupturas 20/10, 30/15 o 55/20) también ganaron a
   comprar y mantener (entre +14 % y +31 % al año). En el último año, con el mercado cayendo entre un 23 %
   y un 59 % según la moneda, la sala habría acabado casi en tablas (−2 %).
+- **Dónde se pierde en la oficina** («Dónde se gana y dónde se pierde»): abrir y cerrar operaciones
+  (comisiones y deslizamiento) es solo una parte pequeña de lo perdido, entre un 8 y un 15 %. Lo que más
+  pesa es el mercado: en la caída de principios de octubre de 2026, la sala de tendencia perdió hasta que
+  salió, que es justo cuando peor lo pasa (sale al cerrar el día, no en mitad de la caída).
+- **Cobrar por el dinero parado**: con el tipo de las letras del Tesoro de cada día, el efectivo de un
+  fondo como este suma entre 3 y 4 puntos al año.
+- **El reparto** (de 2022 a hoy, juntando todo lo anterior y suponiendo que trading y scalping pierden un
+  1 % al año):
+
+  | Reparto (trading / scalping / holding / tendencia, resto sin invertir) | Al año | Caída máxima | 2022 | Meses en positivo |
+  |---|---|---|---|---|
+  | 20 / 15 / 30 / 30, sin cobrar intereses | +20,0 % | −34 % | −30,2 % | 50 % |
+  | 20 / 15 / 30 / 30, cobrando intereses | +23,6 % | −33,5 % | −29,6 % | 50 % |
+  | **5 / 0 / 25 / 40, cobrando intereses (el «reparto rentable»)** | **+25,6 %** | **−31,4 %** | **−27,7 %** | 48 % |
+
+  El «reparto rentable» deja el scalping a 0 % (pierde incluso antes de comisiones), casi nada en trading
+  (no gana a las comisiones), un 25 % en holding, un 40 % en tendencia y un 30 % sin invertir cobrando
+  intereses. Al abrir la oficina, Marta te lo propone **una vez** con botones de Aprobar / Rechazar (si ya
+  lo tienes, no dice nada); también por el chat: «reparto rentable» o «necesitamos que sea rentable».
+  Tu reparto no cambia hasta que lo apruebas. Con el scalping a 0 %, sus scalpers siguen en la sala con
+  0 $ (lo que ganaron o perdieron antes se conserva), por si un día la minería encuentra algo que funcione.
 
 Por eso, al estrenar la sala de tendencia, recibe la mitad del % que tenía la sala de trading (como mucho
 25 puntos; una sola vez, después decides tú en «Mi fondo»). Nada de esto garantiza el futuro: son
@@ -222,8 +253,9 @@ en castellano llano:
 - **Dónde se gana y dónde se pierde** (en el periodo elegido): para cada parte del fondo, su resultado, lo
   que hizo antes de comisiones, lo que costó abrir y cerrar (comisiones y deslizamiento) y cuántas
   operaciones hizo, más cuánto se movió cada moneda. Una frase dice qué parte resta o suma más y qué parte
-  de lo perdido son comisiones. La incubadora no cuenta: usa dinero de prueba. En el chat: «¿dónde
-  perdemos?»; si el scalping pierde incluso antes de comisiones, Marta propone dejarlo a 0 %.
+  de lo perdido son comisiones. Los intereses de la liquidez salen como una parte más. La incubadora no
+  cuenta: usa dinero de prueba. En el chat: «¿dónde perdemos?»; si el scalping pierde incluso antes de
+  comisiones, Marta propone dejarlo a 0 %.
 - Las gráficas del periodo que elijas (7, 30, 90 días o desde el principio): cuánto has ganado, qué parte
   del fondo gana y cuál pierde, tu fondo frente a BTC, días buenos y malos, dónde está tu dinero (con el
   editor del reparto), cómo les va a los traders y las operaciones abiertas. Cada gráfica tiene su «tabla
@@ -290,8 +322,9 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
   - **Modo básico (gratis)**: entiende órdenes sencillas («busca estrategias de SOL», «para la búsqueda»,
     «pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX»,
     «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?»,
-    «riesgo 0,5», «¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿cómo vamos?», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?»,
-    «¿quién es el mejor?»).
+    «riesgo 0,5», «¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿dónde perdemos?»,
+    «reparto rentable», «¿cuánto cobramos de intereses?», «¿cómo vamos?», «¿cómo van las operaciones abiertas?»,
+    «¿cómo paseo por la oficina?», «¿quién es el mejor?»).
   - **Con Claude (opcional, de pago)**: si pones `ANTHROPIC_API_KEY=...` en el archivo `.env` de la
     raíz del proyecto, contestan de verdad a cualquier cosa. Cada mensaje cuesta unos céntimos de tu
     saldo de la API (console.anthropic.com), que va aparte de la suscripción de la app de Claude. Por
@@ -338,6 +371,7 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
 | `riesgo.py` | Tamaño de las operaciones, límites, vetos y frenos |
 | `holding.py` | Carteras de largo plazo sin stop: promedian a la baja y salen por partes sobre el coste medio |
 | `tendencia.py` | Sala de tendencia: media de 50 días y ruptura 20/10 en velas diarias, solo compras |
+| `liquidez.py` | Liquidez remunerada: el dinero que no está en el mercado cobra el tipo de las letras del Tesoro |
 | `macro.py` | Datos macroeconómicos y régimen de mercado |
 | `control.py` | Tus decisiones: búsqueda de estrategias, pausar todo, reabrir, kill switch, traders, límites de riesgo |
 | `chat.py` | Chat con la oficina: modo básico o con Claude, y propuestas de decisiones |

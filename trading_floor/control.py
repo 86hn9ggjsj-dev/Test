@@ -11,7 +11,7 @@ import datetime as dt
 import threading
 
 from . import almacen, banco
-from .config import SCALPING_SIMBOLOS, SIMBOLOS
+from .config import REPARTO_RENTABLE, SCALPING_SIMBOLOS, SIMBOLOS
 
 # límites de riesgo que se pueden cambiar: nombre -> (texto, mínimo, máximo, unidad)
 RIESGO_EDITABLE = {
@@ -36,7 +36,7 @@ ACCIONES = {
     "cambiar_riesgo": "Cambiar un límite de riesgo",
     "nuevo_plan_holding": "Rehacer un plan de holding (presupuesto, caída para promediar, reserva y puntos de salida)",
     "convocar_comite": "Convocar el comité ahora",
-    "asignar": "Cambiar el reparto del fondo: «objetivo» es el área (trading, scalping, holding o tendencia) y «valor» el % del fondo que se le dedica; lo que queda es liquidez",
+    "asignar": "Cambiar el reparto del fondo: «objetivo» es el área (trading, scalping, holding o tendencia) y «valor» el % del fondo que se le dedica; lo que queda es liquidez. Con «objetivo» «rentable» aplica el reparto rentable entero (trading 5, scalping 0, holding 25, tendencia 40)",
     "aportar": "Aportar dinero (ficticio) a tu fondo: «valor» es el importe en dólares",
     "retirar": "Retirar dinero (ficticio) de tu fondo: «valor» es el importe; como mucho la liquidez disponible",
 }
@@ -218,7 +218,9 @@ def _aplicar(propuesta: dict) -> str:
 
         nuevo = {a: v for a, v in fondo.reparto().items() if a in fondo.AREAS}
         cambios_ = dict(propuesta.get("reparto") or {})
-        if objetivo:
+        if objetivo.lower().strip() == "rentable":   # el reparto rentable de config.py
+            cambios_ = dict(REPARTO_RENTABLE)
+        elif objetivo:
             area = objetivo.lower().strip()
             if area not in fondo.AREAS:
                 raise ValueError("El área tiene que ser trading, scalping, holding o tendencia.")

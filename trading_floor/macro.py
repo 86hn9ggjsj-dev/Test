@@ -25,6 +25,7 @@ INDICADORES = {
     "GC=F": ("Oro", "materias"),
     "CL=F": ("Petróleo WTI", "materias"),
     "^TNX": ("Bono EE. UU. 10 años (%)", "tipos"),
+    "^IRX": ("Letras EE. UU. 3 meses (%)", "tipos"),   # lo que cobra la liquidez del fondo (liquidez.py)
 }
 CLASES_FNG = {
     "Extreme Fear": "Miedo extremo", "Fear": "Miedo", "Neutral": "Neutral",

@@ -31,6 +31,7 @@ from .config import (CAPITAL_HOLDING, CAPITAL_POR_ESTRATEGIA, COMISION, COSTE_ID
                      FONDO_CAPITAL_INICIAL, FONDO_VL_INICIAL, MESAS, SIMBOLOS, coste_de)
 
 AREAS = ("trading", "scalping", "holding", "tendencia")
+COMPONENTES = (*AREAS, "intereses")   # lo que mueve el fondo: las cuatro áreas y los intereses de la liquidez (liquidez.py)
 _cerrojo = threading.RLock()
 _cache: dict = {"t": 0.0, "datos": None}
 
@@ -48,7 +49,8 @@ def _serie(puntos: list | None) -> pd.Series:
 def _series_areas(papel: dict, holding: dict, tendencia: dict | None = None) -> dict[str, pd.Series]:
     series = papel.get("series") or {}
     return {"trading": _serie(series.get("trading")), "scalping": _serie(series.get("scalping")),
-            "holding": _serie(holding.get("serie")), "tendencia": _serie((tendencia or {}).get("serie"))}
+            "holding": _serie(holding.get("serie")), "tendencia": _serie((tendencia or {}).get("serie")),
+            "intereses": _serie(almacen.cargar("liquidez", {}).get("serie"))}
 
 
 def cargar(papel: dict | None = None, holding: dict | None = None, tendencia: dict | None = None) -> dict:
@@ -383,7 +385,8 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
     ultimo = {"trading": (papel.get("grupos") or {}).get("trading", {}).get("resultado"),
               "scalping": (papel.get("grupos") or {}).get("scalping", {}).get("resultado"),
               "holding": (holding.get("resumen") or {}).get("resultado"),
-              "tendencia": (tendencia.get("resumen") or {}).get("resultado")}
+              "tendencia": (tendencia.get("resumen") or {}).get("resultado"),
+              "intereses": almacen.cargar("liquidez", {}).get("acumulado")}
     for nombre, v in ultimo.items():
         if v is not None:
             areas[nombre].iloc[-1] = v
@@ -427,7 +430,7 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
               round(float(areas["trading"].iloc[i]), 2), round(float(areas["scalping"].iloc[i]), 2),
               round(float(areas["holding"].iloc[i]), 2), round(float(caida.iloc[i]) * 100, 3),
               round(float(btc.iloc[i] / btc.iloc[0] * FONDO_VL_INICIAL), 4) if btc is not None and btc.iloc[0] > 0 and not np.isnan(btc.iloc[i]) else None,
-              round(float(areas["tendencia"].iloc[i]), 2)]
+              round(float(areas["tendencia"].iloc[i]), 2), round(float(areas["intereses"].iloc[i]), 2)]
              for i in idx]
     ranking = sorted(({"id": i, "simbolo": t["simbolo"], "direccion": t["direccion"], "grupo": t.get("grupo", "trading"),
                        "resultado": t.get("resultado", 0.0), "operaciones": len(t.get("operaciones", []))}
@@ -442,7 +445,9 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
         "btc_pct": btc_pct,
         "mensual": _mensual(vl_s),
         "serie": serie,
-        "columnas": ["t", "vl", "patrimonio", "aportado", "trading", "scalping", "holding", "caida_pct", "btc_vl", "tendencia"],
+        "columnas": ["t", "vl", "patrimonio", "aportado", "trading", "scalping", "holding", "caida_pct", "btc_vl", "tendencia",
+                     "intereses"],
+        "liquidez": {k: v for k, v in almacen.cargar("liquidez", {}).items() if k != "serie"},
         "costes": _costes(papel, holding, tendencia),
         "precios": _precios(indice, idx),
         "reparto": en_uso,
@@ -503,7 +508,7 @@ def desglose(F: dict, dias: float | None = 7) -> dict:
     ini = serie[k]
     dia0 = pd.Timestamp(ini[0]).tz_convert(dt.datetime.now().astimezone().tzinfo).date().isoformat()
     areas = {}
-    for a in AREAS:
+    for a in COMPONENTES:
         res = (fin[cols[a]] or 0) - (ini[cols[a]] or 0) if a in cols else 0.0
         dias_coste = [x for x in (F.get("costes") or {}).get(a, []) if x[0] >= dia0]
         com, n = sum(x[1] for x in dias_coste), sum(x[2] for x in dias_coste)

@@ -871,6 +871,16 @@ def operar(segundos: float = 20, telegram: bool = False, parar: threading.Event 
             tend.update(errores_seguidos=tend.get("errores_seguidos", 0) + 1, ultimo_error=f"{type(e).__name__}: {e}"[:300],
                         error_t=_ahora())
             print(f"[tendencia] Error en el ciclo (lo reintento): {e}", flush=True)
+        liq = sistema.setdefault("liquidez", {})
+        try:   # los intereses del dinero sin invertir (liquidez.py)
+            from .liquidez import actualizar as actualizar_liquidez
+
+            actualizar_liquidez()
+            liq.update(ok=_ahora(), errores_seguidos=0)
+        except Exception as e:
+            liq.update(errores_seguidos=liq.get("errores_seguidos", 0) + 1, ultimo_error=f"{type(e).__name__}: {e}"[:300],
+                       error_t=_ahora())
+            print(f"[liquidez] Error al sumar los intereses (lo reintento): {e}", flush=True)
         papel["vuelta_s"] = round(time.monotonic() - t0, 2)
         try:
             almacen.guardar("sistema", sistema)

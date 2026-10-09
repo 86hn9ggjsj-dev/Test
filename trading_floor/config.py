@@ -112,6 +112,13 @@ KELLY_FRACCION = 0.25
 KELLY_TOPE = 1.5        # como mucho 1,5 veces el riesgo por operación que tengas puesto
 KELLY_MINIMO = 0.0025   # y como poco un 0,25 % del capital
 
+# Liquidez remunerada (liquidez.py): el dinero sin invertir cobra el tipo de las letras del Tesoro de EE. UU. a 3 meses
+# (lo descarga la sala de macro); si no hay dato, este tipo anual en %.
+TIPO_LIQUIDEZ = 4.0
+# Reparto que más habría ganado con datos reales de 2022 a hoy (README, «Lo que dicen los datos»); lo que falta hasta el
+# 100 % (un 30 %) queda sin invertir cobrando intereses. Es una propuesta: solo se aplica si tú la apruebas.
+REPARTO_RENTABLE = {"trading": 5.0, "scalping": 0.0, "holding": 25.0, "tendencia": 40.0}
+
 # Tu fondo (fondo.py): capital ficticio que aportas al empezar y valor inicial de cada participación.
 FONDO_CAPITAL_INICIAL = 100_000.0
 FONDO_VL_INICIAL = 10.0

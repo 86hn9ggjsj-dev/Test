@@ -16,7 +16,7 @@ import re
 import threading
 import unicodedata
 
-from .config import MODELO_CHAT
+from .config import MODELO_CHAT, REPARTO_RENTABLE, TIPO_LIQUIDEZ
 from .control import ACCIONES, RIESGO_EDITABLE
 
 PLANTILLA = {
@@ -89,6 +89,12 @@ mirar, E para ver la ficha de alguien o coger el ascensor). Botones de \
 emergencia: «Pausar todo» (freno manual), «Reabrir» y «Kill switch» (cierra ya todo lo abierto del fondo). \
 Todo forma parte del FONDO del jefe: él aporta capital ficticio y recibe participaciones; el valor liquidativo \
 (VL) sube o baja con los resultados de trading, scalping, holding y tendencia. Lo que no está asignado es liquidez. \
+LIQUIDEZ REMUNERADA: el dinero del fondo que no está invertido (lo no repartido, las mesas vacías, el efectivo de \
+holding y tendencia) cobra el tipo de las letras del Tesoro de EE. UU. a 3 meses, como un monetario («liquidez_remunerada»: \
+tipo, efectivo, acumulado); cuenta en el fondo como «intereses». Con datos de 2022 a hoy, el reparto que más habría ganado \
+es trading 5 %, scalping 0 %, holding 25 %, tendencia 40 % y 30 % sin invertir (+25,6 % al año frente a +23,6 % de un \
+reparto 20/15/30/30, o +20 % sin intereses; en 2022, −28 % frente a −30 %; aun así, la mitad de los meses acaban en negativo). Si el jefe pide \
+que sea rentable y no lo tiene aplicado, proponlo con accion «asignar» y objetivo «rentable». \
 SALA DE TENDENCIA (Marina y Vicente, sentados en la sala de holding): reglas fijas y clásicas con velas diarias, no minadas. \
 Su presupuesto (el % de tendencia del reparto) se reparte a partes iguales entre BTC, ETH, SOL, BNB, XRP y DOGE, y cada moneda \
 tiene dos mitades: la «media» está dentro mientras el cierre diario esté por encima de su media de 50 días; la «ruptura» \
@@ -241,6 +247,7 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
                   "indicadores": {i["nombre"]: [i["valor"], i["dia_pct"]] for i in (mac.get("indicadores") or {}).values()}},
         "precios_en_vivo": E.get("vivo", {}),
         "fondo": E.get("fondo"),
+        "liquidez_remunerada": E.get("liquidez"),
         "donde_se_gana_y_se_pierde_7_dias": _desglose(E),
         "salas": (papel.get("grupos") or {}),
         "estrategias_repetidas": E.get("repetidas", []),
@@ -380,10 +387,12 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
             d = fondo_.desglose(fondo_.analitica(E.get("vivo")), 7)
         except Exception:
             return dice("Marta", "El fondo todavía se está calculando. Pregúntamelo en un momento.")
-        nombre = {"trading": "trading", "scalping": "scalping", "holding": "holding", "tendencia": "tendencia"}
+        nombre = {"trading": "trading", "scalping": "scalping", "holding": "holding", "tendencia": "tendencia",
+                  "intereses": "intereses de la liquidez"}
         partes = sorted(d["areas"].items(), key=lambda kv: kv[1]["resultado"])
-        detalle = "; ".join(f"{nombre[a]} {_es(x['resultado'])} $ ({_es(x['comisiones'], False)} $ de comisiones en {x['operaciones']} "
-                            f"{'operación' if x['operaciones'] == 1 else 'operaciones'})" for a, x in partes)
+        detalle = "; ".join(f"{nombre[a]} {_es(x['resultado'])} $" + ("" if a == "intereses" else
+                            f" ({_es(x['comisiones'], False)} $ de comisiones en {x['operaciones']} "
+                            f"{'operación' if x['operaciones'] == 1 else 'operaciones'})") for a, x in partes)
         merc = ", ".join(f"{s_.replace('USDT', '')} {_es(v)} %" for s_, v in d["mercado"].items())
         total, com = d["resultado"], d["comisiones"]
         txt = (f"En los últimos 7 días el fondo va {_es(total)} $. Por partes: {detalle}. Abrir y cerrar ha costado "
@@ -398,6 +407,28 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                     "si quieres, lo dejo a 0 % y ese dinero queda sin invertir hasta que decidas otra cosa.")
             return dice("Marta", txt, _propuesta("asignar", "Dejar el scalping a 0 % del fondo", "scalping", 0))
         return dice("Marta", txt)
+    if re.search(r"reparto (rentable|recomendad|bueno|mejor)|que reparto|hazlo rentable|sea rentable|ser rentable|como ganamos|ganar dinero", t):
+        rep = REPARTO_RENTABLE
+        tipo = _precio(float((E.get("liquidez") or {}).get("tipo_pct") or TIPO_LIQUIDEZ))
+        txt = ("Con datos reales de 2022 a hoy, el reparto que más habría ganado es: sin scalping (pierde incluso antes de "
+               "comisiones), casi sin trading (las estrategias minadas no ganan a las comisiones), holding 25 %, tendencia 40 % y "
+               f"un 30 % sin invertir, que cobra intereses como un monetario (ahora un {tipo} % al año). Habría dado un +25,6 % al año "
+               "frente a un +23,6 % con un reparto 20/15/30/30 (y un +20 % sin los intereses), con caídas algo menores (en 2022, "
+               "−28 % frente a −30 %). No hay garantías: con cripto dentro, la mitad de los meses salen en rojo.")
+        actual = (E.get("fondo") or {}).get("reparto") or {}
+        if all(abs(float(actual.get(a, -1)) - v) < 0.5 for a, v in rep.items()):
+            return dice("Marta", txt + " Ya lo tienes aplicado: ahora toca paciencia, porque se juzga en meses, no en días.")
+        return dice("Marta", txt + " ¿Lo aplico?",
+                    _propuesta("asignar", "Reparto rentable: trading 5 %, scalping 0 %, holding 25 %, tendencia 40 % y un 30 % sin "
+                                          "invertir que cobra intereses", "rentable"))
+    if re.search(r"interes|monetario|letras del tesoro|dinero (parado|quieto|sin invertir)", t):
+        lq = E.get("liquidez") or {}
+        if lq.get("tipo_pct") is None:
+            return dice("Marta", "Los intereses empiezan a contar cuando el paper trading da su primera vuelta. Pregúntamelo en un momento.")
+        return dice("Marta", f"Todo lo que no está dentro del mercado ({_precio(lq.get('efectivo', 0))} $ ahora: lo que no repartes y el "
+                             f"efectivo que guardan las salas) cobra un {_precio(lq['tipo_pct'])} % al año, el tipo de las letras del "
+                             f"Tesoro de EE. UU. a 3 meses, como en un monetario. Son unos {_precio(lq.get('al_dia', 0))} $ al día, y "
+                             f"llevamos {_precio(lq.get('acumulado', 0))} $ cobrados. Cuentan en tu fondo como «Intereses».")
     if "fondo" in t or "rentabilidad" in t or "valor liquidativo" in t:
         f = E.get("fondo") or {}
         if not f:
@@ -565,7 +596,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
     return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «para la búsqueda», «quita las repetidas», "
                          "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?», "
-                         "«¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿dónde perdemos?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
+                         "«¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿dónde perdemos?», «reparto rentable», «¿cuánto cobramos de intereses?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 
 
 def responder(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> dict:

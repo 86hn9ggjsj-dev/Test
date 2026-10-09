@@ -91,6 +91,7 @@ def estado() -> dict:
         "macro": almacen.cargar("macro", {}),
         "holding": holding,
         "tendencia": tendencia,
+        "liquidez": {k: v for k, v in almacen.cargar("liquidez", {}).items() if k != "serie"},
         "fondo": resumen_fondo,
         "capital_por_estrategia": CAPITAL_POR_ESTRATEGIA,
         "simbolos": SIMBOLOS,
