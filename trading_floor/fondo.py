@@ -27,8 +27,8 @@ import numpy as np
 import pandas as pd
 
 from . import almacen
-from .config import (CAPITAL_HOLDING, CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, FONDO_CAPITAL_INICIAL,
-                     FONDO_VL_INICIAL, MESAS)
+from .config import (CAPITAL_HOLDING, CAPITAL_POR_ESTRATEGIA, COMISION, COSTE_IDA_VUELTA, COSTE_SCALPING, DESLIZAMIENTO,
+                     FONDO_CAPITAL_INICIAL, FONDO_VL_INICIAL, MESAS, SIMBOLOS, coste_de)
 
 AREAS = ("trading", "scalping", "holding", "tendencia")
 _cerrojo = threading.RLock()
@@ -304,6 +304,51 @@ def _reparto(papel: dict, holding: dict, patrimonio: float, vivo: dict,
     return {k: round(v, 2) for k, v in area.items()}, lista, abiertas
 
 
+def _costes(papel: dict, holding: dict, tendencia: dict) -> dict[str, list[list]]:
+    """Comisiones y deslizamiento pagados y operaciones hechas, por área y por día (en tu hora): {área: [[día, $, n]]}.
+    En trading y scalping se apuntan al cerrar la operación (ida y vuelta); en holding y tendencia, en cada compra o venta.
+    La incubadora no cuenta: usa dinero de prueba."""
+    zona = dt.datetime.now().astimezone().tzinfo
+    dias: dict[str, dict] = {a: {} for a in AREAS}
+
+    def apunta(area: str, t: str, coste: float) -> None:
+        x = dias[area].setdefault(pd.Timestamp(t).tz_convert(zona).date().isoformat(), [0.0, 0])
+        x[0] += coste
+        x[1] += 1
+
+    for t in [*(papel.get("estrategias") or {}).values(), *(papel.get("retirados") or {}).values()]:
+        area = t.get("grupo", "trading")
+        coste = coste_de(t.get("intervalo") or ("5m" if area == "scalping" else "30m"))
+        for o in t.get("operaciones", []):
+            c = o.get("comision_usd")
+            apunta(area, o["salida_t"], c if c is not None else (t.get("capital") or CAPITAL_POR_ESTRATEGIA) * o.get("fraccion", 0) * coste)
+    for p in (holding.get("planes") or {}).values():
+        for o in p.get("operaciones", []):
+            if o.get("tipo") in ("compra", "venta"):
+                apunta("holding", o["t"], o.get("importe", 0) * (COMISION + DESLIZAMIENTO))
+    for p in ((tendencia or {}).get("monedas") or {}).values():
+        for o in p.get("operaciones", []):
+            apunta("tendencia", o["t"], o.get("importe", 0) * (COMISION + DESLIZAMIENTO))
+    return {a: [[d, round(v[0], 2), v[1]] for d, v in sorted(x.items())] for a, x in dias.items()}
+
+
+def _precios(indice: pd.DatetimeIndex, idx) -> dict[str, list]:
+    """Precio de cada moneda en los puntos de la curva del fondo (para saber cuánto se movió el mercado en un periodo)."""
+    from .datos import velas
+
+    dias = max(30, int((pd.Timestamp.now(tz="UTC") - indice[0]).days) + 3)
+    salida = {}
+    for s in SIMBOLOS:
+        try:
+            c = velas(s, "1h", dias)["close"]
+        except Exception:   # sin conexión: esa moneda no sale en el desglose
+            continue
+        c.index = c.index + pd.Timedelta(hours=1)
+        v = c.reindex(indice, method="ffill")
+        salida[s] = [None if np.isnan(v.iloc[i]) else round(float(v.iloc[i]), 6) for i in idx]
+    return salida
+
+
 def _btc(indice: pd.DatetimeIndex) -> pd.Series | None:
     """Precio de BTC en cada hora del fondo (velas de 1 hora de Binance)."""
     try:
@@ -398,6 +443,8 @@ def calcular(papel: dict | None = None, holding: dict | None = None, vivo: dict 
         "mensual": _mensual(vl_s),
         "serie": serie,
         "columnas": ["t", "vl", "patrimonio", "aportado", "trading", "scalping", "holding", "caida_pct", "btc_vl", "tendencia"],
+        "costes": _costes(papel, holding, tendencia),
+        "precios": _precios(indice, idx),
         "reparto": en_uso,
         "objetivo": {"pct": objetivo, "usd": {a: round(objetivo[a] / 100 * resumen["patrimonio"], 2) for a in (*AREAS, "liquidez")},
                      "capital_mesa": {"trading": capital_mesa("trading"), "scalping": capital_mesa("scalping")},
@@ -440,3 +487,29 @@ def analitica(vivo: dict | None = None) -> dict:
         _cache["datos"] = calcular(vivo=vivo)
         _cache["t"] = time.time()
     return _cache["datos"]
+
+
+def desglose(F: dict, dias: float | None = 7) -> dict:
+    """Dónde se gana y dónde se pierde en los últimos `dias` días (None: desde el principio), a partir de calcular():
+    por área, el resultado, lo que hicieron antes de comisiones, las comisiones y las operaciones; y cuánto se movió
+    cada moneda en el mismo periodo."""
+    serie, cols = F["serie"], {c: i for i, c in enumerate(F["columnas"])}
+    fin = serie[-1]
+    k = 0
+    if dias:
+        desde = pd.Timestamp(fin[0]) - pd.Timedelta(days=dias)
+        antes = [i for i, r in enumerate(serie) if pd.Timestamp(r[0]) <= desde]
+        k = antes[-1] if antes else 0
+    ini = serie[k]
+    dia0 = pd.Timestamp(ini[0]).tz_convert(dt.datetime.now().astimezone().tzinfo).date().isoformat()
+    areas = {}
+    for a in AREAS:
+        res = (fin[cols[a]] or 0) - (ini[cols[a]] or 0) if a in cols else 0.0
+        dias_coste = [x for x in (F.get("costes") or {}).get(a, []) if x[0] >= dia0]
+        com, n = sum(x[1] for x in dias_coste), sum(x[2] for x in dias_coste)
+        areas[a] = {"resultado": round(res, 2), "comisiones": round(com, 2), "operaciones": n, "antes_de_comisiones": round(res + com, 2)}
+    mercado = {s: round((v[-1] / v[k] - 1) * 100, 2) for s, v in (F.get("precios") or {}).items()
+               if len(v) > k and v[k] and v[-1]}
+    return {"desde": ini[0], "resultado": round(sum(x["resultado"] for x in areas.values()), 2), "areas": areas,
+            "comisiones": round(sum(x["comisiones"] for x in areas.values()), 2),
+            "operaciones": sum(x["operaciones"] for x in areas.values()), "mercado": mercado}

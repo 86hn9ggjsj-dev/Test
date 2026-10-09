@@ -550,6 +550,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
   </div>
   <div class="d-rejilla">
     <section class="d-tarjeta ancha" id="cGanado"><h4>Cuánto has ganado</h4><p class="d-sub" id="sGanado"></p><div class="d-graf"></div></section>
+    <section class="d-tarjeta ancha" id="cDonde"><h4>Dónde se gana y dónde se pierde</h4><p class="d-sub" id="sDonde"></p><div class="d-graf"></div></section>
     <section class="d-tarjeta" id="cAreas"><h4>Qué parte del fondo gana y cuál pierde</h4><p class="d-sub" id="sAreas"></p><div class="d-graf"></div></section>
     <section class="d-tarjeta" id="cVl"><h4>¿Y si hubieras comprado BTC?</h4><p class="d-sub" id="sVl"></p><div class="d-graf"></div></section>
     <section class="d-tarjeta" id="cDias"><h4>Días buenos y días malos</h4><p class="d-sub" id="sDias"></p><div class="d-graf"></div></section>
@@ -5143,6 +5144,36 @@ function tip(ev, html) {
   t.style.top = Math.max(64, Math.min(innerHeight - h - 8, ev.clientY - h - 10)) + "px";
 }
 function filaTip(color, valor, nombre) { return `<div class="f"><i style="background:${color}"></i><b>${esc(valor)}</b> ${esc(nombre)}</div>`; }
+const POR_QUE = {
+  trading: "estrategias minadas de 30 minutos: cada operación paga comisión al abrir y al cerrar",
+  scalping: "estrategias de 5 minutos: muchas operaciones cortas, así que las comisiones pesan mucho",
+  holding: "carteras sin stop: casi siempre invertidas, suben y bajan con el mercado",
+  tendencia: "solo está dentro cuando hay tendencia; en una caída rápida pierde hasta que sale (sale al cerrar el día)",
+};
+function diaLocal(ms) { const d = new Date(ms), p = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`; }
+function pintarDonde(base, fin, periodo, cols) {
+  const serie = F.serie, iBase = serie.indexOf(base), iFin = serie.indexOf(fin), dia0 = diaLocal(Date.parse(base[0]));
+  const filas = AREAS_K.map(k => {
+    const res = (fin[cols[k]] || 0) - (base[cols[k]] || 0), cs = ((F.costes || {})[k] || []).filter(x => x[0] >= dia0);
+    const com = cs.reduce((t, x) => t + x[1], 0), n = cs.reduce((t, x) => t + x[2], 0);
+    return {k, res, com, n, antes: res + com};
+  });
+  const total = filas.reduce((t, x) => t + x.res, 0), comisiones = filas.reduce((t, x) => t + x.com, 0), ops = filas.reduce((t, x) => t + x.n, 0);
+  const orden = [...filas].sort((a, b) => a.res - b.res), peor = orden[0], mejor = orden[orden.length - 1];
+  const mercado = Object.entries(F.precios || {}).map(([s, v]) => [moneda(s), v[iBase] && v[iFin] ? (v[iFin] / v[iBase] - 1) * 100 : null]).filter(x => x[1] != null);
+  const mediaMercado = mercado.length ? mercado.reduce((t, x) => t + x[1], 0) / mercado.length : null;
+  const parteCom = total < 0 ? comisiones / Math.abs(total) * 100 : null;
+  let frase = `${esc(periodo)}, el fondo ${total < -.005 ? `ha perdido <b class="baja">${esc(fmt.dinero(-total))}</b>` : total > .005 ? `ha ganado <b class="sube">${esc(fmt.dinero(total))}</b>` : "ni gana ni pierde"}. `;
+  if (total < -.005 && peor.res < 0) frase += `Lo que más resta: <b>${esc(AREA_NOMBRE[peor.k])}</b> (${esc(signoD(peor.res))}). `;
+  else if (mejor.res > 0) frase += `Lo que más suma: <b>${esc(AREA_NOMBRE[mejor.k])}</b> (${esc(signoD(mejor.res))}). `;
+  frase += `Abrir y cerrar (comisiones y deslizamiento) ha costado <b>${esc(fmt.dinero(comisiones))}</b> en ${fmt.n(ops)} operaciones`
+    + (parteCom != null ? `: ${parteCom < 25 ? `solo un ${NF0.format(parteCom)} % de lo perdido; el resto es cómo se ha movido el mercado` : `un ${NF0.format(parteCom)} % de lo perdido`}.` : ".");
+  if (mediaMercado != null) frase += ` Las monedas, de media, ${mediaMercado < 0 ? "han bajado" : "han subido"} un ${NF1.format(Math.abs(mediaMercado))} % (${mercado.map(([m, v]) => `${m} ${pctS(v)}`).join(", ")}).`;
+  $("#sDonde").innerHTML = frase + ` <span style="color:var(--suave)">La incubadora opera con dinero de prueba: lo que pierda allí no sale de tu fondo.</span>`;
+  $("#cDonde .d-graf").innerHTML = tablaHtml(["Parte del fondo", "Resultado", "Antes de comisiones", "Comisiones", "Operaciones", "Por qué se mueve"],
+    filas.map(x => [{texto: AREA_NOMBRE[x.k], color: COL[x.k]}, {texto: signoD(x.res), clase: claseS(x.res)}, {texto: signoD(x.antes), clase: claseS(x.antes)},
+      {texto: x.com ? "−" + fmt.dinero(x.com) : "0 $"}, {texto: fmt.n(x.n)}, {texto: POR_QUE[x.k]}]), [1, 2, 3, 4]);
+}
 function tablaHtml(cabeceras, filas, numericas = []) {
   return `<div class="d-scroll"><table class="d-tabla"><thead><tr>${cabeceras.map((c, i) => `<th class="${numericas.includes(i) ? "num" : ""}">${esc(c)}</th>`).join("")}</tr></thead>
     <tbody>${filas.map(f => `<tr>${f.map((c, i) => `<td class="${numericas.includes(i) ? "num" : ""} ${c && c.clase || ""}">${c && c.color ? `<i style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:${c.color}"></i>` : ""}${esc(c && c.texto !== undefined ? c.texto : c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
@@ -5335,6 +5366,8 @@ function pintarFondo() {
     diarias.map(({i}) => [diaF(ms[i]), {texto: signoD(res(filas[i]) - res(base)), clase: claseS(res(filas[i]) - res(base))}, fmt.dinero(filas[i][cols.patrimonio])]).reverse(), [1, 2]));
   if (!tablasAbiertas.has("ganado")) lineasSvg(gG.querySelector(".g"), [{nombre: "Ganado", color: COL.fondo, grosor: 2.5, puntos: filas.map((f, i) => [ms[i], res(f) - res(base)])}],
     {formato: signoD, eje: signoEje, area: true, cero: true, alto: 250, minimo: 20});
+  // 1b) dónde se gana y dónde se pierde: lo que hizo cada parte antes de comisiones, las comisiones (abrir y cerrar) y el mercado
+  pintarDonde(base, fin, periodo, cols);
   // 2) qué parte gana y cuál pierde (en el periodo)
   const porArea = AREAS_K.map(k => [k, (fin[cols[k]] || 0) - (base[cols[k]] || 0)]);
   const maxA = Math.max(1e-9, ...porArea.map(([, v]) => Math.abs(v)));

@@ -305,6 +305,7 @@ def _calcular(t: dict, sim, tramos: list | None, medianoche: pd.Timestamp, capit
             "retorno_pct": round(float(f * r) * 100, 3),  # efecto sobre el capital del trader
             "resultado_usd": round(float(valores[min(s, n0 + len(valores) - 1) - n0] - valores[e - 1 - n0]), 2),
             "movimiento_pct": round(float(r) * 100, 3),  # lo que se movió la operación, con costes
+            "comision_usd": round(capital_en(e - 1 - n0) * f * coste_de(m.intervalo), 2),   # comisión y deslizamiento (ida y vuelta)
             "motivo": motivo,
         }
         if motivo == "abierta":

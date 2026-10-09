@@ -109,6 +109,8 @@ Cómo contestar:
 - Contestan 1 a 3 personas, las más relevantes para la pregunta. Si el jefe se dirige a alguien \
 ("@Julia" o "para": Julia), contesta esa persona primero. Si no está claro, contesta Marta.
 - Usa los datos del estado que te paso; no te inventes cifras que no estén ahí. Si algo va mal, dilo.
+- Si preguntan dónde o por qué se pierde (o se gana), usa «donde_se_gana_y_se_pierde_7_dias»: separa lo que hizo cada parte \
+antes de comisiones, lo que costó abrir y cerrar (comisiones y deslizamiento) y cuánto se movió el mercado.
 - Todo es dinero ficticio: no digas nunca que se ha ganado o perdido dinero real ni prometas ganancias. \
 Si piden operar con dinero real o consejos de inversión personales, explica que la oficina solo opera en \
 papel y que pasar a una cuenta demo del exchange es un paso aparte.
@@ -239,6 +241,7 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
                   "indicadores": {i["nombre"]: [i["valor"], i["dia_pct"]] for i in (mac.get("indicadores") or {}).values()}},
         "precios_en_vivo": E.get("vivo", {}),
         "fondo": E.get("fondo"),
+        "donde_se_gana_y_se_pierde_7_dias": _desglose(E),
         "salas": (papel.get("grupos") or {}),
         "estrategias_repetidas": E.get("repetidas", []),
         "incubadora": [{"id": i, "activo": t["simbolo"], "lado": t["direccion"], "sala": t.get("grupo"),
@@ -259,6 +262,17 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
         "decisiones_del_jefe": {"busqueda_de_estrategias_en_marcha": ctrl.get("busqueda"), "freno_manual": ctrl.get("freno_manual"),
                                 "traders_pausados": sorted(pausados), "ultimas": ctrl.get("decisiones", [])[:5]},
     }
+
+
+def _desglose(E: dict) -> dict | None:
+    """Últimos 7 días por parte del fondo: resultado, antes de comisiones, comisiones (abrir y cerrar) y operaciones, y cuánto
+    se movió cada moneda. Así se puede explicar de dónde salen las pérdidas o las ganancias."""
+    from . import fondo
+
+    try:
+        return fondo.desglose(fondo.analitica(E.get("vivo")), 7)
+    except Exception:   # el fondo aún sin calcular: el chat funciona igual
+        return None
 
 
 def _limpiar(respuesta: dict, nombres: dict[str, str]) -> dict:
@@ -358,6 +372,32 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
     if numero is not None and re.search(r"\bretir|\bsaca|\breembols", t) and "repetid" not in t:
         return dice("Marta", f"¿Saco {_es(numero, False)} $ ficticios del fondo? Solo se puede sacar el dinero que no está invertido.",
                     _propuesta("retirar", f"Retirar {_es(numero, False)} $ del fondo", valor=numero))
+    if re.search(r"donde (perdemos|se pierde|ganamos|se gana|se va)|por ?que (perdemos|pierde|se pierde|vamos perdiendo)|de donde (sale|vienen?) (la|las) perdida|"
+                 r"en que (perdemos|se pierde)|abrir y cerrar|comisiones", t):
+        from . import fondo as fondo_
+
+        try:
+            d = fondo_.desglose(fondo_.analitica(E.get("vivo")), 7)
+        except Exception:
+            return dice("Marta", "El fondo todavía se está calculando. Pregúntamelo en un momento.")
+        nombre = {"trading": "trading", "scalping": "scalping", "holding": "holding", "tendencia": "tendencia"}
+        partes = sorted(d["areas"].items(), key=lambda kv: kv[1]["resultado"])
+        detalle = "; ".join(f"{nombre[a]} {_es(x['resultado'])} $ ({_es(x['comisiones'], False)} $ de comisiones en {x['operaciones']} "
+                            f"{'operación' if x['operaciones'] == 1 else 'operaciones'})" for a, x in partes)
+        merc = ", ".join(f"{s_.replace('USDT', '')} {_es(v)} %" for s_, v in d["mercado"].items())
+        total, com = d["resultado"], d["comisiones"]
+        txt = (f"En los últimos 7 días el fondo va {_es(total)} $. Por partes: {detalle}. Abrir y cerrar ha costado "
+               f"{_es(com, False)} $ en total")
+        if total < 0:
+            txt += (f", un {abs(com / total) * 100:.0f} % de lo perdido: " + ("lo demás es que el mercado ha bajado" if abs(com) < abs(total) / 4
+                                                                            else "pesa bastante, sobre todo en el scalping"))
+        txt += f". El mercado en esos días: {merc}. Todo el detalle está en «Mi fondo» → «Dónde se gana y dónde se pierde»."
+        sc = d["areas"].get("scalping") or {}
+        if sc.get("antes_de_comisiones", 0) < 0 and ((E.get("fondo") or {}).get("reparto") or {}).get("scalping", 0) > 0:
+            txt += (f" El scalping pierde incluso antes de comisiones y abre y cierra mucho ({sc['operaciones']} operaciones): "
+                    "si quieres, lo dejo a 0 % y ese dinero queda sin invertir hasta que decidas otra cosa.")
+            return dice("Marta", txt, _propuesta("asignar", "Dejar el scalping a 0 % del fondo", "scalping", 0))
+        return dice("Marta", txt)
     if "fondo" in t or "rentabilidad" in t or "valor liquidativo" in t:
         f = E.get("fondo") or {}
         if not f:
@@ -525,7 +565,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
     return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «para la búsqueda», «quita las repetidas», "
                          "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?», "
-                         "«¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
+                         "«¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿dónde perdemos?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 
 
 def responder(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> dict:

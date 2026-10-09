@@ -219,6 +219,11 @@ en castellano llano:
 - Cinco respuestas cortas: **¿ganas o pierdes?**, **¿mejor que comprar BTC?**, **¿está trabajando tu
   dinero?** (cuánto está invertido y cuánto espera en mesas vacías), **¿qué parte va mejor?** y
   **¿cuánto riesgo corres?**
+- **Dónde se gana y dónde se pierde** (en el periodo elegido): para cada parte del fondo, su resultado, lo
+  que hizo antes de comisiones, lo que costó abrir y cerrar (comisiones y deslizamiento) y cuántas
+  operaciones hizo, más cuánto se movió cada moneda. Una frase dice qué parte resta o suma más y qué parte
+  de lo perdido son comisiones. La incubadora no cuenta: usa dinero de prueba. En el chat: «¿dónde
+  perdemos?»; si el scalping pierde incluso antes de comisiones, Marta propone dejarlo a 0 %.
 - Las gráficas del periodo que elijas (7, 30, 90 días o desde el principio): cuánto has ganado, qué parte
   del fondo gana y cuál pierde, tu fondo frente a BTC, días buenos y malos, dónde está tu dinero (con el
   editor del reparto), cómo les va a los traders y las operaciones abiertas. Cada gráfica tiene su «tabla
