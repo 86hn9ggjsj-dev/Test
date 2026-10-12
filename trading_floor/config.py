@@ -32,8 +32,10 @@ CAPITAL_POR_ESTRATEGIA = 1_000.0  # dinero ficticio que recibe cada estrategia e
 # La minería solo ve el 70 % inicial de los datos; el 30 % final se reserva para validar.
 PARTE_EN_MUESTRA = 0.7
 
-# Mesas de cada sala: 6 activos x 8 = las 48 mesas de trading (las mesas no son de un activo: se reparten según llegan).
-MAX_POR_SIMBOLO = 8
+# La sala de trading tiene 88 mesas: 48 en la planta baja y 40 más en la planta 1 («sala de trading 2»). Las mesas no son
+# de un activo: se reparten según llegan, y cada activo puede tener como mucho MAX_POR_SIMBOLO estrategias en ellas.
+MESAS_TRADING = 88
+MAX_POR_SIMBOLO = 15
 # Además de lo que cabe en las mesas, cada activo puede tener en el banco estrategias que aún están en la incubadora o
 # esperando plaza en ella (el banquillo).
 RESERVA_POR_SIMBOLO = 6
@@ -65,7 +67,8 @@ def dias_de(intervalo: str) -> int:
     return SCALPING_DIAS if es_scalping(intervalo) else DIAS_HISTORICO
 
 
-MESAS = {"trading": MAX_POR_SIMBOLO * len(SIMBOLOS), "scalping": MAX_SCALPERS_POR_SIMBOLO * len(SCALPING_SIMBOLOS)}
+MESAS = {"trading": MESAS_TRADING, "scalping": MAX_SCALPERS_POR_SIMBOLO * len(SCALPING_SIMBOLOS)}
+MESAS_INICIALES = {"trading": 48, "scalping": 12}   # las que había al estrenar el fondo (el reparto inicial: 1.000 $ por mesa)
 
 
 def cupo_banco(intervalo: str) -> int:
@@ -79,12 +82,13 @@ def cupo_banco(intervalo: str) -> int:
 # aprueba su examen. Solo entonces pasa a una mesa con capital del fondo. Si suspende, se descarta sin haberte costado nada.
 CAPITAL_INCUBADORA = 1_000.0
 INCUBADORA = {
-    # trading: aprueba con 10 operaciones y 7 días como mínimo, ganando y con un factor de beneficio de 1,1 o más;
-    # si en 60 días no llega a 10 operaciones, se le examina con 5. Suspende si pierde un 4 % del dinero de prueba.
-    "trading": {"plazas": 24, "operaciones": 10, "dias_min": 7, "dias_max": 60, "operaciones_al_final": 5,
-                "factor_min": 1.1, "corte_pct": 4.0},
-    "scalping": {"plazas": 8, "operaciones": 30, "dias_min": 2, "dias_max": 14, "operaciones_al_final": 12,
-                 "factor_min": 1.1, "corte_pct": 3.0},
+    # trading: aprueba con 15 operaciones y 10 días como mínimo, ganando y con un factor de beneficio de 1,2 o más;
+    # si en 90 días no llega a 15 operaciones, se le examina con 8. Suspende si pierde un 4 % del dinero de prueba.
+    # (Antes bastaban 10 operaciones, 7 días y un factor de 1,1: ahora el examen es más largo y más exigente.)
+    "trading": {"plazas": 24, "operaciones": 15, "dias_min": 10, "dias_max": 90, "operaciones_al_final": 8,
+                "factor_min": 1.2, "corte_pct": 4.0},
+    "scalping": {"plazas": 8, "operaciones": 40, "dias_min": 3, "dias_max": 21, "operaciones_al_final": 16,
+                 "factor_min": 1.2, "corte_pct": 3.0},
 }
 
 # Supervisor de cada sala (papel.py): ya en su mesa, cada trader tiene un periodo de prueba con su estrategia. Si al
@@ -98,7 +102,7 @@ PRUEBA = {
 
 # Gestión de riesgo del paper trading (ver riesgo.py).
 RIESGO_POR_OPERACION = 0.01  # cada operación arriesga como máximo el 1 % del capital de su trader
-MAX_POSICIONES = 16  # posiciones abiertas a la vez en toda la sala
+MAX_POSICIONES = 28  # posiciones abiertas a la vez en toda la sala de trading (eran 16 con 48 mesas)
 MAX_POSICIONES_SCALPING = 12  # posiciones abiertas a la vez en la sala de scalping (una por mesa: son operaciones cortas)
 MAX_MISMA_APUESTA = 3  # posiciones abiertas en el mismo símbolo y la misma dirección (en cada sala)
 LIMITE_PERDIDA_DIARIA = 0.02  # si el día pierde un 2 % del capital, no se abren más posiciones hoy

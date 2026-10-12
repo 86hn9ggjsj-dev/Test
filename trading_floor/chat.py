@@ -29,11 +29,13 @@ PLANTILLA = {
     "Hugo": "minería", "Noa": "minería", "Iker": "minería", "Vega": "minería",
     "Tomás": "supervisor de minería",
     "Carmen": "laboratorio, prueba fuera de muestra",
+    "Ciro": "laboratorio, prueba de la suerte (que lo ganado fuera de muestra no sea casualidad)",
     "Pol": "laboratorio, prueba de costes x2",
     "Sara": "laboratorio, prueba de consistencia",
     "Marc": "laboratorio, prueba de Monte Carlo",
     "Nerea": "laboratorio, prueba de estabilidad",
     "Dani": "laboratorio, test del mono",
+    "Berta": "laboratorio, prueba de otras monedas (la misma regla tiene que ganar en otras criptos)",
     "Elena": "supervisora del laboratorio",
     "Irene": "guardián del banco de estrategias",
     "Raúl": "supervisor del banco",
@@ -64,21 +66,27 @@ SISTEMA = """Eres la voz de los empleados del Trading Floor, una oficina de trad
 funciona en el ordenador del usuario. El usuario es el jefe y te escribe por el chat.
 
 Qué es la oficina: la minería genera estrategias de trading y las prueba con 3 años de velas reales de \
-Binance, pero SOLO cuando el jefe pulsa «Buscar estrategias» (o lo pide por el chat): no mina por su cuenta. \
-El laboratorio las pasa por pruebas de robustez; las que sobreviven van al banco y al momento se ponen en \
-marcha con un trader propio con 1.000 $ FICTICIOS que opera en papel (paper trading) con precios reales. \
+Binance. Busca SIEMPRE, por rondas: en cada ronda prueba unas 2.000 estrategias en cada activo con sitio en el banco \
+(trading y scalping) y luego descansa un rato («mineria.ronda», «mineria.estado»: minando, descanso o pausada). El \
+jefe puede pausarla y reanudarla, o pedir que busque ya en un activo (eso va antes que la ronda). El laboratorio las \
+pasa por OCHO pruebas: fuera de muestra, prueba de la suerte (que lo ganado fuera de muestra no sea casualidad: t de 2 \
+o más), costes x2, consistencia, Monte Carlo, estabilidad, test del mono y otras monedas (la misma regla tiene que \
+ganar en al menos la mitad de las otras monedas de su sala). Son muy duras: con datos de 2022 a 2026 aprueba una de \
+cada diez de las que aprobaban antes, y las que pasan siguen sin ganar de media; hacen menos daño, no más dinero. Las \
+que sobreviven van al banco y empiezan en la incubadora; si aprueban el examen, operan con un trader propio y dinero \
+FICTICIO del fondo, en papel (paper trading) con precios reales. \
 Cada 30 minutos, al cierre de la vela, el trader mira si se cumplen todas las condiciones de su estrategia; \
 si se cumplen, Riesgos aprueba el tamaño o la veta, y la posición sale sola por stop, objetivo o tiempo. \
-Cada estrategia opera de media una vez cada pocos días. Hay 48 mesas en la sala de trading y 12 en la de \
-scalping (velas de 5 minutos, BTC/ETH/SOL; con comisiones el scalping es muy difícil). Los supervisores (Clara en \
+Cada estrategia opera de media una vez cada pocos días. Hay 88 mesas en la sala de trading (48 en la planta baja \
+y 40 en la sala de trading 2, en la planta 1) y 12 en la de scalping (velas de 5 minutos, BTC/ETH/SOL; con comisiones el scalping es muy difícil). Los supervisores (Clara en \
 trading, Álex en scalping) vigilan el periodo de prueba de cada trader en su mesa («supervision.reglas»: días y \
 operaciones mínimas, y un corte por pérdidas): si al acabarlo va en pérdidas, o si antes pierde más del corte, le \
 retiran la estrategia en cuanto no tiene nada abierto y le dan la mejor aprobada de la incubadora, en la misma mesa. \
-Si no hay ninguna y la incubadora está vacía, piden un ciclo de búsqueda. Lo que ganó o perdió la estrategia retirada sigue contando en el fondo, y la minería no vuelve a \
+Si no hay ninguna y la incubadora está vacía, piden una búsqueda (va antes que la ronda). Lo que ganó o perdió la estrategia retirada sigue contando en el fondo, y la minería no vuelve a \
 buscar esa idea. \
 La oficina tiene dos plantas. En la planta 1 está la INCUBADORA: toda estrategia nueva opera primero ahí con \
-1.000 $ de prueba que NO cuentan en el fondo, hasta que aprueba su examen (en trading, 10 operaciones ganando y con \
-factor de beneficio de 1,1 o más; suspende si pierde un 4 %). Las aprobadas suben a una mesa con dinero del fondo, la \
+1.000 $ de prueba que NO cuentan en el fondo, hasta que aprueba su examen (en trading, 15 operaciones y 10 días como mínimo, ganando y con \
+factor de beneficio de 1,2 o más; suspende si pierde un 4 %). Las aprobadas suben a una mesa con dinero del fondo, la \
 de mejor nota primero; si la incubadora está llena, esperan en el banquillo. Cada estrategia que se retira lleva un \
 post mortem (por qué falló) y la ACADEMIA junta lo aprendido: la minería busca más de lo que funciona en real y menos \
 de lo que falla, sin dejar de explorar. Con 30 operaciones reales o más, cada trader arriesga según el Kelly prudente \
@@ -128,8 +136,8 @@ claro en "resumen". NO digas que ya está hecho: el jefe lo aprueba con un botó
 - Parámetros: para acciones de un trader, "objetivo" es el id de su estrategia (E-XXXXXX). Para \
 cambiar_riesgo, "objetivo" es uno de estos límites y "valor" el nuevo valor:
 {riesgo}
-  Para buscar_estrategias: "objetivo" es el activo (BTC, ETH, SOL, BNB, XRP, DOGE) o "" para todos los \
-que tengan mesas libres, y "tipo" es "scalping" si es para la sala de scalping (velas de 5 minutos; solo BTC, \
+  Para buscar_estrategias (buscar ya, antes que la ronda): "objetivo" es el activo (BTC, ETH, SOL, BNB, XRP, DOGE) o "" \
+para todos los que tengan sitio en el banco, y "tipo" es "scalping" si es para la sala de scalping (velas de 5 minutos; solo BTC, \
 ETH y SOL) o "" para la sala de trading. En el resto de acciones, "tipo" es "".
   Para aportar o retirar: "valor" es el importe en dólares ficticios.
   Para asignar: "objetivo" es el área (trading, scalping, holding o tendencia) y "valor" el % del fondo que se le dedica \
@@ -231,7 +239,8 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
         "hora_local": dt.datetime.now().astimezone().strftime("%d/%m/%Y %H:%M"),
         "resumen_papel": papel.get("resumen"),
         "traders": traders,
-        "mineria": {k: m.get(k) for k in ("estado", "simbolo", "generacion", "generaciones", "embudo")},
+        "mineria": {**{k: m.get(k) for k in ("estado", "modo", "ronda", "proxima", "simbolo", "generacion", "generaciones", "embudo")},
+                    "pausada": bool((E.get("control") or {}).get("mineria_pausada"))},
         "banco": [{"id": b["id"], "activo": b["estrategia"]["simbolo"]} for b in E.get("banco", [])],
         "riesgo": riesgo,
         "holding": hold,
@@ -362,8 +371,24 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
     def dice(quien, txt, propuesta=None):
         return {"mensajes": [{"quien": quien, "texto": txt}], "propuesta": propuesta}
 
+    if re.search(r"miner|busqueda|mina\b|buscar", t) and re.search(r"reanud|sigue|continu|vuelve a buscar|arranca", t):
+        if not ctrl.get("mineria_pausada"):
+            return dice("Tomás", "La búsqueda ya está en marcha: buscamos siempre, por rondas, con un descanso entre ronda y ronda.")
+        return dice("Tomás", "Si lo apruebas, vuelvo a buscar estrategias por rondas, sin parar.", _propuesta("reanudar_busqueda", "Reanudar la búsqueda de estrategias"))
+    if re.search(r"miner|busqueda|laboratorio|probador", t) and re.search(r"como va|que tal|estado|cuantas|ronda", t):
+        m = E.get("mineria", {})
+        e = m.get("embudo") or {}
+        estado = ("en pausa (la has pausado tú)" if ctrl.get("mineria_pausada") else
+                  f"minando {str(m.get('simbolo') or '').replace('USDT', '')}, generación {m.get('generacion', 0)} de {m.get('generaciones', 0)}"
+                  if m.get("estado") == "minando" else
+                  "descansando hasta la siguiente ronda" if m.get("estado") == "descanso" else "en espera")
+        ronda = f"Vamos por la ronda {m['ronda']} y estamos {estado}." if m.get("ronda") else f"Ahora estamos {estado}."
+        return dice("Tomás", f"{ronda} En esta ronda: {e.get('Generadas', 0)} estrategias evaluadas, {e.get('Rentables en muestra', 0)} "
+                             f"parecían rentables y {e.get('Distinta a las del banco', 0)} han superado las ocho pruebas. Las pruebas son muy "
+                             "duras a propósito: aprueba una de cada diez de las que aprobaban antes.")
     if re.search(r"miner|busqueda|mina\b", t) and re.search(r"paus|para|deten|cancel", t):
-        return dice("Tomás", "Entendido. Si lo apruebas, paro la búsqueda al terminar la generación en curso.", _propuesta("parar_busqueda", "Parar la búsqueda de estrategias"))
+        return dice("Tomás", "Entendido. Si lo apruebas, pauso la búsqueda al terminar la generación en curso y no vuelvo a buscar "
+                             "hasta que me digas «reanuda la búsqueda».", _propuesta("parar_busqueda", "Pausar la búsqueda de estrategias"))
     area = next((a for a in ("tendencia", "holding", "scalping", "trading") if a in t), None)
     if numero is not None and area and ("%" in texto or re.search(r"\bdedic|\basign|\bpon\b|\bsube|\bbaja|\bporcentaje|\bpor ciento", t)):
         f = E.get("fondo") or {}
@@ -443,8 +468,8 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         activo = next((a for a in ("btc", "eth", "sol", "bnb", "xrp", "doge") if re.search(rf"\b{a}\b", t)), "")
         scalp = "scalp" in t
         que = (activo.upper() or "todos los activos con mesas libres") + (" (scalping, velas de 5 minutos)" if scalp else "")
-        return dice("Tomás", f"¿Busco estrategias nuevas de {que}? Es un ciclo: se para solo al terminar. Si alguna supera las "
-                             "seis pruebas, entra al banco y se pone a operar con su trader.",
+        return dice("Tomás", f"¿Busco ya estrategias nuevas de {que}? Ya buscamos siempre, por rondas; esto va antes que la ronda en "
+                             "curso y luego seguimos donde íbamos. Si alguna supera las ocho pruebas, entra al banco y empieza en la incubadora.",
                     _propuesta("buscar_estrategias", f"Buscar estrategias de {que}", activo.upper(), tipo="scalping" if scalp else ""))
     if re.search(r"\bpase(o|a|ar|arme)\b|primera persona|\b3d\b|recorrer la oficina|\bcaminar\b", t) and not re.search(r"estrateg|trader|\be-[0-9a-f]", t):
         return dice("Chema", "¡Ven a vernos! Pulsa «🚶 Pasear» (debajo de los botones de las plantas) o la tecla P. Haz clic y anda con "
@@ -594,7 +619,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         return dice("Marta", f"Resultado en papel: {_es(r.get('resultado', 0))} $ (hoy {_es(r.get('hoy', 0))} $). "
                              f"{len(papel.get('estrategias', {}))} traders, minería {m.get('estado', 'parada')}"
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
-    return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «para la búsqueda», «quita las repetidas», "
+    return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «pausa la búsqueda», «reanuda la búsqueda», «¿cómo va la búsqueda?», «quita las repetidas», "
                          "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?», "
                          "«¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿dónde perdemos?», «reparto rentable», «¿cuánto cobramos de intereses?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 

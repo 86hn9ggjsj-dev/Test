@@ -400,7 +400,7 @@ def _examen(t: dict, ahora: pd.Timestamp) -> dict:
             estado_, motivo = "aprobada", f"gana un {_pct(pct)[1:]} con {n} operaciones (factor de beneficio {fmt_f})"
         else:
             estado_, motivo = "suspendida", (f"tras {n} operaciones {'pierde' if t['resultado'] <= 0 else 'gana demasiado poco'} "
-                                             f"({_pct(pct)}, factor de beneficio {fmt_f}; hace falta {p['factor_min']:g})")
+                                             f"({_pct(pct)}, factor de beneficio {fmt_f}; hace falta {str(p['factor_min']).replace('.', ',')})")
     elif dias >= p["dias_max"]:
         if n >= p["operaciones_al_final"] and gana:
             estado_, motivo = "aprobada", f"en {p['dias_max']} días gana un {_pct(pct)[1:]} con {n} operaciones (factor {fmt_f})"
@@ -452,12 +452,21 @@ def ciclo(estado: dict) -> list[dict]:
     eventos: list[dict] = []
     medianoche = pd.Timestamp(dt.datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0))
     ahora = pd.Timestamp.now(tz="UTC")
+    mesas_nuevas = fondo.ajustar_mesas()   # una sola vez, si la oficina tiene ahora más (o menos) mesas
     tramos = fondo.capitales()
     lim = riesgo.limites()
     base = lim["riesgo_por_operacion"]
 
     def evento(tipo: str, texto: str, **datos) -> None:
         eventos.append({"t": _ahora(), "tipo": tipo, "texto": texto, **datos})
+
+    if mesas_nuevas and mesas_nuevas["ahora"]["trading"] != mesas_nuevas["antes"].get("trading"):
+        n0, n1 = mesas_nuevas["antes"].get("trading", 0), mesas_nuevas["ahora"]["trading"]
+        pct = f"{mesas_nuevas['trading_pct']:g}".replace(".", ",")
+        evento("mesas", f"La sala de trading pasa de {n0} a {n1} mesas: {'las nuevas están' if n1 > n0 else 'las que quedan están'} "
+                        f"en la planta 1, en la sala de trading 2. Para que tu reparto siga igual, el {pct} % del fondo que va a "
+                        f"trading se reparte entre todas: {_precio(mesas_nuevas['trader'])} $ por mesa desde ahora. "
+                        "Lo ganado hasta hoy se conserva.", antes=n0, ahora=n1)
 
     def estrategia_de(id_: str) -> dict | None:
         b = en_banco.get(id_) or descartadas.get(id_)
@@ -555,7 +564,7 @@ def ciclo(estado: dict) -> list[dict]:
         if not libres:
             banquillo.append(b)
             if b["id"] not in antes_en_banquillo:
-                evento("banquillo", f"{b['id']} ha superado las seis pruebas, pero las {INCUBADORA[g]['plazas']} plazas de la "
+                evento("banquillo", f"{b['id']} ha superado las ocho pruebas, pero las {INCUBADORA[g]['plazas']} plazas de la "
                                     f"incubadora de {'scalping' if g == 'scalping' else 'trading'} están ocupadas: espera en el banquillo.",
                        id=b["id"], simbolo=b["estrategia"]["simbolo"], grupo=g)
             continue
@@ -565,7 +574,7 @@ def ciclo(estado: dict) -> list[dict]:
         evento("incubadora", f"{b['id']} entra en la incubadora (plaza {libres[0] + 1}): {('LARGO' if t['direccion'] == 'largo' else 'CORTO')} en "
                              f"{t['simbolo']} con {_precio(CAPITAL_INCUBADORA)} $ de prueba que no cuentan en tu fondo. Para subir a una "
                              f"mesa tiene que aprobar el examen: {p['operaciones']} operaciones ganando, con factor de beneficio de "
-                             f"{p['factor_min']:g} o más.".replace("1.1", "1,1"),
+                             f"{str(p['factor_min']).replace('.', ',')} o más.",
                id=b["id"], simbolo=t["simbolo"], direccion=t["direccion"], grupo=g, plaza=libres[0])
 
     # 5) Simulación de las mesas con la gestión de riesgo: cada entrada nueva se aprueba o se veta una sola vez.

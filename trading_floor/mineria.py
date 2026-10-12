@@ -17,7 +17,7 @@ import numpy as np
 from . import academia, almacen, banco, control
 from .backtest import simular
 from .config import (DIAS_HISTORICO, INTERVALO, PARTE_EN_MUESTRA, SCALPING_DIAS, SCALPING_INTERVALO, SCALPING_SIMBOLOS,
-                     cupo_banco)
+                     SIMBOLOS, cupo_banco, es_scalping)
 from .datos import velas
 from .estrategia import Estrategia, aleatoria, cruzar, mutar
 from .mercado import Mercado
@@ -115,15 +115,36 @@ def _solape(a: np.ndarray, b: np.ndarray) -> float:
     return np.count_nonzero(a & b) / union if union else 0.0
 
 
+def _otras_monedas(simbolo: str, intervalo: str, dias: int) -> Callable[[], dict[str, Mercado]]:
+    """Los mercados de las otras monedas de la sala, para la prueba «Otras monedas». Se descargan la primera vez que
+    una estrategia llega a esa prueba y se guardan para el resto de la ronda."""
+    cache: dict[str, Mercado] = {}
+    hecho = False
+
+    def cargar() -> dict[str, Mercado]:
+        nonlocal hecho
+        if not hecho:
+            hecho = True
+            for s in (SCALPING_SIMBOLOS if es_scalping(intervalo) else SIMBOLOS):
+                if s == simbolo:
+                    continue
+                try:
+                    cache[s] = Mercado(velas(s, intervalo, dias), s, intervalo)
+                except (OSError, ValueError) as e:   # sin conexión: esa moneda no cuenta
+                    print(f"[minería] No he podido bajar {s} para la prueba de otras monedas: {e}", flush=True)
+        return cache
+    return cargar
+
+
 def _embudo(est: Estrategia, m: Mercado, corte: int, rng: np.random.Generator, muestra: dict,
-            ocupadas: list[dict], estado: EstadoMineria) -> dict | None:
+            ocupadas: list[dict], estado: EstadoMineria, otras: Callable[[], dict[str, Mercado]] | None = None) -> dict | None:
     motivo = repetida(est, None, ocupadas)   # antes de las pruebas: no se pierde tiempo con variantes de lo que ya hay
     if motivo:
         estado.evento(f"{est.id} {motivo}", "descartada", consola=False, id=est.id, etapa="Distinta a las del banco")
         return None
     informe: dict = {"muestra": muestra}
     superadas: dict[str, str] = {}
-    for etapa, ok, detalle, datos in pruebas(est, m, corte, rng):
+    for etapa, ok, detalle, datos in pruebas(est, m, corte, rng, otras):
         informe.update(datos)
         if not ok:
             estado.evento(f"{est.id} descartada en «{etapa}»: {detalle}", "descartada", consola=False,
@@ -190,6 +211,7 @@ def minar(simbolo: str, intervalo: str = INTERVALO, estrategias: int = 2000, gen
     for d in banco.descartadas():
         if d["estrategia"]["simbolo"] == simbolo and d["estrategia"]["intervalo"] == intervalo:
             ocupadas.append({**_huella(Estrategia.de_dict(d["estrategia"]), m, d["id"]), "descartada": d.get("motivo", "retirada")})
+    otras = _otras_monedas(simbolo, intervalo, dias)
     tam = max(20, estrategias // generaciones)
     pesos = academia.pesos()   # lo aprendido en real: se genera más de lo que funciona (sin dejar de explorar)
     if pesos:
@@ -202,7 +224,7 @@ def minar(simbolo: str, intervalo: str = INTERVALO, estrategias: int = 2000, gen
 
     for g in range(1, generaciones + 1):
         if not seguir():
-            estado.evento("Me pide el jefe que pare: dejo la búsqueda aquí.", "pausa")
+            estado.evento("Dejo aquí esta búsqueda: hay una orden nueva (una pausa o una búsqueda pedida).", "corte")
             break
         estado.datos["generacion"] = g
         for est in poblacion:
@@ -212,7 +234,7 @@ def minar(simbolo: str, intervalo: str = INTERVALO, estrategias: int = 2000, gen
             estado.contar("Generadas")
             if rentable_en_muestra(met):
                 estado.contar("Rentables en muestra")
-                if entrada := _embudo(est, m, corte, rng, met, ocupadas, estado):
+                if entrada := _embudo(est, m, corte, rng, met, ocupadas, estado, otras):
                     aprobadas.append(entrada)
             estado.guardar()
 
@@ -300,14 +322,105 @@ def minar_a_demanda(simbolos: list[str], intervalo: str = INTERVALO, estrategias
         if not pedido:
             parar.wait(2)
             continue
-        try:
-            _buscar(pedido, simbolos, intervalo, estrategias, generaciones, dias, parar, estado)
-        except Exception as e:  # un fallo inesperado no debe cerrar la oficina: se avisa y se vuelve a esperar
-            estado.evento(f"La búsqueda ha fallado ({type(e).__name__}: {e}). Vuelvo a esperar.", "error")
-            control.terminar_busqueda(pedido)
-            estado.datos.update(estado="esperando", simbolo=None, ciclo=None)
-            estado.guardar(forzar=True)
+        _atender(pedido, simbolos, intervalo, estrategias, generaciones, dias, parar, estado)
     estado.terminar()
+
+
+def minar_siempre(simbolos: list[str], intervalo: str = INTERVALO, estrategias: int = 2000, generaciones: int = 10,
+                  dias: int = DIAS_HISTORICO, pausa_min: float = 15, parar: threading.Event | None = None) -> None:
+    """La minería de la oficina: busca estrategias siempre, por rondas. Cada ronda pasa por todos los activos de
+    trading y de scalping que tienen sitio en el banco y después descansa `pausa_min` minutos.
+
+    Si pulsas «Buscar estrategias» en un activo (o el supervisor pide recambio), esa búsqueda va primero y luego la
+    ronda sigue donde iba. «Pausar búsqueda» la detiene (al acabar la generación en curso) hasta que la reanudes."""
+    parar = parar or threading.Event()
+    estado = EstadoMineria()
+    estado.datos["modo"] = "siempre"
+    pendiente = control.cargar()["busqueda"]
+    if pendiente and pendiente.get("por") != "supervisor":  # una búsqueda tuya a medias de la vez anterior no se retoma sola
+        control.terminar_busqueda(pendiente)
+    tareas = [(s.upper(), intervalo, dias) for s in simbolos] + [(s, SCALPING_INTERVALO, SCALPING_DIAS) for s in SCALPING_SIMBOLOS]
+    ronda, nuevas, descanso_hasta, estaba_pausada = 0, 0, 0.0, False
+    faltan: list[tuple[str, str, int]] = []   # lo que queda de la ronda en curso
+    en_ronda: list[str] = []                  # los activos de la ronda, para la pantalla («BTC 3/9»)
+
+    def seguir() -> bool:
+        c = control.cargar()
+        return not parar.is_set() and not c["mineria_pausada"] and not c["busqueda"]
+
+    while not parar.is_set():
+        c = control.cargar()
+        if c["busqueda"]:   # lo que pides tú (o el supervisor) va antes que la ronda
+            _atender(c["busqueda"], simbolos, intervalo, estrategias, generaciones, dias, parar, estado)
+            continue
+        if c["mineria_pausada"]:
+            if estado.datos["estado"] != "pausada":
+                estado.datos.update(estado="pausada", simbolo=None, ciclo=None, proxima=None)
+                estado.evento("Búsqueda en pausa por decisión del jefe. Sigo cuando la reanudes.", "pausa")
+            estaba_pausada = True
+            parar.wait(3)
+            continue
+        if estaba_pausada:   # al reanudar se busca ya, sin esperar a que acabe el descanso
+            estaba_pausada, descanso_hasta = False, 0.0
+        if not faltan:
+            if time.time() < descanso_hasta:
+                if estado.datos["estado"] != "descanso":
+                    proxima = dt.datetime.fromtimestamp(descanso_hasta).astimezone().isoformat(timespec="seconds")
+                    estado.datos.update(estado="descanso", simbolo=None, ciclo=None, proxima=proxima)
+                    estado.guardar(forzar=True)
+                parar.wait(3)
+                continue
+            faltan = [t for t in tareas if banco.ocupacion(t[0], t[1]) < cupo_banco(t[1])]
+            if not faltan:
+                descanso_hasta = _descanso(estado, pausa_min, "El banco está lleno en todos los activos: no hace falta "
+                                                              "buscar. Vuelvo a mirar")
+                continue
+            ronda += 1
+            nuevas = 0
+            estado.datos["embudo"] = {e: 0 for e in ETAPAS}  # el embudo de la pantalla es el de esta ronda
+            estado.datos.update(ronda=ronda, proxima=None)
+            en_ronda = [s.replace("USDT", "") + (" (scalping)" if iv == SCALPING_INTERVALO else "") for s, iv, _ in faltan]
+            estado.evento(f"Ronda {ronda}: busco estrategias nuevas en {', '.join(en_ronda)}.", "ronda", ronda=ronda)
+        simbolo, vela, historia = faltan[0]
+        if banco.ocupacion(simbolo, vela) >= cupo_banco(vela):   # se ha llenado mientras tanto
+            faltan.pop(0)
+            continue
+        estado.datos["ciclo"] = {"activos": en_ronda, "n": len(en_ronda) - len(faltan) + 1, "ronda": ronda,
+                                 "tipo": "scalping" if vela == SCALPING_INTERVALO else "trading"}
+        try:
+            nuevas += len(minar(simbolo, vela, estrategias, generaciones, historia, estado=estado, seguir=seguir))
+        except (OSError, ValueError) as e:  # sin conexión, símbolo raro...
+            estado.evento(f"No he podido minar {simbolo}: {e}", "error")
+        except Exception as e:  # un fallo inesperado no debe cerrar la oficina: se avisa y se sigue con el siguiente
+            estado.evento(f"La búsqueda de {simbolo} ha fallado ({type(e).__name__}: {e}). Sigo con el siguiente.", "error")
+        if not seguir() and not parar.is_set():
+            continue   # interrumpida por un pedido o por la pausa: luego se retoma este mismo activo
+        faltan.pop(0)
+        if not faltan:
+            hecho = (f"{nuevas} estrategia{'s' if nuevas != 1 else ''} nueva{'s' if nuevas != 1 else ''} en el banco"
+                     if nuevas else "ninguna ha superado todas las pruebas, lo normal")
+            descanso_hasta = _descanso(estado, pausa_min, f"Ronda {ronda} terminada: {hecho}. Descanso y vuelvo a buscar",
+                                       nuevas=nuevas, ronda=ronda)
+    estado.terminar()
+
+
+def _descanso(estado: EstadoMineria, pausa_min: float, texto: str, **datos) -> float:
+    proxima = dt.datetime.now().astimezone() + dt.timedelta(minutes=pausa_min)
+    estado.datos.update(estado="descanso", simbolo=None, ciclo=None, proxima=proxima.isoformat(timespec="seconds"))
+    estado.evento(f"{texto} a las {proxima:%H:%M}.", "descanso", **datos)
+    return time.time() + pausa_min * 60
+
+
+def _atender(pedido: dict, simbolos: list[str], intervalo: str, estrategias: int, generaciones: int, dias: int,
+             parar: threading.Event, estado: EstadoMineria) -> None:
+    """Hace la búsqueda pedida; si falla, avisa y la quita para no quedarse atascada."""
+    try:
+        _buscar(pedido, simbolos, intervalo, estrategias, generaciones, dias, parar, estado)
+    except Exception as e:  # un fallo inesperado no debe cerrar la oficina: se avisa y se sigue
+        estado.evento(f"La búsqueda ha fallado ({type(e).__name__}: {e}).", "error")
+        control.terminar_busqueda(pedido)
+        estado.datos.update(estado="esperando", simbolo=None, ciclo=None)
+        estado.guardar(forzar=True)
 
 
 def _buscar(pedido: dict, simbolos: list[str], intervalo: str, estrategias: int, generaciones: int, dias: int,
@@ -348,5 +461,5 @@ def _buscar(pedido: dict, simbolos: list[str], intervalo: str, estrategias: int,
         texto += (f": {nuevas} estrategia{'s' if nuevas > 1 else ''} nueva{'s' if nuevas > 1 else ''} en el banco. Con mesa libre "
                   "empiezan a operar ya; si no, esperan en la reserva.")
     else:
-        texto += ": ninguna ha superado las seis pruebas esta vez. Es lo normal; prueba otra búsqueda cuando quieras."
+        texto += ": ninguna ha superado las ocho pruebas esta vez. Es lo normal."
     estado.evento(texto, "fin_busqueda", nuevas=nuevas)

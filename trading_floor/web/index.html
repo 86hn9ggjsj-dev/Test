@@ -637,7 +637,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <div id="ranking"></div>
     <p class="nota">Total, hoy y semana: resultados en papel (dinero ficticio) desde que cada trader llegó a la sala. Backtest: cómo lo hizo su estrategia fuera de muestra, con datos pasados.</p></section>
   <section class="pagina" id="p-scalping"><h3>Sala de scalping</h3><div id="scalping"></div>
-    <p class="nota">Operaciones cortas con velas de 5 minutos en BTC, ETH y SOL. Se asume que los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta, frente al 0,14 % de la sala de trading). Aun así, las comisiones se comen buena parte de lo que se gana: fíjate en «comisiones pagadas». Mismo embudo de seis pruebas que el resto; dinero ficticio.</p></section>
+    <p class="nota">Operaciones cortas con velas de 5 minutos en BTC, ETH y SOL. Se asume que los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta, frente al 0,14 % de la sala de trading). Aun así, las comisiones se comen buena parte de lo que se gana: fíjate en «comisiones pagadas». Mismo embudo de ocho pruebas que el resto; dinero ficticio.</p></section>
   <section class="pagina" id="p-incubadora"><h3>Incubadora · planta 1</h3><div id="incubadora"></div></section>
   <section class="pagina" id="p-informe"><div id="informe"></div></section>
   <section class="pagina" id="p-academia"><h3>Academia · lo aprendido en real</h3><div id="academia"></div></section>
@@ -656,19 +656,19 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p><b>Minería.</b> Genera estrategias sin parar: combina indicadores (RSI, medias, Bollinger…) al azar y con un algoritmo genético, y las prueba en el 70 % inicial de tres años de velas reales de Binance.</p>
     <p><b>Laboratorio.</b> Las que parecen rentables viajan por la cinta. Cada puesto es una prueba de robustez; si la falla, a la trituradora.</p>
     <p><b>Cámara.</b> Las que lo superan todo se guardan en el banco (cada lingote es una estrategia), salvo que se parezcan demasiado a otra que ya esté dentro.</p>
-    <p><b>Sala de trading.</b> Cada mesa tiene su trader, que opera una estrategia del banco con su capital ficticio (el % del fondo que dedicas al trading, repartido entre sus 48 mesas; al principio, 1.000 $) que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
-    <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). Primero se examina en la incubadora (planta 1) con dinero de prueba; si aprueba, un trader se sienta con ella en una mesa libre. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 48 mesas (8 por activo).</p>
+    <p><b>Sala de trading.</b> Cada mesa tiene su trader, que opera una estrategia del banco con su capital ficticio (el % del fondo que dedicas al trading, repartido entre sus 88 mesas: 48 en la planta baja y 40 en la sala de trading 2, en la planta 1) que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
+    <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). Primero se examina en la incubadora (planta 1) con dinero de prueba; si aprueba, un trader se sienta con ella en una mesa libre. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 88 mesas (48 abajo y 40 en la sala de trading 2, en la planta 1), con un máximo de 15 estrategias por activo.</p>
     <p><b>Radar de señales.</b> El equipo de análisis mira, para cada trader, cuántas condiciones de su estrategia se cumplen ahora mismo y le avisa cuando le falta una para entrar (con la hora del próximo cierre de vela, soporte, resistencia y ATR).</p>
-    <p><b>Mi fondo.</b> Todo es tu fondo de inversión (con dinero ficticio): tú aportas capital y recibes participaciones; el valor liquidativo sube o baja solo con los resultados de trading, scalping, holding y tendencia, así que un trader nuevo no cambia tu patrimonio. Tú decides el reparto: qué % va a trading (se divide entre sus 48 mesas), a scalping (12 mesas), a holding y a la sala de tendencia; el resto es liquidez. Se cambia en «Mi fondo» o por el chat («dedica un 20 % al holding») y se aplica desde ese momento, sin perder lo ganado. En la pestaña «Mi fondo» (arriba) tienes tu dashboard: rentabilidad frente a BTC, caídas, volatilidad, Sharpe, reparto del dinero, exposición, meses, operaciones y aportaciones o reembolsos.</p>
-    <p><b>Scalping.</b> Una sala aparte con operaciones cortas en velas de 5 minutos (BTC, ETH y SOL, 12 mesas). Los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta) y pasan el mismo embudo de seis pruebas. Aun así, las comisiones pesan mucho: la sala muestra cuánto se paga.</p>
+    <p><b>Mi fondo.</b> Todo es tu fondo de inversión (con dinero ficticio): tú aportas capital y recibes participaciones; el valor liquidativo sube o baja solo con los resultados de trading, scalping, holding y tendencia, así que un trader nuevo no cambia tu patrimonio. Tú decides el reparto: qué % va a trading (se divide entre sus 88 mesas), a scalping (12 mesas), a holding y a la sala de tendencia; el resto es liquidez. Se cambia en «Mi fondo» o por el chat («dedica un 20 % al holding») y se aplica desde ese momento, sin perder lo ganado. En la pestaña «Mi fondo» (arriba) tienes tu dashboard: rentabilidad frente a BTC, caídas, volatilidad, Sharpe, reparto del dinero, exposición, meses, operaciones y aportaciones o reembolsos.</p>
+    <p><b>Scalping.</b> Una sala aparte con operaciones cortas en velas de 5 minutos (BTC, ETH y SOL, 12 mesas). Los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta) y pasan el mismo embudo de ocho pruebas. Aun así, las comisiones pesan mucho: la sala muestra cuánto se paga.</p>
     <p><b>Sin repetidas.</b> Una estrategia no entra en el banco si es la misma idea que otra (mismas condiciones con otros números), si entra en los mismos momentos o si está en el mercado a la vez la mayor parte del tiempo. Tampoco si se parece a una que ya se retiró por no funcionar. Si tenías repetidas de antes, pídele por el chat «quita las repetidas».</p>
     <p><b>Holding.</b> Carteras de largo plazo (BTC, ETH y SOL) sin stop loss: si el precio baja, promedian comprando más cada −8 % (y si se acaba el presupuesto, meten capital de la reserva); si sube, venden una parte en sus puntos de salida (+30, +60 y +100 % sobre el coste medio). Siempre se queda una parte en cartera.</p>
     <p><b>Tendencia.</b> En la sala de holding se sientan también Marina y Vicente, que siguen la tendencia de BTC, ETH, SOL, BNB, XRP y DOGE con velas diarias: compran la mitad de la parte de una moneda cuando cierra por encima de su media de 50 días, y la otra mitad cuando rompe su máximo de 20 días; venden cuando pierde la media o su mínimo de 10 días. Así están dentro cuando sube y se apartan cuando cae. Su dinero sale del reparto de «Mi fondo».</p>
     <p><b>Control de riesgos.</b> Decide cuánto invierte cada operación (arriesgando como mucho un 1 % del capital del trader) y veta entradas si hay demasiadas posiciones, demasiadas iguales, o si el día o la caída acumulada pierden demasiado.</p>
     <p><b>Macroeconomía.</b> Cuatro analistas siguen la bolsa, el VIX, el dólar, el oro, el petróleo, los bonos y el sentimiento cripto, y deciden si el mercado está en modo RISK-ON (apetito por el riesgo) o RISK-OFF.</p>
     <p><b>Supervisión.</b> Cada sala tiene su supervisor, que la patrulla y sabe cómo va. La supervisión general hace rondas por toda la oficina preguntando a cada uno, y acude corriendo si una sala se pone en rojo. El estado de cada sala está en la pestaña «Salas».</p>
-    <p><b>Dos plantas.</b> Con los botones de arriba a la izquierda (o las teclas Re Pág y Av Pág) cambias de planta. En la baja están la minería, el laboratorio, el banco, macro, holding, trading, scalping, riesgos y el comité. En la planta 1 están la incubadora, el equipo Quant, la academia, comunicación, sistemas, la cafetería, la sala de juegos y una terraza al aire libre con pérgola, piscina, fogata y barbacoa. La gente sube y baja en ascensor, y Satoshi, el gato, se pasea por las dos.</p>
-    <p><b>Incubadora.</b> Toda estrategia nueva empieza en la planta 1 con 1.000 $ de prueba que no cuentan en tu fondo y sin vetos de sala. Para subir a una mesa con dinero del fondo tiene que aprobar el examen: 10 operaciones (30 en scalping) y 7 días como mínimo, ganando y con un factor de beneficio de 1,1 o más. Suspende si pierde un 4 % (3 % en scalping) o si en 60 días no da la talla. Las aprobadas suben, la de mejor nota primero; su trader de la incubadora baja a entregarla a la mesa. Si la incubadora está llena, esperan en el banquillo.</p>
+    <p><b>Dos plantas.</b> Con los botones de arriba a la izquierda (o las teclas Re Pág y Av Pág) cambias de planta. En la baja están la minería, el laboratorio, el banco, macro, holding, trading, scalping, riesgos y el comité. En la planta 1 están la incubadora, la sala de trading 2 (40 mesas más), el equipo Quant, la academia, comunicación, sistemas, la cafetería, la sala de juegos y una terraza al aire libre con piscina, fogata y barbacoa. La gente sube y baja en ascensor, y Satoshi, el gato, se pasea por las dos.</p>
+    <p><b>Incubadora.</b> Toda estrategia nueva empieza en la planta 1 con 1.000 $ de prueba que no cuentan en tu fondo y sin vetos de sala. Para subir a una mesa con dinero del fondo tiene que aprobar el examen: 15 operaciones (40 en scalping) y 10 días como mínimo (3 en scalping), ganando y con un factor de beneficio de 1,2 o más. Suspende si pierde un 4 % (3 % en scalping) o si en 90 días (21 en scalping) no da la talla. Las aprobadas suben, la de mejor nota primero; su trader de la incubadora baja a entregarla a la mesa. Si la incubadora está llena, esperan en el banquillo.</p>
     <p><b>Equipo Quant.</b> Con 30 operaciones reales o más, cada trader arriesga según el Kelly prudente: un cuarto del Kelly, con el acierto rebajado por si ha tenido suerte, entre un 0,25 % y 1,5 veces tu riesgo por operación. También hacen el Monte Carlo del fondo (rango probable de los próximos 30 días) y el post mortem de cada estrategia retirada: qué prometía el backtest, qué hizo en real y por qué falló.</p>
     <p><b>Academia.</b> Junta los post mortem y lo que funciona en real. La minería busca más de lo que funciona y menos de lo que falla, pero un 30 % sigue siendo al azar y todo pasa igualmente las pruebas y el examen. Una estrategia nunca se cambia sola: eso sería adaptarse a la casualidad.</p>
     <p><b>Comunicación y sistemas.</b> Comunicación escribe el informe del día con los datos reales (pestaña «Informe»). Sistemas vigila que el paper trading, el holding y los datos funcionan, y cuánto tarda cada ciclo.</p>
@@ -769,6 +769,7 @@ function rgba(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >
 const TW = 64, TH = 32, ZH = 34;       // ancho y alto de una baldosa; píxeles por unidad de altura
 const W = 54, D = 24;                  // tamaño de la planta en baldosas
 const X_ALA = 46;                      // desde aquí, el ala nueva (scalping) solo tiene la fila de arriba y el pasillo
+const X_TERRAZA1 = 35;                 // en la planta 1, la sala de trading 2 llega hasta aquí; de aquí a X_ALA, la terraza
 const ALTO_MURO = 2.4;
 const iso = (x, y, z = 0) => [(x - y) * TW / 2, (x + y) * TH / 2 - z * ZH];
 
@@ -1046,27 +1047,29 @@ estatico(8.65 + 6.55, () => {
 const HOLO = {x: 8.7, y: 3.3};
 bloquear(8.2, 2.8, 9.2, 3.8);
 
-// ---- LABORATORIO: seis puestos (uno por prueba), cinta y trituradoras ----
-const ETAPAS = ["Generadas", "Rentables en muestra", "Fuera de muestra", "Costes x2", "Consistencia", "Monte Carlo", "Estabilidad", "Test del mono", "Distinta a las del banco"];
-const PRUEBAS = ETAPAS.slice(2, 8);
+// ---- LABORATORIO: ocho puestos (uno por prueba), cinta y trituradoras ----
+const ETAPAS = ["Generadas", "Rentables en muestra", "Fuera de muestra", "Prueba de la suerte", "Costes x2", "Consistencia", "Monte Carlo", "Estabilidad", "Test del mono", "Otras monedas", "Distinta a las del banco"];
+const PRUEBAS = ETAPAS.slice(2, -1);
 const EXPLICA = {
   "Generadas": "Estrategias creadas por la minería.",
   "Rentables en muestra": "Ganan en el 70 % inicial de los datos con suficientes operaciones.",
   "Fuera de muestra": "Siguen ganando en el 30 % final, que la minería nunca vio.",
+  "Prueba de la suerte": "Lo que ganan fuera de muestra es demasiado para ser casualidad (t de 2 o más).",
   "Costes x2": "Aguantan el doble de comisiones y deslizamiento.",
   "Consistencia": "Ganan en la mayoría de los 6 tramos del histórico.",
   "Monte Carlo": "Barajando 1.000 veces sus operaciones, el peor 5 % sigue en positivo.",
   "Estabilidad": "Con parámetros vecinos también ganan (no es sobreajuste).",
   "Test del mono": "En datos no vistos ganan al 90 % de monos que entran al azar.",
+  "Otras monedas": "La misma regla gana también en al menos la mitad de las otras monedas de su sala.",
   "Distinta a las del banco": "No se parecen a otra que ya esté en el banco.",
 };
 const Y_CINTA = 6.3, X_CINTA0 = 9.4, X_CINTA1 = 20.6;
 const ESTACIONES = PRUEBAS.map((nombre, i) => {
-  const x = 10.7 + i * 1.66;
-  return {nombre, x, bx: x + .7, flash: null, asiento: null};
+  const x = 10.55 + i * 1.26;
+  return {nombre, x, bx: x + .56, flash: null, asiento: null};
 });
 for (const e of ESTACIONES) {
-  e.asiento = puesto({x: e.x, y: 2.4, w: 1.4, color: "#cfd8e3", monitores: 1, colorSilla: "#6a7a90",
+  e.asiento = puesto({x: e.x, y: 2.4, w: 1.12, color: "#cfd8e3", monitores: 1, colorSilla: "#6a7a90",
     pintar: (w, h) => pantallaPrueba(e, w, h), brilla: () => e.flash && T < e.flash.hasta ? e.flash.color : null});
   bloquear(e.bx - .28, 7.05, e.bx + .28, 7.55);
   estatico(e.bx + 7.3, () => trituradora(e));
@@ -1075,7 +1078,7 @@ for (const e of ESTACIONES) {
 function pantallaPrueba(e, w, h) {
   const f = e.flash && T < e.flash.hasta ? e.flash.color : null;
   ctx.fillStyle = f ? rgba(f, .35) : "#0b1a2a"; ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = "#cfe8ff"; ctx.font = "700 5.2px Inter, sans-serif";
+  ctx.fillStyle = "#cfe8ff"; ctx.font = `700 ${e.nombre.length > 14 ? 4.2 : 5.2}px Inter, sans-serif`;
   ctx.fillText(e.nombre.toUpperCase(), 3, 7);
   ctx.strokeStyle = f || "#5cc0ff"; ctx.lineWidth = 1; ctx.beginPath();
   for (let i = 0; i <= 20; i++) ctx.lineTo(3 + i * (w - 6) / 20, 20 - Math.sin(i * .9 + T * 2 + e.x) * 4 - Math.cos(i * .4 + e.x) * 3);
@@ -1146,7 +1149,7 @@ function vitrina() {
 for (const [x, y] of [[29.4, 9.5], [12.5, 9.5]]) planta(x, y, true);
 const ROBOT = {x: 6, y: 10.4, dir: 1};
 
-// ---- SALA DE TRADING: 48 mesas (8 por activo) ----
+// ---- SALA DE TRADING: 48 mesas en la planta baja (otras 40 en la sala de trading 2, en la planta 1) ----
 const MESAS = [];
 for (const y of [12.2, 14.2, 16.2, 18.2, 20.2, 22.2])
   for (const x of [1, 3, 5, 7, 9, 11, 13, 15]) {
@@ -1633,7 +1636,8 @@ const SALAS1 = [
   {id: "juegos", nombre: "JUEGOS", x0: 46, y0: 0, x1: 54, y1: 9, a: "#1c1432", b: "#21183b", rotulo: "rgba(181,140,255,.15)"},
   {id: "pasillo1", nombre: "", x0: 0, y0: 9, x1: 54, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
   {id: "incubadora", nombre: "INCUBADORA", x0: 0, y0: 11, x1: 18, y1: 24, a: "#efeee6", b: "#e6e4da", rotulo: "rgba(120,60,0,.08)"},
-  {id: "terraza1", nombre: "TERRAZA", x0: 18, y0: 11, x1: 46, y1: 24, a: "#a07a52", b: "#96714a", rotulo: "rgba(40,20,0,.13)"},
+  {id: "trading2", nombre: "SALA DE TRADING 2", x0: 18, y0: 11, x1: X_TERRAZA1, y1: 24, a: "#eceee8", b: "#e2e5dd", rotulo: "rgba(0,0,0,.075)"},
+  {id: "terraza1", nombre: "TERRAZA", x0: X_TERRAZA1, y0: 11, x1: 46, y1: 24, a: "#a07a52", b: "#96714a", rotulo: "rgba(40,20,0,.13)"},
 ];
 const enPlanta1 = s => ({...s, planta: 1});
 
@@ -1896,27 +1900,17 @@ estatico(30.4 + 9.5, () => {
 }, 30.4, 9.5);
 for (const x of [8, 39]) planta(x, 10.3);
 
-// ---- TERRAZA: pérgola con mesa larga, sombrillas, piscina, fogata, barbacoa, césped y telescopio ----
-const PERGOLA = {x0: 19.4, y0: 12.5, x1: 27.2, y1: 15.9};
-for (const [x, y] of [[PERGOLA.x0, PERGOLA.y0], [PERGOLA.x1, PERGOLA.y0], [PERGOLA.x0, PERGOLA.y1], [PERGOLA.x1, PERGOLA.y1]]) {
-  bloquear(x - .1, y - .1, x + .1, y + .1);
-  estatico(x + y, () => caja(x - .07, y - .07, 0, .14, .14, 2.25, "#5a3a22", {top: "#6b4528"}), x, y);
-}
-estatico(PERGOLA.x0 + PERGOLA.y0 + .1, () => caja(PERGOLA.x0, PERGOLA.y0 - .05, 2.25, PERGOLA.x1 - PERGOLA.x0, .1, .12, "#5a3a22", {top: "#6b4528"}));
-estatico(PERGOLA.x0 + PERGOLA.y0 + .1, () => caja(PERGOLA.x0 - .05, PERGOLA.y0, 2.25, .1, PERGOLA.y1 - PERGOLA.y0, .12, "#5a3a22", {top: "#6b4528"}));
-estatico(PERGOLA.x1 + PERGOLA.y1 + .2, () => { caja(PERGOLA.x0, PERGOLA.y1 - .05, 2.25, PERGOLA.x1 - PERGOLA.x0, .1, .12, "#5a3a22", {top: "#6b4528"}); caja(PERGOLA.x1 - .05, PERGOLA.y0, 2.25, .1, PERGOLA.y1 - PERGOLA.y0, .12, "#5a3a22", {top: "#6b4528"}); });
-bloquear(20.3, 13.8, 26.3, 14.6);
-for (let x = 20.3; x < 26.3; x += 1) estatico(x + .5 + 14.2, () => { caja(x, 13.8, .42, 1, .8, .06, "#8a6440", {top: "#b08356", izq: "#7a5636", der: "#5f432a"}); caja(x + .45, 14.1, 0, .1, .2, .42, "#5a3a22"); });
-estatico(23.3 + 14.2 + .1, () => { for (let k = 0; k < 4; k++) { caja(20.9 + k * 1.5, 14.05, .48, .12, .12, .14, "#f4f1ea", {top: "#7a1d2a"}); const [px, py] = iso(21.4 + k * 1.5, 14.2, .5); circulo(px, py, 4, ["#ff8a5c", "#2ee6a6", "#ffcf5a", "#ff5a76"][k]); } }, 23.3, 14.2);
-const SILLAS_PERGOLA = [];
-for (const x of [20.8, 22.3, 23.8, 25.3]) {
-  silla(x, 13.3, "s", "#3a2a1c"); silla(x, 15.1, "n", "#3a2a1c");
-  SILLAS_PERGOLA.push({x, y: 13.3, mira: "s", postura: "sentado", tipo: "comida", planta: 1}, {x, y: 15.1, mira: "n", postura: "sentado", tipo: "comida", planta: 1});
-}
-const BOMBILLAS1 = [];
-for (let x = PERGOLA.x0; x <= PERGOLA.x1; x += .5) { BOMBILLAS1.push([x, PERGOLA.y0, 2.2]); BOMBILLAS1.push([x, PERGOLA.y1, 2.2]); }
-for (let x = 18.4; x < 45.8; x += .6) BOMBILLAS1.push([x, 23.85, 1.15]);
-for (let y = 11.4; y < 23.8; y += .6) BOMBILLAS1.push([45.85, y, 1.15]);
+// ---- SALA DE TRADING 2: 40 mesas más para la sala de trading (las mesas 49 a 88), en la planta 1 ----
+for (const y of [12.2, 14.2, 16.2, 18.2, 20.2])
+  for (const x of [19, 21, 23, 25, 27, 29, 31, 33]) {
+    const mesa = {trader: null, sala2: true};
+    mesa.asiento = enPlanta1(puesto({x, y, w: 1.5, color: "#a9b3c1", colorSilla: "#2d3442", pintar: (w, h, i) => pantallaTrader(mesa, w, h, i),
+      brilla: () => mesa.trader ? colorTrader(mesa.trader) : null}));
+    MESAS.push(mesa);
+  }
+planta(18.5, 23.4, true); planta(34.4, 23.4); planta(26.4, 23.4, true);
+
+// ---- TERRAZA: piscina, fogata, barbacoa, sombrilla, césped y telescopio ----
 function sombrilla(x, y, c) {
   bloquear(x - .45, y - .45, x + .45, y + .45);
   estatico(x + y, () => {
@@ -1929,12 +1923,12 @@ function sombrilla(x, y, c) {
   }, x, y);
 }
 const SITIOS_SOMBRILLA = [];
-for (const [x, y, c] of [[29.6, 13.4, "#2ee6a6"], [33, 13.4, "#5cc0ff"]]) {
+for (const [x, y, c] of [[43.5, 16.6, "#2ee6a6"]]) {
   sombrilla(x, y, c);
   silla(x - .8, y, "e", "#e9e4dc"); silla(x + .8, y, "o", "#e9e4dc");
   SITIOS_SOMBRILLA.push({x: x - .8, y, mira: "e", postura: "sentado", tipo: "terraza", planta: 1}, {x: x + .8, y, mira: "o", postura: "sentado", tipo: "terraza", planta: 1});
 }
-const PISCINA = {x0: 27.4, y0: 17.2, x1: 34.4, y1: 21.4};
+const PISCINA = {x0: 36.6, y0: 18.1, x1: 42.4, y1: 20.9};
 bloquear(PISCINA.x0 - .2, PISCINA.y0 - .2, PISCINA.x1 + .2, PISCINA.y1 + .2);
 for (let x = PISCINA.x0; x < PISCINA.x1; x++) estatico(x + .5 + PISCINA.y0 - .3, () => {
   const w = Math.min(1, PISCINA.x1 - x);
@@ -1957,11 +1951,14 @@ estatico(PISCINA.x1 + PISCINA.y1 + .3, () => {
   for (const dy of [0, .35]) caja(PISCINA.x1 - .35, PISCINA.y0 + .3 + dy, .06, .05, .05, .55, "#c9ced5");   // escalerilla
 });
 const TUMBONAS = [];
-for (const x of [28, 29.7, 31.4, 33.1]) {
+for (const x of [37.4, 38.9, 40.4, 41.9]) {
   bloquear(x - .35, 22.1, x + .35, 23.5);
   estatico(x + 22.8, () => { caja(x - .35, 22.15, 0, .7, 1.3, .22, "#e9e4dc", {top: "#fbf8f2"}); caja(x - .35, 22.15, .22, .7, .45, .32, "#e9e4dc", {top: "#fbf8f2"}); caja(x - .3, 22.6, .22, .6, .85, .04, ["#ff8a5c", "#5cc0ff", "#d4ff3a", "#ff5a76"][TUMBONAS.length % 4]); }, x, 22.8);
   TUMBONAS.push({x, y: 22.85, mira: "n", postura: "sentado", tipo: "tumbona", planta: 1});
 }
+const BOMBILLAS1 = [];
+for (let x = X_TERRAZA1 + .4; x < 45.8; x += .6) BOMBILLAS1.push([x, 23.85, 1.15]);
+for (let y = 11.4; y < 23.8; y += .6) BOMBILLAS1.push([45.85, y, 1.15]);
 const FOGATA = {x: 39.6, y: 15.4};
 bloquear(FOGATA.x - .5, FOGATA.y - .5, FOGATA.x + .5, FOGATA.y + .5);
 estatico(FOGATA.x + FOGATA.y, () => {
@@ -1997,13 +1994,13 @@ function arbol(x, y, s = 1) {
     for (const [dx, dy, r, c] of [[0, -42, 20, "#2f8f5b"], [-14, -34, 15, "#237a4b"], [14, -36, 15, "#2a8551"], [0, -56, 14, "#3aa56a"], [-8, -50, 11, "#46b877"]]) circulo(px + dx * s, py + dy * s, r * s, c);
   }, x, y);
 }
-arbol(18.9, 23.2); arbol(36.2, 23.2, 1.1); arbol(45.1, 23.2, 1.2); arbol(45.1, 18.6); arbol(45.1, 11.9, .9);
-bloquear(42.2, 20.4, 42.8, 21);
-estatico(42.5 + 20.7, () => {   // telescopio
-  const [bx, by] = iso(42.5, 20.7, 0), [tx, ty] = iso(42.5, 20.7, 1.1);
+arbol(36.2, 23.2, 1.1); arbol(45.1, 23.2, 1.2); arbol(45.1, 18.6); arbol(45.1, 11.9, .9);
+bloquear(43.7, 20.7, 44.3, 21.3);
+estatico(44 + 21, () => {   // telescopio
+  const [bx, by] = iso(44, 21, 0), [tx, ty] = iso(44, 21, 1.1);
   ctx.strokeStyle = "#2a2e36"; ctx.lineWidth = 1.6; ctx.beginPath(); for (const dx of [-6, 0, 6]) { ctx.moveTo(bx + dx, by + (dx ? 2 : -2)); ctx.lineTo(tx, ty); } ctx.stroke();
   ctx.save(); ctx.translate(tx, ty); ctx.rotate(-.5); ctx.fillStyle = "#e9edf3"; rr(-4, -3, 22, 6, 3); ctx.fill(); ctx.fillStyle = "#5cc0ff"; ctx.fillRect(15, -3, 3, 6); ctx.restore();
-}, 42.5, 20.7);
+}, 44, 21);
 bloquear(35.4, 12.1, 36.4, 12.7);
 estatico(35.9 + 12.4, () => {   // carrito de bebidas
   caja(35.4, 12.1, .1, 1, .6, .05, "#c9ced5"); caja(35.4, 12.1, .55, 1, .6, .05, "#c9ced5");
@@ -2011,7 +2008,7 @@ estatico(35.9 + 12.4, () => {   // carrito de bebidas
   for (let k = 0; k < 4; k++) caja(35.5 + k * .22, 12.25, .6, .1, .1, .28, ["#2ee6a6", "#ff8a5c", "#ffcf5a", "#5cc0ff"][k]);
 }, 35.9, 12.4);
 // barandilla de cristal en los bordes de la terraza
-for (let x = 18; x < X_ALA; x++) estatico(x + .5 + 24, () => { caja(x, 23.9, 0, 1, .08, .9, "#000000", {top: "rgba(255,255,255,.35)", izq: "rgba(170,215,255,.16)", der: "rgba(170,215,255,.1)"}); caja(x, 23.88, .9, 1, .12, .05, "#c9ced5"); }, x + .5, 23.95);
+for (let x = X_TERRAZA1; x < X_ALA; x++) estatico(x + .5 + 24, () => { caja(x, 23.9, 0, 1, .08, .9, "#000000", {top: "rgba(255,255,255,.35)", izq: "rgba(170,215,255,.16)", der: "rgba(170,215,255,.1)"}); caja(x, 23.88, .9, 1, .12, .05, "#c9ced5"); }, x + .5, 23.95);
 for (let y = 11; y < D; y++) estatico(X_ALA + y + .5, () => { caja(X_ALA - .08, y, 0, .08, 1, .9, "#000000", {top: "rgba(255,255,255,.35)", izq: "rgba(170,215,255,.12)", der: "rgba(170,215,255,.16)"}); caja(X_ALA - .1, y, .9, .12, 1, .05, "#c9ced5"); }, X_ALA - .05, y + .5);
 
 // ---- tabiques de la planta 1 ----
@@ -2022,12 +2019,14 @@ muroV(28, 0, 9, [], 1, "#5cc0ff");
 muroV(37, 0, 9, [], 1, "#ffcf5a");
 muroV(46, 0, 9, [], 1, "#b58cff");
 muroH(11, 0, 18, [[8, 10]], 1, "#ff8a5c");
-muroH(11, 18, 46, [[22, 26], [33, 37], [42, 44]], 1, "#2ee6a6");
+muroH(11, 18, X_TERRAZA1, [[18, 20], [33, 35]], 1, "#d4ff3a");
+muroH(11, X_TERRAZA1, 46, [[37, 39], [42, 44]], 1, "#2ee6a6");
 muroV(18, 11, 24, [[19, 21]], 1, "#ff8a5c");
+muroV(X_TERRAZA1, 11, 24, [], 1, "#d4ff3a");
 bloquear(X_ALA, 11, W, D);   // fuera del edificio
 for (let y = 0; y < D; y++) muros.add(arista(-1, y, 0, y));
-SITIOS.push(...SILLAS_PERGOLA, ...SITIOS_SOMBRILLA, ...TUMBONAS, ...SITIOS_FUEGO, ...PUPITRES,
-  {x: 44.1, y: 13.2, mira: "n", postura: "de_pie", tipo: "barbacoa", planta: 1}, {x: 42.5, y: 21.4, mira: "n", postura: "de_pie", tipo: "telescopio", planta: 1},
+SITIOS.push(...SITIOS_SOMBRILLA, ...TUMBONAS, ...SITIOS_FUEGO, ...PUPITRES,
+  {x: 44.1, y: 13.2, mira: "n", postura: "de_pie", tipo: "barbacoa", planta: 1}, {x: 44, y: 21.7, mira: "n", postura: "de_pie", tipo: "telescopio", planta: 1},
   ...[38.7, 39.9, 41.1, 42.3, 43.5].map(x => ({x, y: 3.25, mira: "n", postura: "de_pie", tipo: "barra", planta: 1})),
   ...MESAS_CAFE.flatMap(([x, y]) => [{x: x - .75, y, mira: "e", postura: "sentado", tipo: "cafeteria", planta: 1}, {x: x + .75, y, mira: "o", postura: "sentado", tipo: "cafeteria", planta: 1}]),
   {x: 47.95, y: 3.15, mira: "s", postura: "de_pie", tipo: "futbolin", planta: 1}, {x: 47.95, y: 4.85, mira: "n", postura: "de_pie", tipo: "futbolin", planta: 1},
@@ -2161,15 +2160,17 @@ function empleado(o, asiento) { const a = new Agente(o); a.casa = asiento; coloc
 const MINEROS = ["Hugo", "Noa", "Iker", "Vega"].map((n, i) => empleado({nombre: n, rol: "minero", explica: "Genera estrategias sin parar: combina indicadores al azar y con un algoritmo genético, y las prueba en el 70 % inicial de los datos. Las que parecen rentables las manda a la cinta del laboratorio."}, PUESTOS_MINA[[0, 2, 3, 5][i]]));
 const TEXTOS_PRUEBA = {
   "Fuera de muestra": "Prueba la estrategia en el 30 % final de los datos, que la minería nunca vio. Si solo funcionaba en el pasado que conocía, aquí se cae. Es donde más estrategias mueren.",
+  "Prueba de la suerte": "Mira si lo que gana fuera de muestra puede ser casualidad: la ganancia media por operación tiene que ser al menos el doble de su margen de error. Con pocas operaciones o muy desiguales, no pasa. Es la prueba más dura.",
   "Costes x2": "Repite el backtest con el doble de comisiones y deslizamiento. Una ventaja de verdad no debería desaparecer por pagar un poco más.",
   "Consistencia": "Parte el histórico en 6 tramos y exige que gane en la mayoría. Así descarta las que solo tuvieron una buena racha.",
   "Monte Carlo": "Baraja 1.000 veces el orden de las operaciones. Si en el peor 5 % de los casos pierdes dinero, la estrategia es demasiado frágil.",
   "Estabilidad": "Prueba 20 variantes con parámetros vecinos (RSI 21 en vez de 14...). Si al tocar un número deja de ganar, es sobreajuste.",
   "Test del mono": "Compara la estrategia con 100 «monos» que entran en momentos al azar con las mismas salidas, en datos no vistos. Hay que ganar al 90 % de ellos.",
+  "Otras monedas": "Prueba la misma regla, con los mismos números, en las otras monedas de su sala y en el mismo periodo. Tiene que ganar en al menos la mitad: si es algo real del mercado se repite en criptos parecidas; si fue suerte con una moneda, no.",
 };
-const PROBADORES = ["Carmen", "Pol", "Sara", "Marc", "Nerea", "Dani"].map((n, i) =>
+const PROBADORES = ["Carmen", "Ciro", "Pol", "Sara", "Marc", "Nerea", "Dani", "Berta"].map((n, i) =>
   empleado({nombre: n, rol: "prueba", prueba: PRUEBAS[i], puesto: "Laboratorio · " + PRUEBAS[i], explica: TEXTOS_PRUEBA[PRUEBAS[i]]}, ESTACIONES[i].asiento));
-const BANQUERA = empleado({nombre: "Irene", rol: "banco", explica: "Recibe por el tubo las estrategias que superan las seis pruebas y las guarda en la cámara (cada lingote es una). Rechaza las que se parecen demasiado a otra que ya está dentro, o las de un símbolo cuyo banco ya está lleno."}, ASIENTO_BANCO);
+const BANQUERA = empleado({nombre: "Irene", rol: "banco", explica: "Recibe por el tubo las estrategias que superan las ocho pruebas y las guarda en la cámara (cada lingote es una). Rechaza las que se parecen demasiado a otra que ya está dentro, o las de un símbolo cuyo banco ya está lleno."}, ASIENTO_BANCO);
 const DIRECTOR = empleado({nombre: "Bruno", rol: "director", explica: "Preside el comité: repasa el patrimonio y los resultados de cada trader."}, SILLA_CABECERA);
 const RIESGOS = empleado({nombre: "Julia", rol: "riesgos", puesto: "Jefa de riesgos", explica: "Dirige el control de riesgos: decide cuánto invierte cada operación (como mucho un 1 % de riesgo sobre el capital del trader) y veta entradas si se superan los límites de la sala. Puede activar el freno si el día o la caída acumulada pierden demasiado."}, PUESTOS_RIESGO[1]);
 const EQUIPO_RIESGO = [RIESGOS, ...[["Óscar", "Vigila la exposición: cuántas posiciones hay abiertas y cuántas son la misma apuesta (mismo activo y misma dirección)."], ["Nuria", "Vigila las pérdidas: la del día (freno al −2 %) y la caída desde el máximo (pausa al −6 %)."]].map(([n, e], i) =>
@@ -2215,7 +2216,10 @@ GENERAL.x = 19.6; GENERAL.y = 12.3; GENERAL.mira = "s";
 agentes.push(GENERAL);
 const NOMBRES_TRADERS = ["Lucía", "Mateo", "Aitana", "Leo", "Martina", "Unai", "Alba", "Gael", "Carla", "Nico", "Emma", "Izan", "Olivia", "Teo", "Lola", "Enzo", "Jana", "Biel", "Ainhoa", "Rayan", "Candela", "Omar", "Valeria", "Joel",
   "Vera", "Álvaro", "Marcos", "Rubén", "Nora", "Lara", "Sergio", "Aroa", "Gonzalo", "Ane", "Rodrigo", "Mía", "Jorge", "Carlota", "Asier", "Daniela", "Víctor", "Blanca", "Eric", "Luna", "Andrea", "Mario", "Inés", "Pau",
-  "Kai", "Nil", "Zoe", "Iris", "Ian", "Alma", "Dylan", "Leire", "Thiago", "Maya", "Óliver", "Cloe"];
+  "Kai", "Nil", "Zoe", "Iris", "Ian", "Alma", "Dylan", "Leire", "Thiago", "Maya", "Óliver", "Cloe",
+  "Aurora", "Fabio", "Gala", "Héctor", "Irati", "Jaime", "Lía", "Manuel", "Paloma", "Quim", "Raquel", "Tania", "Unax", "Xavi", "Zaira", "Adriana",
+  "Darío", "Eva", "Fran", "Gisela", "Ibai", "Jimena", "Koldo", "Lorenzo", "Macarena", "Nahia", "Oriol", "Patricia", "Úrsula", "Valentín", "Ximena",
+  "Yeray", "Zuriñe", "Amaia", "Borja", "Eloy", "Fiona", "Guillem", "Helena", "Igor"];
 const traders = new Map();
 
 // ---- la gente de la planta 1 ----
@@ -2758,7 +2762,7 @@ function holograma() {
   const m = S && S.mineria || {};
   ctx.textAlign = "center";
   ctx.fillStyle = act ? "#3effd0" : "rgba(62,255,208,.5)"; ctx.font = "800 9px JetBrains Mono, monospace";
-  ctx.fillText(act ? `GEN ${m.generacion || 0}/${m.generaciones || 0}` : (m.estado === "descanso" ? "EN PAUSA" : "EN ESPERA"), bx, by - 102);
+  ctx.fillText(act ? `GEN ${m.generacion || 0}/${m.generaciones || 0}` : (m.estado === "descanso" ? "DESCANSO" : m.estado === "pausada" ? "EN PAUSA" : "EN ESPERA"), bx, by - 102);
   ctx.font = "600 7px JetBrains Mono, monospace"; ctx.fillText(act ? (m.simbolo || "") : "", bx, by - 92);
   ctx.textAlign = "start";
   brillo(HOLO.x, HOLO.y, 1.2, 70, "#3effd0", act ? .45 : .12);
@@ -2772,7 +2776,7 @@ function guirnalda() {
     if (i % 2 === 0) brillo(x, y, z - .05, 16, c, .25 + noche * .5);
   });
 }
-function guirnaldaTerraza() {   // luces de la pérgola y de la barandilla de la terraza
+function guirnaldaTerraza() {   // luces de la barandilla de la terraza
   ctx.strokeStyle = "rgba(40,40,40,.7)"; ctx.lineWidth = 1;
   BOMBILLAS1.forEach(([x, y, z], i) => {
     const zz = z - Math.abs(Math.sin(x * 5.7 + y * 5.7)) * .12, [px, py] = iso(x, y, zz), c = ["#ffcf5a", "#ff8a5c", "#d4ff3a", "#5cc0ff"][i % 4];
@@ -2973,8 +2977,8 @@ function pantallaExamenes(w, h) {
   const inc = Object.entries(S && S.papel && S.papel.incubadora || {}).sort((a, b) => ((b[1].examen || {}).nota || 0) - ((a[1].examen || {}).nota || 0));
   ctx.fillStyle = "#120b05"; ctx.fillRect(0, 0, w, h);
   ctx.fillStyle = "#ff8a5c"; ctx.font = "900 17px Inter, sans-serif"; ctx.fillText("INCUBADORA · EXÁMENES", 14, 24);
-  ctx.fillStyle = "#b7a08c"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText("Dinero de prueba: no cuenta en tu fondo. Aprueban ganando con 10 operaciones (30 en scalping).", 300, 22);
-  if (!inc.length) { ctx.fillStyle = "#5a4a3a"; ctx.font = "700 14px Inter, sans-serif"; ctx.fillText("Sin estrategias de examen. Pulsa «Buscar estrategias».", 14, 80); return; }
+  ctx.fillStyle = "#b7a08c"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText("Dinero de prueba: no cuenta en tu fondo. Aprueban ganando con 15 operaciones (40 en scalping).", 300, 22);
+  if (!inc.length) { ctx.fillStyle = "#5a4a3a"; ctx.font = "700 14px Inter, sans-serif"; ctx.fillText("Sin estrategias de examen todavía.", 14, 80); return; }
   inc.slice(0, 12).forEach(([id, t], k) => {
     const ex = t.examen || {}, x = 14 + (k % 2) * 590, y = 46 + Math.floor(k / 2) * 25, f = clamp((ex.operaciones || 0) / (ex.operaciones_min || 10), 0, 1), c = colorExamen(t);
     ctx.fillStyle = "#e9edf3"; ctx.font = "800 11px JetBrains Mono, monospace"; ctx.fillText(`${id} ${moneda(t.simbolo)} ${t.direccion === "largo" ? "▲" : "▼"}`, x, y + 11);
@@ -3102,7 +3106,7 @@ function pantallaMineria(w, h) {
   const m = S && S.mineria || {}, e = m.embudo || {}, act = m.estado === "minando";
   ctx.fillStyle = "#0a0c10"; ctx.fillRect(0, 0, w, h); ctx.strokeStyle = "#2a2f38"; ctx.lineWidth = 4; ctx.strokeRect(0, 0, w, h);
   ctx.fillStyle = "#ffc24a"; ctx.font = "800 16px JetBrains Mono, monospace";
-  ctx.fillText(act ? `MINANDO ${m.simbolo || ""}` : m.estado === "descanso" ? "RONDA TERMINADA · PAUSA" : "MINERÍA EN ESPERA", 14, 26);
+  ctx.fillText(act ? `MINANDO ${m.simbolo || ""}${m.ronda ? " · RONDA " + m.ronda : ""}` : m.estado === "descanso" ? "RONDA TERMINADA · DESCANSO" : m.estado === "pausada" ? "BÚSQUEDA EN PAUSA" : "MINERÍA EN ESPERA", 14, 26);
   const g = m.generaciones ? (m.generacion || 0) / m.generaciones : 0;
   ctx.fillStyle = "#1c222c"; ctx.fillRect(14, 38, 300, 10); ctx.fillStyle = "#ffc24a"; ctx.fillRect(14, 38, 300 * (act ? g : 0), 10);
   ctx.fillStyle = "#8a94a6"; ctx.font = "600 11px Inter, sans-serif"; ctx.fillText(act ? `generación ${m.generacion}/${m.generaciones}` : "", 322, 47);
@@ -3224,7 +3228,7 @@ let sueloCache = [null, null], vineta = null;
 function texturaSuelo(sala, w, h) {   // coordenadas del plano: 100 unidades = 1 baldosa
   const azar = (() => { let k = hash(sala.id); return () => ((k = Math.imul(k ^ (k >>> 15), 2246822507) + 0x9e3779b9 >>> 0) / 4294967296); })();
   const motas = (n, color, r = 1.4) => { ctx.fillStyle = color; for (let i = 0; i < n; i++) ctx.fillRect(azar() * w, azar() * h, r, r); };
-  if (sala.id === "trading") {   // moqueta oscura con borde neón bajo las mesas
+  if (sala.id === "trading" || sala.id === "trading2") {   // moqueta oscura con borde neón bajo las mesas
     const x0 = 25, y0 = 62, mw = w - 70, mh = h - 70;
     ctx.fillStyle = "#1b2433"; rr(x0, y0, mw, mh, 18); ctx.fill();
     ctx.save(); rr(x0, y0, mw, mh, 18); ctx.clip();
@@ -3261,11 +3265,11 @@ function texturaSuelo(sala, w, h) {   // coordenadas del plano: 100 unidades = 1
       ctx.fillStyle = "rgba(40,20,0,.22)"; ctx.fillRect(0, v, w, 1.6);
       for (let u = (k * 211) % 300; u < w; u += 300) ctx.fillRect(u, v, 1.6, 18);
     }
-    const cx = (36 - 18) * 100, cy = (18.4 - 11) * 100;   // césped con flores
-    ctx.fillStyle = "#3f8f4a"; rr(cx, cy, 940, 520, 40); ctx.fill();
-    ctx.save(); rr(cx, cy, 940, 520, 40); ctx.clip();
-    for (let i = 0; i < 1400; i++) { ctx.fillStyle = azar() < .5 ? "rgba(255,255,255,.05)" : "rgba(0,40,0,.1)"; ctx.fillRect(cx + azar() * 940, cy + azar() * 520, 2, 5); }
-    for (let i = 0; i < 60; i++) { ctx.fillStyle = ["#ffcf5a", "#ff8aa8", "#ffffff", "#b58cff"][i % 4]; ctx.beginPath(); ctx.arc(cx + 30 + azar() * 880, cy + 30 + azar() * 460, 4, 0, TAU); ctx.fill(); }
+    const cx = (43 - sala.x0) * 100, cy = (17.6 - 11) * 100, cw = 290, ch = 600;   // césped con flores
+    ctx.fillStyle = "#3f8f4a"; rr(cx, cy, cw, ch, 40); ctx.fill();
+    ctx.save(); rr(cx, cy, cw, ch, 40); ctx.clip();
+    for (let i = 0; i < 500; i++) { ctx.fillStyle = azar() < .5 ? "rgba(255,255,255,.05)" : "rgba(0,40,0,.1)"; ctx.fillRect(cx + azar() * cw, cy + azar() * ch, 2, 5); }
+    for (let i = 0; i < 24; i++) { ctx.fillStyle = ["#ffcf5a", "#ff8aa8", "#ffffff", "#b58cff"][i % 4]; ctx.beginPath(); ctx.arc(cx + 25 + azar() * (cw - 50), cy + 25 + azar() * (ch - 50), 4, 0, TAU); ctx.fill(); }
     ctx.restore();
   } else if (sala.id === "incubadora") {   // moqueta cálida con borde naranja bajo las mesas
     const x0 = 25, y0 = 62, mw = w - 70, mh = 900;
@@ -3349,10 +3353,9 @@ function decorarSuelo1() {
     ctx.fillStyle = "rgba(212,255,58,.25)";
     for (let x = 450; x < W * 100; x += 300) { ctx.beginPath(); ctx.moveTo(x, 80); ctx.lineTo(x - 40, 100); ctx.lineTo(x, 120); ctx.fill(); }
   });
-  plano(19.6, 12.7, 0, () => { ctx.fillStyle = "rgba(255,207,90,.16)"; rr(0, 0, 740, 300, 30); ctx.fill(); });   // alfombra bajo la pérgola
   plano(37, 13.1, 0, () => { ctx.fillStyle = "rgba(255,138,60,.14)"; ctx.beginPath(); ctx.arc(260, 230, 230, 0, TAU); ctx.fill(); });   // alrededor de la fogata
   const rotulos = [["comunicacion", .4, 8.7, 82], ["infra", 9.4, 8.7, 100], ["quant", 17.4, 8.7, 100], ["academia", 28.4, 8.7, 100], ["cafeteria", 37.4, 8.7, 100], ["juegos", 46.4, 8.7, 100],
-    ["incubadora", .6, 23.7, 150], ["terraza1", 18.6, 23.5, 130]];
+    ["incubadora", .6, 23.7, 150], ["trading2", 18.6, 23.7, 120], ["terraza1", X_TERRAZA1 + .5, 23.5, 110]];
   for (const [id, x, y, t] of rotulos) {
     const s = SALAS1.find(s => s.id === id);
     plano(x, y, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
@@ -3555,11 +3558,13 @@ function nuevosEventos(lista) {
 function agenteDeTrader(id) { return traders.get(id); }
 const DESCARTES = {
   "Fuera de muestra": id => pick([`${id} fuera: en datos que no había visto, pierde.`, `${id} solo funcionaba en el pasado que conocía. A la trituradora.`, `Otra que cae fuera de muestra: ${id}.`]),
+  "Prueba de la suerte": id => pick([`${id} gana fuera de muestra, pero tan poco y tan irregular que puede ser suerte. Fuera.`, `Con esas operaciones, lo de ${id} no se distingue de la casualidad.`]),
   "Costes x2": id => pick([`${id} no aguanta el doble de comisiones. Fuera.`, `Con costes realistas, ${id} deja de ganar.`]),
   "Consistencia": id => pick([`${id} ganó en una racha y poco más. Descartada.`, `${id} solo gana en un par de tramos. No me fío.`]),
   "Monte Carlo": id => pick([`${id}: barajando sus operaciones, el peor 5 % pierde dinero. Fuera.`, `Monte Carlo dice que ${id} es demasiado frágil.`]),
   "Estabilidad": id => pick([`${id}: tocas un parámetro y deja de ganar. Sobreajuste de libro.`, `Las variantes de ${id} pierden. Era casualidad.`]),
   "Test del mono": id => pick([`${id}: un mono entrando al azar lo hace igual de bien 🐒`, `El mono gana otra vez. ${id}, descartada.`]),
+  "Otras monedas": id => pick([`${id} solo funciona en su moneda: en las demás pierde. Huele a suerte.`, `La regla de ${id}, en las otras monedas, no gana. Descartada.`]),
 };
 function procesarMineria(eventos) {
   const descartes = [];
@@ -3578,11 +3583,13 @@ function procesarMineria(eventos) {
     else if (e.tipo === "aprobada") {
       enfocar(26, 5.5, 2.2, 7);
       const n = (S.banco || []).length;
-      charla([[PROBADORES[5], `¡${e.id} ha superado las seis pruebas! ${e.fuera ? "Fuera de muestra: " + e.fuera + "." : ""}`, "bueno"],
+      charla([[PROBADORES[PROBADORES.length - 1], `¡${e.id} ha superado las ocho pruebas! ${e.fuera ? "Fuera de muestra: " + e.fuera + "." : ""}`, "bueno"],
         [BANQUERA, `Guardada en la cámara (${n} en el banco). Si hay mesa libre se pone en marcha ya; si no, a la reserva.`, "oro"],
         [DIRECTOR, pick(["Buen trabajo. Que empiece a operar en papel y veremos.", "Bien. Ahora a demostrarlo con precios de verdad.", "Una más. Sin euforia: el backtest no es el futuro."])]], 3);
     }
-    else if (e.tipo === "descanso") decir(pick(MINEROS), pick(["Ronda terminada. ¡Café!", "Fin de ronda. Me voy al sofá.", "Los servidores descansan y yo también."]));
+    else if (e.tipo === "descanso") { decir(SUPERVISORES[0], e.texto, 2, e.nuevas ? "bueno" : ""); decir(pick(MINEROS), pick(["Ronda terminada. ¡Café!", "Fin de ronda. Me voy al sofá.", "Los servidores descansan y yo también."])); }
+    else if (e.tipo === "ronda") { charla([[SUPERVISORES[0], e.texto, ""], [pick(MINEROS), pick(["¡Otra ronda! Servidores arriba.", "Vamos con la siguiente.", "A picar datos otra vez."])]], 2); }
+    else if (e.tipo === "pausa") decir(SUPERVISORES[0], e.texto, 3);
     else if (e.tipo === "busqueda") { charla([[SUPERVISORES[0], e.texto, "bueno"], [pick(MINEROS), pick(["¡Vamos allá! Enciendo los servidores.", "A por ellas. Que el laboratorio se prepare.", "Servidores arriba. ¡A minar!"])]], 3); enfocar(5, 4.5, 2.2, 6); }
     else if (e.tipo === "fin_busqueda") { decir(SUPERVISORES[0], e.texto, 3, e.nuevas ? "bueno" : ""); if (!e.nuevas) decir(DIRECTOR, "Mejor ninguna que una mala. El embudo está para eso.", 2); }
     else if (e.tipo === "error") decir(pick(MINEROS), `Tenemos un problema: ${e.texto}`, 2, "malo");
@@ -3626,7 +3633,7 @@ function procesarPapel(eventos) {
       continue;
     }
     if (e.tipo === "banquillo") { enCanal("operaciones", () => decir(BANQUERA, `${e.id} espera en el banquillo: la incubadora está llena. Entrará en cuanto quede una plaza libre.`, 1, "oro")); continue; }
-    if (e.tipo === "busqueda") { const sup = supervisorDe(e.grupo); enCanal("operaciones", () => charla([[sup, e.texto, ""], [SUPERVISORES[0], "Recibido. Enciendo los servidores: un ciclo y paramos.", "", sup]], 2)); continue; }
+    if (e.tipo === "busqueda") { const sup = supervisorDe(e.grupo); enCanal("operaciones", () => charla([[sup, e.texto, ""], [SUPERVISORES[0], busquedaSiempre() ? "Recibido. Esa búsqueda va antes que la ronda en curso." : "Recibido. Enciendo los servidores: un ciclo y paramos.", "", sup]], 2)); continue; }
     if (e.tipo === "reserva") { enCanal("operaciones", () => decir(BANQUERA, `${e.id} aprobada, pero no hay mesa libre en ${e.grupo === "scalping" ? "scalping" : "trading"}: la guardo en la reserva. Será la primera opción si el supervisor retira alguna.`, 2, "oro")); continue; }
     if (e.tipo === "baja") { enCanal("operaciones", () => decir(supervisorDe(e.grupo) || BANQUERA, e.texto, 2)); continue; }
     const a = agenteDeTrader(e.id);
@@ -3701,7 +3708,9 @@ function procesarHolding(eventos) {
 function mesaDe(d) { return d && d.mesa != null ? (d.grupo === "scalping" ? MESAS_SCALP : MESAS)[d.mesa] || null : null; }
 function puestoTrader(id, d) { return `${d.grupo === "scalping" ? "Scalper" : "Trader"} · mesa ${d.mesa + 1} · ${id}`; }
 function crearTrader(id, datos) {
-  const nombre = NOMBRES_TRADERS[((datos.grupo === "scalping" ? MESAS.length : 0) + datos.mesa) % NOMBRES_TRADERS.length];
+  // planta baja: 0-47; scalping: 48-59 (como siempre); sala de trading 2: 60-99
+  const k = datos.grupo === "scalping" ? 48 + datos.mesa : datos.mesa < 48 ? datos.mesa : 60 + datos.mesa - 48;
+  const nombre = NOMBRES_TRADERS[k % NOMBRES_TRADERS.length];
   return new Agente({nombre, rol: "trader", id, datos, puesto: puestoTrader(id, datos)});
 }
 function sincronizarTraders(inicial) {
@@ -3956,8 +3965,9 @@ function actualizarHUD() {
   if (ctrl.busqueda && m.estado === "minando" && viva) { p.className = "pastilla minando"; p.textContent = `Buscando ${moneda(m.simbolo || "")} · gen ${m.generacion || 0}/${m.generaciones || 0}`; }
   else if (ctrl.busqueda) { p.className = "pastilla minando"; p.textContent = "Preparando la búsqueda…"; }
   else if (m.estado === "minando" && viva) { p.className = "pastilla minando"; p.textContent = `Minando ${m.simbolo || ""} · gen ${m.generacion || 0}/${m.generaciones || 0}`; }
-  else if (m.estado === "esperando") { p.className = "pastilla descanso"; p.textContent = "Minería en espera"; p.title = "Solo busca estrategias cuando pulsas «Buscar estrategias»"; }
-  else if (m.estado === "descanso") { p.className = "pastilla descanso"; p.textContent = m.proxima ? `Pausa hasta las ${fmt.hora(new Date(m.proxima))}` : "Minería en pausa"; }
+  else if (m.estado === "pausada") { p.className = "pastilla descanso"; p.textContent = "Búsqueda en pausa"; p.title = "La has pausado tú: pulsa «Reanudar búsqueda» para que vuelva a buscar"; }
+  else if (m.estado === "esperando" && !busquedaSiempre()) { p.className = "pastilla descanso"; p.textContent = "Minería en espera"; p.title = "Solo busca estrategias cuando pulsas «Buscar estrategias»"; }
+  else if (m.estado === "descanso") { p.className = "pastilla descanso"; p.textContent = m.proxima ? `Descanso hasta las ${fmt.hora(new Date(m.proxima))}` : "Minería descansando"; p.title = "Entre ronda y ronda de búsqueda, el equipo descansa un rato"; }
   else { p.className = "pastilla"; p.textContent = "Minería parada"; }
   const mc = S.macro || {};
   const pReg = $("#pRegimen");
@@ -4064,10 +4074,11 @@ function estadoSalas() {
   const ap = e["Distinta a las del banco"] || 0, cand = e["Rentables en muestra"] || 0;
   const libres = mesasLibres();
   if (S.control && S.control.busqueda && !(m.estado === "minando" && viva)) out.mineria = ["ok", "Búsqueda pedida: el equipo se está preparando."];
-  else if (m.estado === "esperando") out.mineria = ["ok", `En espera: solo busca cuando pulsas «Buscar estrategias». ${libres > 0 ? `Quedan ${libres} mesas libres en la sala de trading.` : "La sala de trading está llena."}`];
+  else if (m.estado === "pausada") out.mineria = ["aviso", `Búsqueda en pausa: la has pausado tú. Pulsa «Reanudar búsqueda» para que vuelva a buscar. ${libres > 0 ? `Quedan ${libres} mesas libres en la sala de trading.` : "La sala de trading está llena."}`];
+  else if (m.estado === "esperando" && !busquedaSiempre()) out.mineria = ["ok", `En espera: solo busca cuando pulsas «Buscar estrategias». ${libres > 0 ? `Quedan ${libres} mesas libres en la sala de trading.` : "La sala de trading está llena."}`];
   else if (m.actividad && m.actividad[0] && m.actividad[0].tipo === "error") out.mineria = ["alerta", m.actividad[0].texto];
   else if (m.estado === "minando" && viva) out.mineria = ["ok", `Minando ${moneda(m.simbolo)}, generación ${m.generacion}/${m.generaciones}. En la sesión: ${fmt.n(e["Generadas"] || 0)} evaluadas y ${ap} aprobadas.`];
-  else if (m.estado === "descanso") out.mineria = ["ok", `Ronda terminada; la siguiente empieza a las ${m.proxima ? fmt.hora(new Date(m.proxima)) : "—"}. ${fmt.n(e["Generadas"] || 0)} evaluadas en la sesión.`];
+  else if (m.estado === "descanso") out.mineria = ["ok", `Ronda ${m.ronda || ""} terminada; la siguiente empieza a las ${m.proxima ? fmt.hora(new Date(m.proxima)) : "—"}. ${fmt.n(e["Generadas"] || 0)} evaluadas y ${ap} aprobadas en la ronda.`];
   else out.mineria = ["aviso", "La minería está parada: sin ella no llegan estrategias nuevas."];
   out.laboratorio = cand ? [cand >= 60 && !ap ? "aviso" : "ok", `De ${fmt.n(cand)} candidatas, ${fmt.n(e["Fuera de muestra"] || 0)} aguantaron fuera de muestra y ${ap} lo superaron todo (${NF2.format(ap / cand * 100)} %).${cand >= 60 && !ap ? " Ninguna aprobada todavía." : ""}`]
     : ["ok", "Sin candidatas todavía en esta sesión."];
@@ -4093,12 +4104,12 @@ function estadoSalas() {
     return {cambiar, texto: ` ${prueba} en periodo de prueba${cambiar ? `, ${cambiar} en pérdidas (se les cambiará la estrategia al cerrar)` : ""}${listas ? `, ${listas} aprobadas en la incubadora esperando mesa` : ""}${g.retiradas ? `; ${g.retiradas} ${g.retiradas === 1 ? "estrategia retirada" : "estrategias retiradas"}` : ""}.`};
   };
   const st = sup(gt, "trading"), ss = sup(gs, "scalping");
-  out.trading = [r && r.bloqueo ? "alerta" : gt.hoy < 0 || st.cambiar ? "aviso" : "ok", gt.n ? `${gt.n} traders, ${gt.abiertas} posiciones abiertas, hoy ${dineroS(gt.hoy)} y en total ${dineroS(gt.resultado)}.${lider && lider.total > 0 ? ` Líder: ${lider.a.nombre} (${dineroS(lider.total)}).` : ""}${st.texto}` : "Sala vacía: pulsa «Buscar estrategias»."];
-  out.scalping = [r && r.bloqueo ? "alerta" : !gs.n ? "aviso" : gs.hoy < 0 || ss.cambiar ? "aviso" : "ok", gs.n ? `${gs.n} scalpers, ${gs.abiertas} dentro, hoy ${dineroS(gs.hoy)} y en total ${dineroS(gs.resultado)}. Comisiones pagadas: ${fmt.n(gs.comisiones)} $.${ss.texto}` : "Sala vacía: pulsa «Buscar estrategias» → Scalping."];
+  out.trading = [r && r.bloqueo ? "alerta" : gt.hoy < 0 || st.cambiar ? "aviso" : "ok", gt.n ? `${gt.n} traders, ${gt.abiertas} posiciones abiertas, hoy ${dineroS(gt.hoy)} y en total ${dineroS(gt.resultado)}.${lider && lider.total > 0 ? ` Líder: ${lider.a.nombre} (${dineroS(lider.total)}).` : ""}${st.texto}` : (busquedaSiempre() ? "Sala vacía: la minería sigue buscando." : "Sala vacía: pulsa «Buscar estrategias».")];
+  out.scalping = [r && r.bloqueo ? "alerta" : !gs.n ? "aviso" : gs.hoy < 0 || ss.cambiar ? "aviso" : "ok", gs.n ? `${gs.n} scalpers, ${gs.abiertas} dentro, hoy ${dineroS(gs.hoy)} y en total ${dineroS(gs.resultado)}. Comisiones pagadas: ${fmt.n(gs.comisiones)} $.${ss.texto}` : (busquedaSiempre() ? "Sala vacía: la minería sigue buscando, también de scalping." : "Sala vacía: pulsa «Buscar estrategias» → Scalping.")];
   const gi = S.papel && S.papel.grupos_incubadora || {}, enExamen = (gi.trading ? gi.trading.traders : 0) + (gi.scalping ? gi.scalping.traders : 0);
   const aprob = (gi.trading ? gi.trading.aprobadas : 0) + (gi.scalping ? gi.scalping.aprobadas : 0), banq = (S.papel && S.papel.banquillo || []).length;
   out.incubadora = [enExamen ? "ok" : "aviso", enExamen ? `${enExamen} estrategias de examen con dinero de prueba, ${aprob} aprobadas esperando mesa${banq ? ` y ${banq} en el banquillo` : ""}. Resultado de prueba: ${dineroS((gi.trading ? gi.trading.resultado : 0) + (gi.scalping ? gi.scalping.resultado : 0))} (no cuenta en el fondo).`
-    : "Incubadora vacía: las estrategias nuevas empiezan aquí. Pulsa «Buscar estrategias»."];
+    : "Incubadora vacía: las estrategias nuevas empiezan aquí en cuanto la minería encuentra alguna."];
   if (!r) out.riesgos = ["ok", "Esperando al paper trading."];
   else {
     const uso = Math.max(r.posiciones / r.max_posiciones, r.mayor_apuesta / r.max_misma_apuesta, r.perdida_hoy_pct / r.limite_diario_pct, r.caida_pct / r.max_caida_pct);
@@ -4116,7 +4127,8 @@ function departamentosP1() {
     ["comunicacion", "Comunicación", "Rebeca · Gorka", "ok", inf ? `Informe de las ${inf.hora}: ${inf.titular}.` : "Preparando el informe del día."],
     ["sistemas", "Sistemas", "Néstor", p.errores_seguidos ? "alerta" : "ok", p.errores_seguidos ? `${p.errores_seguidos} errores seguidos en el paper trading: ${p.ultimo_error || ""}` : `Todo funciona. Cada ciclo tarda ${p.ciclo_s == null ? "—" : NF2.format(p.ciclo_s) + " s"}.`],
     ["cafeteria", "Cafetería", "Chema", "ok", "Café recién hecho. Satoshi vigila la vitrina de los dulces."],
-    ["terraza1", "Terraza", "—", "ok", `Pérgola, piscina, fogata y barbacoa. ${GATO.planta === 1 ? "Satoshi está arriba." : "Satoshi anda por la planta baja."}`],
+    ["trading2", "Sala de trading 2", "Clara", "ok", (() => { const n = MESAS.slice(48).filter(m => m.trader).length; return `40 mesas más de la sala de trading (de la 49 a la 88): ${n ? `${n} con trader` : "todas libres por ahora"}. Se llenan después de la planta baja, con las estrategias que aprueban el examen de la incubadora.`; })()],
+    ["terraza1", "Terraza", "—", "ok", `Piscina, fogata, barbacoa y telescopio. ${GATO.planta === 1 ? "Satoshi está arriba." : "Satoshi anda por la planta baja."}`],
   ];
 }
 function actualizarSalas() {
@@ -4193,7 +4205,7 @@ function actualizarScalping() {
       <div><small>Acierto</small><b>${g.aciertos_pct == null ? "—" : NF1.format(g.aciertos_pct) + " %"}</b></div>
       <div><small>Comisiones pagadas</small><b>${fmt.n(g.comisiones)} $</b></div></div>
     ${g.n ? g.traders.sort((a, b) => (b.resultado || 0) - (a.resultado || 0)).map(fila).join("")
-      : `<p class="vacio">Todavía no hay scalpers. Pulsa «🔍 Buscar estrategias» arriba y elige «Scalping»: las que superen las seis pruebas se sientan aquí y operan con velas de 5 minutos.</p>`}`;
+      : `<p class="vacio">Todavía no hay scalpers. La minería busca también estrategias de scalping en cada ronda: las que superen las ocho pruebas y el examen se sientan aquí y operan con velas de 5 minutos.</p>`}`;
 }
 $("#scalping").addEventListener("click", e => { const el = e.target.closest(".trader"); if (el) { const a = traders.get(el.dataset.id); if (a) mostrarFicha(a); } });
 
@@ -4510,7 +4522,7 @@ const CENTRO_SALA = {mineria: [5, 4.5, 1.8, "Minería", "#ffc24a"], laboratorio:
   terraza: [34, 17.5, 1.5, "Patio", "#2ee6a6"],
   incubadora: [9, 16.5, 1.25, "Incubadora", "#ff8a5c", 1], quant: [22.5, 4.5, 1.7, "Equipo Quant", "#5cc0ff", 1], academia: [32.5, 4.5, 1.8, "Academia", "#ffcf5a", 1],
   comunicacion: [4.5, 4.5, 1.8, "Comunicación", "#ff8a5c", 1], sistemas: [13, 4.5, 1.8, "Sistemas", "#2ee6a6", 1], cafeteria: [41, 4.5, 1.8, "Cafetería", "#ffcf5a", 1],
-  juegos: [50, 4.5, 1.8, "Juegos", "#b58cff", 1], terraza1: [31, 17.5, 1.25, "Terraza", "#2ee6a6", 1]};
+  juegos: [50, 4.5, 1.8, "Juegos", "#b58cff", 1], trading2: [26.5, 17.5, 1.25, "Trading 2", "#d4ff3a", 1], terraza1: [40.5, 17.5, 1.5, "Terraza", "#2ee6a6", 1]};
 let vuelo = null;
 function irASala(id) {
   if (id === "todo") { const guardada = {...cam}; encuadrar(); vuelo = {x: cam.x, y: cam.y, zoom: cam.zoom}; Object.assign(cam, guardada); }
@@ -4553,7 +4565,7 @@ function buscarAgente(nombre) {
   const n = String(nombre || "").trim().toLowerCase();
   return agentes.find(a => a.nombre && a.nombre.toLowerCase() === n && a.rol) || null;
 }
-const RESPONSABLE = {buscar_estrategias: () => SUPERVISORES[0], parar_busqueda: () => SUPERVISORES[0], activar_freno: () => RIESGOS, quitar_freno: () => RIESGOS,
+const RESPONSABLE = {buscar_estrategias: () => SUPERVISORES[0], parar_busqueda: () => SUPERVISORES[0], reanudar_busqueda: () => SUPERVISORES[0], activar_freno: () => RIESGOS, quitar_freno: () => RIESGOS,
   cambiar_riesgo: () => RIESGOS, pausar_trader: () => SUPERVISORES[5], reanudar_trader: () => SUPERVISORES[5], retirar_estrategia: () => SUPERVISORES[5],
   nuevo_plan_holding: () => SUPERVISORES[4], convocar_comite: () => DIRECTOR};
 function bajarChat() { const c = $("#chatScroll"); c.scrollTop = c.scrollHeight; }
@@ -4613,7 +4625,7 @@ function mostrarPropuesta(p, quien) {
     refrescar();
   };
 }
-// ---- botón «Buscar estrategias»: la minería solo trabaja cuando lo pulsas ----
+// ---- botón de búsqueda: la minería busca siempre, por rondas («Pausar» / «Reanudar»), y se puede pedir un activo ----
 function porSimbolo(tipo = "trading") {   // estrategias del banco por activo (de trading o de scalping)
   const cuenta = {}, vela = S.scalping && S.scalping.intervalo || "5m";
   for (const b of S.banco || []) if ((b.estrategia.intervalo === vela) === (tipo === "scalping")) cuenta[b.estrategia.simbolo] = (cuenta[b.estrategia.simbolo] || 0) + 1;
@@ -4621,19 +4633,29 @@ function porSimbolo(tipo = "trading") {   // estrategias del banco por activo (d
 }
 function mesasLibres(grupo = "trading") {   // mesas sin trader en una sala
   const ocupadas = Object.values(S.papel && S.papel.estrategias || {}).filter(t => (t.grupo || "trading") === grupo).length;
-  return Math.max(0, (S.mesas && S.mesas[grupo] || (grupo === "scalping" ? 12 : 48)) - ocupadas);
+  return Math.max(0, (S.mesas && S.mesas[grupo] || (grupo === "scalping" ? 12 : 88)) - ocupadas);
 }
 function sitioEnBanco(tipo = "trading") {   // estrategias que aún caben en el banco (mesas + reserva)
   const sc = S.scalping || {}, max = tipo === "scalping" ? sc.cupo_banco || 5 : S.cupo_banco || 10, cuenta = porSimbolo(tipo);
   return (tipo === "scalping" ? sc.simbolos || [] : S.simbolos || []).reduce((n, x) => n + Math.max(0, max - (cuenta[x] || 0)), 0);
 }
+const busquedaSiempre = () => !!(S && S.mineria && S.mineria.modo === "siempre");   // la minería busca sola, por rondas
+const busquedaPausada = () => !!(S && S.control && S.control.mineria_pausada);
 function pintarBotonBuscar() {
-  const b = $("#bBuscar"), activa = !!(S && S.control && S.control.busqueda), m = S && S.mineria || {}, c = m.ciclo;
+  const b = $("#bBuscar"), pedida = !!(S && S.control && S.control.busqueda), m = S && S.mineria || {}, c = m.ciclo;
+  const siempre = busquedaSiempre(), pausada = siempre && busquedaPausada(), activa = siempre ? !pausada : pedida;
   b.classList.toggle("activa", activa);
-  const avance = activa && c && m.estado === "minando" ? ` · ${c.tipo === "scalping" ? "scalping " : ""}${esc(moneda(m.simbolo || ""))} ${c.n}/${c.activos.length} · gen ${m.generacion || 0}/${m.generaciones || 0}` : "";
+  const avance = activa && c && m.estado === "minando" ? ` · ${c.ronda ? `ronda ${c.ronda} · ` : ""}${c.tipo === "scalping" ? "scalping " : ""}${esc(moneda(m.simbolo || ""))} ${c.n}/${c.activos.length} · gen ${m.generacion || 0}/${m.generaciones || 0}`
+    : activa && siempre && m.estado === "descanso" && m.proxima ? ` · descanso hasta las ${fmt.hora(new Date(m.proxima))}` : "";
+  if (siempre) {
+    b.innerHTML = pausada ? "▶ <span>Reanudar búsqueda</span>" : `⏸ <span>Pausar búsqueda${avance}</span>`;
+    b.title = pausada ? "La búsqueda está en pausa. Pulsa para que vuelva a buscar estrategias por rondas, sin parar."
+      : "La minería busca estrategias siempre, por rondas: todos los activos con sitio en el banco y un descanso entre ronda y ronda. Pulsa para pausarla o para buscar ya en un activo.";
+    return;
+  }
   b.innerHTML = activa ? `⏹ <span>Parar búsqueda${avance}</span>` : "🔍 <span>Buscar estrategias</span>";
   b.title = activa ? "Ciclo de búsqueda en marcha: se para solo al terminar. Pulsa para cortarlo antes."
-    : "Cada pulsación hace un ciclo de búsqueda y se para sola al terminar. Las estrategias que superen las seis pruebas se ponen a operar con su trader si hay mesa libre; si no, esperan en la reserva.";
+    : "Cada pulsación hace un ciclo de búsqueda y se para sola al terminar. Las estrategias que superen las ocho pruebas se ponen a operar con su trader si hay mesa libre; si no, esperan en la reserva.";
 }
 async function decisionDirecta(propuesta) {
   let r;
@@ -4649,19 +4671,24 @@ function cerrarMenuBuscar() { $("#menuBuscar").hidden = true; $("#bBuscar").setA
 $("#bBuscar").addEventListener("click", e => {
   e.stopPropagation();
   if (!S) return;
-  if (S.control && S.control.busqueda) { decisionDirecta({accion: "parar_busqueda"}); return; }
+  if (busquedaSiempre() && busquedaPausada()) { decisionDirecta({accion: "reanudar_busqueda"}); return; }
+  if (!busquedaSiempre() && S.control && S.control.busqueda) { decisionDirecta({accion: "parar_busqueda"}); return; }
   const menu = $("#menuBuscar");
   if (!menu.hidden) { cerrarMenuBuscar(); return; }
   const max = S.cupo_banco || 10, cuenta = porSimbolo(), sims = S.simbolos || [], sitio = sitioEnBanco();
   const sc = S.scalping || {simbolos: [], cupo_banco: 5}, maxS = sc.cupo_banco || 5, cs = porSimbolo("scalping"), sitioS = sitioEnBanco("scalping");
   const lleno = n => n >= max ? " · lleno" : "", llenoS = n => n >= maxS ? " · lleno" : "";
-  menu.innerHTML = `<p><b>Cada pulsación hace un ciclo</b>: el equipo prueba unas 2.000 estrategias por activo (varios minutos cada uno) y <b>se para solo al terminar</b>. Las que superen las seis pruebas entran al banco: si hay mesa libre se ponen a operar con su trader y, si no, esperan en la reserva.</p>
+  menu.innerHTML = (busquedaSiempre()
+    ? `<p><b>La minería busca siempre, por rondas</b>: en cada ronda prueba unas 2.000 estrategias en cada activo con sitio en el banco (también los de scalping) y luego descansa un rato. Las que superen las ocho pruebas entran al banco y empiezan en la incubadora.</p>
+    <button class="todos" data-pausa="1">⏸ Pausar la búsqueda <small>hasta que la reanudes</small></button>
+    <p class="sep"><b>Buscar ya en…</b> · va antes que la ronda en curso</p>`
+    : `<p><b>Cada pulsación hace un ciclo</b>: el equipo prueba unas 2.000 estrategias por activo (varios minutos cada uno) y <b>se para solo al terminar</b>. Las que superen las ocho pruebas entran al banco: si hay mesa libre se ponen a operar con su trader y, si no, esperan en la reserva.</p>`) + `
     <button class="todos" data-s="" ${sitio ? "" : "disabled"}>Todos los activos con sitio en el banco <small>${mesasLibres()} mesas libres</small></button>
     ${sims.map(x => `<button data-s="${esc(moneda(x))}" ${(cuenta[x] || 0) >= max ? "disabled" : ""}>${esc(moneda(x))} <small>${cuenta[x] || 0}/${max} en el banco${lleno(cuenta[x] || 0)}</small></button>`).join("")}
     <p class="sep"><b>Scalping</b> · velas de 5 minutos, comisión de maker (0,06 % ida y vuelta)</p>
     <button class="todos" data-s="" data-t="scalping" ${sitioS ? "" : "disabled"}>Todos los de scalping <small>${mesasLibres("scalping")} mesas libres</small></button>
     ${sc.simbolos.map(x => `<button data-s="${esc(moneda(x))}" data-t="scalping" ${(cs[x] || 0) >= maxS ? "disabled" : ""}>${esc(moneda(x))} <small>${cs[x] || 0}/${maxS} en el banco${llenoS(cs[x] || 0)}</small></button>`).join("")}
-    <p class="sep">Máximo por activo: las estrategias de las mesas más ${max - (S.max_por_simbolo || 8)} de reserva (${maxS - (sc.max_por_simbolo || 4)} en scalping).</p>`;
+    <p class="sep">Máximo por activo en el banco: ${max} (${S.max_por_simbolo || 15} en mesas y ${max - (S.max_por_simbolo || 15)} de reserva; en scalping, ${maxS}).</p>`;
   menu.hidden = false; $("#bBuscar").setAttribute("aria-expanded", "true");
 });
 $("#menuBuscar").addEventListener("click", e => {
@@ -4669,6 +4696,7 @@ $("#menuBuscar").addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b || b.disabled) return;
   cerrarMenuBuscar();
+  if (b.dataset.pausa) { decisionDirecta({accion: "parar_busqueda"}); return; }
   decisionDirecta({accion: "buscar_estrategias", objetivo: b.dataset.s, tipo: b.dataset.t || ""});
 });
 document.addEventListener("click", cerrarMenuBuscar);
@@ -4782,7 +4810,9 @@ async function refrescar() {
     anadirChat(null, "Te damos la bienvenida al Trading Floor. Todo lo que ves es real salvo el dinero: es paper trading, con dinero ficticio.");
     const rep = (S.repetidas || []).reduce((n, g) => n + g[1].length, 0);
     if (rep) anadirChat(null, `Hay ${rep} estrategias repetidas en el banco (la misma idea con otros números). Escribe «quita las repetidas» y te propongo retirarlas; de cada idea se queda la que mejor lo hizo fuera de muestra.`);
-    if (!(S.banco || []).length && m.estado !== "minando") anadirChat(null, "El banco está vacío. Pulsa «🔍 Buscar estrategias», arriba, y el equipo de minería se pondrá a buscar. Las que superen las seis pruebas se ponen a operar solas, cada una con su trader.");
+    if (!(S.banco || []).length && m.estado !== "minando") anadirChat(null, busquedaSiempre()
+      ? "El banco está vacío. La minería busca estrategias sola, por rondas; las que superen las ocho pruebas y el examen de la incubadora se sientan a operar, cada una con su trader. Son pruebas muy duras: pasan muy pocas."
+      : "El banco está vacío. Pulsa «🔍 Buscar estrategias», arriba, y el equipo de minería se pondrá a buscar. Las que superen las ocho pruebas se ponen a operar solas, cada una con su trader.");
   } else {
     const nuevaSesion = anterior && anterior.mineria && anterior.mineria.inicio !== m.inicio;
     if (!nuevaSesion && anterior) encolarPaquetes(anterior.mineria && anterior.mineria.embudo || {}, m.embudo || {});
@@ -5295,7 +5325,7 @@ function previaReparto() {
   $("#dLiq").textContent = NF1.format(liq) + " %"; $("#dLiq").className = liq < 0 ? "mal" : "";
   f.querySelector("button").disabled = liq < 0 || !repartoTocado;
   $("#dPrevia").innerHTML = liq < 0 ? "Entre las cuatro áreas pasan del 100 %."
-    : `Quedaría: ${fmt.n(v("trading") / 100 * patr / (ob.mesas.trading || 48))} $ por trader, ${fmt.n(v("scalping") / 100 * patr / (ob.mesas.scalping || 12))} $ por scalper, ${fmt.n(v("holding") / 100 * patr)} $ para el holding y ${fmt.n(v("tendencia") / 100 * patr)} $ para la sala de tendencia.`
+    : `Quedaría: ${fmt.n(v("trading") / 100 * patr / (ob.mesas.trading || 88))} $ por trader, ${fmt.n(v("scalping") / 100 * patr / (ob.mesas.scalping || 12))} $ por scalper, ${fmt.n(v("holding") / 100 * patr)} $ para el holding y ${fmt.n(v("tendencia") / 100 * patr)} $ para la sala de tendencia.`
       + (liq < v("holding") * .5 ? " <span style='color:#ffc24a'>Ojo: el holding puede usar hasta un 50 % más como reserva, y eso sale del dinero sin invertir.</span>" : "");
 }
 $("#dEditor").addEventListener("input", () => { repartoTocado = true; previaReparto(); });
@@ -5592,7 +5622,7 @@ function actualizarIncubadora() {
           <div class="d">${esc(moneda(d.simbolo))} ${esc(ladoTxt(d.direccion))} · ${d.grupo === "scalping" ? "scalping · " : ""}${ex.operaciones || 0}/${ex.operaciones_min || 10} operaciones · día ${Math.floor(ex.dias || 0)}${ex.factor != null ? ` · factor ${NF2.format(ex.factor)}` : ""} · nota ${NF2.format(ex.nota || 0)}</div>
           <div class="barra-ex"><i style="width:${f * 100}%;background:${colorExamen(d)}"></i></div></div>
         <div class="r ${r > 0 ? "sube" : r < 0 ? "baja" : ""}">${fmt.pct(r)}<small>${d.posicion ? "dentro" : "esperando señal"}</small></div></div>`;
-    }).join("") : `<p class="vacio">No hay ninguna estrategia de examen. Pulsa «🔍 Buscar estrategias»: las que superen las seis pruebas empezarán aquí.</p>`}
+    }).join("") : `<p class="vacio">No hay ninguna estrategia de examen. Las que encuentre la minería y superen las ocho pruebas empezarán aquí.</p>`}
     ${banq.length ? `<h3 style="margin-top:14px">Banquillo</h3><p class="nota">Aprobadas por el laboratorio, esperando plaza en la incubadora (las mejores fuera de muestra primero): ${banq.map(b => esc(b.id)).join(", ")}.</p>` : ""}
     ${susp.length ? `<h3 style="margin-top:14px">Últimas suspendidas</h3>${susp.slice(0, 6).map(x => postMortemHtml(x.id, x.post_mortem, `${moneda(x.simbolo)} · ${x.motivo || ""}`)).join("")}` : ""}`;
 }
@@ -5658,7 +5688,7 @@ function actualizarAcademia() {
   const kelly = [...traders.values()].filter(a => a.datos && a.datos.kelly).sort((a, b) => b.datos.kelly.riesgo_pct - a.datos.kelly.riesgo_pct);
   $("#academia").innerHTML = `<div class="mini-kpis"><div><small>Juzgadas en real</small><b>${ac.juzgadas || 0}</b></div><div><small>Funcionan</small><b class="sube">${ac.funcionan || 0}</b></div><div><small>Fallan</small><b class="baja">${ac.fallan || 0}</b></div></div>
     ${(ac.textos || []).map(t => `<div class="leccion">${esc(t)}</div>`).join("")}
-    <p class="nota">La minería busca más a menudo lo que funciona en real y menos lo que falla, pero un ${ac.exploracion_pct || 30} % sigue siendo al azar y cada estrategia nueva pasa igualmente las seis pruebas y el examen de la incubadora. Una estrategia nunca se cambia sola: eso sería adaptarse a la casualidad.</p>
+    <p class="nota">La minería busca más a menudo lo que funciona en real y menos lo que falla, pero un ${ac.exploracion_pct || 30} % sigue siendo al azar y cada estrategia nueva pasa igualmente las ocho pruebas y el examen de la incubadora. Una estrategia nunca se cambia sola: eso sería adaptarse a la casualidad.</p>
     ${(ac.tipos || []).length ? `<h3 style="margin-top:12px">Tipos de condición</h3><table class="tabla-eq"><tr><th>Condición</th><th>Funcionan</th><th>Fallan</th><th>La minería la busca</th></tr>
       ${ac.tipos.map(t => `<tr><td>${esc(t.nombre)}</td><td>${t.funcionan}</td><td>${t.fallan}</td><td class="${t.peso > 1 ? "sube" : t.peso < 1 ? "baja" : ""}">×${NF2.format(t.peso)}</td></tr>`).join("")}</table>` : ""}
     ${(ac.causas || []).length ? `<h3 style="margin-top:12px">Causas de fallo más repetidas</h3><table class="tabla-eq">${ac.causas.map(c => `<tr><td>${esc(c.texto)}</td><td>${c.veces}</td></tr>`).join("")}</table>` : ""}

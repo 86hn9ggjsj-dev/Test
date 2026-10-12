@@ -464,7 +464,7 @@ function choque(p, x0, y0, x1, y1) {
 
 /** Techo con paneles de luz en cada planta (la terraza de la planta 1 queda al aire libre). */
 function techos(opacas, luces) {
-  const zonas = [[[0, 0, W, 11], [0, 11, X_ALA, D]], [[0, 0, W, 11], [0, 11, 18, D]]];
+  const zonas = [[[0, 0, W, 11], [0, 11, X_ALA, D]], [[0, 0, W, 11], [0, 11, X_TERRAZA1, D]]];
   const panel = rgbaDe("#f6f3ea");
   for (const p of [0, 1]) {
     for (const [x0, y0, x1, y1] of zonas[p]) {
@@ -484,8 +484,9 @@ function fachadas() {
     m.caja(x0, TECHO, y0, x1, PISO - .01, y1, piel, piel, piel);
     m.caja(x0, -.35, y0, x1, -.01, y1, piel, piel, piel);
   }
-  for (const [x0, y0, x1, y1] of [[0, 0, W, 11], [0, 11, 18, D]]) m.caja(x0, PISO + TECHO, y0, x1, PISO + TECHO + .3, y1, piel, piel, piel);
-  m.caja(18, PISO + TECHO - .02, 11 - .02, X_ALA, PISO + TECHO + .3, 11 + .02, piel, piel, piel);
+  for (const [x0, y0, x1, y1] of [[0, 0, W, 11], [0, 11, X_TERRAZA1, D]]) m.caja(x0, PISO + TECHO, y0, x1, PISO + TECHO + .3, y1, piel, piel, piel);
+  m.caja(X_TERRAZA1, PISO + TECHO - .02, 11 - .02, X_ALA, PISO + TECHO + .3, 11 + .02, piel, piel, piel);
+  m.caja(X_TERRAZA1 - .02, PISO + TECHO - .02, 11, X_TERRAZA1 + .02, PISO + TECHO + .3, D, piel, piel, piel);   // canto de la sala de trading 2
   // paredes del fondo por encima del techo (por fuera) y muros que cierran la terraza por arriba
   for (const p of [0, 1]) {
     m.caja(-.25, base(p) + TECHO, -.25, W, base(p) + PISO, 0, piel, piel, piel);
@@ -494,7 +495,7 @@ function fachadas() {
   // muros de cristal hacia la calle: [x0, y0, x1, y1] (líneas), por planta
   const lineas = [
     [[0, D, X_ALA, D], [X_ALA, 11, X_ALA, D], [X_ALA, 11, W, 11], [W, 0, W, 11]],
-    [[0, D, 18, D], [X_ALA, 11, W, 11], [W, 0, W, 11]],
+    [[0, D, X_TERRAZA1, D], [X_ALA, 11, W, 11], [W, 0, W, 11]],
   ];
   for (const p of [0, 1]) for (const [x0, y0, x1, y1] of lineas[p]) {
     const Y = base(p), horiz = y0 === y1, largo = horiz ? x1 - x0 : y1 - y0;

@@ -6,7 +6,7 @@ casualidad, justo lo que el laboratorio intenta filtrar. Lo que se aprende es a 
   que funcionan en real (aprobadas en la incubadora o rentables en su mesa) y las que fallan (suspendidas o
   retiradas por el supervisor).
 - Con eso, la minería genera más a menudo lo que funciona y menos lo que falla (pesos), pero sigue explorando todo
-  y cada estrategia nueva tiene que pasar igualmente las seis pruebas y el examen de la incubadora.
+  y cada estrategia nueva tiene que pasar igualmente las ocho pruebas y el examen de la incubadora.
 - Los post mortem (postmortem.py) se resumen en lecciones: las causas de fallo más frecuentes.
 """
 

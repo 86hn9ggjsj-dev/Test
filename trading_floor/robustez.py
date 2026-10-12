@@ -4,17 +4,27 @@ Si pruebas miles de estrategias al azar, algunas salen espectaculares en el pasa
 casualidad. Cada prueba intenta pillar una forma distinta de "suerte":
 
 - Fuera de muestra: ¿sigue ganando en el 30 % final de los datos, que la minería nunca vio?
+- Prueba de la suerte: lo que gana fuera de muestra, ¿es demasiado para ser casualidad? La ganancia media por
+                    operación tiene que ser al menos el doble de su margen de error (lo que en estadística se llama
+                    una t de 2 o más). Con pocas operaciones o muy desiguales, no pasa.
 - Costes x2:        ¿aguanta si comisiones y deslizamiento son el doble de lo previsto?
 - Consistencia:     ¿gana en la mayoría de los tramos del periodo, o solo en una racha?
 - Monte Carlo:      barajando el orden de sus operaciones, ¿el peor 5 % de casos sigue en positivo?
 - Estabilidad:      con parámetros vecinos (RSI 21 en vez de 14...), ¿sigue ganando?
 - Test del mono:    en los datos que no vio, ¿gana a "monos" que entran en momentos al azar
                     con las mismas salidas?
+- Otras monedas:    la misma regla, con los mismos números, ¿gana también en al menos la mitad de las otras monedas
+                    de su sala en el mismo periodo? Si es un comportamiento real del mercado, se repite en criptos
+                    parecidas; si fue suerte con una moneda, no.
+
+Con datos de 2022 a 2026, estas dos últimas pruebas extra (la de la suerte y la de otras monedas) dejan pasar muchas
+menos estrategias (ver «Lo que dicen los datos» en el README): hacen menos daño, pero no convierten en ganadoras a
+las que pasan.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 
 import numpy as np
 
@@ -32,13 +42,19 @@ ETAPAS = [
     "Generadas",
     "Rentables en muestra",
     "Fuera de muestra",
+    "Prueba de la suerte",
     "Costes x2",
     "Consistencia",
     "Monte Carlo",
     "Estabilidad",
     "Test del mono",
+    "Otras monedas",
     "Distinta a las del banco",
 ]
+PRUEBAS = ETAPAS[2:-1]   # las pruebas del laboratorio, en orden
+
+T_MINIMA = 2.0         # prueba de la suerte: ganancia media por operación / su margen de error
+OTRAS_MINIMO = 0.5     # otras monedas: tiene que ganar en al menos la mitad de las otras de su sala
 
 TRAMOS = 6
 REMUESTREOS = 1000
@@ -63,16 +79,35 @@ def _dec(x: float) -> str:
     return f"{x:.2f}".replace(".", ",")
 
 
-def pruebas(est: Estrategia, m: Mercado, corte: int, rng: np.random.Generator) -> Iterator[tuple[str, bool, str, dict]]:
+def t_operaciones(retornos: np.ndarray) -> float:
+    """Ganancia media por operación dividida por su margen de error (la «t» de la estadística)."""
+    r = np.asarray(retornos, dtype=float)
+    if len(r) < 3 or np.std(r, ddof=1) == 0:
+        return 0.0
+    return float(np.mean(r) / np.std(r, ddof=1) * np.sqrt(len(r)))
+
+
+def pruebas(est: Estrategia, m: Mercado, corte: int, rng: np.random.Generator,
+            otras: Callable[[], dict[str, Mercado]] | None = None) -> Iterator[tuple[str, bool, str, dict]]:
     """Pasa la estrategia por el embudo. Genera (etapa, superada, detalle, datos) y se
-    detiene en la primera prueba que no supera."""
-    fuera = simular(est, m, inicio=corte).metricas
+    detiene en la primera prueba que no supera. `otras` da los mercados de las otras monedas de su sala (solo se
+    piden si la estrategia llega a esa prueba)."""
+    res_fuera = simular(est, m, inicio=corte)
+    fuera = res_fuera.metricas
     yield (
         "Fuera de muestra",
         fuera["operaciones"] >= 15 and fuera["factor_beneficio"] >= 1.1 and fuera["retorno_pct"] > 0,
         f"{_pct(fuera['retorno_pct'])} con {fuera['operaciones']} operaciones, "
         f"factor de beneficio {_dec(fuera['factor_beneficio'])}",
         {"fuera": fuera},
+    )
+
+    t = t_operaciones(res_fuera.retornos)
+    yield (
+        "Prueba de la suerte",
+        t >= T_MINIMA,
+        f"fuera de muestra, la ganancia media por operación es {_dec(t)} veces su margen de error (hace falta {_dec(T_MINIMA)})",
+        {"t_fuera": round(t, 2)},
     )
 
     caro = simular(est, m, coste=2 * coste_de(est.intervalo)).metricas
@@ -131,4 +166,23 @@ def pruebas(est: Estrategia, m: Mercado, corte: int, rng: np.random.Generator) -
         supera >= 90,
         f"fuera de muestra, mejor que el {supera:.0f} % de {MONOS} monos que entran al azar",
         {"mono_pct": supera},
+    )
+
+    mercados = otras() if otras else {}
+    ganan: list[str] = []
+    for simbolo, M in mercados.items():
+        i0 = max(1, int(M.tiempo.searchsorted(m.tiempo[0])))
+        i1 = int(M.tiempo.searchsorted(m.tiempo[-1], side="right"))
+        if i1 - i0 < 100:
+            continue
+        r = simular(Estrategia.de_dict({**est.a_dict(), "simbolo": simbolo}), M, inicio=i0, fin=i1).metricas
+        if r["retorno_pct"] > 0 and r["factor_beneficio"] >= 1.05:
+            ganan.append(simbolo.replace("USDT", ""))
+    n = len(mercados)
+    yield (
+        "Otras monedas",
+        n > 0 and len(ganan) >= OTRAS_MINIMO * n,
+        (f"la misma regla gana en {len(ganan)} de las otras {n} monedas" + (f" ({', '.join(ganan)})" if ganan else "")
+         if n else "no hay datos de las otras monedas"),
+        {"otras_monedas": ganan},
     )

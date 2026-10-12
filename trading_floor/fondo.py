@@ -28,7 +28,7 @@ import pandas as pd
 
 from . import almacen
 from .config import (CAPITAL_HOLDING, CAPITAL_POR_ESTRATEGIA, COMISION, COSTE_IDA_VUELTA, COSTE_SCALPING, DESLIZAMIENTO,
-                     FONDO_CAPITAL_INICIAL, FONDO_VL_INICIAL, MESAS, SIMBOLOS, coste_de)
+                     FONDO_CAPITAL_INICIAL, FONDO_VL_INICIAL, MESAS, MESAS_INICIALES, SIMBOLOS, coste_de)
 
 AREAS = ("trading", "scalping", "holding", "tendencia")
 COMPONENTES = (*AREAS, "intereses")   # lo que mueve el fondo: las cuatro áreas y los intereses de la liquidez (liquidez.py)
@@ -76,9 +76,9 @@ def cargar(papel: dict | None = None, holding: dict | None = None, tendencia: di
 
 
 def _reparto_inicial() -> dict:
-    """El reparto de antes de poder elegirlo: 1.000 $ por mesa y el presupuesto de holding de config.py."""
-    return {"trading": round(MESAS["trading"] * CAPITAL_POR_ESTRATEGIA / FONDO_CAPITAL_INICIAL * 100, 2),
-            "scalping": round(MESAS["scalping"] * CAPITAL_POR_ESTRATEGIA / FONDO_CAPITAL_INICIAL * 100, 2),
+    """El reparto de antes de poder elegirlo: 1.000 $ por cada mesa que había entonces y el presupuesto de holding."""
+    return {"trading": round(MESAS_INICIALES["trading"] * CAPITAL_POR_ESTRATEGIA / FONDO_CAPITAL_INICIAL * 100, 2),
+            "scalping": round(MESAS_INICIALES["scalping"] * CAPITAL_POR_ESTRATEGIA / FONDO_CAPITAL_INICIAL * 100, 2),
             "holding": round(sum(CAPITAL_HOLDING.values()) / FONDO_CAPITAL_INICIAL * 100, 2), "tendencia": 0.0}
 
 
@@ -131,6 +131,24 @@ def asignar(nuevo: dict, patrimonio: float) -> dict:
     return {**reparto(f), "trader": trader, "scalper": scalper, "holding_pct": r["holding"],
             "holding": round(r["holding"] / 100 * patrimonio, 2), "tendencia_pct": r["tendencia"],
             "tendencia": round(r["tendencia"] / 100 * patrimonio, 2)}
+
+
+def ajustar_mesas() -> dict | None:
+    """Si ha cambiado el número de mesas de alguna sala (40 más en la de trading, por ejemplo), reparte otra vez su % del
+    fondo entre todas sus mesas, una sola vez. Así tu reparto se mantiene: sin esto, cada mesa nueva operaría con el capital
+    de antes y la sala usaría más dinero del que le das. Lo ganado se conserva (es un tramo de capital nuevo, como al
+    cambiar el reparto). Devuelve las mesas de antes y de ahora y el capital nuevo de cada mesa, o None si no hay cambio."""
+    f = almacen.cargar("fondo", {})
+    if not f or f.get("mesas") == MESAS:
+        return None
+    antes = dict(f.get("mesas") or MESAS_INICIALES)
+    info = asignar({a: v for a, v in reparto(f).items() if a in AREAS}, calcular(completo=False)["resumen"]["patrimonio"])
+    with _cerrojo:
+        f = almacen.cargar("fondo", {})
+        f["mesas"] = dict(MESAS)
+        almacen.guardar("fondo", f)
+    return {"antes": antes, "ahora": dict(MESAS), "trader": info["trader"], "scalper": info["scalper"],
+            "trading_pct": info["trading"]}
 
 
 def mover(tipo: str, importe: float, liquidez: float) -> dict:

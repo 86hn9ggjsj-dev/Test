@@ -13,8 +13,9 @@ una sala de **tendencia** con reglas clásicas, otra de **macroeconomía**, y to
 
 | | Windows | Mac / Linux |
 |---|---|---|
-| Todo (oficina + paper trading + macro; la minería espera a tu botón) | doble clic en `trading.bat` | `./trading.sh` |
-| Todo, pero minando por rondas sin parar | `trading.bat --minar-siempre` | `./trading.sh --minar-siempre` |
+| Todo (oficina + paper trading + macro; la minería busca siempre, por rondas) | doble clic en `trading.bat` | `./trading.sh` |
+| Todo, pero la minería solo busca cuando pulsas el botón | `trading.bat --minar-a-demanda` | `./trading.sh --minar-a-demanda` |
+| Cambiar el descanso entre rondas (en minutos; por defecto 15) | `trading.bat --pausa 30` | `./trading.sh --pausa 30` |
 | Solo una ronda de minería | `trading.bat minar` | `./trading.sh minar` |
 | Ver las estrategias aprobadas | `trading.bat banco` | `./trading.sh banco` |
 | Resumen macro en la terminal | `trading.bat macro` | `./trading.sh macro` |
@@ -29,28 +30,42 @@ Telegram de Jarvis, si lo tienes configurado.
 ## Cómo funciona
 
 ```
- Minería ──► Laboratorio (6 pruebas) ──► Banco ──► Sala de trading (papel)
+ Minería ──► Laboratorio (8 pruebas) ──► Banco ──► Incubadora ──► Sala de trading (papel)
  miles de       la mayoría cae aquí        las que      cada estrategia es un
  estrategias                               sobreviven   trader con 1.000 $ ficticios
 ```
 
 1. **Datos.** Velas de 30 minutos de los últimos 3 años de Binance (API pública, sin claves) de BTC,
    ETH, SOL, BNB, XRP y DOGE, guardadas en `~/.trading_floor/datos/`.
-2. **Minería** (`mineria.py`). **Solo busca cuando pulsas «🔍 Buscar estrategias»** (arriba en la
-   oficina, eligiendo todos los activos con sitio en el banco o uno en concreto) o se lo pides por el chat; al
-   terminar la búsqueda se queda en espera. La única excepción: si el supervisor retira una estrategia y no
-   queda ninguna en la reserva, pide él un ciclo de búsqueda (uno solo) para tener recambio. Una estrategia es "entra en largo o en corto cuando se cumplan
+2. **Minería** (`mineria.py`). **Busca siempre, por rondas**, como al principio: en cada ronda prueba unas
+   2.000 estrategias en cada activo que tenga sitio en el banco (los 6 de trading y los 3 de scalping) y luego
+   descansa 15 minutos (`--pausa` para cambiarlo). Arriba en la oficina, el botón **«⏸ Pausar búsqueda»** la
+   para (al acabar la generación en curso) hasta que pulses **«▶ Reanudar búsqueda»**; en su menú también
+   puedes pedir que busque **ya** en un activo concreto: eso va antes que la ronda, que luego sigue donde iba.
+   Lo mismo si el supervisor retira una estrategia y no queda recambio. Por el chat: «pausa la búsqueda»,
+   «reanuda la búsqueda», «busca estrategias de SOL», «¿cómo va la búsqueda?». Con `--minar-a-demanda`
+   vuelve el modo anterior (solo busca cuando pulsas el botón). Una estrategia es "entra en largo o en corto cuando se cumplan
    1-3 condiciones" (RSI, medias, cruces, rupturas, Bollinger, MACD, momento, volatilidad) más
    una salida por stop, objetivo o tiempo. Se generan al azar y con un algoritmo genético, y se
    prueban **solo en el 70 % inicial** de los datos.
-3. **Laboratorio** (`robustez.py`). Las que parecen rentables pasan, en orden, por:
+3. **Laboratorio** (`robustez.py`). Las que parecen rentables pasan, en orden, por **ocho pruebas** (un
+   probador para cada una):
    - **Fuera de muestra**: ¿gana en el 30 % final, que la minería nunca vio?
+   - **Prueba de la suerte** (nueva): lo que gana fuera de muestra, ¿es demasiado para ser casualidad? La
+     ganancia media por operación tiene que ser al menos el doble de su margen de error (una «t» de 2 o
+     más). Con pocas operaciones, o muy desiguales, no pasa.
    - **Costes x2**: ¿aguanta el doble de comisiones y deslizamiento?
    - **Consistencia**: ¿gana en la mayoría de los 6 tramos del histórico?
    - **Monte Carlo**: barajando 1.000 veces sus operaciones, ¿el peor 5 % sigue en positivo?
    - **Estabilidad**: ¿siguen ganando las variantes con parámetros vecinos?
    - **Test del mono**: en datos no vistos, ¿gana al 90 % de "monos" que entran al azar?
-4. **Banco** (`banco.py`). Guarda las supervivientes (máximo 14 por activo en trading y 7 en scalping,
+   - **Otras monedas** (nueva): la misma regla, con los mismos números, ¿gana también en al menos la
+     mitad de las otras monedas de su sala en el mismo periodo? Si es algo real del mercado, se repite en
+     criptos parecidas; si fue suerte con una moneda, no.
+
+   Las dos pruebas nuevas son muy duras a propósito: con datos de 2022 a 2026, de cada 10 estrategias que
+   aprobaban antes ahora aprueba 1 (ver «Lo que dicen los datos»).
+4. **Banco** (`banco.py`). Guarda las supervivientes (máximo 21 por activo en trading y 7 en scalping,
    contando las que están en la incubadora o en el banquillo) **sin repetidas**: no entra una estrategia que sea la
    misma idea que otra del banco (mismas condiciones con otros números; se mira antes de las pruebas), que
    entre casi en los mismos momentos (más del 30 % de sus entradas) o que esté dentro del mercado a la
@@ -59,13 +74,15 @@ Telegram de Jarvis, si lo tienes configurado.
    chat o `trading banco --limpiar-repetidas` (se queda la mejor fuera de muestra de cada idea).
 5. **Incubadora** (`papel.py`, `config.INCUBADORA`). Toda estrategia nueva opera primero en la
    incubadora (planta 1) con **1.000 $ de prueba que no cuentan en tu fondo** y sin vetos de sala. Su
-   examen: en trading, 10 operaciones y 7 días como mínimo, ganando y con un factor de beneficio de 1,1 o
-   más (en scalping, 30 operaciones y 2 días); suspende si pierde un 4 % (3 % en scalping) o si en 60
-   días (14 en scalping) no da la talla. Las aprobadas suben a una mesa libre con dinero del fondo, la de
+   examen, ahora más largo y exigente: en trading, 15 operaciones y 10 días como mínimo, ganando y con un
+   factor de beneficio de 1,2 o más (en scalping, 40 operaciones y 3 días); suspende si pierde un 4 % (3 %
+   en scalping) o si en 90 días (21 en scalping) no da la talla. Antes bastaban 10 operaciones, 7 días y un
+   factor de 1,1. Las aprobadas suben a una mesa libre con dinero del fondo, la de
    mejor nota primero (la nota mide lo clara que es su ventaja: media entre dispersión por la raíz del
    número de operaciones). Si la incubadora está llena (24 plazas de trading y 8 de scalping), esperan en
    el banquillo. Las suspendidas se descartan con su post mortem sin haber tocado tu dinero.
-6. **Paper trading** (`papel.py`). Cada trader tiene su mesa (48 en trading, 12 en scalping) y el
+6. **Paper trading** (`papel.py`). Cada trader tiene su mesa (88 en trading: 48 en la planta baja y 40 en la
+   **sala de trading 2**, en la planta 1, que se llenan después de las de abajo; 12 en scalping) y el
    capital ficticio que le toca según tu reparto. Al cerrar cada vela comprueba si se cumplen
    **todas** sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra;
    después sale sola por stop, objetivo o tiempo máximo. Son reglas exigentes: cada estrategia opera de
@@ -106,7 +123,7 @@ Telegram de Jarvis, si lo tienes configurado.
 7. **Control de riesgos** (`riesgo.py`). Encima del paper trading:
    - **Tamaño de cada operación**: arriesga como mucho el 1 % del capital de su trader si salta el
      stop (con un stop lejano se invierte menos; nunca más del 100 %).
-   - **Vetos**: una entrada nueva se veta si ya había 16 posiciones abiertas en la sala de trading (12 en
+   - **Vetos**: una entrada nueva se veta si ya había 28 posiciones abiertas en la sala de trading (12 en
      la de scalping, una por mesa: cada sala tiene su propio límite) o 3 iguales (mismo símbolo y
      dirección, también por sala) en ese momento, o si está activado un freno (los frenos son comunes).
      Se evalúa con las posiciones que estaban abiertas justo cuando llega la señal.
@@ -150,7 +167,7 @@ Telegram de Jarvis, si lo tienes configurado.
    comprar y mantener y con caídas mucho menores, con cualquier variante razonable de las reglas.
 10. **Scalping** (misma minería y paper trading, con velas de 5 minutos). Una sala aparte con 12 mesas
    (4 para BTC, 4 para ETH y 4 para SOL, los más líquidos). Se mina con 120 días de velas de 5 minutos y
-   el mismo embudo de seis pruebas. Como los scalpers trabajan con órdenes límite, pagan comisión de
+   el mismo embudo de ocho pruebas. Como los scalpers trabajan con órdenes límite, pagan comisión de
    «maker» (0,02 % por lado en Binance Futures) más un poco de deslizamiento: 0,06 % ida y vuelta, frente
    al 0,14 % de la sala de trading. Con la comisión de «taker» casi ninguna estrategia de 5 minutos
    sobrevive; con la de «maker» sí algunas. La sala enseña cuánto se paga en comisiones.
@@ -165,8 +182,9 @@ Telegram de Jarvis, si lo tienes configurado.
    (como mucho la liquidez) desde el dashboard o por el chat («aporta 5000», «retira 2000»).
 
    **Tu reparto**: eliges qué % del fondo va a cada área (al principio, trading 48 %, scalping 12 %,
-   holding 10 % y liquidez 30 %). En trading y scalping el % se divide entre sus mesas (48 y 12), así que
-   marca el capital de cada trader; en holding es el presupuesto de las carteras, repartido según su peso,
+   holding 10 % y liquidez 30 %). En trading y scalping el % se divide entre sus mesas (88 y 12), así que
+   marca el capital de cada trader (al pasar de 48 a 88 mesas, el % de trading se repartió una sola vez entre
+   todas, para que la sala no use más dinero del que le das; lo ganado se conserva); en holding es el presupuesto de las carteras, repartido según su peso,
    y en tendencia el presupuesto de la sala, a partes iguales entre sus seis monedas.
    Al cambiarlo, cada área opera con su capital nuevo **desde ese momento** y lo ganado antes se conserva
    (el resultado de cada trader se calcula por tramos de capital; las carteras de holding reciben o
@@ -204,7 +222,14 @@ minería no había visto, y se miró qué habría pasado después:
   de muestra no anticipa lo que pasa después (las que mejor salían, peor lo hicieron) y el examen de la
   incubadora tampoco. Se probaron filtros más duros (prueba estadística, margen sobre las comisiones, stops
   más amplios, operaciones más largas con tendencias más largas, que la misma regla gane también en otras
-  monedas): ninguno cambió el resultado.
+  monedas): ninguno cambió el resultado por estrategia.
+- **El probador duro** (las dos pruebas nuevas juntas: la de la suerte y la de otras monedas), con el mismo
+  método: de 213 aprobadas se pasa a 22 (una de cada diez). Esas 22 siguieron sin ganar de media en los 6
+  meses siguientes (−1,4 % cada una; ganaron 27 de cada 100), aunque su operación media sí quedó en
+  positivo (+0,06 %). Como pasan tan pocas y la incubadora frena casi todas, el efecto en el fondo fue
+  prácticamente cero (−1 $ por semestre en una sala de 48.000 $, frente a −24 $ con las seis pruebas de
+  antes). Es decir: **las pruebas duras hacen menos daño, pero no fabrican estrategias ganadoras**. Por eso
+  las 88 mesas se llenarán despacio: es normal ver muchas libres (su dinero cobra intereses).
 - **Scalping.** Lo mismo con un año de velas de 5 minutos (minando 120 días y mirando el mes siguiente,
   en 8 meses distintos): las aprobadas perdieron un 1,7 % de media el mes siguiente y solo ganaron 33 de
   cada 100, aun con comisión de «maker».
@@ -277,14 +302,17 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
   laboratorio, cámara del banco, macro, holding, sala de trading, scalping, riesgos, comité, descanso y
   patio. La **planta 1**, que se ve encima del edificio de la planta baja:
   - **Incubadora**: 32 mesas de examen, el tablón de exámenes en la pared y Lorena, su supervisora.
+  - **Sala de trading 2**: 40 mesas más de la sala de trading (de la 49 a la 88), con la misma moqueta y
+    las mismas pantallas que la de abajo. Se llenan cuando las 48 de la planta baja están ocupadas; sus
+    traders tienen nombres propios (Aurora, Fabio, Gala…) y Clara los supervisa igual.
   - **Equipo Quant**: Ainara (Kelly), Bernat (Monte Carlo) y Yago (post mortem), con una gran pantalla del
     Monte Carlo del fondo, Sharpe, Sortino, Calmar y el Kelly de cada trader.
   - **Academia**: Begoña da clase con lo aprendido en real (la pizarra lo muestra).
   - **Comunicación**: Rebeca y Gorka escriben el informe del día (pestaña «Informe»), con plató de TF News.
   - **Sistemas**: Néstor y los servidores; un panel enseña la salud del sistema (errores, duración del ciclo).
   - **Cafetería** con Chema el barista, **sala de juegos** (futbolín, recreativas, dardos y pufs) y una
-    **terraza al aire libre** con pérgola y mesa larga, sombrillas, piscina con tumbonas, fogata con sofás,
-    barbacoa, césped, árboles, telescopio y luces por la noche.
+    **terraza al aire libre** (más pequeña, para hacer sitio a la sala de trading 2) con piscina y tumbonas,
+    fogata con sofás, sombrilla, barbacoa, césped, árboles, telescopio y luces por la noche.
   La gente sube y baja en **ascensor**. Cuando una estrategia aprueba en la incubadora, su trader baja a
   entregarla a la mesa. **Satoshi, el gato**, se pasea por las dos plantas: duerme en el sofá o en una
   tumbona, se sienta junto a la fogata o se sube a la mesa de algún trader. Su ficha dice dónde está.
@@ -360,7 +388,7 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
 | `indicadores.py`, `mercado.py` | Indicadores técnicos, calculados una sola vez por mercado |
 | `estrategia.py` | Vocabulario de reglas, generación al azar, mutaciones y cruces |
 | `backtest.py` | Simulador de operaciones y métricas (retorno, caída, Sharpe, factor de beneficio…) |
-| `robustez.py` | Las seis pruebas del laboratorio |
+| `robustez.py` | Las ocho pruebas del laboratorio |
 | `mineria.py` | Algoritmo genético y embudo; minería continua por rondas |
 | `banco.py`, `almacen.py` | Banco de estrategias, descartadas y almacén JSON en `~/.trading_floor/` |
 | `postmortem.py` | Por qué falló cada estrategia retirada: backtest frente a real y causas |

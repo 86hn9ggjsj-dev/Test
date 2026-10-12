@@ -16,7 +16,7 @@ from .config import REPARTO_RENTABLE, SCALPING_SIMBOLOS, SIMBOLOS
 # límites de riesgo que se pueden cambiar: nombre -> (texto, mínimo, máximo, unidad)
 RIESGO_EDITABLE = {
     "riesgo_por_operacion": ("riesgo por operación", 0.1, 3.0, "%"),
-    "max_posiciones": ("posiciones abiertas a la vez en la sala de trading", 1, 48, ""),
+    "max_posiciones": ("posiciones abiertas a la vez en la sala de trading", 1, 88, ""),
     "max_posiciones_scalping": ("posiciones abiertas a la vez en scalping", 1, 12, ""),
     "max_misma_apuesta": ("posiciones iguales (mismo activo y dirección)", 1, 10, ""),
     "limite_perdida_diaria": ("freno por pérdida diaria", 0.5, 10.0, "%"),
@@ -24,9 +24,10 @@ RIESGO_EDITABLE = {
 }
 
 ACCIONES = {
-    "buscar_estrategias": "Buscar estrategias nuevas ahora: un ciclo de búsqueda en todos los activos con mesas libres o en el que se diga; con tipo «scalping», para la sala de scalping (velas de 5 minutos)",
+    "buscar_estrategias": "Buscar estrategias ya en un activo (o en todos los que tengan sitio): va antes que la ronda en curso de la búsqueda continua; con tipo «scalping», para la sala de scalping (velas de 5 minutos)",
     "limpiar_repetidas": "Retirar las estrategias repetidas del banco (misma idea con otros números): se queda la mejor de cada grupo",
-    "parar_busqueda": "Parar la búsqueda de estrategias en curso",
+    "parar_busqueda": "Pausar la búsqueda de estrategias: deja de buscar (al acabar la generación en curso) hasta que la reanudes",
+    "reanudar_busqueda": "Reanudar la búsqueda continua de estrategias, por rondas",
     "activar_freno": "Pausar todo: activar el freno manual (no se abren posiciones nuevas; las abiertas siguen con su stop)",
     "quitar_freno": "Reabrir: quitar el freno manual",
     "kill_switch": "Kill switch: cerrar ya todas las posiciones abiertas del fondo al último precio y activar el freno manual",
@@ -69,7 +70,7 @@ def pedir_busqueda(tipo: str = "trading", simbolos: list[str] | None = None, por
 
 def cargar() -> dict:
     c = almacen.cargar("control", {})
-    c.setdefault("mineria_pausada", False)  # solo para la minería continua de la terminal (minar --siempre)
+    c.setdefault("mineria_pausada", False)  # «Pausar búsqueda»: la minería continua no busca hasta que la reanudes
     c.setdefault("busqueda", None)  # búsqueda de estrategias pedida con el botón: {"pedida", "simbolos"}
     c.setdefault("freno_manual", False)
     c.setdefault("kill_switch", None)   # cuándo se pulsó por última vez el kill switch
@@ -146,9 +147,15 @@ def _aplicar(propuesta: dict) -> str:
         hecho = (f"Retiradas {len(sobran)} estrategias repetidas ({', '.join(sorted(ids))}); de cada idea se queda "
                  "la que mejor lo hizo fuera de muestra.")
     elif accion == "parar_busqueda":
-        if not c["busqueda"]:
-            raise ValueError("No hay ninguna búsqueda en marcha.")
-        c["busqueda"], hecho = None, "Búsqueda parada: la minería termina la generación en curso y se queda en espera."
+        if not c["busqueda"] and c["mineria_pausada"]:
+            raise ValueError("La búsqueda ya está en pausa.")
+        c["busqueda"], c["mineria_pausada"] = None, True
+        hecho = "Búsqueda en pausa: la minería termina la generación en curso y no vuelve a buscar hasta que la reanudes."
+    elif accion == "reanudar_busqueda":
+        if not c["mineria_pausada"]:
+            raise ValueError("La búsqueda ya está en marcha.")
+        c["mineria_pausada"] = False
+        hecho = "Búsqueda reanudada: la minería sigue por rondas, buscando en todos los activos con sitio en el banco."
     elif accion == "activar_freno":
         c["freno_manual"], hecho = True, "Freno manual activado: no se abren posiciones nuevas."
     elif accion == "quitar_freno":

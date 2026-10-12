@@ -1,7 +1,7 @@
 """Trading Floor: minería de estrategias + paper trading (dinero ficticio) + oficina isométrica.
 
 Uso:
-    python -m trading_floor                 # todo: oficina en el navegador, paper trading y minería (con el botón)
+    python -m trading_floor                 # todo: oficina en el navegador, paper trading y minería (siempre, por rondas)
     python -m trading_floor minar           # una ronda de minería desde la terminal
     python -m trading_floor banco           # ver las estrategias aprobadas
     python -m trading_floor papel           # solo el paper trading
@@ -137,8 +137,10 @@ def main() -> None:
     parser.add_argument("--puerto", type=int, default=8050, help="puerto de la oficina web (por defecto 8050)")
     parser.add_argument("--sin-minar", action="store_true", help="no minar; solo oficina y paper trading")
     parser.add_argument("--minar-siempre", action="store_true",
-                        help="minar por rondas sin parar (por defecto solo busca cuando pulsas «Buscar estrategias»)")
-    parser.add_argument("--pausa", type=float, default=15, help="minutos de descanso entre rondas (con --minar-siempre)")
+                        help="minar por rondas sin parar (es lo que hace por defecto; se mantiene por compatibilidad)")
+    parser.add_argument("--minar-a-demanda", action="store_true",
+                        help="buscar estrategias solo cuando pulses «Buscar estrategias» (por defecto busca siempre, por rondas)")
+    parser.add_argument("--pausa", type=float, default=15, help="minutos de descanso entre una ronda de búsqueda y la siguiente")
     parser.add_argument("--telegram", action="store_true", help="avisar de cada operación por Telegram (bot de Jarvis)")
     _opciones_mineria(parser)
     sub = parser.add_subparsers(dest="orden")
@@ -223,7 +225,7 @@ def main() -> None:
             parar.wait()
         else:
             from .macro import vigilar
-            from .mineria import minar_a_demanda, minar_continuo
+            from .mineria import minar_a_demanda, minar_siempre
             from .papel import operar
             from .web import servir
 
@@ -232,11 +234,11 @@ def main() -> None:
             threading.Thread(target=vigilar, args=(15, parar), daemon=True).start()
             if args.sin_minar:
                 parar.wait()
-            elif args.minar_siempre:
-                minar_continuo(args.simbolos, args.intervalo, args.estrategias, args.generaciones,
-                               args.dias, args.pausa, parar)
-            else:
+            elif args.minar_a_demanda:
                 minar_a_demanda(args.simbolos, args.intervalo, args.estrategias, args.generaciones, args.dias, parar)
+            else:
+                minar_siempre(args.simbolos, args.intervalo, args.estrategias, args.generaciones, args.dias,
+                              args.pausa, parar)
     except KeyboardInterrupt:
         parar.set()
         print("\nTrading Floor detenido.")
