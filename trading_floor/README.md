@@ -27,6 +27,22 @@ La primera vez instala lo necesario solo (hace falta Python 3). La oficina se ab
 http://127.0.0.1:8050. Con `--telegram` avisa de cada operación al móvil usando el bot de
 Telegram de Jarvis, si lo tienes configurado.
 
+### Abrirla en el móvil
+
+Con el programa abierto en el ordenador y el móvil en el **mismo WiFi**:
+
+1. En la oficina, pulsa **«Móvil»** (arriba a la derecha) y luego **«Activar el acceso desde el móvil»**.
+2. Sale un código QR: ábrelo con la cámara del móvil y toca el enlace. La oficina se ve adaptada a la pantalla del móvil,
+   con «Mi fondo», el chat y el paseo en 3D (se anda con el pulgar izquierdo y se mira con el derecho).
+3. La primera vez, Windows puede preguntar por el cortafuegos: pulsa **«Permitir acceso»** en redes privadas. Si no
+   carga, comprueba que tu WiFi está como red «privada» en Windows.
+
+Cómo funciona: el servidor abre una segunda entrada en la red de casa (el puerto siguiente, 8051) que solo deja pasar a
+quien trae la **clave** del enlace del QR; el móvil la guarda y no hace falta volver a escanear. Cualquier otro aparato
+de tu red sin la clave ve «Falta la clave», y desde el móvil no se puede abrir ni cerrar esa entrada. Se queda activada
+para la próxima vez que abras el programa; «Dejar de compartir» la cierra. Solo funciona dentro de tu WiFi (fuera de
+casa, no).
+
 ## Cómo funciona
 
 ```
@@ -410,7 +426,7 @@ descanso, cafetería, sala de juegos, gimnasio o la azotea.
 - En la pestaña «Salas», «Ir a una sala» lleva la cámara a cada sala; las flechas ‹ › del panel pasan de
   pestaña y de canal.
 - Arrastra para moverte, rueda o pellizca para hacer zoom, haz clic en cualquiera para ver su ficha.
-- 🚶 **Pasear** (botón bajo las plantas, o tecla P): recorres la oficina **en primera persona**, en 3D.
+- **Pasear en 3D** (botón bajo las plantas, o tecla P): recorres la oficina **en primera persona**, en 3D.
   Haz clic para empezar; **W A S D** (o las flechas) para andar, el **ratón** para mirar, **Mayús** para
   correr, **E** (o clic) para ver la ficha de quien tengas delante y, junto al ascensor (al fondo del pasillo,
   a la izquierda), para subir una planta (desde la 3 vuelve a la baja); Re Pág / Av Pág suben y bajan.
@@ -424,8 +440,10 @@ descanso, cafetería, sala de juegos, gimnasio o la azotea.
   cualquier ordenador. En el móvil se anda con el pulgar
   izquierdo y se mira con el derecho. Usa [Three.js](https://threejs.org) (licencia MIT, incluido en
   `web/vendor/`, así que funciona sin Internet).
-- 🎬 activa el **modo cine**: la cámara recorre las salas y persigue lo que va pasando.
-- ◐ cambia entre día, noche y automático (según tu hora).
+- El botón de la cámara de vídeo activa el **modo cine**: la cámara recorre las salas y persigue lo que va pasando.
+- El círculo medio relleno cambia entre día, noche y automático (según tu hora).
+- **Diseño**: interfaz sobria en gris grafito, con iconos de línea, una sola letra (Inter) con cifras alineadas y color solo
+  donde significa algo (verde sube, rojo baja, ámbar aviso). La oficina dibujada no cambia.
 
 ## Archivos
 
@@ -451,5 +469,5 @@ descanso, cafetería, sala de juegos, gimnasio o la azotea.
 | `macro.py` | Datos macroeconómicos y régimen de mercado |
 | `control.py` | Tus decisiones: búsqueda de estrategias, pausar todo, reabrir, kill switch, traders, límites de riesgo |
 | `chat.py` | Chat con la oficina: modo básico o con Claude, y propuestas de decisiones |
-| `web.py`, `web/index.html` | Servidor local y la oficina isométrica (canvas, sin librerías) |
-| `web/paseo.js`, `web/vendor/` | El paseo en primera persona: la misma oficina en 3D con Three.js |
+| `web.py`, `web/index.html` | Servidor local (y la entrada del móvil, con clave) y la oficina isométrica (canvas, sin librerías) |
+| `web/paseo.js`, `web/vendor/` | El paseo en primera persona: la misma oficina en 3D con Three.js; y el generador del código QR del móvil (qrcode-generator, MIT) |

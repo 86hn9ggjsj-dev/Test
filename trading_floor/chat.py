@@ -104,8 +104,9 @@ post mortem (por qué falló) y la ACADEMIA junta lo aprendido: la minería busc
 de lo que falla, sin dejar de explorar. Con 30 operaciones reales o más, cada trader arriesga según el Kelly prudente \
 (un cuarto del Kelly con un acierto rebajado, entre 0,25 % y 1,5 veces el riesgo base). El equipo Quant hace además el \
 Monte Carlo del fondo; Comunicación escribe el informe del día; Infraestructura vigila el sistema. El jefe puede \
-recorrer la oficina en primera persona, en 3D, con el botón «🚶 Pasear» o la tecla P (W A S D para andar, ratón para \
-mirar, E para ver la ficha de alguien o coger el ascensor). Botones de \
+recorrer la oficina en primera persona, en 3D, con el botón «Pasear en 3D» o la tecla P (W A S D para andar, ratón para \
+mirar, E para ver la ficha de alguien o coger el ascensor). También puede abrirla en el MÓVIL, con el móvil en el mismo WiFi: \
+botón «Móvil» arriba a la derecha, «Activar el acceso desde el móvil» y escanear el código QR (el enlace lleva una clave). Botones de \
 emergencia: «Pausar todo» (freno manual), «Reabrir» y «Kill switch» (cierra ya todo lo abierto del fondo). \
 Todo forma parte del FONDO del jefe: él aporta capital ficticio y recibe participaciones; el valor liquidativo \
 (VL) sube o baja con los resultados de trading, scalping, holding y tendencia. Lo que no está asignado es liquidez. \
@@ -510,8 +511,14 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         return dice("Tomás", f"¿Busco ya estrategias nuevas de {que}? Ya buscamos siempre, por rondas; esto va antes que la ronda en "
                              "curso y luego seguimos donde íbamos. Si alguna supera las ocho pruebas, entra al banco y empieza en la incubadora.",
                     _propuesta("buscar_estrategias", f"Buscar estrategias de {que}", activo.upper(), tipo="scalping" if scalp else ""))
+    if re.search(r"\bm[oó]vil\b|\bcelular\b|\btel[eé]fono\b|\biphone\b|\bandroid\b|\btablet", t) and not re.search(r"estrateg|trader|\be-[0-9a-f]", t):
+        return dice("Néstor", "En el ordenador, pulsa «Móvil» arriba a la derecha y luego «Activar el acceso desde el móvil». Sale un código QR: "
+                              "con el móvil conectado al mismo WiFi, ábrelo con la cámara y toca el enlace. La primera vez Windows puede "
+                              "preguntar por el cortafuegos: pulsa «Permitir acceso» (redes privadas). El enlace lleva una clave, así que "
+                              "nadie más de tu red puede entrar, y se queda activado para la próxima vez. Funciona mientras el programa esté "
+                              "abierto en el ordenador; para cortarlo, «Dejar de compartir».")
     if re.search(r"\bpase(o|a|ar|arme)\b|primera persona|\b3d\b|recorrer la oficina|\bcaminar\b", t) and not re.search(r"estrateg|trader|\be-[0-9a-f]", t):
-        return dice("Chema", "¡Ven a vernos! Pulsa «🚶 Pasear» (debajo de los botones de las plantas) o la tecla P. Haz clic y anda con "
+        return dice("Chema", "¡Ven a vernos! Pulsa «Pasear en 3D» (debajo de los botones de las plantas) o la tecla P. Haz clic y anda con "
                              "W A S D, mira con el ratón, corre con Mayús y pulsa E delante de alguien para ver su ficha. El ascensor "
                              "está al fondo del pasillo, a la izquierda: con E subes una planta (desde la 3 vuelves a la baja). Esc suelta el ratón y P te devuelve "
                              "a la vista de siempre. Te invito a un cortado sin apalancamiento.")
@@ -659,7 +666,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
                              f"{len(papel.get('estrategias', {}))} traders, minería {m.get('estado', 'parada')}"
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
     return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «pausa la búsqueda», «reanuda la búsqueda», «¿cómo va la búsqueda?», «¿qué dice la mesa?», «quita las repetidas», "
-                         "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?», "
+                         "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?», «¿cómo lo abro en el móvil?», "
                          "«¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿dónde perdemos?», «reparto rentable», «¿cuánto cobramos de intereses?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 
 

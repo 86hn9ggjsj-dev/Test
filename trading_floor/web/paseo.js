@@ -197,7 +197,7 @@ function crearMotor() {
     <div class="donde"><b></b><span></span></div>
     <div class="pista" hidden></div>
     <div class="teclas">W A S D andar · ratón mirar · Mayús correr · E ver ficha o ascensor · Re Pág / Av Pág cambiar de planta · Esc soltar el ratón</div>
-    <button type="button" class="salir" title="Volver a la vista de siempre (tecla P)">✕ Salir del paseo</button>
+    <button type="button" class="salir" title="Volver a la vista de siempre (tecla P)">Salir del paseo</button>
     <div class="pausa"><div><b>🚶 Paseo por la oficina</b><p>Haz clic para empezar a andar.<br>W A S D para moverte, el ratón para mirar, Mayús para correr y E para ver la ficha de quien tengas delante o coger el ascensor.</p><small>Esc suelta el ratón</small></div></div>
     <div class="fundido"></div>`;
   document.body.append(hud);
@@ -211,17 +211,17 @@ body.en-paseo #paseoHud{display:block}
 #paseoHud .mira{position:fixed;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;z-index:4;pointer-events:none}
 #paseoHud .mira::before,#paseoHud .mira::after{content:"";position:absolute;background:rgba(255,255,255,.85);box-shadow:0 0 3px rgba(0,0,0,.8)}
 #paseoHud .mira::before{left:8px;top:2px;width:2px;height:14px}#paseoHud .mira::after{top:8px;left:2px;height:2px;width:14px}
-#paseoHud .mira.sobre::before,#paseoHud .mira.sobre::after{background:#d4ff3a}
-#paseoHud .donde{position:fixed;left:16px;top:14px;z-index:5;background:rgba(10,13,19,.78);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 12px;font:600 12px Inter,sans-serif;color:#c9d0db;backdrop-filter:blur(8px);pointer-events:none}
-#paseoHud .donde b{display:block;color:#d4ff3a;font-size:14px;letter-spacing:.04em}
-#paseoHud .pista{position:fixed;left:50%;top:calc(50% + 26px);transform:translateX(-50%);z-index:5;background:rgba(10,13,19,.85);border:1px solid #d4ff3a;border-radius:999px;padding:6px 14px;font:700 13px Inter,sans-serif;color:#e9edf3;white-space:nowrap;pointer-events:none}
-#paseoHud .pista kbd{display:inline-block;border:1px solid #d4ff3a;border-radius:5px;padding:0 6px;margin-right:6px;color:#d4ff3a;font:800 12px JetBrains Mono,monospace}
-#paseoHud .teclas{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:5;background:rgba(10,13,19,.7);border-radius:999px;padding:6px 14px;font:600 11px Inter,sans-serif;color:#aeb6c3;white-space:nowrap;pointer-events:none;max-width:calc(100vw - 24px);overflow:hidden;text-overflow:ellipsis}
-#paseoHud .salir{position:fixed;right:16px;top:14px;z-index:9;height:38px;padding:0 14px;border-radius:10px;border:1px solid #d4ff3a;background:rgba(10,13,19,.85);color:#d4ff3a;font:800 13px Inter,sans-serif;cursor:pointer}
+#paseoHud .mira.sobre::before,#paseoHud .mira.sobre::after{background:#fff}
+#paseoHud .donde{position:fixed;left:16px;top:14px;z-index:5;background:rgba(26,26,25,.9);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:8px 12px;font:500 12px Inter,sans-serif;color:#898781;backdrop-filter:blur(8px);pointer-events:none}
+#paseoHud .donde b{display:block;color:#f0efec;font-size:13.5px;font-weight:600}
+#paseoHud .pista{position:fixed;left:50%;top:calc(50% + 26px);transform:translateX(-50%);z-index:5;background:rgba(26,26,25,.92);border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:6px 12px;font:500 13px Inter,sans-serif;color:#f0efec;white-space:nowrap;pointer-events:none}
+#paseoHud .pista kbd{display:inline-block;background:#f0efec;border-radius:4px;padding:0 6px;margin-right:8px;color:#0d0d0d;font:600 12px Inter,sans-serif}
+#paseoHud .teclas{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:5;background:rgba(26,26,25,.85);border-radius:8px;padding:6px 12px;font:500 11.5px Inter,sans-serif;color:#c3c2b7;white-space:nowrap;pointer-events:none;max-width:calc(100vw - 24px);overflow:hidden;text-overflow:ellipsis}
+#paseoHud .salir{position:fixed;right:16px;top:14px;z-index:9;height:34px;padding:0 14px;border-radius:6px;border:1px solid rgba(255,255,255,.16);background:rgba(26,26,25,.92);color:#f0efec;font:500 13px Inter,sans-serif;cursor:pointer}
 #paseoHud .pausa{position:fixed;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(4,6,10,.45);cursor:pointer}
 #paseoHud .pausa.ver{display:flex}
-#paseoHud .pausa>div{max-width:420px;margin:16px;background:rgba(10,13,19,.92);border:1px solid rgba(212,255,58,.5);border-radius:16px;padding:18px 20px;color:#c9d0db;font:500 14px/1.5 Inter,sans-serif;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-#paseoHud .pausa b{color:#d4ff3a;font-size:18px}#paseoHud .pausa small{color:#7d8696}
+#paseoHud .pausa>div{max-width:420px;margin:16px;background:rgba(26,26,25,.96);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:18px 20px;color:#c3c2b7;font:400 14px/1.5 Inter,sans-serif;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#paseoHud .pausa b{color:#f0efec;font-size:17px;font-weight:600}#paseoHud .pausa small{color:#898781}
 #paseoHud .fundido{position:fixed;inset:0;z-index:8;background:#000;opacity:0;pointer-events:none;transition:opacity .25s}
 #paseoHud .fundido.negro{opacity:1}
 @media (pointer:coarse){#paseoHud .teclas{display:none}}`;
@@ -1250,7 +1250,7 @@ function nombre3d(a, sx, sy, destacado) {
   g2.font = destacado ? "700 12px Inter, sans-serif" : "700 11px Inter, sans-serif";
   const w = g2.measureText(texto).width + 14;
   g2.fillStyle = "rgba(10,13,19,.82)"; g2.beginPath(); g2.roundRect(sx - w / 2, sy - 20, w, 19, 9); g2.fill();
-  if (destacado) { g2.strokeStyle = "#d4ff3a"; g2.lineWidth = 1; g2.stroke(); }
+  if (destacado) { g2.strokeStyle = "rgba(255,255,255,.5)"; g2.lineWidth = 1; g2.stroke(); }
   g2.fillStyle = "#e9edf3"; g2.textAlign = "center"; g2.fillText(texto, sx, sy - 6.5); g2.textAlign = "start";
 }
 function actualizarHud() {

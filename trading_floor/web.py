@@ -1,10 +1,18 @@
-"""Servidor local de la oficina: sirve la página y el estado en JSON (solo en este ordenador)."""
+"""Servidor local de la oficina: sirve la página y el estado en JSON.
+
+Normalmente solo se puede abrir desde este ordenador (127.0.0.1). Con «Abrir en el móvil» se abre además una segunda
+puerta en la red de casa (el puerto siguiente), protegida con una clave que va dentro del código QR: el móvil la guarda
+en una cookie y cualquier otro aparato de la red sin la clave recibe un «prohibido»."""
 
 from __future__ import annotations
 
 import datetime as dt
+import hmac
+import http.cookies
 import json
 import re
+import secrets
+import socket
 import threading
 import time
 import urllib.parse
@@ -20,7 +28,8 @@ from .config import (CAPITAL_POR_ESTRATEGIA, COSTE_IDA_VUELTA, COSTE_SCALPING, I
 
 PAGINA = Path(__file__).resolve().parent / "web" / "index.html"
 # Archivos que necesita el paseo en primera persona (solo estos: no se sirve nada más del disco).
-ESTATICOS = {"/paseo.js": ("paseo.js", False), "/vendor/three.module.min.js": ("vendor/three.module.min.js", True)}
+ESTATICOS = {"/paseo.js": ("paseo.js", False), "/vendor/three.module.min.js": ("vendor/three.module.min.js", True),
+             "/vendor/qrcode.js": ("vendor/qrcode.js", True)}
 
 
 _vivo: dict = {"t": 0.0, "precios": {}}
@@ -112,10 +121,112 @@ def estado() -> dict:
     return E
 
 
+_movil: dict = {"servidor": None, "puerto": None, "base": 8050}
+_cerrojo_movil = threading.Lock()
+
+
+def _ip_local() -> str:
+    """La dirección de este ordenador en la red de casa (la que usa el móvil para llegar)."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("10.255.255.255", 1))   # no envía nada: solo sirve para que el sistema elija la tarjeta de red
+        return s.getsockname()[0]
+    except OSError:
+        return "127.0.0.1"
+    finally:
+        s.close()
+
+
+def _clave_movil() -> str:
+    datos = almacen.cargar("movil", {})
+    if not datos.get("clave"):
+        datos["clave"] = secrets.token_urlsafe(9)
+        almacen.guardar("movil", datos)
+    return datos["clave"]
+
+
+def estado_movil() -> dict:
+    if not _movil["servidor"]:
+        return {"activo": False, "puerto": _movil["base"] + 1}
+    ip = _ip_local()
+    return {"activo": True, "ip": ip, "puerto": _movil["puerto"], "en_red": not ip.startswith("127."),
+            "url": f"http://{ip}:{_movil['puerto']}/?clave={_clave_movil()}"}
+
+
+def activar_movil() -> dict:
+    """Abre la puerta para el móvil (si no estaba abierta) y lo recuerda para la próxima vez."""
+    with _cerrojo_movil:
+        if not _movil["servidor"]:
+            puerto = _movil["base"] + 1
+            servidor = ThreadingHTTPServer(("0.0.0.0", puerto), _Manejador)
+            servidor.es_movil = True
+            threading.Thread(target=servidor.serve_forever, daemon=True).start()
+            _movil.update(servidor=servidor, puerto=puerto)
+        datos = almacen.cargar("movil", {})
+        if not datos.get("activo"):
+            datos["activo"] = True
+            almacen.guardar("movil", datos)
+    _clave_movil()
+    return estado_movil()
+
+
+def desactivar_movil() -> dict:
+    with _cerrojo_movil:
+        servidor = _movil["servidor"]
+        if servidor:
+            servidor.shutdown()
+            servidor.server_close()
+        _movil.update(servidor=None, puerto=None)
+        datos = almacen.cargar("movil", {})
+        datos["activo"] = False
+        almacen.guardar("movil", datos)
+    return estado_movil()
+
+
+PROHIBIDO = ("<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+             "<title>Trading Floor</title><body style='margin:0;min-height:100vh;display:grid;place-items:center;background:#0d0d0d;"
+             "color:#f0efec;font:15px/1.5 system-ui,sans-serif;padding:24px'><div style='max-width:340px'><b>Falta la clave</b><p style='color:#c3c2b7'>"
+             "En el ordenador, abre la oficina, pulsa «Móvil» arriba a la derecha y escanea el código QR con la cámara del móvil."
+             "</p></div>").encode()
+
+
 class _Manejador(BaseHTTPRequestHandler):
+    def _es_movil(self) -> bool:
+        return getattr(self.server, "es_movil", False)
+
+    def _permitido(self) -> bool:
+        """Desde este ordenador, siempre. Desde el móvil (o cualquier aparato de la red), solo con la clave."""
+        if not self._es_movil() or self.client_address[0] in ("127.0.0.1", "::1"):
+            return True
+        try:
+            galleta = http.cookies.SimpleCookie(self.headers.get("Cookie", ""))
+        except http.cookies.CookieError:
+            return False
+        dada = galleta["tf_clave"].value if "tf_clave" in galleta else ""
+        return hmac.compare_digest(dada.encode(), _clave_movil().encode())
+
     def do_GET(self) -> None:  # noqa: N802 (nombre impuesto por http.server)
         ruta = self.path.split("?")[0]
-        if ruta in ("/", "/index.html"):
+        if self._es_movil():
+            dada = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query).get("clave", [""])[0]
+            if dada and hmac.compare_digest(dada.encode(), _clave_movil().encode()):
+                # el enlace del QR trae la clave: el móvil la guarda y se quita de la barra de direcciones
+                self.send_response(303)
+                self.send_header("Set-Cookie", f"tf_clave={_clave_movil()}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax")
+                self.send_header("Location", "/")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+            if not self._permitido():
+                self.send_response(403)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(PROHIBIDO)))
+                self.end_headers()
+                self.wfile.write(PROHIBIDO)
+                return
+        if ruta == "/api/movil" and not self._es_movil():
+            self._responder(json.dumps(estado_movil()).encode(), "application/json; charset=utf-8")
+        elif ruta in ("/", "/index.html"):
             self._responder(PAGINA.read_bytes(), "text/html; charset=utf-8")
         elif ruta in ESTATICOS:
             archivo, guardar = ESTATICOS[ruta]
@@ -132,9 +243,11 @@ class _Manejador(BaseHTTPRequestHandler):
             self.send_error(404)
 
     def do_POST(self) -> None:  # noqa: N802
-        # Solo desde la propia oficina: el navegador no deja a otras webs mandar esta cabecera.
+        # Solo desde la propia oficina: el navegador no deja a otras webs mandar esta cabecera. Desde el móvil, además,
+        # con la clave y desde la misma dirección que sirvió la página.
         origen = self.headers.get("Origin", "")
-        if self.headers.get("X-Trading-Floor") != "1" or (origen and not re.match(r"^http://(127\.0\.0\.1|localhost)(:\d+)?$", origen)):
+        propio = re.match(r"^http://(127\.0\.0\.1|localhost)(:\d+)?$", origen) or (self._es_movil() and origen == f"http://{self.headers.get('Host', '')}")
+        if self.headers.get("X-Trading-Floor") != "1" or (origen and not propio) or not self._permitido():
             self.send_error(403)
             return
         try:
@@ -146,6 +259,11 @@ class _Manejador(BaseHTTPRequestHandler):
         if ruta == "/api/chat":
             nombres = {str(k): str(v) for k, v in (datos.get("nombres") or {}).items()}
             respuesta = chat.responder(str(datos.get("texto", "")), datos.get("para"), estado(), nombres)
+        elif ruta == "/api/movil" and not self._es_movil():   # solo desde el ordenador se abre o se cierra la puerta del móvil
+            try:
+                respuesta = activar_movil() if datos.get("activar") else desactivar_movil()
+            except OSError as e:
+                respuesta = {"activo": False, "error": f"No he podido abrir el puerto {_movil['base'] + 1}: {e}"}
         elif ruta == "/api/decision":
             try:
                 respuesta = {"ok": True, "texto": control.aplicar(datos.get("propuesta") or {})}
@@ -174,8 +292,15 @@ def servir(puerto: int = 8050, abrir: bool = True) -> ThreadingHTTPServer:
     """Arranca el servidor en segundo plano y devuelve el objeto servidor."""
     servidor = ThreadingHTTPServer(("127.0.0.1", puerto), _Manejador)
     threading.Thread(target=servidor.serve_forever, daemon=True).start()
+    _movil["base"] = puerto
     url = f"http://127.0.0.1:{puerto}"
     print(f"[web] Oficina abierta en {url}", flush=True)
+    if almacen.cargar("movil", {}).get("activo"):   # la última vez se dejó abierta la puerta del móvil
+        try:
+            m = activar_movil()
+            print(f"[web] También en el móvil (mismo WiFi): {m['url']}", flush=True)
+        except OSError as e:
+            print(f"[web] No he podido abrir la puerta del móvil (puerto {puerto + 1}): {e}", flush=True)
     if abrir:
         webbrowser.open(url)
     return servidor
