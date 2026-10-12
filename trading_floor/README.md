@@ -175,6 +175,12 @@ casa, no).
      20, 25 y 25 % de lo que tenga. Como se miden sobre el coste medio, se mueven solos al promediar.
      Siempre se queda una parte (el núcleo). Si después vuelve a bajar, promedia otra vez con lo cobrado
      y las salidas se rearman.
+   - **Freno lento** (desde octubre de 2026): si el precio cierra el día por debajo de su **media de 200
+     días** y esa media va hacia abajo (está más baja que hace 20 días), el plan vende y deja de promediar;
+     cuando vuelve a cerrar por encima de la media, recompra lo que vendió y sigue. No es un stop: no salta
+     por una caída rápida, solo cuando la tendencia de meses se ha dado la vuelta. En los mercados bajistas
+     largos (como 2022), promediar a la baja hundía la cartera; el freno la aparta. Cuesta algo en los años
+     muy buenos (ver «Lo que dicen los datos»). El panel de holding enseña a qué precio está el freno.
 
    Se simula con velas reales de 1 hora desde que se crea el plan. Puedes pedir otro plan por el chat o:
 
@@ -304,19 +310,46 @@ minería no había visto, y se miró qué habría pasado después:
   salió, que es justo cuando peor lo pasa (sale al cerrar el día, no en mitad de la caída).
 - **Cobrar por el dinero parado**: con el tipo de las letras del Tesoro de cada día, el efectivo de un
   fondo como este suma entre 3 y 4 puntos al año.
-- **El reparto** (de 2022 a hoy, juntando todo lo anterior y suponiendo que trading y scalping pierden un
-  1 % al año):
+- **El freno lento del holding** (con el plan real de la oficina, velas diarias de Binance):
 
-  | Reparto (trading / scalping / holding / tendencia, resto sin invertir) | Al año | Caída máxima | 2022 | Meses en positivo |
-  |---|---|---|---|---|
-  | 20 / 15 / 30 / 30, sin cobrar intereses | +20,0 % | −34 % | −30,2 % | 50 % |
-  | 20 / 15 / 30 / 30, cobrando intereses | +23,6 % | −33,5 % | −29,6 % | 50 % |
-  | **5 / 0 / 25 / 40, cobrando intereses (el «reparto rentable»)** | **+25,6 %** | **−31,4 %** | **−27,7 %** | 48 % |
+  | Holding | Sin freno | Con freno |
+  |---|---|---|
+  | BTC y ETH, de 2019 a hoy (dos subidas y una gran caída) | +15,6 % al año, caída máx. −59 % | **+21,2 %**, −45 % |
+  | BTC, ETH y SOL, de 2022 a hoy | +13,6 %, −72 % | **+22,0 %**, −18 % |
+  | BTC, ETH y SOL, desde octubre de 2023 (subida) | +32,6 %, −34 % | +26,9 %, −18 % |
+  | BTC, ETH y SOL, desde junio de 2024 (de lado) | +20,3 %, −42 % | +12,0 %, −22 % |
+
+  Es un seguro: en los ciclos completos gana más y corta las grandes caídas, pero en los años buenos o de
+  lado cuesta unos puntos. Se probaron otras versiones: solo «bajo la media», sin mirar si baja (muchas más
+  idas y venidas: +16,1 % desde 2019 y +10,1 % desde junio de 2024), con banda de ±3 %, confirmando 3
+  cierres, o con la media de 150 días; la elegida es la mejor o casi la mejor en los cuatro periodos.
+- **Más monedas en la sala de tendencia, no.** Con las monedas que más volumen tenían en cada momento (sin
+  mirar el futuro; 50 monedas de 2019 a hoy, incluidas las que acabaron mal o se dejaron de negociar), la
+  sala gana entre un +15 y un +18 % al año, frente al +31 % con las 6 de ahora: parte de ese +31 % viene de
+  haber elegido hoy 6 monedas que sabemos que fueron bien. Tampoco mejoraron: concentrar el dinero parado en
+  las que están en tendencia (más caídas: hasta −53 %), quedarse solo con las 5 o 6 más fuertes (−51 %), ni
+  vender antes mirando cada 1, 4 o 12 horas en vez de al cierre del día (gana lo mismo o menos). El «carry»
+  (cobrar la financiación de los futuros sin riesgo de precio) da en torno a un 2 % al año sobre el capital:
+  menos que los intereses de la liquidez.
+- **El reparto** (de 2022 a hoy, juntando todo lo anterior y suponiendo que trading y scalping pierden un
+  1 % al año). Dos versiones de la sala de tendencia: la de ahora (6 monedas elegidas hoy, optimista) y la de
+  las 10 de más volumen en cada momento (prudente):
+
+  | Reparto (trading / scalping / holding / tendencia, resto sin invertir) | Optimista | Prudente |
+  |---|---|---|
+  | 5 / 0 / 25 / 40 + 30 % sin invertir, holding sin freno (el reparto rentable anterior) | +18,8 % al año, caída −30 % | +12,6 %, −33 % |
+  | 5 / 0 / 25 / 40 + 30 %, holding con freno | +19,9 %, −12 % | +13,6 %, −13 % |
+  | **5 / 0 / 40 / 45 + 10 %, holding con freno (el «reparto rentable» nuevo)** | **+24,1 %, −16 %** | **+16,9 %, −16 %** |
+  | 5 / 0 / 40 / 45 + 10 %, holding sin freno | +21,8 %, −43 % | +14,7 %, −46 % |
+
+  **Corrección**: antes este README daba un +25,6 % al año para el reparto 5/0/25/40. Estaba mal calculado:
+  se medía la ganancia de cada día sobre el dinero inicial del holding y no sobre lo que valía la cartera ese
+  día (cuando la cartera ha crecido, eso exagera los movimientos). Bien calculado es el +18,8 % de la tabla.
 
   El «reparto rentable» deja el scalping a 0 % (pierde incluso antes de comisiones), casi nada en trading
-  (no gana a las comisiones), un 25 % en holding, un 40 % en tendencia y un 30 % sin invertir cobrando
-  intereses. Al abrir la oficina, Marta te lo propone **una vez** con botones de Aprobar / Rechazar (si ya
-  lo tienes, no dice nada); también por el chat: «reparto rentable» o «necesitamos que sea rentable».
+  (no gana a las comisiones), un 40 % en holding (con el freno), un 45 % en tendencia y un 10 % sin invertir
+  cobrando intereses. Al abrir la oficina, Marta te lo propone **una vez** con botones de Aprobar / Rechazar (si
+  ya lo tienes, no dice nada); también por el chat: «reparto rentable» o «necesitamos que sea rentable».
   Tu reparto no cambia hasta que lo apruebas. Con el scalping a 0 %, sus scalpers siguen en la sala con
   0 $ (lo que ganaron o perdieron antes se conserva), por si un día la minería encuentra algo que funcione.
 
@@ -327,7 +360,7 @@ si la minería encuentra algo que funcione de verdad, la incubadora y el supervi
 
 ## La oficina
 
-Arriba a la izquierda eliges la vista: **🏢 Oficina** o **📊 Mi fondo**, tu dashboard personal, explicado
+Arriba a la izquierda eliges la vista: **Oficina** o **Mi fondo**, tu dashboard personal, explicado
 en castellano llano:
 - Arriba, cuánto tienes y una frase: cuánto has puesto, cuánto has ganado o perdido y cuánto llevas hoy.
 - Cinco respuestas cortas: **¿ganas o pierdes?**, **¿mejor que comprar BTC?**, **¿está trabajando tu
@@ -463,7 +496,7 @@ descanso, cafetería, sala de juegos, gimnasio o la azotea.
 | `mesa.py` | Mesa de análisis: tendencia diaria, riesgo/beneficio y miedo y codicia antes de cada entrada |
 | `fondo.py` | Tu fondo: participaciones, valor liquidativo, aportaciones, métricas (Sharpe, Sortino, Calmar), Monte Carlo y comparación con BTC |
 | `riesgo.py` | Tamaño de las operaciones, límites, vetos y frenos |
-| `holding.py` | Carteras de largo plazo sin stop: promedian a la baja y salen por partes sobre el coste medio |
+| `holding.py` | Carteras de largo plazo sin stop: promedian a la baja, salen por partes sobre el coste medio y tienen un freno lento (media de 200 días) |
 | `tendencia.py` | Sala de tendencia: media de 50 días y ruptura 20/10 en velas diarias, solo compras, con volatilidad objetivo y stop de 3 ATR |
 | `liquidez.py` | Liquidez remunerada: el dinero que no está en el mercado cobra el tipo de las letras del Tesoro |
 | `macro.py` | Datos macroeconómicos y régimen de mercado |

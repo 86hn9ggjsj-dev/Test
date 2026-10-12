@@ -125,7 +125,8 @@ KELLY_MINIMO = 0.0025   # y como poco un 0,25 % del capital
 TIPO_LIQUIDEZ = 4.0
 # Reparto que más habría ganado con datos reales de 2022 a hoy (README, «Lo que dicen los datos»); lo que falta hasta el
 # 100 % (un 30 %) queda sin invertir cobrando intereses. Es una propuesta: solo se aplica si tú la apruebas.
-REPARTO_RENTABLE = {"trading": 5.0, "scalping": 0.0, "holding": 25.0, "tendencia": 40.0}
+# Con el freno lento del holding (octubre de 2026): el holding arriesga mucho menos, así que se puede invertir más.
+REPARTO_RENTABLE = {"trading": 5.0, "scalping": 0.0, "holding": 40.0, "tendencia": 45.0}
 
 # Tu fondo (fondo.py): capital ficticio que aportas al empezar y valor inicial de cada participación.
 FONDO_CAPITAL_INICIAL = 100_000.0

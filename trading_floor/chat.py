@@ -112,10 +112,19 @@ Todo forma parte del FONDO del jefe: él aporta capital ficticio y recibe partic
 (VL) sube o baja con los resultados de trading, scalping, holding y tendencia. Lo que no está asignado es liquidez. \
 LIQUIDEZ REMUNERADA: el dinero del fondo que no está invertido (lo no repartido, las mesas vacías, el efectivo de \
 holding y tendencia) cobra el tipo de las letras del Tesoro de EE. UU. a 3 meses, como un monetario («liquidez_remunerada»: \
-tipo, efectivo, acumulado); cuenta en el fondo como «intereses». Con datos de 2022 a hoy, el reparto que más habría ganado \
-es trading 5 %, scalping 0 %, holding 25 %, tendencia 40 % y 30 % sin invertir (+25,6 % al año frente a +23,6 % de un \
-reparto 20/15/30/30, o +20 % sin intereses; en 2022, −28 % frente a −30 %; aun así, la mitad de los meses acaban en negativo). Si el jefe pide \
-que sea rentable y no lo tiene aplicado, proponlo con accion «asignar» y objetivo «rentable». \
+tipo, efectivo, acumulado); cuenta en el fondo como «intereses». FRENO LENTO DEL HOLDING (octubre de 2026): si el precio \
+cierra el día por debajo de su media de 200 días y esa media va hacia abajo, el plan vende y deja de promediar; al volver a \
+cerrar por encima, recompra («freno» en cada plan). Con el plan real: BTC y ETH desde 2019, +21,2 % al año frente a +15,6 % \
+(caída máxima −45 % frente a −59 %); BTC/ETH/SOL desde 2022, +22 % frente a +13,6 % (−18 % frente a −72 %). Es un seguro: en \
+los años buenos cuesta (desde octubre de 2023, +26,9 % frente a +32,6 %). Con el freno, el reparto recomendado es trading 5 %, \
+scalping 0 %, holding 40 %, tendencia 45 % y 10 % sin invertir: de 2022 a hoy +24 % al año y caída máxima del −16 %, frente a \
++18,8 % y −30 % del reparto anterior 5/0/25/40 sin freno; con monedas elegidas sin mirar el futuro, +16,9 % frente a +12,6 %. \
+El +25,6 % que se dijo antes para el reparto anterior estaba mal calculado (medía cada día sobre el dinero inicial); si \
+sale el tema, reconócelo. Probado y descartado: más monedas en la sala de tendencia (con monedas elegidas sin mirar el futuro \
+gana la mitad: hoy la sala tiene a favor haber elegido 6 monedas que sabemos que fueron bien), concentrar el dinero en las que \
+suben, quedarse solo con las más fuertes, salir cada pocas horas en vez de al cierre del día, y el «carry» de la financiación \
+de futuros (≈2 % al año, menos que los intereses). Si el jefe pide que sea rentable y no lo tiene aplicado, proponlo con accion \
+«asignar» y objetivo «rentable». \
 MESA DE ANÁLISIS (idea de los vídeos de «6 bots en un chat de grupo», pero con reglas medidas): antes de entrar, \
 cada señal de la sala de trading y de sus estrategias de la incubadora pasa por la mesa: Celeste (scout, volumen), Cristian \
 (noticias: lo que se ha movido), Noemí (sentimiento: miedo y codicia), Amador (charts) y Olga, la escéptica, que dice \
@@ -138,7 +147,8 @@ tendencia ganó más que comprar y mantener y con caídas mucho menores, mientra
 trading apenas tenían ventaja tras las comisiones (pierden de media en los meses siguientes; la incubadora y el supervisor \
 limitan el daño). Nada de esto es una garantía. Hay control de riesgos, una sala de holding a largo plazo (BTC, ETH, SOL) con un plan \
 adaptativo SIN stop loss (promedia a la baja cada cierto % de caída, usa una reserva de capital si se acaba \
-el presupuesto y vende por partes en puntos de salida sobre el coste medio), y una sala de macroeconomía. Nunca se envía ninguna orden a ningún exchange.
+el presupuesto y vende por partes en puntos de salida sobre el coste medio; con un freno lento: fuera mientras el precio cierre \
+por debajo de su media de 200 días), y una sala de macroeconomía. Nunca se envía ninguna orden a ningún exchange.
 
 Plantilla (usa exactamente estos nombres en "quien"):
 {plantilla}
@@ -475,17 +485,20 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
     if re.search(r"reparto (rentable|recomendad|bueno|mejor)|que reparto|hazlo rentable|sea rentable|ser rentable|como ganamos|ganar dinero", t):
         rep = REPARTO_RENTABLE
         tipo = _precio(float((E.get("liquidez") or {}).get("tipo_pct") or TIPO_LIQUIDEZ))
-        txt = ("Con datos reales de 2022 a hoy, el reparto que más habría ganado es: sin scalping (pierde incluso antes de "
-               "comisiones), casi sin trading (las estrategias minadas no ganan a las comisiones), holding 25 %, tendencia 40 % y "
-               f"un 30 % sin invertir, que cobra intereses como un monetario (ahora un {tipo} % al año). Habría dado un +25,6 % al año "
-               "frente a un +23,6 % con un reparto 20/15/30/30 (y un +20 % sin los intereses), con caídas algo menores (en 2022, "
-               "−28 % frente a −30 %). No hay garantías: con cripto dentro, la mitad de los meses salen en rojo.")
+        txt = ("Con datos reales de 2022 a hoy, y ahora que el holding tiene su freno lento (vende si el precio cierra por debajo de "
+               "su media de 200 días y esa media va hacia abajo; recompra al volver encima), el mejor reparto es: sin scalping (pierde "
+               "incluso antes de comisiones), casi sin trading (las estrategias minadas no ganan a las comisiones), holding 40 %, "
+               f"tendencia 45 % y un 10 % sin invertir, que cobra intereses como un monetario (ahora un {tipo} % al año). Habría dado un "
+               "+24 % al año con una caída máxima del −16 %, frente a un +18,8 % y caídas del −30 % del reparto anterior (5/0/25/40) sin "
+               "freno. Siendo prudentes (con monedas elegidas sin mirar el futuro): +16,9 % frente a +12,6 %. El freno es un seguro: en "
+               "los años muy buenos cuesta unos puntos. Ojo: antes te dije +25,6 % para el reparto anterior y estaba mal calculado. "
+               "No hay garantías: con cripto dentro, hay muchos meses en rojo.")
         actual = (E.get("fondo") or {}).get("reparto") or {}
         if all(abs(float(actual.get(a, -1)) - v) < 0.5 for a, v in rep.items()):
             return dice("Marta", txt + " Ya lo tienes aplicado: ahora toca paciencia, porque se juzga en meses, no en días.")
         return dice("Marta", txt + " ¿Lo aplico?",
-                    _propuesta("asignar", "Reparto rentable: trading 5 %, scalping 0 %, holding 25 %, tendencia 40 % y un 30 % sin "
-                                          "invertir que cobra intereses", "rentable"))
+                    _propuesta("asignar", "Reparto rentable: trading 5 %, scalping 0 %, holding 40 % (con freno lento), tendencia 45 % "
+                                          "y un 10 % sin invertir que cobra intereses", "rentable"))
     if re.search(r"interes|monetario|letras del tesoro|dinero (parado|quieto|sin invertir)", t):
         lq = E.get("liquidez") or {}
         if lq.get("tipo_pct") is None:
@@ -611,11 +624,18 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
             moneda = p["simbolo"].replace("USDT", "")
             prox = next((z["precio"] for z in p.get("compras", []) if not z.get("sin_dinero")), None)
             salida = next((z for z in p.get("ventas", []) if not z.get("llena") and z.get("precio")), None)
+            fr = p.get("freno") or {}
+            if fr.get("activo"):
+                partes.append(f"{moneda} {_es(p.get('resultado_pct', 0))} %, con el freno puesto: fuera del mercado hasta que cierre "
+                              f"por encima de su media de 200 días ({_precio(fr['media'])})" if fr.get("media") else
+                              f"{moneda} {_es(p.get('resultado_pct', 0))} %, con el freno puesto")
+                continue
             partes.append(f"{moneda} {_es(p.get('resultado_pct', 0))} %"
+                          + (f", freno si cierra por debajo de {_precio(fr['media'])} con la media bajando" if fr.get("media") else "")
                           + (f", próxima compra a {_precio(prox)}" if prox else ", sin dinero para más compras")
                           + (f", próxima salida a {_precio(salida['precio'])} (+{_es(salida['sobre_coste_pct'], False)} % sobre coste)"
                              if salida else ""))
-        return dice("Diego", "Holding sin stop: " + "; ".join(partes) + ".")
+        return dice("Diego", "Holding sin stop pero con freno lento (media de 200 días): " + "; ".join(partes) + ".")
     if not ident and re.search(r"abiert|trades? abierto|posicion(es)? abierta|operaciones (en curso|abiertas)|dentro del mercado", t):
         vivo, abiertas = E.get("vivo") or {}, []
         for i, x in (papel.get("estrategias") or {}).items():

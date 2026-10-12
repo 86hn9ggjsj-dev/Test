@@ -1,6 +1,6 @@
 """Sala de holding: comprar y mantener a largo plazo con un plan adaptativo (dinero ficticio).
 
-Reglas del plan (sin stop loss: nunca se vende por miedo):
+Reglas del plan (sin stop loss: no se vende por una caída rápida; solo el freno lento, más abajo):
 - Compra inicial de una parte del presupuesto.
 - Promediar a la baja: cada vez que el precio cae un `paso_pct` desde la última compra (o desde la
   última salida), se compra otro tramo. Si se acaba el presupuesto, entra capital de la reserva.
@@ -11,8 +11,14 @@ Reglas del plan (sin stop loss: nunca se vende por miedo):
 - Ajustes de capital: cuando cambias el % del fondo dedicado al holding (o aportas/retiras dinero), cada
   plan recibe o devuelve capital desde ese momento; si hay que devolver más de lo que tiene en efectivo,
   vende la parte necesaria. Los tramos y la reserva se recalculan con el presupuesto nuevo.
-
-Se simula con las velas reales de Binance (1 hora) desde que se crea el plan.
+- Freno lento (desde octubre de 2026): si el precio cierra el día por debajo de su media de 200 días y esa media va hacia
+  abajo (más baja que hace 20 días: la tendencia de meses se ha dado la vuelta), el plan vende y deja de promediar (en los
+  mercados bajistas largos, promediar a la baja hunde la cartera); cuando vuelve a cerrar por encima de la media, recompra
+  lo que vendió y sigue con el plan. Medido con este mismo plan y velas reales: BTC y ETH desde 2019, +21,2 % al año
+  frente a +15,6 % y caída máxima del −45 % en vez del −59 %; BTC, ETH y SOL desde 2022, +22 % frente a +13,6 % y −18 %
+  en vez de −72 %. Es un seguro y cuesta en los años buenos: desde octubre de 2023, +26,9 % frente a +32,6 %. Mirar solo
+  si el precio está bajo la media (sin la pendiente) daba muchas más idas y venidas y ganaba menos. No es un stop: no
+  salta por una caída rápida, solo cuando la tendencia de meses ha cambiado.
 """
 
 from __future__ import annotations
@@ -33,6 +39,10 @@ PASO_PCT = 8.0  # caída desde la última compra que dispara otra compra
 TRAMO_PCT = 12.5  # tamaño de cada compra de promedio, en % del presupuesto
 RESERVA_PCT = 50.0  # capital extra (en % del presupuesto) que se puede añadir si se acaba el dinero
 SALIDAS = [(30.0, 20.0), (60.0, 25.0), (100.0, 25.0)]  # (+% sobre el coste medio, % de la posición que se vende)
+FRENO_DIAS = 200  # freno lento: fuera mientras el cierre diario esté por debajo de esta media...
+FRENO_PENDIENTE = 20  # ...y la media esté más baja que hace estos días (0: sin mirar la pendiente)
+FRENO_CONFIRMA = 1  # cierres seguidos que hacen falta para poner o quitar el freno
+FRENO_BANDA = 0.0  # margen alrededor de la media (0,02 = ±2 %)
 COSTE = COMISION + DESLIZAMIENTO
 _cerrojo = threading.RLock()  # el ciclo de holding y los planes que pides desde el chat no deben pisarse
 
@@ -70,6 +80,7 @@ def nuevo_plan(simbolo: str, presupuesto: float, precio: float, paso_pct: float 
         "reserva_pct": float(RESERVA_PCT if reserva_pct is None else reserva_pct),
         "salidas": salidas,
         "ajustes": [],
+        "freno_desde": _ahora(),
     }
 
 
@@ -147,7 +158,13 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
         operaciones.append({"t": t(k), "tipo": "venta", "motivo": motivo, "precio": float(precio), "unidades": u,
                             "importe": round(ingreso, 2), "coste_medio": medio})
 
-    comprar(presupuesto * plan["entrada_inicial_pct"] / 100, plan["precio_inicio"], inicio - 1, "entrada inicial")
+    frenado = _frenado(m, plan)
+    freno = {"activo": False, "recomprar": 0.0, "veces": 0}
+
+    if inicio < len(m) and frenado[inicio]:   # nace con el freno puesto: espera a que vuelva la tendencia para entrar
+        freno.update(activo=True, recomprar=presupuesto * plan["entrada_inicial_pct"] / 100)
+    else:
+        comprar(presupuesto * plan["entrada_inicial_pct"] / 100, plan["precio_inicio"], inicio - 1, "entrada inicial")
     referencia = plan["precio_inicio"]  # última compra o última salida: de ahí se mide la caída
     valores = [efectivo + unidades * plan["precio_inicio"]]
     cada = max(1, 240 // m.minutos)  # un punto cada 4 horas para las gráficas
@@ -156,6 +173,34 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
         while pendiente < len(ajustes) and pd.Timestamp(ajustes[pendiente]["t"]) <= m.tiempo[k]:
             ajustar(ajustes[pendiente], float(m.o[k]), k)
             pendiente += 1
+        # 0) Freno lento: al cerrar el día bajo la media de 200 días se vende todo; al volver encima, se recompra.
+        if frenado[k] and not freno["activo"]:
+            freno["activo"] = True
+            freno["veces"] += 1
+            freno["recomprar"] = unidades * float(m.o[k]) * (1 - COSTE)
+            if unidades > 0:
+                vender(1.0, float(m.o[k]), k, "freno")
+            hechas.clear()
+        elif not frenado[k] and freno["activo"]:
+            freno["activo"] = False
+            if freno["recomprar"] > 1:
+                importe = min(freno["recomprar"], efectivo)
+                if importe > 1:
+                    u = importe * (1 - COSTE) / float(m.o[k])
+                    efectivo -= importe
+                    unidades += u
+                    coste_base += importe
+                    operaciones.append({"t": t(k), "tipo": "compra", "motivo": "recompra", "precio": float(m.o[k]), "unidades": u,
+                                        "importe": round(importe, 2), "coste_medio": coste_base / unidades})
+            freno["recomprar"] = 0.0
+            referencia = float(m.o[k])
+            hechas.clear()
+        if freno["activo"]:   # con el freno puesto ni se promedia ni hay salidas (no hay nada que vender)
+            valores.append(efectivo + unidades * m.c[k])
+            if (k - inicio) % cada == 0 or k == len(m) - 1:
+                serie.append([(m.tiempo[k] + pd.Timedelta(minutes=m.minutos)).isoformat(),
+                              round(float(valores[-1] - presupuesto - reserva_usada), 2)])
+            continue
         # 1) Promediar a la baja (puede saltar varios escalones si el precio cae de golpe).
         while efectivo + (reserva - reserva_usada) > 1:
             objetivo = referencia * (1 - paso)
@@ -206,6 +251,8 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
         "realizado": round(realizado, 2),
         "operaciones": operaciones,
         "stop": None,
+        "freno": {"activo": freno["activo"], "veces": freno["veces"], "dias": FRENO_DIAS,
+                  "media": _media_diaria(m, FRENO_DIAS) if plan.get("freno_desde") else None},
         "compras": [{"precio": round(siguiente * (1 - paso) ** j, 6), "pct": plan["tramo_pct"],
                      "llena": False, "sin_dinero": queda < tramo * (j + 1) * .99} for j in range(3)],
         "ventas": [{"precio": round(medio * (1 + s["sobre_coste_pct"] / 100), 6) if medio else None,
@@ -219,7 +266,57 @@ def simular_plan(plan: dict, m: Mercado) -> dict:
     }
 
 
+def _frenado(m: Mercado, plan: dict) -> np.ndarray:
+    """Freno lento, vela a vela, según el último cierre diario terminado (solo decisiones desde «freno_desde»).
+    Se pone si el cierre está por debajo de su media de 200 días y esa media baja (la tendencia de meses se ha dado la
+    vuelta), confirmado `FRENO_CONFIRMA` cierres seguidos; se quita al cerrar por encima de la media (igual de confirmado)."""
+    frenado = np.zeros(len(m), dtype=bool)
+    if not plan.get("freno_desde"):
+        return frenado
+    r = {"dias": FRENO_DIAS, "pendiente": FRENO_PENDIENTE, "confirma": FRENO_CONFIRMA, "banda": FRENO_BANDA, **(plan.get("freno_regla") or {})}
+    cierre = pd.Series(m.c, index=m.tiempo).resample("1D").last().dropna()
+    if len(cierre) and m.tiempo[-1] < cierre.index[-1] + pd.Timedelta(hours=23):
+        cierre = cierre.iloc[:-1]   # el día en curso todavía no ha cerrado
+    if not len(cierre):
+        return frenado
+    media = cierre.rolling(r["dias"]).mean()
+    baja = (media < media.shift(r["pendiente"])) if r["pendiente"] else pd.Series(True, index=media.index)
+    debajo = ((cierre < media * (1 - r["banda"])) & baja & media.notna()).to_numpy()
+    encima = (cierre > media * (1 + r["banda"])).to_numpy()
+    desde = pd.Timestamp(plan["freno_desde"])
+    valido = np.asarray(cierre.index + pd.Timedelta(days=1) > desde)   # lo decidido antes de activarlo no cuenta
+    estado, seguidos_d, seguidos_e, puesto = np.zeros(len(cierre), dtype=bool), 0, 0, False
+    for i in range(len(cierre)):
+        seguidos_d = seguidos_d + 1 if debajo[i] else 0
+        seguidos_e = seguidos_e + 1 if encima[i] else 0
+        if not valido[i]:
+            puesto = False
+        elif not puesto and seguidos_d >= r["confirma"]:
+            puesto = True
+        elif puesto and seguidos_e >= r["confirma"]:
+            puesto = False
+        estado[i] = puesto
+    aplica = np.asarray(cierre.index + pd.Timedelta(days=1))   # se aplica desde la apertura del día siguiente
+    pos = np.searchsorted(aplica, np.asarray(m.tiempo), side="right") - 1
+    return np.where(pos >= 0, estado[np.clip(pos, 0, None)], False)
+
+
+def _media_diaria(m: Mercado, dias: int) -> float | None:
+    """Media de los cierres diarios terminados (para enseñar a qué precio está el freno)."""
+    cierre = pd.Series(m.c, index=m.tiempo).resample("1D").last().dropna()
+    if len(cierre) and m.tiempo[-1] < cierre.index[-1] + pd.Timedelta(hours=23):
+        cierre = cierre.iloc[:-1]
+    return round(float(cierre.iloc[-dias:].mean()), 6) if len(cierre) >= dias else None
+
+
 def _texto(moneda: str, op: dict, plan: dict) -> str:
+    if op.get("motivo") == "freno":
+        return (f"{moneda}: freno lento. Ha cerrado el día por debajo de su media de {FRENO_DIAS} días, y la media baja: vendo la posición "
+                f"({_precio(op['importe'])} $ a {_precio(op['precio'])}) y dejo de promediar hasta que la tendencia vuelva. "
+                "En los mercados bajistas largos, promediar a la baja hunde la cartera.")
+    if op.get("motivo") == "recompra":
+        return (f"{moneda}: vuelve a cerrar por encima de su media de {FRENO_DIAS} días. Quito el freno y recompro "
+                f"({_precio(op['importe'])} $ a {_precio(op['precio'])}); el plan sigue como siempre.")
     if op["tipo"] == "ajuste":
         sube = op["importe"] >= 0
         return (f"{moneda}: {'entran' if sube else 'salen'} {_precio(abs(op['importe']))} $ por el nuevo reparto del fondo; "
@@ -249,7 +346,8 @@ def _serie_total(planes) -> pd.Series:
 def _base(plan: dict) -> dict:
     claves = ("tipo", "simbolo", "presupuesto", "creado", "precio_inicio", "entrada_inicial_pct",
               "paso_pct", "tramo_pct", "reserva_pct", "salidas")
-    return {**{k: plan[k] for k in claves}, "ajustes": list(plan.get("ajustes") or [])}
+    return {**{k: plan[k] for k in claves}, "ajustes": list(plan.get("ajustes") or []),
+            **({"freno_desde": plan["freno_desde"]} if plan.get("freno_desde") else {})}
 
 
 def ciclo(estado: dict) -> list[dict]:
@@ -272,6 +370,12 @@ def ciclo(estado: dict) -> list[dict]:
             plan = {"operaciones": plan.get("operaciones", []), **_desde_plan_antiguo(plan), "migrado": True}
             evento("plan", simbolo, f"Plan de {moneda} actualizado: ya no tiene stop. Promedia a la baja cada "
                                     f"{_pct(PASO_PCT)} % y sale por partes sobre el coste medio (recalculado desde su inicio).")
+        if not plan.get("freno_desde"):
+            plan["freno_desde"] = _ahora()
+            evento("plan", simbolo, f"Plan de {moneda}: estreno el freno lento. Si el precio cierra el día por debajo de su media "
+                                    f"de {FRENO_DIAS} días y esa media va hacia abajo, vendo y dejo de promediar; cuando vuelva a cerrar por "
+                                    "encima, recompro. Con datos reales desde 2019, el holding habría ganado más con caídas mucho menores; "
+                                    "en los años muy buenos cuesta unos puntos.")
         base = _base(plan)
         nuevo = simular_plan(base, Mercado(velas(simbolo, "1h"), simbolo, "1h"))
         anteriores = [] if plan.get("migrado") else plan.get("operaciones", [])
@@ -284,7 +388,8 @@ def ciclo(estado: dict) -> list[dict]:
         if not plan.get("migrado"):
             for op in nuevo["operaciones"][len(anteriores):]:
                 if op.get("motivo") != "entrada inicial":
-                    evento(op["tipo"], simbolo, _texto(moneda, op, base))
+                    tipo = op["motivo"] if op.get("motivo") in ("freno", "recompra") else op["tipo"]
+                    evento(tipo, simbolo, _texto(moneda, op, base))
         planes[simbolo] = nuevo
     aportado = sum(p["aportado"] for p in planes.values())
     valor = sum(p["valor"] for p in planes.values())
