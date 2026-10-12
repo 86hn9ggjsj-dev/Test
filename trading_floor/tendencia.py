@@ -9,6 +9,12 @@ Reglas fijas y clásicas. No salen de la minería, así que no se han ajustado a
   Así cada moneda está invertida al 0 %, al 50 % o al 100 % de su parte. Solo compras: sin cortos ni apalancamiento.
 - Se decide con el cierre de cada día (00:00 UTC) y se opera a la apertura del día siguiente, pagando comisión y
   deslizamiento. Lo que no está invertido espera en efectivo.
+- Desde octubre de 2026 (las carteras de antes, solo desde que se actualiza el programa; lo anterior no cambia):
+  · Volatilidad objetivo: cada moneda invierte como mucho lo que corresponde a una volatilidad del 80 % anual; si se
+    mueve más, invierte menos, en pasos del 10 % (con 20 días de historia).
+  · Stop de seguimiento: si, estando dentro, el cierre cae más de 3 veces su rango diario medio (ATR de 14 días) desde
+    el máximo de cierre, sale entera y no vuelve a entrar hasta que las dos mitades hayan salido y vuelva la tendencia.
+  Con datos de 2022 a 2026 ganó lo mismo (+32 % al año) con menos caída (−23 % frente a −27 %; 2022: −16 % frente a −23 %).
 - Ajustes de capital: cuando cambias el reparto del fondo (o aportas o retiras), la cartera recibe o devuelve dinero
   desde ese momento y cada moneda se reajusta a su nivel de inversión.
 
@@ -37,6 +43,10 @@ MEDIA_DIAS = 50
 RUPTURA_ENTRA = 20   # entra al superar el máximo de los 20 días anteriores...
 RUPTURA_SALE = 10    # ...y sale al bajar del mínimo de los 10 días anteriores
 HISTORIA_PREVIA = 120   # días de velas antes de crear la cartera, para que las señales ya estén formadas
+VOL_OBJETIVO = 0.8      # volatilidad anual con la que una moneda invierte toda su parte; con más, invierte menos
+VOL_DIAS = 20
+STOP_ATR = 3.0          # stop de seguimiento: 3 veces el rango diario medio desde el máximo de cierre
+ATR_DIAS = 14
 COSTE = COMISION + DESLIZAMIENTO   # por lado
 _cerrojo = threading.RLock()
 
@@ -54,18 +64,23 @@ def _moneda(simbolo: str) -> str:
 
 
 def nueva_cartera(presupuesto: float, monedas: list[str] | None = None) -> dict:
-    return {"creado": pd.Timestamp.now(tz="UTC").isoformat(), "presupuesto": float(presupuesto),
-            "monedas": list(monedas or SIMBOLOS), "ajustes": []}
+    ahora = pd.Timestamp.now(tz="UTC").isoformat()
+    return {"creado": ahora, "presupuesto": float(presupuesto), "monedas": list(monedas or SIMBOLOS), "ajustes": [],
+            "reglas_v2": ahora}
 
 
-def _dias_cerrados(m: Mercado, origen: pd.Timestamp | None = None) -> pd.DataFrame:
+def _dias_cerrados(m: Mercado, origen: pd.Timestamp | None = None, v2: pd.Timestamp | None = None) -> pd.DataFrame:
     """Cierres diarios (00:00 UTC) de los días ya terminados, con las señales de cada mitad y el peso que toca. Con
-    `origen`, los cálculos empiezan siempre ese día: así lo ya decidido no cambia al pasar el tiempo."""
-    c = pd.Series(m.c, index=m.tiempo).resample("1D").last().dropna()
+    `origen`, los cálculos empiezan siempre ese día: así lo ya decidido no cambia al pasar el tiempo. Desde `v2` se
+    aplican la volatilidad objetivo y el stop de seguimiento (antes, el peso es el de las dos mitades sin más)."""
+    serie = pd.Series(m.c, index=m.tiempo)
+    c = serie.resample("1D").last().dropna()
+    alto = pd.Series(m.h, index=m.tiempo).resample("1D").max().reindex(c.index)
+    bajo = pd.Series(m.l, index=m.tiempo).resample("1D").min().reindex(c.index)
     if origen is not None:
-        c = c[c.index >= origen]
+        c, alto, bajo = c[c.index >= origen], alto[alto.index >= origen], bajo[bajo.index >= origen]
     if len(c) and m.tiempo[-1] < c.index[-1] + pd.Timedelta(hours=23):
-        c = c.iloc[:-1]   # el día en curso todavía no ha cerrado
+        c, alto, bajo = c.iloc[:-1], alto.iloc[:-1], bajo.iloc[:-1]   # el día en curso todavía no ha cerrado
     media = c.rolling(MEDIA_DIAS).mean()
     maximo = c.rolling(RUPTURA_ENTRA).max().shift(1)
     minimo = c.rolling(RUPTURA_SALE).min().shift(1)
@@ -79,14 +94,40 @@ def _dias_cerrados(m: Mercado, origen: pd.Timestamp | None = None) -> pd.DataFra
         ruptura[i] = dentro
     d = pd.DataFrame({"cierre": c, "media": media, "maximo": maximo, "minimo": minimo, "en_media": en_media,
                       "en_ruptura": ruptura})
-    d["peso"] = (d["en_media"] + d["en_ruptura"]) / 2
+    base = (d["en_media"] + d["en_ruptura"]) / 2
+    vol = c.pct_change().rolling(VOL_DIAS).std() * np.sqrt(365)
+    escala = np.floor((VOL_OBJETIVO / vol).clip(upper=1.0).fillna(1.0) * 10) / 10
+    rango = pd.concat([alto - bajo, (alto - c.shift()).abs(), (bajo - c.shift()).abs()], axis=1).max(axis=1)
+    atr = rango.rolling(ATR_DIAS).mean()
+    peso, stop = base.to_numpy(copy=True), np.zeros(len(c))
+    tope, fuera = 0.0, False
+    for i in range(len(c)):
+        nuevo = v2 is not None and c.index[i] + pd.Timedelta(days=1) > v2   # decisiones que se aplican desde v2
+        if base.iloc[i] == 0:
+            tope, fuera = 0.0, False
+            continue
+        if i == 0 or base.iloc[i - 1] == 0:
+            tope = c.iloc[i]
+        tope = max(tope, c.iloc[i])
+        if not nuevo:
+            continue
+        if not fuera and not np.isnan(atr.iloc[i]) and c.iloc[i] < tope - STOP_ATR * atr.iloc[i]:
+            fuera = True
+        stop[i] = 1.0 if fuera else 0.0
+        peso[i] = 0.0 if fuera else base.iloc[i] * escala.iloc[i]
+    d["escala"] = escala
+    d["stop"] = stop
+    d["peso"] = peso
     d.loc[media.isna(), "peso"] = np.nan   # sin historia suficiente no se decide nada
     d.index = d.index + pd.Timedelta(days=1)   # se aplica desde la apertura del día siguiente
     return d
 
 
 def _motivo(antes: dict | None, ahora: dict) -> str:
-    """Por qué cambia el peso: qué mitad entra o sale."""
+    """Por qué cambia el peso: qué mitad entra o sale, el stop de seguimiento o la volatilidad."""
+    if ahora.get("stop") and not (antes or {}).get("stop"):
+        return (f"salta el stop de seguimiento: cae más de {STOP_ATR:g} veces su rango diario medio desde el máximo, "
+                "así que salgo entera hasta que vuelva la tendencia")
     partes = []
     a_media, a_rup = (antes or {}).get("en_media", 0.0), (antes or {}).get("en_ruptura", 0.0)
     if ahora["en_media"] != a_media:
@@ -94,12 +135,16 @@ def _motivo(antes: dict | None, ahora: dict) -> str:
     if ahora["en_ruptura"] != a_rup:
         partes.append(f"rompe el máximo de {RUPTURA_ENTRA} días" if ahora["en_ruptura"]
                       else f"pierde el mínimo de {RUPTURA_SALE} días")
+    if not partes and ahora.get("escala") != (antes or {}).get("escala"):
+        return (f"cambia su volatilidad: invierto el {ahora.get('escala', 1) * 100:.0f} % de lo que tocaría "
+                "(menos cuanto más nerviosa está)")
     return " y ".join(partes) or "reajuste"
 
 
-def simular_moneda(simbolo: str, presupuesto: float, creado: pd.Timestamp, ajustes: list[dict], m: Mercado) -> dict:
-    """Una moneda de la cartera, hora a hora desde la creación."""
-    dias = _dias_cerrados(m, (creado - pd.Timedelta(days=HISTORIA_PREVIA)).floor("D"))
+def simular_moneda(simbolo: str, presupuesto: float, creado: pd.Timestamp, ajustes: list[dict], m: Mercado,
+                   v2: pd.Timestamp | None = None) -> dict:
+    """Una moneda de la cartera, hora a hora desde la creación (con las reglas nuevas desde `v2`)."""
+    dias = _dias_cerrados(m, (creado - pd.Timedelta(days=HISTORIA_PREVIA)).floor("D"), v2)
     efectivo, unidades, aportado = float(presupuesto), 0.0, float(presupuesto)
     operaciones: list[dict] = []
     serie: list[list] = []
@@ -169,6 +214,8 @@ def simular_moneda(simbolo: str, presupuesto: float, creado: pd.Timestamp, ajust
         "invertido": round(unidades * precio, 2), "valor": round(valor, 2), "aportado": round(aportado, 2),
         "resultado": round(valor - aportado, 2), "resultado_pct": round((valor / aportado - 1) * 100, 3) if aportado > 0 else 0.0,
         "en_media": bool(senal and senal["en_media"]), "en_ruptura": bool(senal and senal["en_ruptura"]),
+        "escala": float(senal["escala"]) if senal and senal.get("escala") == senal.get("escala") else 1.0,
+        "stop": bool(senal and senal.get("stop")),
         "media": round(float(ultimo["media"]), 6) if ultimo is not None and not np.isnan(ultimo["media"]) else None,
         "maximo": round(float(ultimo["maximo"]), 6) if ultimo is not None and not np.isnan(ultimo["maximo"]) else None,
         "minimo": round(float(ultimo["minimo"]), 6) if ultimo is not None and not np.isnan(ultimo["minimo"]) else None,
@@ -190,7 +237,7 @@ def _serie_total(monedas) -> pd.Series:
 
 
 def _texto(moneda: str, op: dict) -> str:
-    nivel = {0.0: "nada", 0.5: "la mitad", 1.0: "todo"}.get(op["peso"], f"{op['peso']:.0%}")
+    nivel = {0.0: "nada", 0.5: "la mitad", 1.0: "todo"}.get(op["peso"], f"el {op['peso'] * 100:.0f} %")
     if op["tipo"] == "ajuste":
         return f"{moneda}: entra o sale dinero por el nuevo reparto del fondo; sigue invertido {nivel} de su parte."
     verbo = "Compro" if op["tipo"] == "compra" else "Vendo"
@@ -213,7 +260,8 @@ def ciclo(estado: dict) -> list[dict]:
     for simbolo in cartera["monedas"]:
         m = Mercado(velas(simbolo, "1h", dias_hist), simbolo, "1h")
         ajustes = [{"t": a["t"], "importe": float(a["importe"]) / n} for a in cartera.get("ajustes", [])]
-        nuevo = simular_moneda(simbolo, cartera["presupuesto"] / n, creado, ajustes, m)
+        v2 = pd.Timestamp(cartera["reglas_v2"]) if cartera.get("reglas_v2") else None
+        nuevo = simular_moneda(simbolo, cartera["presupuesto"] / n, creado, ajustes, m, v2)
         previas = len((anteriores.get(simbolo) or {}).get("operaciones", []))
         if simbolo in anteriores:
             for op in nuevo["operaciones"][previas:]:
@@ -248,7 +296,11 @@ def ciclo(estado: dict) -> list[dict]:
 def actualizar() -> list[dict]:
     """Una vuelta de la sala. El cálculo (que la primera vez descarga velas) va sin cerrojo para no hacer esperar a un
     cambio de reparto; si la cartera ha cambiado mientras tanto, no se guarda y se recalcula en la siguiente vuelta."""
-    estado = almacen.cargar("tendencia", {})
+    with _cerrojo:   # las carteras de antes estrenan las reglas nuevas (volatilidad y stop) desde ahora, una sola vez
+        estado = almacen.cargar("tendencia", {})
+        if estado.get("cartera") and not estado["cartera"].get("reglas_v2"):
+            estado["cartera"]["reglas_v2"] = pd.Timestamp.now(tz="UTC").isoformat()
+            almacen.guardar("tendencia", estado)
     eventos = ciclo(estado)
     with _cerrojo:
         if almacen.cargar("tendencia", {}).get("cartera") != estado.get("cartera"):

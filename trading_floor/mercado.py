@@ -31,6 +31,7 @@ class Mercado:
         self.h = velas["high"].to_numpy(float)
         self.l = velas["low"].to_numpy(float)
         self.c = velas["close"].to_numpy(float)
+        self.v = velas["volume"].to_numpy(float) if "volume" in velas else None   # volumen (lo mira el scout de la mesa)
         dias = self.tiempo.values.astype("datetime64[D]")
         self.dia = (dias - dias[0]).astype(np.int64)  # nº de día de cada vela, para el Sharpe diario
         self._cache: dict[tuple, np.ndarray] = {}

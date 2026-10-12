@@ -30,6 +30,7 @@ import numpy as np
 import pandas as pd
 
 from . import almacen, banco, control, fondo, postmortem, riesgo
+from . import mesa as mesa_analisis
 from .backtest import simular
 from .config import (CAPITAL_INCUBADORA, CAPITAL_POR_ESTRATEGIA, INCUBADORA, KELLY_FRACCION, KELLY_MIN_OPERACIONES,
                      KELLY_MINIMO, KELLY_TOPE, MESAS, PRUEBA, coste_de, dias_de, es_scalping)
@@ -460,11 +461,56 @@ def ciclo(estado: dict) -> list[dict]:
     def evento(tipo: str, texto: str, **datos) -> None:
         eventos.append({"t": _ahora(), "tipo": tipo, "texto": texto, **datos})
 
+    # Mesa de análisis (mesa.py): las entradas nuevas de la sala de trading y de sus estrategias de la incubadora pasan
+    # antes por la mesa; si el escéptico dice PASA, esa entrada se veta (una sola vez: la decisión queda guardada).
+    mesa_desde = pd.Timestamp(estado.setdefault("mesa_desde", ahora.isoformat()))
+    decisiones_mesa = estado.setdefault("mesa_analisis", [])
+    contextos: dict = {}
+    fng = None
+
+    def pasar_por_mesa(t: dict, est: Estrategia, resimular, donde: str):
+        """Simula al trader con las entradas que la mesa ya ha vetado y lleva a la mesa las que aún no ha visto."""
+        nonlocal fng
+        sim = resimular()
+        if es_scalping(est.intervalo):
+            return sim
+        vistas = t.setdefault("mesa_vistas", {})
+        for _ in range(40):
+            if not sim:
+                return sim
+            _, m_, _, res_ = sim
+            nueva = next(((e, m_.tiempo[e].isoformat()) for e in res_.entradas
+                          if m_.tiempo[e] >= mesa_desde and m_.tiempo[e].isoformat() not in vistas), None)
+            if nueva is None:
+                return sim
+            e, clave = nueva
+            if fng is None:
+                fng = mesa_analisis.sentimiento()
+            ctx = contextos.get((est.simbolo, est.intervalo)) or contextos.setdefault((est.simbolo, est.intervalo), mesa_analisis.Contexto(m_, fng))
+            v = mesa_analisis.veredicto(est, ctx, e)
+            vistas[clave] = v["entra"]
+            # la misma estrategia repite señal vela tras vela: en el chat solo se cuenta si cambia algo o cada 6 horas
+            previa = next((d for d in decisiones_mesa if d["id"] == est.id), None)
+            repetida = (previa is not None and previa["entra"] == v["entra"] and previa["motivos"] == v["motivos"]
+                        and pd.Timestamp(clave) - pd.Timestamp(previa["vela"]) < pd.Timedelta(hours=6))
+            decisiones_mesa.insert(0, {"t": _ahora(), "vela": clave, "id": est.id, "simbolo": est.simbolo, "direccion": est.direccion,
+                                       "donde": donde, "entra": v["entra"], "motivos": v["motivos"], "roles": v["roles"],
+                                       "repetida": repetida})
+            if not repetida:
+                evento("mesa", f"Mesa de análisis · {est.id} ({'LARGO' if est.direccion == 'largo' else 'CORTO'} en {est.simbolo}"
+                               f"{', en la incubadora' if donde == 'incubadora' else ''}): {v['roles']['esceptico']}",
+                       id=est.id, simbolo=est.simbolo, direccion=est.direccion, entra=v["entra"], roles=v["roles"], donde=donde)
+            if v["entra"]:
+                continue
+            t.setdefault("vetadas", []).append(clave)
+            sim = resimular()
+        return sim
+
     if mesas_nuevas and mesas_nuevas["ahora"]["trading"] != mesas_nuevas["antes"].get("trading"):
         n0, n1 = mesas_nuevas["antes"].get("trading", 0), mesas_nuevas["ahora"]["trading"]
         pct = f"{mesas_nuevas['trading_pct']:g}".replace(".", ",")
         evento("mesas", f"La sala de trading pasa de {n0} a {n1} mesas: {'las nuevas están' if n1 > n0 else 'las que quedan están'} "
-                        f"en la planta 1, en la sala de trading 2. Para que tu reparto siga igual, el {pct} % del fondo que va a "
+                        f"en la sala de trading 2, en la planta baja. Para que tu reparto siga igual, el {pct} % del fondo que va a "
                         f"trading se reparte entre todas: {_precio(mesas_nuevas['trader'])} $ por mesa desde ahora. "
                         "Lo ganado hasta hoy se conserva.", antes=n0, ahora=n1)
 
@@ -581,7 +627,7 @@ def ciclo(estado: dict) -> list[dict]:
     def simular_trader(id_: str):
         b, t = en_banco[id_], traders[id_]
         est = Estrategia.de_dict(b["estrategia"])
-        return _simular(t, est, mercados[(est.simbolo, est.intervalo)])
+        return pasar_por_mesa(t, est, lambda: _simular(t, est, mercados[(est.simbolo, est.intervalo)]), "mesa")
 
     sims = {id_: simular_trader(id_) for id_ in traders}
     for id_, sim in sims.items():  # estados de versiones anteriores: lo ya operado se da por aprobado
@@ -677,7 +723,7 @@ def ciclo(estado: dict) -> list[dict]:
     for id_, t in list(incubadora.items()):
         b = en_banco[id_]
         est, m = Estrategia.de_dict(b["estrategia"]), mercado_de(b)
-        sim = _simular(t, est, m)
+        sim = pasar_por_mesa(t, est, lambda: _simular(t, est, m), "incubadora")
         _, t["operaciones"], t["posicion"] = _calcular(t, sim, None, medianoche, capital=CAPITAL_INCUBADORA, riesgo_op=base)
         if sim:
             t["radar"] = _radar(est, m)
@@ -799,6 +845,8 @@ def ciclo(estado: dict) -> list[dict]:
                                      abiertas["scalping"], pausa_caida)
     estado["capital_por_estrategia"] = fondo.capital_mesa("trading")
     estado["capital_scalper"] = fondo.capital_mesa("scalping")
+    del decisiones_mesa[60:]
+    estado["mesa_resumen"] = mesa_analisis.resumen_dia(decisiones_mesa)
     estado["actividad"] = (eventos[::-1] + estado.get("actividad", []))[:ACTIVIDAD_MAX]
     estado["actualizado"] = _ahora()
     return eventos

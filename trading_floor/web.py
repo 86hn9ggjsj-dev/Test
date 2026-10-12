@@ -62,10 +62,11 @@ def estado() -> dict:
     papel.pop("series", None)
     # de las estrategias retiradas, solo las últimas y sin su curva ni sus operaciones
     for t in [*(papel.get("estrategias") or {}).values(), *(papel.get("incubadora") or {}).values()]:
-        for k in ("fracciones", "aprobadas", "vetadas", "forzadas"):   # solo los usa el cálculo, no la oficina
+        for k in ("fracciones", "aprobadas", "vetadas", "forzadas", "mesa_vistas"):   # solo los usa el cálculo, no la oficina
             t.pop(k, None)
         if t.get("examen"):
             t["examen"] = {k: v for k, v in t["examen"].items() if k != "movimientos"}
+    papel["mesa_analisis"] = (papel.get("mesa_analisis") or [])[:20]   # las últimas decisiones de la mesa de análisis
     retirados = sorted((papel.pop("retirados", None) or {}).values(), key=lambda r: r.get("fin", ""), reverse=True)
     papel["retirados"] = [{k: v for k, v in r.items() if k not in ("serie", "operaciones")} | {"n_operaciones": len(r.get("operaciones", []))}
                           for r in retirados[:40]]

@@ -82,6 +82,11 @@ def generar(E: dict, nombres: dict[str, str] | None = None) -> dict:
         punto("Tendencia", f"La sala de tendencia vale {_d(tend.get('valor', 0))[1:]} ({_p(tend.get('resultado_pct', 0))}). Hay tendencia en "
                            f"{tend.get('dentro', 0)} de {tend.get('monedas', 0)} monedas y está invertido el {tend.get('invertido_pct', 0):.0f} %; "
                            "el resto espera en efectivo.", "bueno" if tend.get("resultado", 0) > 0 else "malo" if tend.get("resultado", 0) < 0 else "")
+    res_mesa = (E.get("papel") or {}).get("mesa_resumen") or {}
+    if res_mesa.get("hoy"):
+        punto("Mesa de análisis", f"Hoy han llegado {res_mesa['hoy']} señales a la mesa y han entrado {res_mesa.get('entran_hoy', 0)}; "
+                                  "el resto iba contra la tendencia diaria, ganaba poco para lo que arriesgaba o era ir con la masa en un "
+                                  "extremo.", "")
     lq = E.get("liquidez") or {}
     if lq.get("tipo_pct") is not None:
         tipo = f"{lq['tipo_pct']:.2f}".replace(".", ",")

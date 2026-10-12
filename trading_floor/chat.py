@@ -28,6 +28,12 @@ PLANTILLA = {
     "Pablo": "supervisor del control de riesgos",
     "Hugo": "minería", "Noa": "minería", "Iker": "minería", "Vega": "minería",
     "Tomás": "supervisor de minería",
+    "Ramiro": "jefe de la mesa de análisis (anuncia si una señal entra o pasa)",
+    "Celeste": "mesa de análisis, scout: mira el volumen de cada señal",
+    "Cristian": "mesa de análisis, noticias: cuánto se ha movido la moneda y el régimen macro",
+    "Noemí": "mesa de análisis, sentimiento: el índice de miedo y codicia",
+    "Amador": "mesa de análisis, charts: tendencia diaria (media de 50 días) y riesgo/beneficio",
+    "Olga": "mesa de análisis, la escéptica: lleva la contraria y decide COMPRA, VENDE o PASA",
     "Carmen": "laboratorio, prueba fuera de muestra",
     "Ciro": "laboratorio, prueba de la suerte (que lo ganado fuera de muestra no sea casualidad)",
     "Pol": "laboratorio, prueba de costes x2",
@@ -103,7 +109,19 @@ tipo, efectivo, acumulado); cuenta en el fondo como «intereses». Con datos de 
 es trading 5 %, scalping 0 %, holding 25 %, tendencia 40 % y 30 % sin invertir (+25,6 % al año frente a +23,6 % de un \
 reparto 20/15/30/30, o +20 % sin intereses; en 2022, −28 % frente a −30 %; aun así, la mitad de los meses acaban en negativo). Si el jefe pide \
 que sea rentable y no lo tiene aplicado, proponlo con accion «asignar» y objetivo «rentable». \
-SALA DE TENDENCIA (Marina y Vicente, sentados en la sala de holding): reglas fijas y clásicas con velas diarias, no minadas. \
+MESA DE ANÁLISIS (idea de los vídeos de «6 bots en un chat de grupo», pero con reglas medidas): antes de entrar, \
+cada señal de la sala de trading y de sus estrategias de la incubadora pasa por la mesa: Celeste (scout, volumen), Cristian \
+(noticias: lo que se ha movido), Noemí (sentimiento: miedo y codicia), Amador (charts) y Olga, la escéptica, que dice \
+PASA si va contra la tendencia diaria (precio frente a su media de 50 días), si gana menos de 1,5 veces lo que arriesga o \
+si es ir con la masa en un extremo (comprar con codicia de 75 o más, vender en corto con miedo de 25 o menos). Ramiro, el \
+jefe de mesa, lo anuncia. Medido de 2024 a 2026 con 6.448 operaciones que la minería no había visto: la operación media \
+pasaba de −0,05 % a +0,15 % y mejoraba en los cuatro semestres y en las seis monedas, pero es una mejora modesta (la \
+mitad de las estrategias casi no operan y dos semestres siguieron en negativo). Las decisiones están en \
+«mesa_de_analisis». \
+SALA DE TENDENCIA (Marina y Vicente, con su propia sala en la planta de inversión): reglas fijas y clásicas con velas \
+diarias, no minadas; desde octubre de 2026 además invierte menos en las monedas muy nerviosas (volatilidad objetivo del 80 % \
+anual) y sale si el cierre cae 3 veces su rango diario medio desde el máximo (stop de seguimiento): de 2022 a 2026 ganó lo \
+mismo con menos caída (−23 % frente a −27 %). \
 Su presupuesto (el % de tendencia del reparto) se reparte a partes iguales entre BTC, ETH, SOL, BNB, XRP y DOGE, y cada moneda \
 tiene dos mitades: la «media» está dentro mientras el cierre diario esté por encima de su media de 50 días; la «ruptura» \
 entra al superar el máximo de los 20 días anteriores y sale al perder el mínimo de los 10 días anteriores. Solo compra, sin \
@@ -242,6 +260,9 @@ def contexto(E: dict, nombres: dict[str, str]) -> dict:
         "mineria": {**{k: m.get(k) for k in ("estado", "modo", "ronda", "proxima", "simbolo", "generacion", "generaciones", "embudo")},
                     "pausada": bool((E.get("control") or {}).get("mineria_pausada"))},
         "banco": [{"id": b["id"], "activo": b["estrategia"]["simbolo"]} for b in E.get("banco", [])],
+        "mesa_de_analisis": {"resumen": papel.get("mesa_resumen"),
+                             "ultimas": [{k: d.get(k) for k in ("t", "id", "simbolo", "direccion", "donde", "entra", "motivos")}
+                                         for d in (papel.get("mesa_analisis") or [])[:8]]},
         "riesgo": riesgo,
         "holding": hold,
         "tendencia": {"resumen": (E.get("tendencia") or {}).get("resumen"),
@@ -375,6 +396,17 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         if not ctrl.get("mineria_pausada"):
             return dice("Tomás", "La búsqueda ya está en marcha: buscamos siempre, por rondas, con un descanso entre ronda y ronda.")
         return dice("Tomás", "Si lo apruebas, vuelvo a buscar estrategias por rondas, sin parar.", _propuesta("reanudar_busqueda", "Reanudar la búsqueda de estrategias"))
+    if re.search(r"mesa de analisis|esceptic|la mesa\b|que dice la mesa", t):
+        res = papel.get("mesa_resumen") or {}
+        ult = [d for d in (papel.get("mesa_analisis") or []) if not d.get("repetida")][:3]
+        if not ult:
+            return dice("Olga", "Todavía no ha llegado ninguna señal a la mesa. Cuando un trader de la sala de trading (o una estrategia de "
+                                "la incubadora) quiera entrar, la miramos entre los seis y yo digo si entra o pasa: a favor de la tendencia "
+                                "diaria, ganando al menos 1,5 veces lo que arriesga y sin la masa en contra en un extremo.")
+        lineas = "; ".join(f"{d['id']} ({'largo' if d['direccion'] == 'largo' else 'corto'} en {d['simbolo'].replace('USDT', '')}): "
+                           + ("entra" if d["entra"] else "pasa, " + ", ".join(d["motivos"])) for d in ult)
+        return dice("Olga", f"Hoy la mesa ha visto {res.get('hoy', 0)} señales y ha dejado pasar {res.get('entran_hoy', 0)}. Las últimas: {lineas}. "
+                            "Con datos de 2024 a 2026, lo que dejamos pasar ganaba de media un 0,15 % por operación y lo que vetamos perdía un 0,10 %.")
     if re.search(r"miner|busqueda|laboratorio|probador", t) and re.search(r"como va|que tal|estado|cuantas|ronda", t):
         m = E.get("mineria", {})
         e = m.get("embudo") or {}
@@ -619,7 +651,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
         return dice("Marta", f"Resultado en papel: {_es(r.get('resultado', 0))} $ (hoy {_es(r.get('hoy', 0))} $). "
                              f"{len(papel.get('estrategias', {}))} traders, minería {m.get('estado', 'parada')}"
                              f"{', freno manual activado' if ctrl.get('freno_manual') else ''}.")
-    return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «pausa la búsqueda», «reanuda la búsqueda», «¿cómo va la búsqueda?», «quita las repetidas», "
+    return dice("Marta", "Sin la clave de Claude solo entiendo órdenes sencillas: «busca estrategias», «busca estrategias de SOL», «busca scalping de BTC», «pausa la búsqueda», «reanuda la búsqueda», «¿cómo va la búsqueda?», «¿qué dice la mesa?», «quita las repetidas», "
                          "«pausa todo», «reabre», «kill switch», «pausa a E-XXXXXX», «cambia la estrategia de E-XXXXXX», «¿cómo va la supervisión?», «¿cómo va la incubadora?», «informe del día», «¿qué ha aprendido la academia?», «riesgo 0,5», «convoca el comité», «¿cómo van las operaciones abiertas?», «¿cómo paseo por la oficina?», "
                          "«¿cómo va el holding?», «¿cómo va la tendencia?», «pon un 20 % en tendencia», «¿dónde perdemos?», «reparto rentable», «¿cuánto cobramos de intereses?», «¿cómo vamos?» o «¿quién es el mejor?». Para conversar de verdad, añade ANTHROPIC_API_KEY al .env.")
 
