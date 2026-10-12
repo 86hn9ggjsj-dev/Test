@@ -32,7 +32,7 @@ import pandas as pd
 from . import almacen, banco, control, fondo, postmortem, riesgo
 from . import mesa as mesa_analisis
 from .backtest import simular
-from .config import (CAPITAL_INCUBADORA, CAPITAL_POR_ESTRATEGIA, INCUBADORA, KELLY_FRACCION, KELLY_MIN_OPERACIONES,
+from .config import (RB_MINIMO, CAPITAL_INCUBADORA, CAPITAL_POR_ESTRATEGIA, INCUBADORA, KELLY_FRACCION, KELLY_MIN_OPERACIONES,
                      KELLY_MINIMO, KELLY_TOPE, MESAS, PRUEBA, coste_de, dias_de, es_scalping)
 from .datos import velas
 from .estrategia import Estrategia
@@ -342,6 +342,17 @@ def _congelar(id_: str, t: dict, curva: pd.Series | None, cerradas: list[dict], 
     }
 
 
+def _sin_paso_por_la_mesa(t: dict, est: Estrategia) -> str | None:
+    """Las estrategias antiguas de la sala de trading que ganan menos de 1,5 veces lo que arriesgan: la mesa de análisis
+    nunca las dejará entrar, así que solo ocupan sitio. Se retiran cuando no tienen nada abierto (no cuenta como que
+    hayan fallado: la academia no aprende nada de ellas)."""
+    if es_scalping(est.intervalo) or t.get("posicion") or not est.stop_atr or est.objetivo_atr >= RB_MINIMO * est.stop_atr:
+        return None
+    rb = f"{est.objetivo_atr / est.stop_atr:.1f}".replace(".", ",")
+    return (f"gana solo {rb} veces lo que arriesga y la mesa de análisis pide {f'{RB_MINIMO:g}'.replace('.', ',')}: "
+            "no la dejará entrar nunca")
+
+
 def _prueba(t: dict, ahora: pd.Timestamp) -> tuple[dict, str | None]:
     """El periodo de prueba de un trader en su mesa, y el motivo para retirarle la estrategia si no es rentable.
     El supervisor solo actúa cuando el trader no tiene ninguna posición abierta."""
@@ -603,8 +614,14 @@ def ciclo(estado: dict) -> list[dict]:
     plazas = {g: {t["plaza"] for t in incubadora.values() if t["grupo"] == g} for g in INCUBADORA}
     antes_en_banquillo = {r["id"] for r in estado.get("banquillo", [])}
     banquillo = []
+    sin_mesa = []
     for b in sorted((b for b in en_banco.values() if b["id"] not in traders and b["id"] not in incubadora),
                     key=banco.calidad, reverse=True):
+        if motivo_mesa := _sin_paso_por_la_mesa({}, Estrategia.de_dict(b["estrategia"])):   # antiguas: la mesa nunca las dejaría entrar
+            banco.descartar(b["id"], f"no entra en la incubadora: {motivo_mesa}", por="mesa")
+            del en_banco[b["id"]]
+            sin_mesa.append(b["id"])
+            continue
         g = _grupo(b["estrategia"]["intervalo"])
         libres = sorted(set(range(INCUBADORA[g]["plazas"])) - plazas[g])
         if not libres:
@@ -622,6 +639,12 @@ def ciclo(estado: dict) -> list[dict]:
                              f"mesa tiene que aprobar el examen: {p['operaciones']} operaciones ganando, con factor de beneficio de "
                              f"{str(p['factor_min']).replace('.', ',')} o más.",
                id=b["id"], simbolo=t["simbolo"], direccion=t["direccion"], grupo=g, plaza=libres[0])
+    if sin_mesa:
+        evento("mesa_limpia", f"La mesa de análisis saca del banco {len(sin_mesa)} estrategia{'s' if len(sin_mesa) > 1 else ''} "
+                              f"de trading que esperaba{'n' if len(sin_mesa) > 1 else ''} plaza ({', '.join(sin_mesa[:4])}"
+                              f"{'…' if len(sin_mesa) > 4 else ''}): ganan menos de {f'{RB_MINIMO:g}'.replace('.', ',')} veces lo "
+                              "que arriesgan y nunca las dejaríamos entrar. Su sitio queda para las que la minería encuentre.",
+               ids=sin_mesa)
 
     # 5) Simulación de las mesas con la gestión de riesgo: cada entrada nueva se aprueba o se veta una sola vez.
     def simular_trader(id_: str):
@@ -729,7 +752,15 @@ def ciclo(estado: dict) -> list[dict]:
             t["radar"] = _radar(est, m)
         t["examen"] = _examen(t, ahora)
         ex = t["examen"]
-        if ex["estado"] == "suspendida":
+        if motivo_mesa := _sin_paso_por_la_mesa(t, est):
+            pm = postmortem.informe(b, t["operaciones"], t["inicio"], ahora, m, motivo_mesa, "incubadora")
+            banco.descartar(id_, f"sale de la incubadora: {motivo_mesa}", por="mesa", post_mortem=pm,
+                            funcionaba=ex["estado"] == "aprobada")
+            del incubadora[id_], en_banco[id_]
+            suspendidas.insert(0, _suspendida(id_, t, motivo_mesa, "mesa", pm))
+            evento("suspende", f"{id_} sale de la incubadora: {motivo_mesa}. Deja su plaza a otra; no ha tocado tu dinero.",
+                   id=id_, grupo=t["grupo"], plaza=t.get("plaza"), simbolo=t["simbolo"], resultado=t["resultado"])
+        elif ex["estado"] == "suspendida":
             pm = postmortem.informe(b, t["operaciones"], t["inicio"], ahora, m, ex["motivo"], "incubadora")
             banco.descartar(id_, f"suspende el examen de la incubadora: {ex['motivo']}", por="incubadora", post_mortem=pm)
             del incubadora[id_], en_banco[id_]
@@ -765,15 +796,19 @@ def ciclo(estado: dict) -> list[dict]:
     for id_ in sorted(traders, key=lambda i: (traders[i]["grupo"], traders[i].get("mesa") or 0)):
         t = traders[id_]
         t["prueba"], motivo = _prueba(t, ahora)
+        por, porque = "supervisor", f"no era rentable: {motivo}"
+        if not motivo and (motivo := _sin_paso_por_la_mesa(t, Estrategia.de_dict(en_banco[id_]["estrategia"]))):
+            por, porque = "mesa", motivo
         if not motivo:
             continue
         g, mesa = t["grupo"], t.get("mesa")
         sup = SUPERVISORES[g]
         b = en_banco[id_]
         pm = postmortem.informe(b, t["operaciones"], t["inicio"], ahora, mercado_de(b), motivo, "mesa")
-        retirados[id_] = _congelar(id_, t, curvas.pop(id_, None), t["operaciones"], f"no era rentable: {motivo}", "supervisor",
-                                   _ahora(), pm)
-        banco.descartar(id_, f"no era rentable: {motivo}", por="supervisor", post_mortem=pm)
+        retirados[id_] = _congelar(id_, t, curvas.pop(id_, None), t["operaciones"], porque, por, _ahora(), pm)
+        banco.descartar(id_, porque, por=por, post_mortem=pm,
+                        **({"funcionaba": t["prueba"]["estado"] == "rentable" or (t.get("examen") or {}).get("estado") == "aprobada"}
+                           if por == "mesa" else {}))
         del traders[id_], en_banco[id_]
         candidatas = aprobadas_de(g)
         datos = dict(anterior=id_, mesa=mesa, grupo=g, motivo=motivo, supervisor=sup, resultado=retirados[id_]["resultado"],

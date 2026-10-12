@@ -17,13 +17,13 @@ THREE.ColorManagement.enabled = false;
 const PISO = ALTURA_PLANTA, TECHO = ALTO_MURO;      // altura entre plantas (3,1) y del techo de cada planta (2,4)
 const OJOS = 1.02, RADIO = .2, ANDAR = 1.9, CORRER = 3.8, SENSIBILIDAD = .0022;
 const PX_SUELO = 40, PX_PANTALLA = 2.2, ALCANCE = 4.5;
-const NOMBRE_PLANTA = ["Planta baja", "Planta 1"];
+const NOMBRE_PLANTA = Array.from({length: NPLANTAS}, (_, p) => nombrePlanta(p));
 
 let enMarcha = false, opciones = null, construida = false;
 let renderer = null, escena = null, camara = null, lienzo3d = null, capa = null, g2 = null, hud = null;
 let plantas = [], exterior = null, cielo3d = null, estrellas = null, materiales = null;
 let caras = [], monitores = [], atlas = null, personas = null, extras = null;
-let colisiones = [[], []];
+let colisiones = [];
 const jugador = {x: 0, y: 0, p: 0, yaw: 0, pitch: 0, paso: 0, ascensor: 0};
 const teclas = new Set();
 let objetivo = null, ultimoCielo = "", tiempoAtlas = 0, indiceLejos = 0, tactil = null;
@@ -62,10 +62,10 @@ const luzCara = (css, nx, ny, nz) => tono(css, Math.max(.42, .66 + .16 * (.85 * 
 
 /** Acumula cajas (6 caras con color por vértice) y las convierte en una sola malla: una llamada de dibujo para miles de muebles. */
 class Malla {
-  constructor(alfa = false) { this.alfa = alfa; this.p = []; this.c = []; this.i = []; }
+  constructor(alfa = false) { this.alfa = alfa; this.p = []; this.c = []; this.i = []; this.dy = 0; }   // dy: sube lo que se añada (otra planta)
   cara(v, col) {
     const b = this.p.length / 3;
-    for (const q of v) { this.p.push(q[0], q[1], q[2]); if (this.alfa) this.c.push(col[0], col[1], col[2], col[3]); else this.c.push(col[0], col[1], col[2]); }
+    for (const q of v) { this.p.push(q[0], q[1] + this.dy, q[2]); if (this.alfa) this.c.push(col[0], col[1], col[2], col[3]); else this.c.push(col[0], col[1], col[2]); }
     this.i.push(b, b + 1, b + 2, b, b + 2, b + 3);
   }
   /** Caja en coordenadas 3D (X = x, Y = altura, Z = y de la oficina). */
@@ -84,7 +84,7 @@ class Malla {
   /** Polígono convexo, en sentido antihorario visto desde fuera. */
   poli(v, col) {
     const b = this.p.length / 3;
-    for (const q of v) { this.p.push(q[0], q[1], q[2]); if (this.alfa) this.c.push(col[0], col[1], col[2], col[3]); else this.c.push(col[0], col[1], col[2]); }
+    for (const q of v) { this.p.push(q[0], q[1] + this.dy, q[2]); if (this.alfa) this.c.push(col[0], col[1], col[2], col[3]); else this.c.push(col[0], col[1], col[2]); }
     for (let k = 1; k < v.length - 1; k++) this.i.push(b, b + k, b + k + 1);
   }
   /** Cilindro o cono de a a b (puntos 3D) con n lados. Con luz, cada cara toma el tono según hacia dónde mira; sin luz, el color tal cual (neones, brasas). */
@@ -259,14 +259,15 @@ function construir() {
     suelo: [],
     hojas: new THREE.MeshLambertMaterial({color: 0xffffff}),
   };
-  plantas = [0, 1].map(() => new THREE.Group());
+  plantas = Array.from({length: NPLANTAS}, () => new THREE.Group());
   plantas.forEach(g => escena.add(g));
   exterior = new THREE.Group();
   escena.add(exterior);
-  colisiones = [0, 1].map(() => Array.from({length: W * D}, () => []));
+  colisiones = Array.from({length: NPLANTAS}, () => Array.from({length: W * D}, () => []));
 
   // cajas capturadas: opacas y de cristal, una malla de cada por planta
-  const opacas = [new Malla(), new Malla()], vidrios = [new Malla(true), new Malla(true)], luces = [new Malla(), new Malla()];
+  const opacas = Array.from({length: NPLANTAS}, () => new Malla()), vidrios = Array.from({length: NPLANTAS}, () => new Malla(true)),
+    luces = Array.from({length: NPLANTAS}, () => new Malla());
   for (const [x, y, z, w, d, h, top, izq, der, p] of c.cajas) {
     if (!(w > 0 && d > 0 && h > 0)) continue;
     const a = rgbaDe(top), b = rgbaDe(izq), e = rgbaDe(der);
@@ -355,18 +356,18 @@ function construir() {
     im.computeBoundingSphere();
     escena.add(im);
   }
-  // la piscina de la terraza no se pisa
-  choque(1, PISCINA.x0 - .2, PISCINA.y0 - .2, PISCINA.x1 + .2, PISCINA.y1 + .2);
+  // la piscina de la azotea no se pisa
+  choque(PLANTA_DE.terraza1, PISCINA.x0 - .2, PISCINA.y0 - .2, PISCINA.x1 + .2, PISCINA.y1 + .2);
   // objetos animados que en 2D se dibujan cada fotograma: sus bases, con soportes, columnas, bandas y emisores
   bases(opacas, luces);
-  choque(0, GLOBO.x - .4, GLOBO.y - .4, GLOBO.x + .4, GLOBO.y + .4);
-  choque(0, MONEDA.x - .45, MONEDA.y - .45, MONEDA.x + .45, MONEDA.y + .45);
-  choque(0, HOLO.x - .45, HOLO.y - .45, HOLO.x + .45, HOLO.y + .45);
-  choque(0, BALIZA.x - .15, BALIZA.y - .15, BALIZA.x + .15, BALIZA.y + .15);
+  choque(PLANTA_DE.macro, GLOBO.x - .4, GLOBO.y - .4, GLOBO.x + .4, GLOBO.y + .4);
+  choque(PLANTA_DE.holding, MONEDA.x - .45, MONEDA.y - .45, MONEDA.x + .45, MONEDA.y + .45);
+  choque(PLANTA_DE.mineria, HOLO.x - .45, HOLO.y - .45, HOLO.x + .45, HOLO.y + .45);
+  choque(PLANTA_DE.riesgos, BALIZA.x - .15, BALIZA.y - .15, BALIZA.x + .15, BALIZA.y + .15);
 
   techos(opacas, luces);
   fachadas();
-  for (const p of [0, 1]) {
+  for (let p = 0; p < NPLANTAS; p++) {
     const mo = opacas[p].malla(materiales.cajas); if (mo) plantas[p].add(mo);
     const mv = vidrios[p].malla(materiales.cristal); if (mv) { mv.renderOrder = 2; plantas[p].add(mv); }
     const ml = luces[p].malla(materiales.luces); if (ml) plantas[p].add(ml);
@@ -382,7 +383,9 @@ function construir() {
 
 /** Bases fijas del globo, la moneda, la baliza, el holograma y la fogata (en 2D se pintan cada fotograma). */
 function bases(opacas, luces) {
-  const m = opacas[0], luz = luces[0], m1 = opacas[1], luz1 = luces[1];
+  // cada objeto va en la planta de su sala: se dibuja con su altura de siempre y la malla lo sube a esa planta
+  const en = (id, f) => { const p = PLANTA_DE[id], m = opacas[p], luz = luces[p]; m.dy = luz.dy = base(p); try { f(m, luz); } finally { m.dy = luz.dy = 0; } };
+  en("macro", (m, luz) => {
   // globo de macro: peana, columna, copa y eje
   const G = GLOBO;
   m.pieza(G.x - .4, 0, G.y - .4, G.x + .4, .25, G.y + .4, "#15283a");
@@ -391,6 +394,8 @@ function bases(opacas, luces) {
   m.cilindro([G.x, .62, G.y], [G.x, .7, G.y], .05, .13, 14, "#2a4d6e", false);
   luz.cilindro([G.x, .7, G.y], [G.x, 1.62, G.y], .007, .007, 4, "#8fd6ff", false, false);
   luz.cilindro([G.x, .29, G.y], [G.x, .3, G.y], .26, .26, 24, "#5cc0ff", false, false);
+  });
+  en("holding", (m, luz) => {
   // moneda: pedestal escalonado con cuatro columnas doradas y un foco naranja
   const M = MONEDA;
   m.pieza(M.x - .45, 0, M.y - .45, M.x + .45, .35, M.y + .45, "#2b2210");
@@ -403,6 +408,8 @@ function bases(opacas, luces) {
   }
   m.marco(M.x, M.y, .32, .22, .74, .77, "#c9a24a");
   luz.cilindro([M.x, .41, M.y], [M.x, .425, M.y], .14, .14, 20, "#f7931a", true, false);
+  });
+  en("riesgos", (m) => {
   // baliza de riesgos: pie con tornillos, poste con bandas amarillas y negras, bandeja, jaula y tapa
   const B = BALIZA;
   m.pieza(B.x - .21, 0, B.y - .21, B.x + .21, .04, B.y + .21, "#3a3e46");
@@ -415,6 +422,8 @@ function bases(opacas, luces) {
   m.marco(B.x, B.y, .227, .203, 1.66, 1.69, "#1a1c22");
   m.pieza(B.x - .23, 1.85, B.y - .23, B.x + .23, 1.9, B.y + .23, "#1a1c22");
   m.cilindro([B.x, 1.9, B.y], [B.x, 1.96, B.y], .06, .045, 10, "#2a2e36");
+  });
+  en("mineria", (m, luz) => {
   // holograma de la minería: base con lente central, cuatro emisores y un aro de luz
   const H = HOLO;
   m.pieza(H.x - .45, 0, H.y - .45, H.x + .45, .12, H.y + .45, "#11262a");
@@ -427,8 +436,10 @@ function bases(opacas, luces) {
   luz.cilindro([H.x, .12, H.y], [H.x, .132, H.y], .42, .42, 32, "#3effd0", false, false);
   for (const [x0, z0, x1, z1] of [[-.45, -.45, .45, -.43], [-.45, .43, .45, .45], [-.45, -.43, -.43, .43], [.43, -.43, .45, .43]])
     luz.caja(H.x + x0, .12, H.y + z0, H.x + x1, .126, H.y + z1, rgbaDe("#3effd0"), rgbaDe("#2bb894"), rgbaDe("#2bb894"));
-  // fogata de la terraza: piedras alrededor, leños cruzados y brasas
-  const F = FOGATA, Y = PISO + .25;
+  });
+  en("terraza1", (m1, luz1) => {
+  // fogata de la azotea: piedras alrededor, leños cruzados y brasas
+  const F = FOGATA, Y = .25;
   for (let k = 0; k < 13; k++) {
     const a = k * Math.PI * 2 / 13, r = .36 + (k % 3) * .02, h = .07 + (k * 7 % 5) * .012;
     m1.cilindro([F.x + Math.cos(a) * r, Y, F.y + Math.sin(a) * r], [F.x + Math.cos(a) * r, Y + h, F.y + Math.sin(a) * r], .08 + (k % 2) * .015, .06, 6, ["#6b6f78", "#80848c", "#5a5e66"][k % 3]);
@@ -445,6 +456,7 @@ function bases(opacas, luces) {
     const a = k * 2.4, r = (k % 4) * .045, t = .02 + (k % 3) * .01, x = F.x + Math.cos(a) * r, z = F.y + Math.sin(a) * r;
     luz1.caja(x - t, Y, z - t, x + t, Y + .03 + (k % 2) * .02, z + t, ...[0, 1, 2].map(() => rgbaDe(["#ff5a1f", "#ffb347", "#ff7a2a"][k % 3])));
   }
+  });
 }
 
 function desmontar() {
@@ -462,12 +474,13 @@ function choque(p, x0, y0, x1, y1) {
     for (let y = Math.max(0, Math.floor(y0)); y <= Math.min(D - 1, Math.floor(y1)); y++) r[x * D + y].push(caja);
 }
 
-/** Techo con paneles de luz en cada planta (la terraza de la planta 1 queda al aire libre). */
+/** Techo con paneles de luz en cada planta (la azotea de la última planta queda al aire libre). */
 function techos(opacas, luces) {
-  const zonas = [[[0, 0, W, 11], [0, 11, X_ALA, D]], [[0, 0, W, 11], [0, 11, X_TERRAZA1, D]]];
+  // todas las plantas tienen techo; en la última, la azotea (de X_AZOTEA a X_ALA, abajo) queda al aire libre
+  const zonas = p => p < NPLANTAS - 1 ? [[0, 0, W, 11], [0, 11, X_ALA, D]] : [[0, 0, W, 11], [0, 11, X_AZOTEA, D]];
   const panel = rgbaDe("#f6f3ea");
-  for (const p of [0, 1]) {
-    for (const [x0, y0, x1, y1] of zonas[p]) {
+  for (let p = 0; p < NPLANTAS; p++) {
+    for (const [x0, y0, x1, y1] of zonas(p)) {
       opacas[p].bloque(p, x0, y0, TECHO - .02, x1 - x0, y1 - y0, .02, p ? "#2a2f38" : "#2c313b");
       for (let x = x0 + 1.5; x < x1 - .5; x += 3) for (let y = y0 + 1.2; y < y1 - .4; y += 2.6)
         luces[p].caja(x - .55, base(p) + TECHO - .035, y - .18, x + .55, base(p) + TECHO - .02, y + .18, panel, panel, panel);
@@ -475,29 +488,28 @@ function techos(opacas, luces) {
   }
 }
 
-/** Fachadas de cristal hacia la calle, forjados y tejado: la piel del edificio, que se ve desde las dos plantas. */
+/** Fachadas de cristal hacia la calle, forjados y tejado: la piel del edificio, que se ve desde todas las plantas. */
 function fachadas() {
   const m = new Malla(), v = new Malla(true);
   const piel = rgbaDe("#20252e"), marco = rgbaDe("#3a414d"), zocalo = rgbaDe("#1a1e26"), vidrio = [.55, .72, .9, .13];
   // forjados (entre el techo de una planta y el suelo de la siguiente) y tejado
+  const ultima = NPLANTAS - 1, Yu = base(ultima);
   for (const [x0, y0, x1, y1] of [[0, 0, W, 11], [0, 11, X_ALA, D]]) {
-    m.caja(x0, TECHO, y0, x1, PISO - .01, y1, piel, piel, piel);
+    for (let p = 0; p < ultima; p++) m.caja(x0, base(p) + TECHO, y0, x1, base(p + 1) - .01, y1, piel, piel, piel);
     m.caja(x0, -.35, y0, x1, -.01, y1, piel, piel, piel);
   }
-  for (const [x0, y0, x1, y1] of [[0, 0, W, 11], [0, 11, X_TERRAZA1, D]]) m.caja(x0, PISO + TECHO, y0, x1, PISO + TECHO + .3, y1, piel, piel, piel);
-  m.caja(X_TERRAZA1, PISO + TECHO - .02, 11 - .02, X_ALA, PISO + TECHO + .3, 11 + .02, piel, piel, piel);
-  m.caja(X_TERRAZA1 - .02, PISO + TECHO - .02, 11, X_TERRAZA1 + .02, PISO + TECHO + .3, D, piel, piel, piel);   // canto de la sala de trading 2
-  // paredes del fondo por encima del techo (por fuera) y muros que cierran la terraza por arriba
-  for (const p of [0, 1]) {
+  for (const [x0, y0, x1, y1] of [[0, 0, W, 11], [0, 11, X_AZOTEA, D]]) m.caja(x0, Yu + TECHO, y0, x1, Yu + TECHO + .3, y1, piel, piel, piel);
+  m.caja(X_AZOTEA, Yu + TECHO - .02, 11 - .02, X_ALA, Yu + TECHO + .3, 11 + .02, piel, piel, piel);
+  m.caja(X_AZOTEA - .02, Yu + TECHO - .02, 11, X_AZOTEA + .02, Yu + TECHO + .3, D, piel, piel, piel);   // canto de lo cubierto junto a la azotea
+  // paredes del fondo por encima del techo (por fuera) y muros que cierran la azotea por arriba
+  for (let p = 0; p < NPLANTAS; p++) {
     m.caja(-.25, base(p) + TECHO, -.25, W, base(p) + PISO, 0, piel, piel, piel);
     m.caja(-.25, base(p) + TECHO, 0, 0, base(p) + PISO, D, piel, piel, piel);
   }
   // muros de cristal hacia la calle: [x0, y0, x1, y1] (líneas), por planta
-  const lineas = [
-    [[0, D, X_ALA, D], [X_ALA, 11, X_ALA, D], [X_ALA, 11, W, 11], [W, 0, W, 11]],
-    [[0, D, X_TERRAZA1, D], [X_ALA, 11, W, 11], [W, 0, W, 11]],
-  ];
-  for (const p of [0, 1]) for (const [x0, y0, x1, y1] of lineas[p]) {
+  const lineas = p => p < ultima ? [[0, D, X_ALA, D], [X_ALA, 11, X_ALA, D], [X_ALA, 11, W, 11], [W, 0, W, 11]]
+    : [[0, D, X_AZOTEA, D], [X_ALA, 11, W, 11], [W, 0, W, 11]];
+  for (let p = 0; p < NPLANTAS; p++) for (const [x0, y0, x1, y1] of lineas(p)) {
     const Y = base(p), horiz = y0 === y1, largo = horiz ? x1 - x0 : y1 - y0;
     const caja = (a0, a1, yb, yt, col, malla = m, grosor = .06) => horiz
       ? malla.caja(x0 + a0, yb, y0 - grosor, x0 + a1, yt, y0 + grosor, col, col, col)
@@ -509,7 +521,7 @@ function fachadas() {
     for (let k = 0; k < largo; k++) horiz ? choque(p, x0 + k, y0 - .1, x0 + k + 1, y0 + .1) : choque(p, x0 - .1, y0 + k, x0 + .1, y0 + k + 1);
   }
   // paredes del fondo (norte y oeste): obstáculos
-  for (const p of [0, 1]) { for (let x = 0; x < W; x++) choque(p, x, -.3, x + 1, .02); for (let y = 0; y < D; y++) choque(p, -.3, y, .02, y + 1); }
+  for (let p = 0; p < NPLANTAS; p++) { for (let x = 0; x < W; x++) choque(p, x, -.3, x + 1, .02); for (let y = 0; y < D; y++) choque(p, -.3, y, .02, y + 1); }
   const mm = m.malla(materiales.exterior), mv = v.malla(materiales.vidrioExt);
   exterior.add(mm); mv.renderOrder = 2; exterior.add(mv);
   // calle, aceras y la ciudad alrededor
@@ -568,7 +580,7 @@ function suelo(p, capas) {
   cv.width = W * PX_SUELO; cv.height = D * PX_SUELO;
   const g = cv.getContext("2d");
   g.fillStyle = "#101318"; g.fillRect(0, 0, cv.width, cv.height);
-  for (const s of (p ? SALAS1 : SALAS)) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
+  for (const s of SALAS_PLANTA[p]) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
     g.fillStyle = (x + y) % 2 ? s.a : s.b; g.fillRect(x * PX_SUELO, y * PX_SUELO, PX_SUELO + .5, PX_SUELO + .5);
   }
   for (const f of capas) {
@@ -639,7 +651,7 @@ function crearMonitores(lista) {
   const tex = texturaDe(cv);
   atlas = {cv, g: cv.getContext("2d"), tex, cambiado: false};
   const mat = new THREE.MeshBasicMaterial({map: tex, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2});
-  const datos = [{p: [], u: [], i: []}, {p: [], u: [], i: []}];
+  const datos = Array.from({length: NPLANTAS}, () => ({p: [], u: [], i: []}));
   lista.forEach((m, n) => {
     const h = huecos[n], d = datos[m.planta], k = d.p.length / 3, Y = base(m.planta), Z = m.y + .006;
     d.p.push(m.x, Y + m.z - m.h, Z, m.x + m.w, Y + m.z - m.h, Z, m.x + m.w, Y + m.z, Z, m.x, Y + m.z, Z);
@@ -823,10 +835,10 @@ function crearExtras() {
   extras = {};
   // holograma de la minería: doble hélice de puntos
   extras.holo = new THREE.InstancedMesh(new THREE.SphereGeometry(.035, 6, 4), aditivo("#3effd0"), 52);
-  extras.holo.frustumCulled = false; plantas[0].add(extras.holo);
+  extras.holo.frustumCulled = false; plantas[PLANTA_DE.mineria].add(extras.holo);
   // globo de macro: rejilla, núcleo con meridianos y ciudades, y un aro inclinado
   extras.globo = new THREE.Mesh(new THREE.SphereGeometry(.42, 18, 12), new THREE.MeshBasicMaterial({color: color3("#5cc0ff"), wireframe: true, transparent: true, opacity: .55}));
-  extras.globo.position.set(GLOBO.x, 1.15, GLOBO.y); plantas[0].add(extras.globo);
+  extras.globo.position.set(GLOBO.x, base(PLANTA_DE.macro) + 1.15, GLOBO.y); plantas[PLANTA_DE.macro].add(extras.globo);
   const mapa = document.createElement("canvas"); mapa.width = 256; mapa.height = 128;
   const gm = mapa.getContext("2d");
   gm.fillStyle = "#0c2740"; gm.fillRect(0, 0, 256, 128);
@@ -840,7 +852,7 @@ function crearExtras() {
   }
   extras.globo.add(new THREE.Mesh(new THREE.SphereGeometry(.34, 24, 16), new THREE.MeshBasicMaterial({map: texturaDe(mapa)})));
   extras.aro = new THREE.Mesh(new THREE.TorusGeometry(.52, .009, 4, 64), new THREE.MeshBasicMaterial({color: color3("#5cc0ff"), transparent: true, opacity: .8}));
-  extras.aro.position.copy(extras.globo.position); extras.aro.rotation.set(Math.PI / 2 + .4, 0, 0); plantas[0].add(extras.aro);
+  extras.aro.position.copy(extras.globo.position); extras.aro.rotation.set(Math.PI / 2 + .4, 0, 0); plantas[PLANTA_DE.macro].add(extras.aro);
   // moneda gigante del holding: caras con borde y canto dorado estriado
   const cara = document.createElement("canvas"); cara.width = cara.height = 256;
   const gc = cara.getContext("2d"), gr = gc.createRadialGradient(96, 88, 12, 128, 128, 128);
@@ -857,10 +869,10 @@ function crearExtras() {
   for (let x = 0; x < 512; x += 4) { gk.fillStyle = "#8a5512"; gk.fillRect(x, 0, 1.5, 16); gk.fillStyle = "#ffd58a"; gk.fillRect(x + 2, 0, 1, 16); }
   const tc = texturaDe(cara);
   extras.moneda = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, .07, 48), [new THREE.MeshBasicMaterial({map: texturaDe(canto)}), new THREE.MeshBasicMaterial({map: tc}), new THREE.MeshBasicMaterial({map: tc})]);
-  extras.moneda.rotation.order = "YXZ"; plantas[0].add(extras.moneda);
+  extras.moneda.rotation.order = "YXZ"; plantas[PLANTA_DE.holding].add(extras.moneda);
   // baliza de riesgos
   extras.baliza = new THREE.Mesh(new THREE.BoxGeometry(.4, .35, .4), new THREE.MeshBasicMaterial({color: 0xffffff}));
-  extras.baliza.position.set(BALIZA.x, 1.675, BALIZA.y); plantas[0].add(extras.baliza);
+  extras.baliza.position.set(BALIZA.x, base(PLANTA_DE.riesgos) + 1.675, BALIZA.y); plantas[PLANTA_DE.riesgos].add(extras.baliza);
   // robot del pasillo
   extras.robot = new THREE.Group();
   const cuerpo = new THREE.Mesh(new THREE.CylinderGeometry(.28, .3, .14, 24), new THREE.MeshLambertMaterial({color: color3("#2d323c")}));
@@ -887,14 +899,14 @@ function crearExtras() {
   extras.antena.position.set(-.13, .49, .09);
   extras.robot.add(extras.antena);
   extras.robot.add(cuerpo, tapa, extras.led); plantas[0].add(extras.robot);
-  // guirnaldas de bombillas (patio y terraza)
+  // guirnalda de bombillas de la azotea
   const bombillas = (lista, p) => {
     const im = new THREE.InstancedMesh(new THREE.SphereGeometry(.045, 8, 6), new THREE.MeshBasicMaterial({color: 0xffffff}), lista.length);
     const m = new THREE.Matrix4(), tramos = new Map();
     lista.forEach((b, i) => {
-      const z = p ? b[2] - Math.abs(Math.sin(b[0] * 5.7 + b[1] * 5.7)) * .12 : 1.9 - Math.abs(Math.sin(b[0] * 5.7 + b[1] * 5.7)) * .15;
+      const z = b[2] - Math.abs(Math.sin(b[0] * 5.7 + b[1] * 5.7)) * .12;
       m.makeTranslation(b[0], base(p) + z - .04, b[1]); im.setMatrixAt(i, m);
-      const clave = p ? (b[2] > 2 ? "p" + b[1] : b[1] > 23 ? "s" : "e") : "0";
+      const clave = b[0] > 45.8 ? "e" : "s";   // barandilla este o sur
       if (!tramos.has(clave)) tramos.set(clave, []);
       tramos.get(clave).push(new THREE.Vector3(b[0], base(p) + z, b[1]));
     });
@@ -903,17 +915,17 @@ function crearExtras() {
     for (const pts of tramos.values()) plantas[p].add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({color: 0x2a2a2a})));
     return {im, lista};
   };
-  extras.bombillas = [bombillas(BOMBILLAS, 0), bombillas(BOMBILLAS1, 1)];
+  extras.bombillas = [bombillas(BOMBILLAS1, PLANTA_DE.terraza1)];
   // fogata
   extras.llamas = new THREE.InstancedMesh(new THREE.ConeGeometry(.07, .24, 6), aditivo("#ff8a3c"), 7);
-  extras.llamas.frustumCulled = false; plantas[1].add(extras.llamas);
+  extras.llamas.frustumCulled = false; plantas[PLANTA_DE.terraza1].add(extras.llamas);
   // pelota de ping-pong y paquetes del laboratorio
   extras.pelota = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), new THREE.MeshBasicMaterial({color: 0xffffff}));
-  plantas[0].add(extras.pelota);
+  plantas[PLANTA_DE.descanso].add(extras.pelota);
   extras.paquetes = new THREE.InstancedMesh(new THREE.BoxGeometry(.22, .2, .22), new THREE.MeshBasicMaterial({color: 0xffffff}), 64);
   extras.paquetes.frustumCulled = false;
   extras.paquetes.setColorAt(0, new THREE.Color());
-  plantas[0].add(extras.paquetes);
+  plantas[PLANTA_DE.mineria].add(extras.paquetes);
 }
 const _x = new THREE.Matrix4();
 function moverExtras() {
@@ -921,7 +933,7 @@ function moverExtras() {
   const vel = minando ? 2.4 : .6;
   for (let i = 0; i < 26; i++) for (let k = 0; k < 2; k++) {
     const h = i / 26, ang = T * vel + h * Math.PI * 2 * 1.4 + k * Math.PI;
-    _x.makeTranslation(HOLO.x + Math.cos(ang) * .42, .25 + h * 2, HOLO.y + Math.sin(ang) * .42);
+    _x.makeTranslation(HOLO.x + Math.cos(ang) * .42, base(PLANTA_DE.mineria) + .25 + h * 2, HOLO.y + Math.sin(ang) * .42);
     extras.holo.setMatrixAt(i * 2 + k, _x);
   }
   extras.holo.instanceMatrix.needsUpdate = true;
@@ -929,7 +941,7 @@ function moverExtras() {
   extras.globo.rotation.y = T * .35;
   extras.aro.rotation.z = -T * .2;
   extras.antena.material.color.copy(color3((T * 1.3) % 1 < .18 ? "#ff3b3b" : "#5a1414"));
-  extras.moneda.position.set(MONEDA.x, 1.3 + Math.sin(T * 1.5) * .06, MONEDA.y);
+  extras.moneda.position.set(MONEDA.x, base(PLANTA_DE.holding) + 1.3 + Math.sin(T * 1.5) * .06, MONEDA.y);
   extras.moneda.rotation.set(Math.PI / 2, T * 1.1, 0);
   const mal = !!(S && S.papel && S.papel.riesgo && S.papel.riesgo.bloqueo);
   extras.baliza.material.color.copy(color3(mal ? (Math.sin(T * 10) > 0 ? "#ff5a76" : "#7a1d2a") : "#2ee6a6"));
@@ -943,17 +955,17 @@ function moverExtras() {
   }
   for (let k = 0; k < 7; k++) {
     const f = (T * 3 + k * .7) % 1, s = 1 - f * .8;
-    _x.makeScale(s, s * 1.2, s).setPosition(FOGATA.x + Math.sin(k * 2.1 + T * 4) * .12, PISO + .3 + f * .45, FOGATA.y + Math.cos(k * 1.7 + T * 3) * .1);
+    _x.makeScale(s, s * 1.2, s).setPosition(FOGATA.x + Math.sin(k * 2.1 + T * 4) * .12, base(PLANTA_DE.terraza1) + .3 + f * .45, FOGATA.y + Math.cos(k * 1.7 + T * 3) * .1);
     extras.llamas.setMatrixAt(k, _x);
   }
   extras.llamas.instanceMatrix.needsUpdate = true;
   const bola = pelotaPingPong();
   extras.pelota.visible = !!bola;
-  if (bola) extras.pelota.position.set(bola.x, bola.z, bola.y);
+  if (bola) extras.pelota.position.set(bola.x, base(PLANTA_DE.descanso) + bola.z, bola.y);
   let n = 0;
   for (const p of paquetes) {
     if (n >= 64) break;
-    _x.makeTranslation(p.x, p.z + .1, p.y); extras.paquetes.setMatrixAt(n, _x);
+    _x.makeTranslation(p.x, base(PLANTA_DE.mineria) + p.z + .1, p.y); extras.paquetes.setMatrixAt(n, _x);
     extras.paquetes.setColorAt(n, color3(p.destino === 7 ? "#ffcf5a" : "#d4ff3a")); n++;
   }
   extras.paquetes.count = n;
@@ -1047,7 +1059,7 @@ function puntoDeSalida() {
   return [ASCENSOR.x + 1, ASCENSOR.y, -Math.PI / 2];
 }
 function salaEn(p, x, y) {
-  const s = (p ? SALAS1 : SALAS).find(s => x >= s.x0 && x < s.x1 && y >= s.y0 && y < s.y1);
+  const s = SALAS_PLANTA[p].find(s => x >= s.x0 && x < s.x1 && y >= s.y0 && y < s.y1);
   if (!s) return "";
   return s.nombre || "PASILLO";
 }
@@ -1061,7 +1073,7 @@ function irAPlantaPaseo(p) {
   setTimeout(() => {
     jugador.p = p; jugador.x = ASCENSOR.x + .45; jugador.y = ASCENSOR.y; jugador.yaw = -Math.PI / 2; jugador.pitch = 0;
     ascensorPlanta[p] = T + 2.5;
-    for (const q of [0, 1]) plantas[q].visible = q === p;
+    plantas.forEach((g, q) => { g.visible = q === p; });
     f.classList.remove("negro");
     jugador.ascensor = 0;
   }, 320);
@@ -1089,7 +1101,7 @@ function buscarObjetivo() {
 function interactuar() {
   if (!enMarcha) return;
   if (objetivo) { mostrarFicha(objetivo); soltarRaton(); return; }
-  if (cercaDelAscensor()) irAPlantaPaseo(1 - jugador.p);
+  if (cercaDelAscensor()) irAPlantaPaseo((jugador.p + 1) % NPLANTAS);   // sube una planta; desde la última, vuelve a la baja
 }
 
 // ------------------------------------------------------------ entradas --
@@ -1108,8 +1120,8 @@ function teclaAbajo(e) {
   if (e.target.closest && e.target.closest("input,textarea")) return;
   teclas.add(e.code);
   if (e.code === "KeyE") interactuar();
-  else if (e.code === "PageUp") { irAPlantaPaseo(1); e.preventDefault(); }
-  else if (e.code === "PageDown") { irAPlantaPaseo(0); e.preventDefault(); }
+  else if (e.code === "PageUp") { irAPlantaPaseo(Math.min(NPLANTAS - 1, jugador.p + 1)); e.preventDefault(); }
+  else if (e.code === "PageDown") { irAPlantaPaseo(Math.max(0, jugador.p - 1)); e.preventDefault(); }
   else if (e.code === "KeyP" && !e.ctrlKey && !e.metaKey && !e.altKey) salir();
   if (/^(Arrow|Space)/.test(e.code)) e.preventDefault();
 }
@@ -1245,11 +1257,11 @@ function actualizarHud() {
   const sala = salaEn(jugador.p, jugador.x, jugador.y);
   const donde = hud.querySelector(".donde");
   donde.querySelector("b").textContent = sala || "TRADING FLOOR";
-  donde.querySelector("span").textContent = NOMBRE_PLANTA[jugador.p] + (jugador.p === 1 && sala === "TERRAZA" ? " · al aire libre" : "");
+  donde.querySelector("span").textContent = NOMBRE_PLANTA[jugador.p] + (jugador.p === PLANTA_DE.terraza1 && sala === "AZOTEA" ? " · al aire libre" : "");
   const pista = hud.querySelector(".pista");
   let texto = "";
   if (objetivo) texto = `<kbd>E</kbd>Ver la ficha de ${esc(objetivo.nombre)}`;
-  else if (cercaDelAscensor()) texto = `<kbd>E</kbd>Ascensor a la ${jugador.p ? "planta baja" : "planta 1 (terraza)"}`;
+  else if (cercaDelAscensor()) texto = `<kbd>E</kbd>Ascensor: ${jugador.p === NPLANTAS - 1 ? "baja" : "sube"} a ${NOMBRE_PLANTA[(jugador.p + 1) % NPLANTAS]}`;
   if (pista.innerHTML !== texto) pista.innerHTML = texto;
   pista.hidden = !texto;
   hud.querySelector(".mira").classList.toggle("sobre", !!objetivo);
@@ -1286,7 +1298,7 @@ export function posicion() { return {x: jugador.x, y: jugador.y, planta: jugador
 export function estadisticas() { const r = renderer.info.render; return {llamadas: r.calls, triangulos: r.triangles, texturas: renderer.info.memory.textures, geometrias: renderer.info.memory.geometries, caras: caras.length, monitores: monitores.length}; }
 export function teletransportar(x, y, p = jugador.p, giro = jugador.yaw, inclinacion = 0) {
   jugador.x = x; jugador.y = y; jugador.p = p; jugador.yaw = giro; jugador.pitch = inclinacion;
-  for (const q of [0, 1]) plantas[q].visible = q === p;
+  plantas.forEach((g, q) => { g.visible = q === p; });
 }
 
 export function entrar(o = {}) {
@@ -1296,7 +1308,7 @@ export function entrar(o = {}) {
   jugador.p = vista;
   [jugador.x, jugador.y, jugador.yaw] = puntoDeSalida();
   jugador.pitch = -.05; jugador.ascensor = 0;
-  for (const q of [0, 1]) plantas[q].visible = q === jugador.p;
+  plantas.forEach((g, q) => { g.visible = q === jugador.p; });
   enMarcha = true;
   document.body.classList.add("en-paseo");
   redimensionar3d();

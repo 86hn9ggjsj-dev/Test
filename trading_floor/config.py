@@ -52,6 +52,10 @@ COMISION_SCALPING = 0.0002
 DESLIZAMIENTO_SCALPING = 0.0001
 COSTE_SCALPING = 2 * (COMISION_SCALPING + DESLIZAMIENTO_SCALPING)
 
+# Mesa de análisis (mesa.py): en la sala de trading solo entra lo que gana al menos 1,5 veces lo que arriesga
+# (objetivo frente a stop). La minería ya no genera estrategias de trading por debajo: la mesa nunca las dejaría entrar.
+RB_MINIMO = 1.5
+
 
 def es_scalping(intervalo: str) -> bool:
     return intervalo == SCALPING_INTERVALO

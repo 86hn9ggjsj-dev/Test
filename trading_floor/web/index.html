@@ -638,7 +638,7 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p class="nota">Total, hoy y semana: resultados en papel (dinero ficticio) desde que cada trader llegó a la sala. Backtest: cómo lo hizo su estrategia fuera de muestra, con datos pasados.</p></section>
   <section class="pagina" id="p-scalping"><h3>Sala de scalping</h3><div id="scalping"></div>
     <p class="nota">Operaciones cortas con velas de 5 minutos en BTC, ETH y SOL. Se asume que los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta, frente al 0,14 % de la sala de trading). Aun así, las comisiones se comen buena parte de lo que se gana: fíjate en «comisiones pagadas». Mismo embudo de ocho pruebas que el resto; dinero ficticio.</p></section>
-  <section class="pagina" id="p-incubadora"><h3>Incubadora · planta 1</h3><div id="incubadora"></div></section>
+  <section class="pagina" id="p-incubadora"><h3>Incubadora · planta 1 (investigación)</h3><div id="incubadora"></div></section>
   <section class="pagina" id="p-informe"><div id="informe"></div></section>
   <section class="pagina" id="p-academia"><h3>Academia · lo aprendido en real</h3><div id="academia"></div></section>
   <section class="pagina" id="p-salas"><h3>Ir a una sala</h3>
@@ -656,8 +656,8 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p><b>Minería.</b> Genera estrategias sin parar: combina indicadores (RSI, medias, Bollinger…) al azar y con un algoritmo genético, y las prueba en el 70 % inicial de tres años de velas reales de Binance.</p>
     <p><b>Laboratorio.</b> Las que parecen rentables viajan por la cinta. Cada puesto es una prueba de robustez; si la falla, a la trituradora.</p>
     <p><b>Cámara.</b> Las que lo superan todo se guardan en el banco (cada lingote es una estrategia), salvo que se parezcan demasiado a otra que ya esté dentro.</p>
-    <p><b>Sala de trading.</b> Cada mesa tiene su trader, que opera una estrategia del banco con su capital ficticio (el % del fondo que dedicas al trading, repartido entre sus 88 mesas: 48 en la planta baja y 40 en la sala de trading 2, en la planta 1) que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
-    <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). Primero se examina en la incubadora (planta 1) con dinero de prueba; si aprueba, un trader se sienta con ella en una mesa libre. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 88 mesas (48 abajo y 40 en la sala de trading 2, en la planta 1), con un máximo de 15 estrategias por activo.</p>
+    <p><b>Sala de trading.</b> Cada mesa tiene su trader, que opera una estrategia del banco con su capital ficticio (el % del fondo que dedicas al trading, repartido entre sus 88 mesas: 48 en la sala de trading y 40 en la sala de trading 2, las dos en la planta baja) que opera con precios reales desde que llega, con las mismas reglas que el backtest.</p>
+    <p><b>De estrategia a operación.</b> Una estrategia es una regla fija («compra BTC si pasa esto y esto, con este stop y este objetivo»). Primero se examina en la incubadora (planta 1) con dinero de prueba; si aprueba, un trader se sienta con ella en una mesa libre. Cada 30 minutos, al cerrar la vela, comprueba si se cumplen todas sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra; luego sale sola por stop, objetivo o tiempo. Son reglas exigentes: cada una opera de media una vez cada pocos días (lo pone en su ficha), por eso muchos traders pasan días esperando. Cuantos más traders, más operaciones: la sala tiene 88 mesas (48 en la sala 1 y 40 en la sala de trading 2, las dos en la planta baja), con un máximo de 15 estrategias por activo.</p>
     <p><b>Radar de señales.</b> El equipo de análisis mira, para cada trader, cuántas condiciones de su estrategia se cumplen ahora mismo y le avisa cuando le falta una para entrar (con la hora del próximo cierre de vela, soporte, resistencia y ATR).</p>
     <p><b>Mi fondo.</b> Todo es tu fondo de inversión (con dinero ficticio): tú aportas capital y recibes participaciones; el valor liquidativo sube o baja solo con los resultados de trading, scalping, holding y tendencia, así que un trader nuevo no cambia tu patrimonio. Tú decides el reparto: qué % va a trading (se divide entre sus 88 mesas), a scalping (12 mesas), a holding y a la sala de tendencia; el resto es liquidez. Se cambia en «Mi fondo» o por el chat («dedica un 20 % al holding») y se aplica desde ese momento, sin perder lo ganado. En la pestaña «Mi fondo» (arriba) tienes tu dashboard: rentabilidad frente a BTC, caídas, volatilidad, Sharpe, reparto del dinero, exposición, meses, operaciones y aportaciones o reembolsos.</p>
     <p><b>Scalping.</b> Una sala aparte con operaciones cortas en velas de 5 minutos (BTC, ETH y SOL, 12 mesas). Los scalpers usan órdenes límite (comisión de «maker»: 0,06 % ida y vuelta) y pasan el mismo embudo de ocho pruebas. Aun así, las comisiones pesan mucho: la sala muestra cuánto se paga.</p>
@@ -667,7 +667,8 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
     <p><b>Control de riesgos.</b> Decide cuánto invierte cada operación (arriesgando como mucho un 1 % del capital del trader) y veta entradas si hay demasiadas posiciones, demasiadas iguales, o si el día o la caída acumulada pierden demasiado.</p>
     <p><b>Macroeconomía.</b> Cuatro analistas siguen la bolsa, el VIX, el dólar, el oro, el petróleo, los bonos y el sentimiento cripto, y deciden si el mercado está en modo RISK-ON (apetito por el riesgo) o RISK-OFF.</p>
     <p><b>Supervisión.</b> Cada sala tiene su supervisor, que la patrulla y sabe cómo va. La supervisión general hace rondas por toda la oficina preguntando a cada uno, y acude corriendo si una sala se pone en rojo. El estado de cada sala está en la pestaña «Salas».</p>
-    <p><b>Dos plantas.</b> Con los botones de arriba a la izquierda (o las teclas Re Pág y Av Pág) cambias de planta. En la baja están la minería, el laboratorio, el banco, macro, holding, trading, scalping, riesgos y el comité. En la planta 1 están la incubadora, la sala de trading 2 (40 mesas más), el equipo Quant, la academia, comunicación, sistemas, la cafetería, la sala de juegos y una terraza al aire libre con piscina, fogata y barbacoa. La gente sube y baja en ascensor, y Satoshi, el gato, se pasea por las dos.</p>
+    <p><b>Cuatro plantas, una por sector.</b> Con los botones de arriba a la izquierda (o las teclas Re Pág y Av Pág) cambias de planta. <b>Baja · Trading</b>: las dos salas de trading (88 mesas), scalping, riesgos, la mesa de análisis, el equipo quant y la recepción. <b>1 · Investigación</b>: minería, laboratorio, cámara del banco, incubadora, academia, biblioteca y zona de estudio. <b>2 · Inversión</b>: holding, sala de tendencia, macro, tesorería, tu fondo, mirador y jardín interior. <b>3 · Dirección y servicios</b>: dirección, comité, comunicación, sistemas, cafetería, juegos, gimnasio, descanso y la azotea al aire libre. La gente sube y baja en ascensor, y Satoshi, el gato, se pasea por todas.</p>
+    <p><b>Mesa de análisis.</b> Como en los vídeos de «bots de trading en un chat de grupo», pero con reglas medidas: antes de entrar, cada señal de la sala de trading pasa por seis (scout, noticias, sentimiento, charts, la escéptica y el jefe de mesa). Solo entra si va a favor de la tendencia diaria, gana al menos 1,5 veces lo que arriesga y no es ir con la masa en un extremo de miedo o codicia. Con datos de 2024 a 2026, lo que deja pasar ganaba de media un 0,15 % por operación y lo que veta perdía un 0,10 %. Por eso la minería ya no genera estrategias de trading que ganen menos de 1,5 veces lo que arriesgan, y las antiguas que no llegan se retiran cuando no tienen nada abierto (su mesa espera a una que sí pueda operar).</p>
     <p><b>Incubadora.</b> Toda estrategia nueva empieza en la planta 1 con 1.000 $ de prueba que no cuentan en tu fondo y sin vetos de sala. Para subir a una mesa con dinero del fondo tiene que aprobar el examen: 15 operaciones (40 en scalping) y 10 días como mínimo (3 en scalping), ganando y con un factor de beneficio de 1,2 o más. Suspende si pierde un 4 % (3 % en scalping) o si en 90 días (21 en scalping) no da la talla. Las aprobadas suben, la de mejor nota primero; su trader de la incubadora baja a entregarla a la mesa. Si la incubadora está llena, esperan en el banquillo.</p>
     <p><b>Equipo Quant.</b> Con 30 operaciones reales o más, cada trader arriesga según el Kelly prudente: un cuarto del Kelly, con el acierto rebajado por si ha tenido suerte, entre un 0,25 % y 1,5 veces tu riesgo por operación. También hacen el Monte Carlo del fondo (rango probable de los próximos 30 días) y el post mortem de cada estrategia retirada: qué prometía el backtest, qué hizo en real y por qué falló.</p>
     <p><b>Academia.</b> Junta los post mortem y lo que funciona en real. La minería busca más de lo que funciona y menos de lo que falla, pero un 30 % sigue siendo al azar y todo pasa igualmente las pruebas y el examen. Una estrategia nunca se cambia sola: eso sería adaptarse a la casualidad.</p>
@@ -690,8 +691,10 @@ body.en-fondo #panel,body.en-fondo #resultados,body.en-fondo #controles,body.en-
   <button id="bNoche" title="Día / noche / automático">◐</button>
 </div>
 <div id="plantas" role="group" aria-label="Planta que se ve">
-  <button type="button" data-planta="1" title="Planta 1: incubadora, quant, academia, comunicación, sistemas, cafetería, juegos y terraza (tecla Re Pág)">🌇 <span>Planta 1 · terraza</span></button>
-  <button type="button" data-planta="0" class="activo" title="Planta baja: minería, laboratorio, banco, macro, holding, trading, scalping, riesgos y comité (tecla Av Pág)">🏢 <span>Planta baja</span></button>
+  <button type="button" data-planta="3" title="Planta 3 · Dirección y servicios: comité, comunicación, sistemas, dirección, cafetería, juegos, gimnasio, descanso y azotea (teclas Re Pág / Av Pág)">🏛 <span>3 · Dirección</span></button>
+  <button type="button" data-planta="2" title="Planta 2 · Inversión: holding, sala de tendencia, macro, tesorería, tu fondo, mirador y jardín (teclas Re Pág / Av Pág)">💼 <span>2 · Inversión</span></button>
+  <button type="button" data-planta="1" title="Planta 1 · Investigación: minería, laboratorio, cámara del banco, incubadora, academia, biblioteca y zona de estudio (teclas Re Pág / Av Pág)">🔬 <span>1 · Investigación</span></button>
+  <button type="button" data-planta="0" class="activo" title="Planta baja · Trading: salas de trading, scalping, riesgos, mesa de análisis, equipo quant y recepción (teclas Re Pág / Av Pág)">📈 <span>Baja · Trading</span></button>
   <button type="button" id="bPasear" title="Pasear por la oficina en primera persona: W A S D para andar y el ratón para mirar (tecla P)">🚶 <span>Pasear</span></button>
 </div>
 <nav id="botonera" aria-label="Acciones rápidas">
@@ -769,7 +772,18 @@ function rgba(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >
 const TW = 64, TH = 32, ZH = 34;       // ancho y alto de una baldosa; píxeles por unidad de altura
 const W = 54, D = 24;                  // tamaño de la planta en baldosas
 const X_ALA = 46;                      // desde aquí, el ala nueva (scalping) solo tiene la fila de arriba y el pasillo
-const X_TERRAZA1 = 35;                 // en la planta 1, la sala de trading 2 llega hasta aquí; de aquí a X_ALA, la terraza
+// Cuatro plantas, una por sector de la empresa. Cada sala está en la misma posición de siempre dentro de su planta.
+const NPLANTAS = 4;
+const SECTORES = ["Trading", "Investigación", "Inversión", "Dirección y servicios"];
+const ICONOS_PLANTA = ["📈", "🔬", "💼", "🏛"];
+const PLANTA_DE = {
+  recepcion: 0, quant: 0, analisis: 0, scalping: 0, trading: 0, trading2: 0, riesgos: 0,
+  mineria: 1, laboratorio: 1, banco: 1, academia: 1, biblioteca: 1, incubadora: 1, estudio: 1,
+  tesoreria: 2, tendencia: 2, macro: 2, holding: 2, mirador: 2, salafondo: 2, jardin: 2,
+  comunicacion: 3, infra: 3, direccion: 3, cafeteria: 3, juegos: 3, gimnasio: 3, comite: 3, descanso: 3, terraza1: 3,
+};
+const nombrePlanta = p => (p ? `Planta ${p}` : "Planta baja") + " · " + SECTORES[p];
+const X_AZOTEA = 30;                   // en la última planta, de aquí a X_ALA (abajo) es la azotea al aire libre
 const ALTO_MURO = 2.4;
 const iso = (x, y, z = 0) => [(x - y) * TW / 2, (x + y) * TH / 2 - z * ZH];
 
@@ -821,7 +835,7 @@ function capturarOficina() {
   const c = captura3D = {cajas: [], caras: [], pantallas: [], cristales: [], objetos: [], suelo: [], planta: 0};
   cam.zoom = 4; ctx = NULO;   // con zoom alto se apuntan también las piezas pequeñas
   try {
-    for (const p of [0, 1]) {
+    for (let p = 0; p < NPLANTAS; p++) {
       c.planta = p; paredes(p); for (const e of PLANTAS[p].estaticos) e.f();
       const n = c.caras.length; decorarSuelo(p); c.suelo[p] = c.caras.splice(n);   // lo que se pinta sobre el suelo
     }
@@ -840,27 +854,64 @@ let noche = 0;
 const parametros = new URLSearchParams(location.search);
 
 // =================================================== CONSTRUCCIÓN =====
-const SALAS = [
-  {id: "mineria", nombre: "MINERÍA", x0: 0, y0: 0, x1: 10, y1: 9, a: "#1d2129", b: "#22262f", rotulo: "rgba(255,255,255,.06)"},
-  {id: "laboratorio", nombre: "LABORATORIO", x0: 10, y0: 0, x1: 21, y1: 9, a: "#e8edf3", b: "#dde4ec", rotulo: "rgba(20,40,70,.09)"},
-  {id: "banco", nombre: "CÁMARA", x0: 21, y0: 0, x1: 30, y1: 9, a: "#241f16", b: "#2b251a", rotulo: "rgba(255,207,90,.09)"},
-  {id: "macro", nombre: "MACRO", x0: 30, y0: 0, x1: 38, y1: 9, a: "#0f2230", b: "#122838", rotulo: "rgba(92,192,255,.1)"},
-  {id: "holding", nombre: "HOLDING", x0: 38, y0: 0, x1: 46, y1: 9, a: "#231b0c", b: "#2a2010", rotulo: "rgba(247,147,26,.12)"},
-  {id: "scalping", nombre: "SCALPING", x0: 46, y0: 0, x1: 54, y1: 9, a: "#160f22", b: "#1b1229", rotulo: "rgba(255,79,216,.11)"},
-  {id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 54, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
-  {id: "riesgos", nombre: "RIESGOS", x0: 38, y0: 11, x1: 46, y1: 24, a: "#1c1216", b: "#22161b", rotulo: "rgba(255,90,118,.1)"},
-  {id: "terraza", nombre: "PATIO", x0: 30, y0: 11, x1: 38, y1: 24, a: "#8a6a48", b: "#7f6141", rotulo: "rgba(40,20,0,.14)"},
-  {id: "trading", nombre: "SALA DE TRADING", x0: 0, y0: 11, x1: 18, y1: 24, a: "#eceee8", b: "#e2e5dd", rotulo: "rgba(0,0,0,.075)"},
-  {id: "comite", nombre: "COMITÉ", x0: 18, y0: 11, x1: 30, y1: 17, a: "#d8d0c2", b: "#cec5b5", rotulo: "rgba(60,30,0,.09)"},
-  {id: "descanso", nombre: "DESCANSO", x0: 18, y0: 17, x1: 30, y1: 24, a: "#b98f62", b: "#b28858", rotulo: "rgba(60,30,0,.12)"},
+const SALAS_TODAS = [
+  // planta baja · TRADING
+  {planta: 0, id: "recepcion", nombre: "RECEPCIÓN", x0: 0, y0: 0, x1: 17, y1: 9, a: "#e9e6df", b: "#e1ddd4", rotulo: "rgba(0,0,0,.07)"},
+  {planta: 0, id: "quant", nombre: "EQUIPO QUANT", x0: 17, y0: 0, x1: 30, y1: 9, a: "#0f1a2a", b: "#122034", rotulo: "rgba(92,192,255,.11)"},
+  {planta: 0, id: "analisis", nombre: "MESA DE ANÁLISIS", x0: 30, y0: 0, x1: 46, y1: 9, a: "#141922", b: "#181e29", rotulo: "rgba(212,255,58,.09)"},
+  {planta: 0, id: "scalping", nombre: "SCALPING", x0: 46, y0: 0, x1: 54, y1: 9, a: "#160f22", b: "#1b1229", rotulo: "rgba(255,79,216,.11)"},
+  {planta: 0, id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 54, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
+  {planta: 0, id: "trading", nombre: "SALA DE TRADING", x0: 0, y0: 11, x1: 18, y1: 24, a: "#eceee8", b: "#e2e5dd", rotulo: "rgba(0,0,0,.075)"},
+  {planta: 0, id: "trading2", nombre: "SALA DE TRADING 2", x0: 18, y0: 11, x1: 35, y1: 24, a: "#eceee8", b: "#e2e5dd", rotulo: "rgba(0,0,0,.075)"},
+  {planta: 0, id: "riesgos", nombre: "RIESGOS", x0: 35, y0: 11, x1: 46, y1: 24, a: "#1c1216", b: "#22161b", rotulo: "rgba(255,90,118,.1)"},
+  // planta 1 · INVESTIGACIÓN (la fábrica de estrategias)
+  {planta: 1, id: "mineria", nombre: "MINERÍA", x0: 0, y0: 0, x1: 10, y1: 9, a: "#1d2129", b: "#22262f", rotulo: "rgba(255,255,255,.06)"},
+  {planta: 1, id: "laboratorio", nombre: "LABORATORIO", x0: 10, y0: 0, x1: 21, y1: 9, a: "#e8edf3", b: "#dde4ec", rotulo: "rgba(20,40,70,.09)"},
+  {planta: 1, id: "banco", nombre: "CÁMARA", x0: 21, y0: 0, x1: 30, y1: 9, a: "#241f16", b: "#2b251a", rotulo: "rgba(255,207,90,.09)"},
+  {planta: 1, id: "academia", nombre: "ACADEMIA", x0: 30, y0: 0, x1: 39, y1: 9, a: "#e8e3d4", b: "#dfd9c9", rotulo: "rgba(60,40,0,.1)"},
+  {planta: 1, id: "biblioteca", nombre: "BIBLIOTECA", x0: 39, y0: 0, x1: 54, y1: 9, a: "#2a2118", b: "#30261b", rotulo: "rgba(255,207,90,.1)"},
+  {planta: 1, id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 54, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
+  {planta: 1, id: "incubadora", nombre: "INCUBADORA", x0: 0, y0: 11, x1: 18, y1: 24, a: "#efeee6", b: "#e6e4da", rotulo: "rgba(120,60,0,.08)"},
+  {planta: 1, id: "estudio", nombre: "ZONA DE ESTUDIO", x0: 18, y0: 11, x1: 46, y1: 24, a: "#dfe3e8", b: "#d7dbe1", rotulo: "rgba(20,40,70,.08)"},
+  // planta 2 · INVERSIÓN (largo plazo)
+  {planta: 2, id: "tesoreria", nombre: "TESORERÍA", x0: 0, y0: 0, x1: 14, y1: 9, a: "#1f1d14", b: "#252218", rotulo: "rgba(255,207,90,.1)"},
+  {planta: 2, id: "tendencia", nombre: "SALA DE TENDENCIA", x0: 14, y0: 0, x1: 30, y1: 9, a: "#211a08", b: "#271f0a", rotulo: "rgba(201,133,0,.14)"},
+  {planta: 2, id: "macro", nombre: "MACRO", x0: 30, y0: 0, x1: 38, y1: 9, a: "#0f2230", b: "#122838", rotulo: "rgba(92,192,255,.1)"},
+  {planta: 2, id: "holding", nombre: "HOLDING", x0: 38, y0: 0, x1: 46, y1: 9, a: "#231b0c", b: "#2a2010", rotulo: "rgba(247,147,26,.12)"},
+  {planta: 2, id: "mirador", nombre: "MIRADOR", x0: 46, y0: 0, x1: 54, y1: 9, a: "#c9b79c", b: "#c1ae91", rotulo: "rgba(60,30,0,.1)"},
+  {planta: 2, id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 54, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
+  {planta: 2, id: "salafondo", nombre: "TU FONDO", x0: 0, y0: 11, x1: 18, y1: 24, a: "#151b26", b: "#19202d", rotulo: "rgba(212,255,58,.1)"},
+  {planta: 2, id: "jardin", nombre: "JARDÍN INTERIOR", x0: 18, y0: 11, x1: 46, y1: 24, a: "#b9a98c", b: "#b2a284", rotulo: "rgba(40,20,0,.12)"},
+  // planta 3 · DIRECCIÓN Y SERVICIOS (con la azotea)
+  {planta: 3, id: "comunicacion", nombre: "COMUNICACIÓN", x0: 0, y0: 0, x1: 9, y1: 9, a: "#1f1a26", b: "#241e2c", rotulo: "rgba(255,138,92,.12)"},
+  {planta: 3, id: "infra", nombre: "SISTEMAS", x0: 9, y0: 0, x1: 17, y1: 9, a: "#11161c", b: "#141a21", rotulo: "rgba(46,230,166,.1)"},
+  {planta: 3, id: "direccion", nombre: "DIRECCIÓN", x0: 17, y0: 0, x1: 37, y1: 9, a: "#2a2420", b: "#302925", rotulo: "rgba(255,207,90,.1)"},
+  {planta: 3, id: "cafeteria", nombre: "CAFETERÍA", x0: 37, y0: 0, x1: 46, y1: 9, a: "#c79f76", b: "#be966d", rotulo: "rgba(60,30,0,.13)"},
+  {planta: 3, id: "juegos", nombre: "JUEGOS", x0: 46, y0: 0, x1: 54, y1: 9, a: "#1c1432", b: "#21183b", rotulo: "rgba(181,140,255,.15)"},
+  {planta: 3, id: "pasillo", nombre: "", x0: 0, y0: 9, x1: 54, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
+  {planta: 3, id: "gimnasio", nombre: "GIMNASIO", x0: 0, y0: 11, x1: 18, y1: 24, a: "#1d2228", b: "#22282f", rotulo: "rgba(46,230,166,.1)"},
+  {planta: 3, id: "comite", nombre: "COMITÉ", x0: 18, y0: 11, x1: 30, y1: 17, a: "#d8d0c2", b: "#cec5b5", rotulo: "rgba(60,30,0,.09)"},
+  {planta: 3, id: "descanso", nombre: "DESCANSO", x0: 18, y0: 17, x1: 30, y1: 24, a: "#b98f62", b: "#b28858", rotulo: "rgba(60,30,0,.12)"},
+  {planta: 3, id: "terraza1", nombre: "AZOTEA", x0: X_AZOTEA, y0: 11, x1: 46, y1: 24, a: "#a07a52", b: "#96714a", rotulo: "rgba(40,20,0,.13)"},
 ];
+const SALAS_PLANTA = Array.from({length: NPLANTAS}, (_, p) => SALAS_TODAS.filter(s => s.planta === p));
+const SALAS = SALAS_PLANTA[0];
 
-// Dos plantas: cada una con sus obstáculos, tabiques y objetos fijos. Mientras se construye una planta, estas tres
+// Cuatro plantas: cada una con sus obstáculos, tabiques y objetos fijos. Mientras se construye una planta, estas tres
 // variables apuntan a la suya (construirEn); en marcha, cada función usa la planta que le toca.
-const PLANTAS = [0, 1].map(() => ({bloqueado: Array.from({length: W}, () => new Uint8Array(D)), muros: new Set(), estaticos: []}));
+const PLANTAS = Array.from({length: NPLANTAS}, () => ({bloqueado: Array.from({length: W}, () => new Uint8Array(D)), muros: new Set(), estaticos: []}));
 let bloqueado = PLANTAS[0].bloqueado, muros = PLANTAS[0].muros, estaticos = PLANTAS[0].estaticos;
-function construirEn(p) { ({bloqueado, muros, estaticos} = PLANTAS[p]); }
-const ALTURA_PLANTA = 3.1;   // la planta 1 se dibuja encima de la baja, a esta altura
+let plantaObra = 0;   // la planta que se está construyendo: los puestos y los sitios nuevos quedan en ella
+function construirEn(p) { plantaObra = p; ({bloqueado, muros, estaticos} = PLANTAS[p]); }
+/** Una lista de sitios (para sentarse, descansar...) en la que cada sitio nuevo queda en la planta que se construye. */
+function conPlanta(lista) {
+  const fijar = x => { if (x && x.planta === undefined) x.planta = plantaObra; };
+  lista.forEach(fijar);
+  const push = lista.push.bind(lista);
+  lista.push = (...xs) => { xs.forEach(fijar); return push(...xs); };
+  return lista;
+}
+const ALTURA_PLANTA = 3.1;   // cada planta se dibuja encima de la de abajo, a esta altura
 let vista = 0;               // planta que se está viendo
 const arista = (a, b, c, d) => (a < c || (a === c && b < d)) ? `${a},${b}|${c},${d}` : `${c},${d}|${a},${b}`;
 function bloquear(x0, y0, x1, y1) {
@@ -962,7 +1013,7 @@ function decorMesa(x, y, w, d, cosa, ocupado, semilla) {
 /** Mesa con patas, faldón y 1 o 2 monitores cuya pantalla mira a +y; la persona se sienta delante (lado +y). */
 function puesto({x, y, w = 1.5, d = .7, color = "#2a2e37", monitores = 2, pintar = null, brilla = null, conSilla = true, colorSilla, decor = true}) {
   bloquear(x, y, x + w, y + d);
-  const asiento = {x: x + w / 2, y: y + d + .55, mira: "n"};
+  const asiento = {x: x + w / 2, y: y + d + .55, mira: "n", planta: plantaObra};
   const semilla = hash(x.toFixed(2) + "," + y.toFixed(2)), cosa = semilla % 5;
   const tapa = {top: shade(color, 1.28), izq: shade(color, .95), der: shade(color, .78)};
   const pata = {top: "#aab2bf", izq: "#8e97a6", der: "#6f7887"};
@@ -1001,6 +1052,7 @@ function planta(x, y, grande = false) {
 }
 
 // ---- MINERÍA: racks, puestos, holograma y empaquetadora ----
+construirEn(PLANTA_DE.mineria);
 const RACKS = [];
 for (let i = 0; i < 9; i++) { const x = .4 + i * 1.05; RACKS.push(x); bloquear(x, .3, x + .9, 1.15); estatico(x + .45 + .72, () => rack(x, .3)); }
 function rack(x, y) {
@@ -1048,6 +1100,7 @@ const HOLO = {x: 8.7, y: 3.3};
 bloquear(8.2, 2.8, 9.2, 3.8);
 
 // ---- LABORATORIO: ocho puestos (uno por prueba), cinta y trituradoras ----
+construirEn(PLANTA_DE.laboratorio);
 const ETAPAS = ["Generadas", "Rentables en muestra", "Fuera de muestra", "Prueba de la suerte", "Costes x2", "Consistencia", "Monte Carlo", "Estabilidad", "Test del mono", "Otras monedas", "Distinta a las del banco"];
 const PRUEBAS = ETAPAS.slice(2, -1);
 const EXPLICA = {
@@ -1117,6 +1170,7 @@ estatico(22.35 + 6.55, () => {
 });
 
 // ---- CÁMARA DEL BANCO ----
+construirEn(PLANTA_DE.banco);
 const VITRINA = {x: 24.8, y: 4.4, w: 4, d: 1.5};
 bloquear(VITRINA.x, VITRINA.y, VITRINA.x + VITRINA.w, VITRINA.y + VITRINA.d);
 estatico(VITRINA.x + 2 + VITRINA.y + .75, () => vitrina());
@@ -1146,10 +1200,12 @@ function vitrina() {
 }
 
 // ---- PASILLO ----
+construirEn(0);
 for (const [x, y] of [[29.4, 9.5], [12.5, 9.5]]) planta(x, y, true);
 const ROBOT = {x: 6, y: 10.4, dir: 1};
 
-// ---- SALA DE TRADING: 48 mesas en la planta baja (otras 40 en la sala de trading 2, en la planta 1) ----
+// ---- SALA DE TRADING: 48 mesas (otras 40 en la sala de trading 2, al lado) ----
+construirEn(PLANTA_DE.trading);
 const MESAS = [];
 for (const y of [12.2, 14.2, 16.2, 18.2, 20.2, 22.2])
   for (const x of [1, 3, 5, 7, 9, 11, 13, 15]) {
@@ -1161,6 +1217,7 @@ for (const y of [12.2, 14.2, 16.2, 18.2, 20.2, 22.2])
 planta(17.4, 11.6, true); planta(17.4, 23.4);
 
 // ---- SALA DE SCALPING: 12 mesas (4 por activo), cinta de precios en vivo ----
+construirEn(PLANTA_DE.scalping);
 const MESAS_SCALP = [];
 for (const y of [1.2, 3.2, 5.2])
   for (const x of [46.5, 48.5, 50.5, 52.5]) {
@@ -1251,15 +1308,16 @@ function pantallaTrader(mesa, w, h, i) {
 }
 
 // ---- COMITÉ ----
+construirEn(PLANTA_DE.comite);
 const MESA_COMITE = {x0: 20.5, x1: 27.5, y: 13.3, d: 1.2};
 bloquear(MESA_COMITE.x0, MESA_COMITE.y, MESA_COMITE.x1, MESA_COMITE.y + MESA_COMITE.d);
 for (let x = MESA_COMITE.x0; x < MESA_COMITE.x1; x++)
   estatico(x + .5 + MESA_COMITE.y + .6, () => {
     caja(x, MESA_COMITE.y, 0, 1, MESA_COMITE.d, .44, "#6b4b2e", {top: "#8a6440", izq: "#5a3e25", der: "#4a331e"});
   });
-const SILLAS_NORTE = [21.2, 22.6, 24, 25.4, 26.8].map(x => ({x, y: 12.7, mira: "s"}));
-const SILLAS_SUR = [21.2, 22.6, 24, 25.4, 26.8].map(x => ({x, y: 15.15, mira: "n"}));
-const SILLA_CABECERA = {x: 28.1, y: 13.9, mira: "o"};
+const SILLAS_NORTE = [21.2, 22.6, 24, 25.4, 26.8].map(x => ({x, y: 12.7, mira: "s", planta: PLANTA_DE.comite}));
+const SILLAS_SUR = [21.2, 22.6, 24, 25.4, 26.8].map(x => ({x, y: 15.15, mira: "n", planta: PLANTA_DE.comite}));
+const SILLA_CABECERA = {x: 28.1, y: 13.9, mira: "o", planta: PLANTA_DE.comite};
 for (const s of [...SILLAS_NORTE, ...SILLAS_SUR, SILLA_CABECERA]) silla(s.x, s.y, s.mira, "#2c2c34");
 estatico(24 + 11.35, () => {   // pantalla de riesgos
   caja(23.9, 11.28, 0, .2, .1, .5, "#222");
@@ -1270,6 +1328,7 @@ estatico(24 + 11.35, () => {   // pantalla de riesgos
 planta(29.4, 11.6); planta(18.6, 16.4);
 
 // ---- DESCANSO ----
+construirEn(PLANTA_DE.descanso);
 bloquear(18.3, 17.15, 22.3, 17.8);
 estatico(20.3 + 17.5, () => {
   // encimera con armarios
@@ -1372,7 +1431,7 @@ for (const [x, y, c] of [[23.5, 22.8, "#ff8a5c"], [24.6, 23.2, "#d4ff3a"]]) {
   estatico(x + y - .1, () => { objeto3D({tipo: "disco", x, y, z: 0, r: .36, alto: .26, color: c}); const [px, py] = iso(x, y, 0); ctx.fillStyle = shade(c, .7); ctx.beginPath(); ctx.ellipse(px, py - 5, 17, 10, 0, 0, TAU); ctx.fill(); ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(px - 1, py - 9, 14, 8, 0, 0, TAU); ctx.fill(); });
 }
 planta(29.4, 23.4, true); planta(18.6, 23.4); planta(29.4, 17.6);
-const SITIOS = [
+const SITIOS = conPlanta([
   {x: 18.8, y: 18.4, mira: "n", postura: "de_pie", tipo: "cafe"}, {x: 19.9, y: 18.4, mira: "n", postura: "de_pie", tipo: "cafe"},
   {x: 21, y: 18.5, mira: "n", postura: "de_pie", tipo: "cafe"},
   {x: 26, y: 20.3, mira: "s", postura: "sentado", tipo: "sofa"}, {x: 27, y: 20.3, mira: "s", postura: "sentado", tipo: "sofa"},
@@ -1382,11 +1441,12 @@ const SITIOS = [
   {x: 23.5, y: 22.75, mira: "s", postura: "sentado", tipo: "puf"}, {x: 24.6, y: 23.15, mira: "s", postura: "sentado", tipo: "puf"},
   {x: 24.2, y: 20.5, mira: "s", postura: "de_pie", tipo: "charla"}, {x: 25, y: 21.2, mira: "o", postura: "de_pie", tipo: "charla"},
   {x: 23.4, y: 21.3, mira: "e", postura: "de_pie", tipo: "charla"},
-];
+]);
 SITIOS.forEach(s => s.ocupante = null);
-const GATO = {x: 29.5, y: 21.1, z: .55};
+const GATO = {x: 29.5, y: 21.1, z: .55, planta: PLANTA_DE.descanso};
 
 // ---- MACROECONOMÍA: cuatro analistas y un globo holográfico ----
+construirEn(PLANTA_DE.macro);
 const MACRO_TICKERS = ["^GSPC", "DX-Y.NYB", "GC=F", "^TNX"];
 const PUESTOS_MACRO = [[30.7, 3.2], [33.1, 3.2], [30.7, 5.8], [33.1, 5.8]].map(([x, y], i) =>
   puesto({x, y, w: 1.6, color: "#1d3444", colorSilla: "#2b4a5e", pintar: (w, h) => pantallaAnalista(MACRO_TICKERS[i], w, h), brilla: () => "#5cc0ff"}));
@@ -1433,7 +1493,8 @@ function globo() {
 }
 planta(37.4, 8.4, true);
 
-// ---- TERRAZA: mesa con sombrilla, tumbonas, barbacoa y guirnalda de luces ----
+// ---- AZOTEA (parte oeste): mesa con sombrilla y tumbonas ----
+construirEn(PLANTA_DE.terraza1);
 bloquear(31.9, 14.9, 33.1, 16.1);
 estatico(32.5 + 15.5, () => {
   caja(32.45, 15.45, 0, .1, .1, .45, "#444");
@@ -1447,46 +1508,31 @@ for (const y of [20.2, 21.9]) {
   bloquear(33.4, y, 35.6, y + .7);
   estatico(34.5 + y + .35, () => { caja(33.4, y, 0, 2.2, .7, .22, "#e9e4dc", {top: "#fbf8f2"}); caja(35.1, y, .22, .5, .7, .28, "#e9e4dc", {top: "#fbf8f2"}); caja(33.5, y + .05, .22, 1.5, .6, .05, "#5cc0ff"); });
 }
-bloquear(35.9, 12.6, 36.9, 13.4);
-estatico(36.4 + 13, () => {
-  caja(35.9, 12.6, 0, 1, .8, .7, "#2b2b30", {top: "#3a3a40"});
-  plano(35.95, 12.65, .705, () => { for (let i = 0; i < 4; i++) { ctx.fillStyle = Math.sin(T * 4 + i) > 0 ? "#ff8a3c" : "#c2410c"; ctx.fillRect(8 + i * 22, 20, 14, 40); } });
-  brillo(36.4, 13, .8, 40, "#ff8a3c", .5);
-  if (Math.random() < .08) particulas.push({x: 36.4 + rand(-.2, .2), y: 13, z: .8, vx: 0, vy: 0, vz: .4, g: -.05, vida: 2, t: 0, color: "#ffffff", r: 2.5, vapor: true});
-});
-for (const [x, y] of [[37.5, 11.5], [37.5, 23.4], [30.6, 23.4]]) planta(x, y, true);
-// gimnasio: cinta de correr y pesas
-bloquear(35.6, 15.9, 36.6, 16.6);
-estatico(36.1 + 16.5, () => {
-  caja(35.65, 16.35, 0, .9, 1.25, .14, "#2b2f38", {top: "#15181d"});
-  plano(35.7, 16.4, .142, () => { ctx.strokeStyle = "rgba(255,255,255,.12)"; ctx.lineWidth = 3; const o = (T * 160) % 20; for (let v = o; v < 115; v += 20) { ctx.beginPath(); ctx.moveTo(5, v); ctx.lineTo(75, v); ctx.stroke(); } });
-  caja(35.65, 16.2, 0, .08, .15, .95, "#555"); caja(36.47, 16.2, 0, .08, .15, .95, "#555");
-  caja(35.65, 16.15, .9, .9, .22, .12, "#2b2f38", {top: "#3a404c"});
-  brillo(36.1, 16.2, 1, 16, "#2ee6a6", .5);
-});
-bloquear(36.8, 18.1, 37.5, 19.6);
-estatico(37.15 + 18.85, () => {
-  caja(36.85, 18.1, 0, .55, 1.4, .7, "#2b2f38", {top: "#3a404c"});
-  for (let i = 0; i < 4; i++) { const [px, py] = iso(37.1, 18.3 + i * .32, .72); circulo(px - 5, py - 3, 3.2, "#15181d"); circulo(px + 5, py - 3, 3.2, "#15181d"); ctx.fillStyle = "#777"; ctx.fillRect(px - 5, py - 4, 10, 2); }
-});
-SITIOS.push({x: 36.1, y: 17.05, mira: "n", postura: "de_pie", tipo: "cinta"}, {x: 36.3, y: 18.85, mira: "e", postura: "de_pie", tipo: "pesas"});
-SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
-const BOMBILLAS = [];
-for (let x = 30.4; x < 37.8; x += .55) BOMBILLAS.push([x, 11.2]);
-for (let y = 11.6; y < 23.8; y += .55) BOMBILLAS.push([37.8, y]);
+for (const [x, y] of [[30.6, 11.6], [30.6, 23.4]]) planta(x, y, true);
+const BOMBILLAS = [];   // (la guirnalda del antiguo patio; ahora las luces de la azotea están en BOMBILLAS1)
 SITIOS.push(
   {x: 31.75, y: 15.5, mira: "e", postura: "de_pie", tipo: "terraza"}, {x: 33.25, y: 15.5, mira: "o", postura: "de_pie", tipo: "terraza"},
   {x: 34, y: 20.55, mira: "s", postura: "sentado", tipo: "tumbona"}, {x: 34, y: 22.25, mira: "s", postura: "sentado", tipo: "tumbona"},
-  {x: 36.4, y: 13.9, mira: "n", postura: "de_pie", tipo: "barbacoa"}, {x: 35.4, y: 14.2, mira: "e", postura: "de_pie", tipo: "terraza"});
+  {x: 35.4, y: 14.2, mira: "e", postura: "de_pie", tipo: "terraza"});
 SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
 
 // ---- HOLDING: dos holders, moneda gigante y gráfico de zonas en la pared ----
+construirEn(PLANTA_DE.holding);
 const PUESTOS_HOLDING = [[38.7, 3.2], [38.7, 5.8]].map(([x, y], i) =>
   puesto({x, y, w: 1.6, color: "#3a2a12", colorSilla: "#5a3d16", pintar: (w, h) => pantallaHolder(i, w, h), brilla: () => "#f7931a"}));
 function planesHolding() { return Object.values(S && S.holding && S.holding.planes || {}); }
-// ---- TENDENCIA (en la sala de holding): dos mesas, cada una sigue la tendencia de tres monedas con velas diarias ----
-const PUESTOS_TENDENCIA = [[44.1, 2.6], [44.1, 5.9]].map(([x, y], i) =>
+// ---- SALA DE TENDENCIA (planta de inversión): dos mesas, cada una sigue la tendencia de tres monedas con velas diarias ----
+construirEn(PLANTA_DE.tendencia);
+const PUESTOS_TENDENCIA = [[16.4, 3.6], [20.4, 3.6]].map(([x, y], i) =>
   puesto({x, y, w: 1.6, color: "#2e2408", colorSilla: "#6b5410", pintar: (w, h, j) => pantallaTendencia(i, j || 0, w, h), brilla: () => "#c98500"}));
+bloquear(24.2, 4.4, 28.6, 5.6);
+estatico(26.4 + 5, () => {   // mesa de reuniones con las seis monedas marcadas
+  caja(24.2, 4.4, 0, 4.4, 1.2, .44, "#4a3410", {top: "#6b4c18", izq: "#3d2b0c", der: "#2e2009"});
+  ["BTC", "ETH", "SOL", "BNB", "XRP", "DOGE"].forEach((m, k) => caja(24.45 + k * .7, 4.75, .44, .4, .5, .03, "", {top: ["#f7931a", "#8a92b2", "#14f195", "#f3ba2f", "#5a6470", "#c2a633"][k], izq: "#222", der: "#111"}));
+}, 26.4, 5);
+for (const [x, y, m] of [[24.8, 3.95, "s"], [26.4, 3.95, "s"], [28, 3.95, "s"], [24.8, 6.05, "n"], [26.4, 6.05, "n"], [28, 6.05, "n"]]) silla(x, y, m, "#6b5410");
+planta(14.5, .9, true); planta(29.4, 8.4); planta(14.5, 8.4);
+construirEn(PLANTA_DE.holding);
 function monedasTendencia() { return Object.values(S && S.tendencia && S.tendencia.monedas || {}); }
 function pintarTendencia(g, w, h, p, letra = 5) {
   const sr = p.precios || [], md = (p.medias || []).slice(-sr.length), desfase = sr.length - md.length;
@@ -1540,6 +1586,7 @@ function monedaGigante() {
 planta(45.4, 8.4, true); planta(45.4, .9);
 
 // ---- CONTROL DE RIESGOS: pantalla de límites, baliza y puestos ----
+construirEn(PLANTA_DE.riesgos);
 estatico(42 + 11.5, () => {
   caja(41.9, 11.3, 0, .2, .1, .5, "#222");
   caja(38.6, 11.22, .5, 6.8, .12, 1.4, "#101217");
@@ -1604,55 +1651,23 @@ planta(45.4, 23.4, true); planta(38.6, 23.4);
 SITIOS.push({x: 40.5, y: 20.3, mira: "e", postura: "sentado", tipo: "crisis"}, {x: 43.5, y: 20.3, mira: "o", postura: "sentado", tipo: "crisis"});
 SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
 
-// ---- tabiques ----
-muroH(9, 0, 54, [[4, 6], [15, 17], [25, 27], [33, 35], [41, 43], [49, 51]], 1, "#d4ff3a");
-muroV(46, 0, 9, [], 1, "#ff4fd8");
-bloquear(X_ALA, 11, W, D);   // fuera del edificio
-muroV(38, 0, 9, [], 1, "#f7931a");
-muroH(11, 38, 46, [[41, 43]], 1, "#ff5a76");
-muroV(38, 11, 24, [], 1, "#ff5a76");
-muroV(30, 0, 9, [], 1, "#5cc0ff");
-muroH(11, 30, 38, [[33, 35]], 1, "#d4ff3a");
-muroV(30, 11, 24, [[19, 21]], 1, "#ff8a5c");
-muroV(10, 0, 9, [[6, 7]], 1, "#ffc24a");
-muroV(21, 0, 9, [[6, 7]], 1, "#ffcf5a");
-muroH(11, 0, 18, [[8, 10]], 1, "#d4ff3a");
-muroH(11, 18, 30, [[23, 25]], 1, "#b58cff");
-muroV(18, 11, 24, [[20, 22]], 1, "#ff8a5c");
-muroH(17, 18, 30, [[26, 28]], 1, "#ff8a5c");
-for (let y = 0; y < D; y++) { muros.add(arista(-1, y, 0, y)); }
-estaticos.sort((a, b) => a.k - b.k);
 
-// =================================================== PLANTA 1 =========
-// Arriba: la incubadora (estrategias de examen con dinero de prueba), el equipo Quant, la academia, comunicación,
-// infraestructura, la cafetería, la sala de juegos y una terraza al aire libre. Se sube y se baja en ascensor.
-construirEn(1);
-const SALAS1 = [
-  {id: "comunicacion", nombre: "COMUNICACIÓN", x0: 0, y0: 0, x1: 9, y1: 9, a: "#1f1a26", b: "#241e2c", rotulo: "rgba(255,138,92,.12)"},
-  {id: "infra", nombre: "SISTEMAS", x0: 9, y0: 0, x1: 17, y1: 9, a: "#11161c", b: "#141a21", rotulo: "rgba(46,230,166,.1)"},
-  {id: "quant", nombre: "EQUIPO QUANT", x0: 17, y0: 0, x1: 28, y1: 9, a: "#0f1a2a", b: "#122034", rotulo: "rgba(92,192,255,.11)"},
-  {id: "academia", nombre: "ACADEMIA", x0: 28, y0: 0, x1: 37, y1: 9, a: "#e8e3d4", b: "#dfd9c9", rotulo: "rgba(60,40,0,.1)"},
-  {id: "cafeteria", nombre: "CAFETERÍA", x0: 37, y0: 0, x1: 46, y1: 9, a: "#c79f76", b: "#be966d", rotulo: "rgba(60,30,0,.13)"},
-  {id: "juegos", nombre: "JUEGOS", x0: 46, y0: 0, x1: 54, y1: 9, a: "#1c1432", b: "#21183b", rotulo: "rgba(181,140,255,.15)"},
-  {id: "pasillo1", nombre: "", x0: 0, y0: 9, x1: 54, y1: 11, a: "#101318", b: "#12161c", rotulo: ""},
-  {id: "incubadora", nombre: "INCUBADORA", x0: 0, y0: 11, x1: 18, y1: 24, a: "#efeee6", b: "#e6e4da", rotulo: "rgba(120,60,0,.08)"},
-  {id: "trading2", nombre: "SALA DE TRADING 2", x0: 18, y0: 11, x1: X_TERRAZA1, y1: 24, a: "#eceee8", b: "#e2e5dd", rotulo: "rgba(0,0,0,.075)"},
-  {id: "terraza1", nombre: "TERRAZA", x0: X_TERRAZA1, y0: 11, x1: 46, y1: 24, a: "#a07a52", b: "#96714a", rotulo: "rgba(40,20,0,.13)"},
-];
-const enPlanta1 = s => ({...s, planta: 1});
+// ==================================================== MÁS SALAS =======
+// Cada sección se construye en la planta de su sector (PLANTA_DE). Se sube y se baja en ascensor.
 
 // ---- INCUBADORA: 24 plazas de trading y 8 de scalping, con dinero de prueba que no es del fondo ----
+construirEn(PLANTA_DE.incubadora);
 const PLAZAS = {trading: [], scalping: []};
 for (const y of [12.2, 14.2, 16.2])
   for (const x of [1, 3, 5, 7, 9, 11, 13, 15]) {
     const mesa = {trader: null, incubadora: true};
-    mesa.asiento = enPlanta1(puesto({x, y, w: 1.5, color: "#cdd3db", colorSilla: "#5d6470", pintar: (w, h, i) => pantallaIncubada(mesa, w, h, i),
+    mesa.asiento = (puesto({x, y, w: 1.5, color: "#cdd3db", colorSilla: "#5d6470", pintar: (w, h, i) => pantallaIncubada(mesa, w, h, i),
       brilla: () => mesa.trader && mesa.trader.datos ? colorExamen(mesa.trader.datos) : null}));
     PLAZAS.trading.push(mesa);
   }
 for (const x of [1, 3, 5, 7, 9, 11, 13, 15]) {
   const mesa = {trader: null, incubadora: true, scalping: true};
-  mesa.asiento = enPlanta1(puesto({x, y: 18.3, w: 1.5, color: "#4a3a66", colorSilla: "#5a3d73", pintar: (w, h, i) => pantallaIncubada(mesa, w, h, i),
+  mesa.asiento = (puesto({x, y: 18.3, w: 1.5, color: "#4a3a66", colorSilla: "#5a3d73", pintar: (w, h, i) => pantallaIncubada(mesa, w, h, i),
     brilla: () => mesa.trader && mesa.trader.datos ? colorExamen(mesa.trader.datos) : null}));
   PLAZAS.scalping.push(mesa);
 }
@@ -1684,7 +1699,7 @@ function pantallaIncubada(mesa, w, h, i) {
   }
 }
 // mesa de la supervisora de la incubadora y rincón de estudio
-const ASIENTO_LORENA = enPlanta1(puesto({x: 7.2, y: 21, w: 1.8, color: "#7a4a1d", colorSilla: "#9a5a22", pintar: (w, h, i) => pantallaLorena(w, h, i), brilla: () => "#ff8a5c"}));
+const ASIENTO_LORENA = (puesto({x: 7.2, y: 21, w: 1.8, color: "#7a4a1d", colorSilla: "#9a5a22", pintar: (w, h, i) => pantallaLorena(w, h, i), brilla: () => "#ff8a5c"}));
 function pantallaLorena(w, h, i) {
   const inc = S && S.papel && S.papel.grupos_incubadora || {}, t = inc.trading || {}, s = inc.scalping || {};
   ctx.fillStyle = "#140c05"; ctx.fillRect(0, 0, w, h);
@@ -1703,8 +1718,9 @@ for (const [x, y, m] of [[1.9, 20.75, "s"], [3.4, 20.75, "s"], [1.9, 22.85, "n"]
 planta(17.4, 11.6, true); planta(17.4, 23.4); planta(.5, 23.4, true); planta(10.8, 23.4);
 
 // ---- EQUIPO QUANT: Kelly, Monte Carlo y post mortem ----
+construirEn(PLANTA_DE.quant);
 const PUESTOS_QUANT = [[18, 3.2], [20.7, 3.2], [23.4, 3.2]].map(([x, y], i) =>
-  enPlanta1(puesto({x, y, w: 1.8, color: "#15263c", colorSilla: "#23405f", pintar: (w, h, k) => pantallaQuant(i, k, w, h), brilla: () => "#5cc0ff"})));
+  (puesto({x, y, w: 1.8, color: "#15263c", colorSilla: "#23405f", pintar: (w, h, k) => pantallaQuant(i, k, w, h), brilla: () => "#5cc0ff"})));
 function pantallaQuant(i, k, w, h) {
   ctx.fillStyle = "#06101c"; ctx.fillRect(0, 0, w, h);
   ctx.strokeStyle = "#5cc0ff"; ctx.lineWidth = .8;
@@ -1736,23 +1752,25 @@ for (const [x, y, m] of [[19.1, 6.05, "s"], [20.6, 6.05, "s"], [19.1, 7.95, "n"]
 planta(27.5, .9, true);
 
 // ---- ACADEMIA: pizarra con las lecciones y pupitres ----
+construirEn(PLANTA_DE.academia);
 const PUPITRES = [];
-for (const y of [5, 6.9]) for (const x of [29.6, 31.3, 33, 34.7]) {
+for (const y of [5, 6.9]) for (const x of [31.6, 33.3, 35, 36.7]) {
   bloquear(x - .45, y - .75, x + .45, y - .35);
   estatico(x + y - .55, () => caja(x - .45, y - .75, 0, .9, .4, .5, "#c9a47a", {top: "#e2bf93", izq: "#b8936a", der: "#9c7a55"}), x, y);
   silla(x, y, "n", "#6b5a44");
-  PUPITRES.push({x, y, mira: "n", postura: "sentado", tipo: "clase", planta: 1});
+  PUPITRES.push({x, y, mira: "n", postura: "sentado", tipo: "clase", planta: PLANTA_DE.academia});
 }
-bloquear(35.6, 1.2, 36.4, 2);
-estatico(36 + 1.6, () => {   // atril de la profesora
-  caja(35.65, 1.25, 0, .7, .7, 1, "#6b4b2e", {top: "#8a6440"});
-  caja(35.7, 1.3, 1, .6, .45, .04, "", {top: "#f4f6f9", izq: "#d9dde3", der: "#c9cdd3"});
-}, 36, 1.6);
-planta(28.6, 8.4); planta(36.4, 8.4, true);
+bloquear(37.6, 1.2, 38.4, 2);
+estatico(38 + 1.6, () => {   // atril de la profesora
+  caja(37.65, 1.25, 0, .7, .7, 1, "#6b4b2e", {top: "#8a6440"});
+  caja(37.7, 1.3, 1, .6, .45, .04, "", {top: "#f4f6f9", izq: "#d9dde3", der: "#c9cdd3"});
+}, 38, 1.6);
+planta(30.6, 8.4); planta(38.4, 8.4, true);
 
 // ---- COMUNICACIÓN: informe del día, plató y redes ----
+construirEn(PLANTA_DE.comunicacion);
 const PUESTOS_COM = [[1, 3.2], [3.5, 3.2]].map(([x, y], i) =>
-  enPlanta1(puesto({x, y, w: 1.8, color: "#2e2236", colorSilla: "#4a3352", pintar: (w, h, k) => pantallaComunicacion(i, k, w, h), brilla: () => "#ff8a5c"})));
+  (puesto({x, y, w: 1.8, color: "#2e2236", colorSilla: "#4a3352", pintar: (w, h, k) => pantallaComunicacion(i, k, w, h), brilla: () => "#ff8a5c"})));
 function pantallaComunicacion(i, k, w, h) {
   const inf = S && S.informe;
   ctx.fillStyle = "#140a12"; ctx.fillRect(0, 0, w, h);
@@ -1789,8 +1807,9 @@ silla(6.6, 4.75, "s", "#4a3352");
 planta(8.5, .9, true); planta(.6, 8.4);
 
 // ---- SISTEMAS: servidores y el panel de salud del sistema ----
+construirEn(PLANTA_DE.infra);
 for (let i = 0; i < 7; i++) { const x = 9.35 + i * 1.05; bloquear(x, .3, x + .9, 1.15); estatico(x + .45 + .72, () => rack(x, .3), x + .45, .72); }
-const ASIENTO_NESTOR = enPlanta1(puesto({x: 10.2, y: 4.6, w: 1.8, color: "#1b2a24", colorSilla: "#2b443a", pintar: (w, h, i) => pantallaSistemaMini(w, h, i), brilla: () => sistemaOk() ? "#2ee6a6" : "#ff5a76"}));
+const ASIENTO_NESTOR = (puesto({x: 10.2, y: 4.6, w: 1.8, color: "#1b2a24", colorSilla: "#2b443a", pintar: (w, h, i) => pantallaSistemaMini(w, h, i), brilla: () => sistemaOk() ? "#2ee6a6" : "#ff5a76"}));
 function sistemaOk() {
   const p = S && S.sistema && S.sistema.papel;
   return !p || !p.errores_seguidos;
@@ -1829,6 +1848,7 @@ function pantallaSistema(w, h) {
 planta(16.5, 8.4, true);
 
 // ---- CAFETERÍA: barra, cafetera, vitrina y mesas ----
+construirEn(PLANTA_DE.cafeteria);
 bloquear(38, 1.9, 44.6, 2.65);
 estatico(41.3 + 2.3, () => {
   caja(38, 1.9, 0, 6.6, .75, .98, "#5a3a22", {top: "#e9e4dc", izq: "#6b4528", der: "#4e331e"});
@@ -1851,10 +1871,11 @@ for (const [x, y] of MESAS_CAFE) {
   estatico(x + y, () => { caja(x - .05, y - .05, 0, .1, .1, .45, "#2a2e36"); objeto3D({tipo: "disco", x, y, z: .44, r: .42, alto: .03, color: "#f2efe8"}); const [px, py] = iso(x, y, .46); ctx.fillStyle = "#3a2a1c"; ctx.beginPath(); ctx.ellipse(px, py + 1, 19, 9.5, 0, 0, TAU); ctx.fill(); ctx.fillStyle = "#f2efe8"; ctx.beginPath(); ctx.ellipse(px, py, 19, 9.5, 0, 0, TAU); ctx.fill(); caja(x - .05, y - .1, .46, .1, .1, .1, "#f4f1ea", {top: "#4a2c1d"}); }, x, y);
   silla(x - .75, y, "e", "#7a4a1d"); silla(x + .75, y, "o", "#7a4a1d");
 }
-const ASIENTO_CHEMA = {x: 41.3, y: 1.25, mira: "s", postura: "de_pie", planta: 1};
+const ASIENTO_CHEMA = {x: 41.3, y: 1.25, mira: "s", postura: "de_pie", planta: PLANTA_DE.cafeteria};
 planta(45.4, 8.4, true); planta(37.6, 8.4);
 
 // ---- SALA DE JUEGOS: futbolín, recreativas, dardos y pufs ----
+construirEn(PLANTA_DE.juegos);
 const FUTBOLIN = {x: 47.2, y: 3.6, w: 1.5, d: .8};
 bloquear(FUTBOLIN.x, FUTBOLIN.y, FUTBOLIN.x + FUTBOLIN.w, FUTBOLIN.y + FUTBOLIN.d);
 estatico(FUTBOLIN.x + .75 + FUTBOLIN.y + .4, () => {
@@ -1892,6 +1913,7 @@ for (const [x, y, c] of [[50.2, 7.1, "#ff8a5c"], [51.4, 7.4, "#d4ff3a"], [52.6, 
 planta(53.4, 8.4, true); planta(46.6, 8.4);
 
 // ---- PASILLO: máquina de vending y bancos ----
+construirEn(1);
 bloquear(30, 9.15, 30.8, 9.75);
 estatico(30.4 + 9.5, () => {
   caja(30, 9.15, 0, .8, .6, 1.5, "#1f2a3a", {top: "#2c3a50"});
@@ -1900,17 +1922,19 @@ estatico(30.4 + 9.5, () => {
 }, 30.4, 9.5);
 for (const x of [8, 39]) planta(x, 10.3);
 
-// ---- SALA DE TRADING 2: 40 mesas más para la sala de trading (las mesas 49 a 88), en la planta 1 ----
+// ---- SALA DE TRADING 2: 40 mesas más para la sala de trading (las mesas 49 a 88), junto a la primera ----
+construirEn(PLANTA_DE.trading2);
 for (const y of [12.2, 14.2, 16.2, 18.2, 20.2])
   for (const x of [19, 21, 23, 25, 27, 29, 31, 33]) {
     const mesa = {trader: null, sala2: true};
-    mesa.asiento = enPlanta1(puesto({x, y, w: 1.5, color: "#a9b3c1", colorSilla: "#2d3442", pintar: (w, h, i) => pantallaTrader(mesa, w, h, i),
+    mesa.asiento = (puesto({x, y, w: 1.5, color: "#a9b3c1", colorSilla: "#2d3442", pintar: (w, h, i) => pantallaTrader(mesa, w, h, i),
       brilla: () => mesa.trader ? colorTrader(mesa.trader) : null}));
     MESAS.push(mesa);
   }
 planta(18.5, 23.4, true); planta(34.4, 23.4); planta(26.4, 23.4, true);
 
-// ---- TERRAZA: piscina, fogata, barbacoa, sombrilla, césped y telescopio ----
+// ---- AZOTEA (parte este): piscina, fogata, barbacoa, sombrilla, césped y telescopio ----
+construirEn(PLANTA_DE.terraza1);
 function sombrilla(x, y, c) {
   bloquear(x - .45, y - .45, x + .45, y + .45);
   estatico(x + y, () => {
@@ -1926,7 +1950,7 @@ const SITIOS_SOMBRILLA = [];
 for (const [x, y, c] of [[43.5, 16.6, "#2ee6a6"]]) {
   sombrilla(x, y, c);
   silla(x - .8, y, "e", "#e9e4dc"); silla(x + .8, y, "o", "#e9e4dc");
-  SITIOS_SOMBRILLA.push({x: x - .8, y, mira: "e", postura: "sentado", tipo: "terraza", planta: 1}, {x: x + .8, y, mira: "o", postura: "sentado", tipo: "terraza", planta: 1});
+  SITIOS_SOMBRILLA.push({x: x - .8, y, mira: "e", postura: "sentado", tipo: "terraza", planta: PLANTA_DE.terraza1}, {x: x + .8, y, mira: "o", postura: "sentado", tipo: "terraza", planta: PLANTA_DE.terraza1});
 }
 const PISCINA = {x0: 36.6, y0: 18.1, x1: 42.4, y1: 20.9};
 bloquear(PISCINA.x0 - .2, PISCINA.y0 - .2, PISCINA.x1 + .2, PISCINA.y1 + .2);
@@ -1954,10 +1978,10 @@ const TUMBONAS = [];
 for (const x of [37.4, 38.9, 40.4, 41.9]) {
   bloquear(x - .35, 22.1, x + .35, 23.5);
   estatico(x + 22.8, () => { caja(x - .35, 22.15, 0, .7, 1.3, .22, "#e9e4dc", {top: "#fbf8f2"}); caja(x - .35, 22.15, .22, .7, .45, .32, "#e9e4dc", {top: "#fbf8f2"}); caja(x - .3, 22.6, .22, .6, .85, .04, ["#ff8a5c", "#5cc0ff", "#d4ff3a", "#ff5a76"][TUMBONAS.length % 4]); }, x, 22.8);
-  TUMBONAS.push({x, y: 22.85, mira: "n", postura: "sentado", tipo: "tumbona", planta: 1});
+  TUMBONAS.push({x, y: 22.85, mira: "n", postura: "sentado", tipo: "tumbona", planta: PLANTA_DE.terraza1});
 }
 const BOMBILLAS1 = [];
-for (let x = X_TERRAZA1 + .4; x < 45.8; x += .6) BOMBILLAS1.push([x, 23.85, 1.15]);
+for (let x = X_AZOTEA + .4; x < 45.8; x += .6) BOMBILLAS1.push([x, 23.85, 1.15]);
 for (let y = 11.4; y < 23.8; y += .6) BOMBILLAS1.push([45.85, y, 1.15]);
 const FOGATA = {x: 39.6, y: 15.4};
 bloquear(FOGATA.x - .5, FOGATA.y - .5, FOGATA.x + .5, FOGATA.y + .5);
@@ -1975,14 +1999,14 @@ for (const [x, y, w, d, mira] of [[37.5, 14.7, .7, 1.5, "e"], [38.9, 13.3, 1.5, 
   bloquear(x, y, x + w, y + d);
   estatico(x + w / 2 + y + d / 2, () => { caja(x, y, 0, w, d, .38, "#3d5a80", {top: "#d9d2c3", izq: "#4a6b94", der: "#324b6b"}); caja(x + (mira === "e" ? 0 : mira === "o" ? w - .18 : 0), y + (mira === "s" ? 0 : 0), .38, mira === "s" ? w : .18, mira === "s" ? .18 : d, .32, "#3d5a80", {top: "#4d6d96"}); }, x + w / 2, y + d / 2);
   const cx = x + w / 2, cy = y + d / 2;
-  SITIOS_FUEGO.push({x: mira === "e" ? cx + .55 : mira === "o" ? cx - .55 : cx, y: mira === "s" ? cy + .55 : cy, mira, postura: "sentado", tipo: "fuego", planta: 1});
+  SITIOS_FUEGO.push({x: mira === "e" ? cx + .55 : mira === "o" ? cx - .55 : cx, y: mira === "s" ? cy + .55 : cy, mira, postura: "sentado", tipo: "fuego", planta: PLANTA_DE.terraza1});
 }
 bloquear(43.5, 12, 44.5, 12.8);
 estatico(44 + 12.4, () => {
   caja(43.5, 12, 0, 1, .8, .7, "#2b2b30", {top: "#3a3a40"});
   plano(43.55, 12.05, .705, () => { for (let i = 0; i < 4; i++) { ctx.fillStyle = Math.sin(T * 4 + i) > 0 ? "#ff8a3c" : "#c2410c"; ctx.fillRect(8 + i * 22, 20, 14, 40); } });
   brillo(44, 12.4, .8, 40, "#ff8a3c", .5);
-  if (Math.random() < .08 && vista === 1) particulas.push({x: 44 + rand(-.2, .2), y: 12.4, z: .8, vx: 0, vy: 0, vz: .4, g: -.05, vida: 2, t: 0, color: "#ffffff", r: 2.5, vapor: true, planta: 1});
+  if (Math.random() < .08 && vista === PLANTA_DE.terraza1) particulas.push({x: 44 + rand(-.2, .2), y: 12.4, z: .8, vx: 0, vy: 0, vz: .4, g: -.05, vida: 2, t: 0, color: "#ffffff", r: 2.5, vapor: true, planta: PLANTA_DE.terraza1});
 }, 44, 12.4);
 function arbol(x, y, s = 1) {
   bloquear(x - .4, y - .4, x + .4, y + .4);
@@ -2008,34 +2032,308 @@ estatico(35.9 + 12.4, () => {   // carrito de bebidas
   for (let k = 0; k < 4; k++) caja(35.5 + k * .22, 12.25, .6, .1, .1, .28, ["#2ee6a6", "#ff8a5c", "#ffcf5a", "#5cc0ff"][k]);
 }, 35.9, 12.4);
 // barandilla de cristal en los bordes de la terraza
-for (let x = X_TERRAZA1; x < X_ALA; x++) estatico(x + .5 + 24, () => { caja(x, 23.9, 0, 1, .08, .9, "#000000", {top: "rgba(255,255,255,.35)", izq: "rgba(170,215,255,.16)", der: "rgba(170,215,255,.1)"}); caja(x, 23.88, .9, 1, .12, .05, "#c9ced5"); }, x + .5, 23.95);
+for (let x = X_AZOTEA; x < X_ALA; x++) estatico(x + .5 + 24, () => { caja(x, 23.9, 0, 1, .08, .9, "#000000", {top: "rgba(255,255,255,.35)", izq: "rgba(170,215,255,.16)", der: "rgba(170,215,255,.1)"}); caja(x, 23.88, .9, 1, .12, .05, "#c9ced5"); }, x + .5, 23.95);
 for (let y = 11; y < D; y++) estatico(X_ALA + y + .5, () => { caja(X_ALA - .08, y, 0, .08, 1, .9, "#000000", {top: "rgba(255,255,255,.35)", izq: "rgba(170,215,255,.12)", der: "rgba(170,215,255,.16)"}); caja(X_ALA - .1, y, .9, .12, 1, .05, "#c9ced5"); }, X_ALA - .05, y + .5);
 
-// ---- tabiques de la planta 1 ----
-muroH(9, 0, 54, [[4, 6], [12, 14], [21, 23], [31, 33], [40, 42], [49, 51]], 1, "#d4ff3a");
-muroV(9, 0, 9, [], 1, "#ff8a5c");
-muroV(17, 0, 9, [], 1, "#2ee6a6");
-muroV(28, 0, 9, [], 1, "#5cc0ff");
-muroV(37, 0, 9, [], 1, "#ffcf5a");
-muroV(46, 0, 9, [], 1, "#b58cff");
-muroH(11, 0, 18, [[8, 10]], 1, "#ff8a5c");
-muroH(11, 18, X_TERRAZA1, [[18, 20], [33, 35]], 1, "#d4ff3a");
-muroH(11, X_TERRAZA1, 46, [[37, 39], [42, 44]], 1, "#2ee6a6");
-muroV(18, 11, 24, [[19, 21]], 1, "#ff8a5c");
-muroV(X_TERRAZA1, 11, 24, [], 1, "#d4ff3a");
-bloquear(X_ALA, 11, W, D);   // fuera del edificio
-for (let y = 0; y < D; y++) muros.add(arista(-1, y, 0, y));
+// ---- piezas para las salas nuevas: sofá, estantería, mesa baja ----
+function sofa(x, y, w, d, mira, color = "#3d5a80") {   // devuelve los sitios para sentarse
+  bloquear(x, y, x + w, y + d);
+  const respaldo = {top: shade(color, 1.2), izq: shade(color, .9), der: shade(color, .7)};
+  estatico(x + w / 2 + y + d / 2, () => {
+    caja(x, y, 0, w, d, .38, color, {top: "#d9d2c3", izq: shade(color, .9), der: shade(color, .7)});
+    if (mira === "s") caja(x, y, .38, w, .18, .32, color, respaldo);
+    else if (mira === "n") caja(x, y + d - .18, .38, w, .18, .32, color, respaldo);
+    else if (mira === "e") caja(x, y, .38, .18, d, .32, color, respaldo);
+    else caja(x + w - .18, y, .38, .18, d, .32, color, respaldo);
+  }, x + w / 2, y + d / 2);
+  const n = Math.max(1, Math.round((mira === "e" || mira === "o" ? d : w) / .9)), sitios = [];
+  for (let k = 0; k < n; k++) {
+    const t = (k + .5) / n;
+    if (mira === "s") sitios.push({x: x + t * w, y: y + d + .25, mira: "s"});
+    else if (mira === "n") sitios.push({x: x + t * w, y: y - .25, mira: "n"});
+    else if (mira === "e") sitios.push({x: x + w + .25, y: y + t * d, mira: "e"});
+    else sitios.push({x: x - .25, y: y + t * d, mira: "o"});
+  }
+  return sitios.map(s => ({...s, postura: "sentado", tipo: "sofa", planta: plantaObra}));
+}
+function mesaBaja(x, y, w, d, color = "#6b4b2e") {
+  bloquear(x, y, x + w, y + d);
+  estatico(x + w / 2 + y + d / 2, () => caja(x, y, 0, w, d, .3, color, {top: shade(color, 1.3), izq: shade(color, .85), der: shade(color, .7)}), x + w / 2, y + d / 2);
+}
+function estanteria(x, y, w) {   // pegada a la pared del fondo, llena de libros de colores
+  bloquear(x, y, x + w, y + .5);
+  estatico(x + w / 2 + y + .25, () => {
+    caja(x, y, 0, w, .5, 1.9, "#4a3524", {top: "#5a4130", izq: "#3d2b1d", der: "#2e2116"});
+    caraY(x + .02, y + .502, 1.85, () => {
+      ctx.fillStyle = "#2a1d12"; ctx.fillRect(0, 0, w * 100, 185);
+      const colores = ["#c2302f", "#1d3a8a", "#2f8f5b", "#ffcf5a", "#8a6440", "#5cc0ff", "#e9e4dc", "#b58cff"];
+      for (let fila = 0; fila < 4; fila++) {
+        let u = 4;
+        while (u < w * 100 - 8) {
+          const a = 5 + ((u * 7 + fila * 13) % 6), h = 28 + ((u * 3 + fila * 5) % 12);
+          ctx.fillStyle = colores[(u + fila * 3) % colores.length]; ctx.fillRect(u, 8 + fila * 45 + (40 - h), a, h);
+          u += a + 1;
+        }
+        ctx.fillStyle = "#4a3524"; ctx.fillRect(0, 46 + fila * 45, w * 100, 4);
+      }
+    });
+  }, x + w / 2, y + .25);
+}
+function sitios(lista, tipo) { for (const s of lista) SITIOS.push({...s, tipo: tipo || s.tipo}); }
+
+// ---- RECEPCIÓN (planta baja · trading): mostrador, recepcionista, sofás de espera y el directorio de plantas ----
+construirEn(PLANTA_DE.recepcion);
+const ASIENTO_RECEPCION = puesto({x: 5.6, y: 2.4, w: 1.8, color: "#2b2f38", colorSilla: "#3a404c", pintar: (w, h, i) => pantallaRecepcion(w, h, i), brilla: () => "#d4ff3a"});
+bloquear(3.8, 4.1, 9.2, 4.9);
+estatico(6.5 + 4.5, () => {   // mostrador con el logo
+  caja(3.8, 4.1, 0, 5.4, .8, .95, "#1e2230", {top: "#e9e6df", izq: "#2a2f3d", der: "#161a24"});
+  caraY(3.85, 4.9 + .002, .9, () => {
+    ctx.fillStyle = "#1e2230"; ctx.fillRect(0, 0, 530, 90);
+    ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 70, 530, 4);
+    ctx.font = "900 34px Inter, sans-serif"; ctx.fillText("TF", 22, 52);
+    ctx.fillStyle = "#e9edf3"; ctx.font = "800 18px Inter, sans-serif"; ctx.fillText("TRADING FLOOR · RECEPCIÓN", 80, 46);
+  });
+  brillo(6.5, 4.9, .5, 90, "#d4ff3a", .18);
+}, 6.5, 4.5);
+const SITIOS_RECEPCION = [...sofa(11.2, 6.9, 3.2, .8, "n", "#3a3f4b"), ...sofa(11.2, 1.1, 3.2, .8, "s", "#3a3f4b")];
+mesaBaja(11.8, 3.7, 2, 1, "#5a4636");
+planta(.6, 8.4, true); planta(16.4, 8.4, true); planta(16.4, .9); planta(.6, .9);
+function pantallaRecepcion(w, h, i) {
+  ctx.fillStyle = "#0d1118"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#d4ff3a"; ctx.font = "800 5px JetBrains Mono, monospace";
+  ctx.fillText(i ? "VISITAS" : "BIENVENIDA", 3, 8);
+  ctx.fillStyle = "#cfd6e0"; ctx.font = "700 4.2px Inter, sans-serif";
+  if (i) ["Paper trading", "dinero ficticio", "4 plantas"].forEach((l, n) => ctx.fillText(l, 3, 15 + n * 6));
+  else [0, 1, 2, 3].forEach(p => ctx.fillText(`${p} · ${SECTORES[p]}`, 3, 15 + p * 5));
+}
+
+// ---- MESA DE ANÁLISIS (planta baja · trading): la mesa de seis de los vídeos, con reglas medidas (mesa.py) ----
+construirEn(PLANTA_DE.analisis);
+const MESA_ANALISIS = {x0: 34.6, x1: 41, y: 4.2, d: 1.3};
+bloquear(MESA_ANALISIS.x0, MESA_ANALISIS.y, MESA_ANALISIS.x1, MESA_ANALISIS.y + MESA_ANALISIS.d);
+estatico(37.8 + 4.85, () => {
+  caja(MESA_ANALISIS.x0, MESA_ANALISIS.y, 0, MESA_ANALISIS.x1 - MESA_ANALISIS.x0, MESA_ANALISIS.d, .44, "#1b2230", {top: "#2a3344", izq: "#161c28", der: "#10151e"});
+  plano(MESA_ANALISIS.x0 + .1, MESA_ANALISIS.y + .1, .441, () => { ctx.fillStyle = "rgba(212,255,58,.35)"; ctx.fillRect(0, 50, 620, 4); });
+  for (const [x, y] of [[35.3, 4.3], [37.4, 4.3], [39.5, 4.3], [35.3, 5.05], [37.4, 5.05], [39.5, 5.05]]) {   // portátiles
+    caja(x, y, .44, .55, .38, .02, "#15181e", {top: "#2b303a"});
+    caja(x + .02, y + (y < 4.8 ? 0 : .34), .46, .51, .04, .3, "#101318", {top: "#22262e"});
+  }
+  brillo(37.8, 4.85, .6, 120, "#d4ff3a", .12);
+}, 37.8, 4.85);
+const ASIENTOS_ANALISIS = [
+  {x: 41.5, y: 4.85, mira: "o"},                                                     // jefe de mesa, en la cabecera
+  {x: 35.6, y: 3.75, mira: "s"}, {x: 37.7, y: 3.75, mira: "s"}, {x: 39.8, y: 3.75, mira: "s"},
+  {x: 35.6, y: 5.95, mira: "n"}, {x: 37.7, y: 5.95, mira: "n"},
+].map(a => ({...a, postura: "sentado", planta: plantaObra}));
+for (const a of ASIENTOS_ANALISIS) silla(a.x, a.y, a.mira, "#2b3344");
+silla(39.8, 5.95, "n", "#2b3344");
+planta(30.6, 8.4, true); planta(45.4, 8.4); planta(45.4, .9, true);
+
+// ---- TESORERÍA (planta de inversión): el dinero sin invertir y sus intereses ----
+construirEn(PLANTA_DE.tesoreria);
+const ASIENTO_TESORERIA = puesto({x: 4.4, y: 4.2, w: 1.8, color: "#3b3422", colorSilla: "#5a4a2a", pintar: (w, h, i) => pantallaTesoreria(w, h, i), brilla: () => "#ffcf5a"});
+bloquear(10.2, .4, 13.2, 2.2);
+estatico(11.7 + 1.3, () => {   // caja fuerte
+  caja(10.2, .4, 0, 3, 1.8, 1.7, "#4a4d55", {top: "#5a5d66", izq: "#3d4048", der: "#2e3036"});
+  caraY(10.3, 2.2 + .002, 1.6, () => {
+    ctx.fillStyle = "#3d4048"; ctx.fillRect(0, 0, 280, 160);
+    circulo(140, 80, 48, "#8b95a5"); circulo(140, 80, 36, "#5a5d66");
+    ctx.strokeStyle = "#ffcf5a"; ctx.lineWidth = 5;
+    ctx.save(); ctx.translate(140, 80); ctx.rotate(T * .4); for (let k = 0; k < 3; k++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(-30, 0); ctx.lineTo(30, 0); ctx.stroke(); } ctx.restore();
+    ctx.fillStyle = "#ffcf5a"; ctx.font = "900 16px Inter, sans-serif"; ctx.fillText("LIQUIDEZ", 14, 26);
+  });
+  brillo(11.7, 2.2, 1, 70, "#ffcf5a", .2);
+}, 11.7, 1.3);
+planta(.6, 8.4, true); planta(13.4, 8.4);
+const SITIOS_TESORERIA = sofa(8.6, 6.6, 2.6, .8, "n", "#5a4a2a");
+function pantallaTesoreria(w, h, i) {
+  const lq = S && S.liquidez || {};
+  ctx.fillStyle = "#141005"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#ffcf5a"; ctx.font = "800 5px JetBrains Mono, monospace"; ctx.fillText(i ? "INTERESES" : "SIN INVERTIR", 3, 8);
+  ctx.fillStyle = "#f4f1ea"; ctx.font = "800 7px JetBrains Mono, monospace";
+  ctx.fillText(i ? `+${NF2.format(lq.acumulado || 0)}` : fmt.n(lq.efectivo || 0), 3, 19);
+  ctx.fillStyle = "#b7a08c"; ctx.font = "700 4.2px Inter, sans-serif"; ctx.fillText(i ? "$ cobrados" : `$ al ${NF2.format(lq.tipo_pct || 0)} %`, 3, 26);
+}
+
+// ---- MIRADOR (planta de inversión): sofás frente a la cristalera ----
+construirEn(PLANTA_DE.mirador);
+const SITIOS_MIRADOR = [...sofa(47.2, 4.4, 2.6, .8, "s", "#8a6440"), ...sofa(50.6, 4.4, 2.6, .8, "s", "#8a6440")];
+mesaBaja(48.6, 6.4, 2.8, .7, "#5a4130");
+planta(46.6, 8.4, true); planta(53.4, 8.4, true);
+
+// ---- TU FONDO (planta de inversión): la sala de los inversores, con el fondo en la pared ----
+construirEn(PLANTA_DE.salafondo);
+const MESA_FONDO = {x0: 5, x1: 13, y: 16.6, d: 1.6};
+bloquear(MESA_FONDO.x0, MESA_FONDO.y, MESA_FONDO.x1, MESA_FONDO.y + MESA_FONDO.d);
+for (let x = MESA_FONDO.x0; x < MESA_FONDO.x1; x++) estatico(x + .5 + MESA_FONDO.y + .8, () => caja(x, MESA_FONDO.y, 0, 1, MESA_FONDO.d, .44, "#20283a", {top: "#2c3750", izq: "#1a2130", der: "#141a26"}));
+const SITIOS_FONDO = [];
+for (const x of [5.8, 7.6, 9.4, 11.2]) {
+  silla(x, 16.05, "s", "#2c3750"); silla(x, 18.75, "n", "#2c3750");
+  SITIOS_FONDO.push({x, y: 16.05, mira: "s", postura: "sentado", tipo: "fondo", planta: plantaObra}, {x, y: 18.75, mira: "n", postura: "sentado", tipo: "fondo", planta: plantaObra});
+}
+planta(17.4, 11.6, true); planta(17.4, 23.4); planta(.6, 11.6);
+
+// ---- JARDÍN INTERIOR (planta de inversión): árboles, bancos y una fuente ----
+construirEn(PLANTA_DE.jardin);
+for (const [x, y, e] of [[21, 13.5, 1.1], [27, 21.5, 1.2], [33, 13.2, 1], [39, 21, 1.15], [44.6, 13.5, .9], [19.2, 22.6, .9]]) arbol(x, y, e);
+const FUENTE = {x: 31.5, y: 18};
+bloquear(FUENTE.x - 1.2, FUENTE.y - 1.2, FUENTE.x + 1.2, FUENTE.y + 1.2);
+estatico(FUENTE.x + FUENTE.y, () => {
+  caja(FUENTE.x - 1.2, FUENTE.y - 1.2, 0, 2.4, 2.4, .35, "#cfc6b8", {top: "#e9e4dc", izq: "#b7ad9e", der: "#a29787"});
+  plano(FUENTE.x - 1.05, FUENTE.y - 1.05, .351, () => {
+    ctx.fillStyle = "#1ea6d6"; ctx.fillRect(0, 0, 210, 210);
+    ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 2;
+    for (let k = 0; k < 3; k++) { const r = ((T * 30 + k * 35) % 100); ctx.beginPath(); ctx.arc(105, 105, r, 0, TAU); ctx.stroke(); }
+  });
+  caja(FUENTE.x - .12, FUENTE.y - .12, .35, .24, .24, .5, "#b7ad9e", {top: "#e9e4dc"});
+  brillo(FUENTE.x, FUENTE.y, .4, 60, "#5cc0ff", .2);
+}, FUENTE.x, FUENTE.y);
+const SITIOS_JARDIN = [];
+for (const [x, y, mira] of [[24, 15.2, "s"], [24, 20.4, "n"], [37, 15.2, "s"], [37, 20.4, "n"]]) {
+  const banco = sofa(x - 1, y - (mira === "s" ? .55 : -.05), 2, .5, mira, "#8a6440");
+  SITIOS_JARDIN.push(...banco.map(b => ({...b, tipo: "jardin"})));   // (sofa() ya les pone su planta)
+}
+
+// ---- BIBLIOTECA (planta de investigación): estanterías, sillones y mesa de lectura ----
+construirEn(PLANTA_DE.biblioteca);
+estanteria(39.4, .3, 6.6); estanteria(46.6, .3, 6.9);
+const SITIOS_BIBLIOTECA = [...sofa(40, 6.4, 1.8, .8, "n", "#6b3445"), ...sofa(43, 6.4, 1.8, .8, "n", "#6b3445")];
+bloquear(47.4, 3.6, 51.6, 4.8);
+estatico(49.5 + 4.2, () => { caja(47.4, 3.6, 0, 4.2, 1.2, .44, "#6b4b2e", {top: "#8a6440", izq: "#5a3e25", der: "#4a331e"}); caja(48.2, 3.9, .44, .6, .4, .1, "#c2302f"); caja(50, 4, .44, .5, .35, .08, "#1d3a8a"); }, 49.5, 4.2);
+for (const [x, y, m] of [[48, 3.15, "s"], [49.5, 3.15, "s"], [51, 3.15, "s"], [48, 5.25, "n"], [49.5, 5.25, "n"], [51, 5.25, "n"]]) {
+  silla(x, y, m, "#5a4130");
+  SITIOS_BIBLIOTECA.push({x, y, mira: m, postura: "sentado", tipo: "lectura", planta: plantaObra});
+}
+planta(53.4, 8.4, true); planta(39.6, 8.4);
+
+// ---- ZONA DE ESTUDIO (planta de investigación): puestos libres para estudiar backtests ----
+construirEn(PLANTA_DE.estudio);
+const PUESTOS_ESTUDIO = [];
+for (const y of [13, 17.4]) for (const x of [20, 23, 26]) PUESTOS_ESTUDIO.push(puesto({x, y, w: 1.8, color: "#cfd8e3", colorSilla: "#6a7a90", pintar: (w, h, i) => pantallaEstudio(w, h, i, x + y)}));
+for (const [x, y] of [[31, 13.6], [31, 18]]) {   // pizarras blancas
+  bloquear(x, y, x + 2.2, y + .2);
+  estatico(x + 1.1 + y, () => {
+    caja(x + .1, y, 0, .06, .06, 1.1, "#8b97a8"); caja(x + 2.04, y, 0, .06, .06, 1.1, "#8b97a8");
+    caja(x, y + .02, .5, 2.2, .06, 1.2, "#f4f6f9", {izq: "#f7f8fa", top: "#c9cdd3", der: "#d9dde3"});
+    caraY(x + .05, y + .082, 1.66, () => { ctx.strokeStyle = "#1d3a8a"; ctx.lineWidth = 2; ctx.beginPath(); for (let u = 0; u < 200; u += 10) ctx.lineTo(10 + u, 80 - Math.sin(u / 25 + x) * 30 - u / 6); ctx.stroke(); ctx.fillStyle = "#c2410c"; ctx.font = "700 13px Inter, sans-serif"; ctx.fillText("¿suerte o ventaja?", 12, 22); });
+  }, x + 1.1, y);
+}
+const SITIOS_ESTUDIO = [...sofa(37.5, 21.6, 3, .8, "n", "#4a6b94"), ...sofa(41.5, 21.6, 3, .8, "n", "#4a6b94")];
+mesaBaja(38.5, 19.4, 5, .8, "#c9a47a");
+planta(45.4, 11.6, true); planta(18.6, 23.4); planta(29.4, 23.4, true);
+function pantallaEstudio(w, h, i, semilla) {
+  ctx.fillStyle = "#0b1a2a"; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = i ? "#5cc0ff" : "#2ee6a6"; ctx.lineWidth = .8; ctx.beginPath();
+  for (let u = 0; u <= 20; u++) ctx.lineTo(2 + u * (w - 4) / 20, h - 4 - (Math.sin(u * .6 + semilla) * .5 + u / 20) * (h - 12));
+  ctx.stroke();
+  ctx.fillStyle = "#cfe8ff"; ctx.font = "700 4.4px JetBrains Mono, monospace"; ctx.fillText(i ? "FUERA DE MUESTRA" : "BACKTEST", 3, 6);
+}
+
+// ---- DIRECCIÓN (planta de dirección): la mesa de Marta, la supervisión general, y una mesa de reuniones ----
+construirEn(PLANTA_DE.direccion);
+const ASIENTO_MARTA = puesto({x: 19, y: 3, w: 2.2, color: "#3b2f28", colorSilla: "#5a4636", pintar: (w, h, i) => pantallaDireccion(w, h, i), brilla: () => "#ffcf5a"});
+bloquear(25.5, 3.6, 31.5, 4.9);
+estatico(28.5 + 4.25, () => caja(25.5, 3.6, 0, 6, 1.3, .44, "#4a3a2e", {top: "#6b5444", izq: "#3d3026", der: "#2e241d"}), 28.5, 4.25);
+const SITIOS_DIRECCION = [];
+for (const x of [26.2, 27.7, 29.2, 30.7]) {
+  silla(x, 3.15, "s", "#5a4636"); silla(x, 5.35, "n", "#5a4636");
+  SITIOS_DIRECCION.push({x, y: 3.15, mira: "s", postura: "sentado", tipo: "reunion", planta: plantaObra}, {x, y: 5.35, mira: "n", postura: "sentado", tipo: "reunion", planta: plantaObra});
+}
+SITIOS_DIRECCION.push(...sofa(33.4, 6.6, 2.8, .8, "n", "#5a4636"));
+planta(17.6, 8.4, true); planta(36.4, 8.4, true); planta(36.4, .9);
+function pantallaDireccion(w, h, i) {
+  ctx.fillStyle = "#14100c"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#ffcf5a"; ctx.font = "800 5px JetBrains Mono, monospace"; ctx.fillText(i ? "PLANTAS" : "SUPERVISIÓN", 3, 8);
+  ctx.font = "700 4.2px Inter, sans-serif";
+  if (i) SECTORES.forEach((t, p) => { ctx.fillStyle = "#e9edf3"; ctx.fillText(`${p} · ${t}`, 3, 15 + p * 5); });
+  else { const e = typeof estadoSalas === "function" && S ? estadoSalas() : {}; const c = {ok: 0, aviso: 0, alerta: 0}; for (const k in e) c[e[k][0]]++;
+    [["#2ee6a6", c.ok, "en verde"], ["#ffc24a", c.aviso, "en amarillo"], ["#ff5a76", c.alerta, "en rojo"]].forEach(([col, n, t], k) => { ctx.fillStyle = col; ctx.fillText(`${n} ${t}`, 3, 15 + k * 6); }); }
+}
+
+// ---- GIMNASIO (planta de dirección y servicios): cintas de correr, pesas y esterillas ----
+construirEn(PLANTA_DE.gimnasio);
+function cintaCorrer(x, y) {
+  bloquear(x, y, x + 1, y + 1.4);
+  estatico(x + .5 + y + .9, () => {
+    caja(x + .05, y + .45, 0, .9, 1.25, .14, "#2b2f38", {top: "#15181d"});
+    plano(x + .1, y + .5, .142, () => { ctx.strokeStyle = "rgba(255,255,255,.12)"; ctx.lineWidth = 3; const o = (T * 160) % 20; for (let v = o; v < 115; v += 20) { ctx.beginPath(); ctx.moveTo(5, v); ctx.lineTo(75, v); ctx.stroke(); } });
+    caja(x + .05, y + .3, 0, .08, .15, .95, "#555"); caja(x + .87, y + .3, 0, .08, .15, .95, "#555");
+    caja(x + .05, y + .25, .9, .9, .22, .12, "#2b2f38", {top: "#3a404c"});
+    brillo(x + .5, y + .3, 1, 16, "#2ee6a6", .5);
+  }, x + .5, y + .9);
+  return {x: x + .5, y: y + 1.15, mira: "n", postura: "de_pie", tipo: "cinta", planta: plantaObra};
+}
+function bancoPesas(x, y) {
+  bloquear(x, y, x + .7, y + 1.5);
+  estatico(x + .35 + y + .75, () => {
+    caja(x + .05, y, 0, .55, 1.4, .7, "#2b2f38", {top: "#3a404c"});
+    for (let i = 0; i < 4; i++) { const [px, py] = iso(x + .3, y + .2 + i * .32, .72); circulo(px - 5, py - 3, 3.2, "#15181d"); circulo(px + 5, py - 3, 3.2, "#15181d"); }
+  }, x + .35, y + .75);
+  return {x: x - .5, y: y + .75, mira: "e", postura: "de_pie", tipo: "pesas", planta: plantaObra};
+}
+const SITIOS_GIMNASIO = [cintaCorrer(1.4, 11.6), cintaCorrer(3.2, 11.6), cintaCorrer(5, 11.6), bancoPesas(10.6, 12.4), bancoPesas(13, 12.4)];
+[[2, 18.5, "#2ee6a6"], [5, 18.5, "#5cc0ff"], [8, 18.5, "#ff8a5c"]].forEach(([x, y, c]) => {   // esterillas
+  estatico(x + 1 + y + .4, () => plano(x, y, .01, () => { ctx.fillStyle = c; rr(0, 0, 200, 80, 10); ctx.fill(); }), x + 1, y + .4);
+  SITIOS_GIMNASIO.push({x: x + 1, y: y + .4, mira: "n", postura: "de_pie", tipo: "estiramientos", planta: plantaObra});
+});
+planta(17.4, 11.6, true); planta(17.4, 23.4); planta(.6, 23.4, true);
+
+// ---- PASILLOS de las plantas de inversión y de dirección ----
+construirEn(2); planta(12.5, 9.5, true); planta(40, 9.5, true);
+construirEn(3); planta(12.5, 9.5, true); planta(28.5, 9.5, true);
+
+sitios(SITIOS_RECEPCION, "espera"); sitios(SITIOS_TESORERIA, "sofa"); sitios(SITIOS_MIRADOR, "mirador"); sitios(SITIOS_FONDO); sitios(SITIOS_JARDIN);
+sitios(SITIOS_BIBLIOTECA); sitios(SITIOS_ESTUDIO, "sofa"); sitios(SITIOS_DIRECCION); sitios(SITIOS_GIMNASIO);
+
+// ---- tabiques de cada planta (cada sala, en la misma posición de siempre dentro de su planta) ----
+const TABIQUES = [
+  // planta baja · trading
+  () => {
+    muroH(9, 0, 54, [[6, 10], [22, 24], [37, 39], [49, 51]], 1, "#d4ff3a");
+    muroV(17, 0, 9, [], 1, "#5cc0ff"); muroV(30, 0, 9, [], 1, "#d4ff3a"); muroV(46, 0, 9, [], 1, "#ff4fd8");
+    muroH(11, 0, 18, [[8, 10]], 1, "#d4ff3a"); muroH(11, 18, 35, [[18, 20], [33, 35]], 1, "#d4ff3a"); muroH(11, 35, 46, [[41, 43]], 1, "#ff5a76");
+    muroV(18, 11, 24, [[20, 22]], 1, "#d4ff3a"); muroV(35, 11, 24, [], 1, "#ff5a76");
+  },
+  // planta 1 · investigación
+  () => {
+    muroH(9, 0, 54, [[4, 6], [15, 17], [25, 27], [33, 35], [45, 47]], 1, "#ffc24a");
+    muroV(10, 0, 9, [[6, 7]], 1, "#ffc24a"); muroV(21, 0, 9, [[6, 7]], 1, "#ffcf5a"); muroV(30, 0, 9, [], 1, "#ffcf5a"); muroV(39, 0, 9, [], 1, "#ffcf5a");
+    muroH(11, 0, 18, [[8, 10]], 1, "#ff8a5c"); muroH(11, 18, 46, [[24, 28], [38, 42]], 1, "#5cc0ff");
+    muroV(18, 11, 24, [[19, 21]], 1, "#ff8a5c");
+  },
+  // planta 2 · inversión
+  () => {
+    muroH(9, 0, 54, [[6, 8], [21, 23], [33, 35], [41, 43], [49, 51]], 1, "#f7931a");
+    muroV(14, 0, 9, [], 1, "#ffcf5a"); muroV(30, 0, 9, [], 1, "#c98500"); muroV(38, 0, 9, [], 1, "#f7931a"); muroV(46, 0, 9, [], 1, "#f7931a");
+    muroH(11, 0, 18, [[8, 10]], 1, "#d4ff3a"); muroH(11, 18, 46, [[24, 28], [38, 42]], 1, "#2ee6a6");
+    muroV(18, 11, 24, [[19, 21]], 1, "#d4ff3a");
+  },
+  // planta 3 · dirección y servicios (la azotea, al aire libre, tiene barandilla de cristal)
+  () => {
+    muroH(9, 0, 54, [[4, 6], [12, 14], [21, 23], [31, 33], [40, 42], [49, 51]], 1, "#d4ff3a");
+    muroV(9, 0, 9, [], 1, "#ff8a5c"); muroV(17, 0, 9, [], 1, "#2ee6a6"); muroV(37, 0, 9, [], 1, "#ffcf5a"); muroV(46, 0, 9, [], 1, "#b58cff");
+    muroH(11, 0, 18, [[8, 10]], 1, "#2ee6a6"); muroH(11, 18, 30, [[23, 25]], 1, "#b58cff"); muroH(11, X_AZOTEA, 46, [[33, 35], [42, 44]], 1, "#2ee6a6");
+    muroV(18, 11, 24, [[20, 22]], 1, "#2ee6a6"); muroH(17, 18, 30, [[26, 28]], 1, "#ff8a5c"); muroV(X_AZOTEA, 11, 24, [[19, 21]], 1, "#ff8a5c");
+  },
+];
+TABIQUES.forEach((hacer, p) => {
+  construirEn(p);
+  hacer();
+  bloquear(X_ALA, 11, W, D);   // fuera del edificio
+  for (let y = 0; y < D; y++) muros.add(arista(-1, y, 0, y));
+});
+
 SITIOS.push(...SITIOS_SOMBRILLA, ...TUMBONAS, ...SITIOS_FUEGO, ...PUPITRES,
-  {x: 44.1, y: 13.2, mira: "n", postura: "de_pie", tipo: "barbacoa", planta: 1}, {x: 44, y: 21.7, mira: "n", postura: "de_pie", tipo: "telescopio", planta: 1},
-  ...[38.7, 39.9, 41.1, 42.3, 43.5].map(x => ({x, y: 3.25, mira: "n", postura: "de_pie", tipo: "barra", planta: 1})),
-  ...MESAS_CAFE.flatMap(([x, y]) => [{x: x - .75, y, mira: "e", postura: "sentado", tipo: "cafeteria", planta: 1}, {x: x + .75, y, mira: "o", postura: "sentado", tipo: "cafeteria", planta: 1}]),
-  {x: 47.95, y: 3.15, mira: "s", postura: "de_pie", tipo: "futbolin", planta: 1}, {x: 47.95, y: 4.85, mira: "n", postura: "de_pie", tipo: "futbolin", planta: 1},
-  ...[49.8, 50.9, 52].map(x => ({x, y: 1.6, mira: "n", postura: "de_pie", tipo: "arcade", planta: 1})),
-  ...[[50.2, 7.2], [51.4, 7.5], [52.6, 7.2]].map(([x, y]) => ({x, y, mira: "n", postura: "sentado", tipo: "puf", planta: 1})),
-  {x: 53, y: 3.4, mira: "n", postura: "de_pie", tipo: "dardos", planta: 1});
+  {x: 44.1, y: 13.2, mira: "n", postura: "de_pie", tipo: "barbacoa", planta: PLANTA_DE.terraza1}, {x: 44, y: 21.7, mira: "n", postura: "de_pie", tipo: "telescopio", planta: PLANTA_DE.terraza1},
+  ...[38.7, 39.9, 41.1, 42.3, 43.5].map(x => ({x, y: 3.25, mira: "n", postura: "de_pie", tipo: "barra", planta: PLANTA_DE.cafeteria})),
+  ...MESAS_CAFE.flatMap(([x, y]) => [{x: x - .75, y, mira: "e", postura: "sentado", tipo: "cafeteria", planta: PLANTA_DE.cafeteria}, {x: x + .75, y, mira: "o", postura: "sentado", tipo: "cafeteria", planta: PLANTA_DE.cafeteria}]),
+  {x: 47.95, y: 3.15, mira: "s", postura: "de_pie", tipo: "futbolin", planta: PLANTA_DE.juegos}, {x: 47.95, y: 4.85, mira: "n", postura: "de_pie", tipo: "futbolin", planta: PLANTA_DE.juegos},
+  ...[49.8, 50.9, 52].map(x => ({x, y: 1.6, mira: "n", postura: "de_pie", tipo: "arcade", planta: PLANTA_DE.juegos})),
+  ...[[50.2, 7.2], [51.4, 7.5], [52.6, 7.2]].map(([x, y]) => ({x, y, mira: "n", postura: "sentado", tipo: "puf", planta: PLANTA_DE.juegos})),
+  {x: 53, y: 3.4, mira: "n", postura: "de_pie", tipo: "dardos", planta: PLANTA_DE.juegos});
 SITIOS.forEach(s => { if (s.ocupante === undefined) s.ocupante = null; });
 function futbolinJugando() { return SITIOS.filter(s => s.tipo === "futbolin" && s.ocupante && !s.ocupante.andando).length === 2; }
-estaticos.sort((a, b) => a.k - b.k);
+for (const P of PLANTAS) P.estaticos.sort((a, b) => a.k - b.k);
 construirEn(0);
 
 // ---------------------------------------------------------- caminos --
@@ -2102,6 +2400,10 @@ const ROLES = {
   comunicacion: {puesto: "Comunicación", camisa: "#e0457b", pantalon: "#23202a", accesorio: null, tono: "#ff8a5c"},
   it: {puesto: "Sistemas", camisa: "#20b26b", pantalon: "#1e2621", accesorio: "cascos", tono: "#2ee6a6"},
   barista: {puesto: "Cafetería", camisa: "#3a2a1c", pantalon: "#1a1512", accesorio: null, tono: "#ffcf5a"},
+  analisis: {puesto: "Mesa de análisis", camisa: "#2f3b52", pantalon: "#1d2230", accesorio: "cascos", tono: "#d4ff3a"},
+  esceptica: {puesto: "Mesa de análisis · escéptica", camisa: "#5a5f6b", pantalon: "#1d2128", accesorio: "gafas_pasta", tono: "#ff5a76"},
+  recepcion: {puesto: "Recepción", camisa: "#d4ff3a", pantalon: "#23262e", accesorio: null, tono: "#d4ff3a"},
+  tesoreria: {puesto: "Tesorería", camisa: "#3b3422", pantalon: "#1e1a12", accesorio: "corbata_oro", tono: "#ffcf5a"},
 };
 const agentes = [];
 class Agente {
@@ -2126,7 +2428,7 @@ function irA(a, x, y, postura, mira, alLlegar) {
 }
 // Para ir a otra planta se coge el ascensor (al fondo del pasillo): se entra, se sube o se baja y se sigue andando.
 const ASCENSOR = {x: .9, y: 10.1};
-const ascensorPlanta = [0, 0];   // hasta cuándo está abierto el ascensor de cada planta (animación de las puertas)
+const ascensorPlanta = Array(NPLANTAS).fill(0);   // hasta cuándo está abierto el ascensor de cada planta (animación de las puertas)
 function irAPlanta(a, p, x, y, postura, mira, alLlegar) {
   if ((a.planta || 0) === p) return irA(a, x, y, postura, mira, alLlegar);
   irA(a, ASCENSOR.x, ASCENSOR.y, "de_pie", "o", () => {
@@ -2199,8 +2501,9 @@ const SALAS_SUP = [
   {id: "trading", nombre: "Sala de trading", sup: "Clara", color: "#d4ff3a", casa: [9.5, 11.6], ruta: [[2.5, 13.6], [16.6, 13.6], [16.6, 21.6], [2.5, 21.6], [8.5, 23.6], [9.5, 11.6]]},
   {id: "riesgos", nombre: "Control de riesgos", sup: "Pablo", color: "#ff5a76", casa: [42, 17.2], ruta: [[39.5, 12], [44.6, 17.6], [42, 22.6], [42, 17.2]]},
   {id: "scalping", nombre: "Scalping", sup: "Álex", color: "#ff4fd8", casa: [50, 8.3], ruta: [[46.5, 8.2], [53.5, 8.2], [52.2, 6.6], [48.2, 6.6], [50, 8.3]]},
-  {id: "incubadora", nombre: "Incubadora", sup: "Lorena", color: "#ff8a5c", casa: [9.5, 20.1], ruta: [[2, 19.9], [16.5, 19.9], [16.5, 11.7], [9.5, 20.1]], planta: 1},
+  {id: "incubadora", nombre: "Incubadora", sup: "Lorena", color: "#ff8a5c", casa: [9.5, 20.1], ruta: [[2, 19.9], [16.5, 19.9], [16.5, 11.7], [9.5, 20.1]]},
 ];
+for (const s of SALAS_SUP) s.planta = PLANTA_DE[s.id] ?? 0;
 const SUPERVISORES = SALAS_SUP.map(s => {
   const a = new Agente({nombre: s.sup, rol: "supervisor", sala: s, puesto: "Supervisión · " + s.nombre, proximaRonda: rand(4, 14), puntoRonda: 0,
     explica: `Supervisa ${s.nombre.toLowerCase()}: la patrulla, vigila sus números y se los cuenta a la supervisión general en cada ronda. Si algo se pone en rojo, da la alarma.` +
@@ -2212,7 +2515,7 @@ const SUPERVISORES = SALAS_SUP.map(s => {
 });
 const GENERAL = new Agente({nombre: "Marta", rol: "general", proxima: 8, urgente: null,
   explica: "Supervisión general de toda la oficina: hace rondas preguntando a cada supervisor cómo va su sala, y si una sala se pone en rojo acude corriendo. Lleva el estado de todas las salas (pestaña «Salas»)."});
-GENERAL.x = 19.6; GENERAL.y = 12.3; GENERAL.mira = "s";
+GENERAL.x = ASIENTO_MARTA.x; GENERAL.y = ASIENTO_MARTA.y; GENERAL.planta = ASIENTO_MARTA.planta; GENERAL.mira = "n"; GENERAL.postura = "sentado";
 agentes.push(GENERAL);
 const NOMBRES_TRADERS = ["Lucía", "Mateo", "Aitana", "Leo", "Martina", "Unai", "Alba", "Gael", "Carla", "Nico", "Emma", "Izan", "Olivia", "Teo", "Lola", "Enzo", "Jana", "Biel", "Ainhoa", "Rayan", "Candela", "Omar", "Valeria", "Joel",
   "Vera", "Álvaro", "Marcos", "Rubén", "Nora", "Lara", "Sergio", "Aroa", "Gonzalo", "Ane", "Rodrigo", "Mía", "Jorge", "Carlota", "Asier", "Daniela", "Víctor", "Blanca", "Eric", "Luna", "Andrea", "Mario", "Inés", "Pau",
@@ -2229,13 +2532,23 @@ const QUANTS = [["Ainara", "Calcula el Kelly prudente de cada trader: con 30 ope
   ["Yago", "Escribe el post mortem de cada estrategia que se retira: compara lo que prometía el backtest con lo que hizo en real y busca la causa (comisiones, mercado en contra, stops, volatilidad...)."]]
   .map(([n, e], i) => empleado({nombre: n, rol: "quant", explica: e}, PUESTOS_QUANT[i]));
 const PROFESORA = empleado({nombre: "Begoña", rol: "profesora", explica: "Da clase en la academia con lo que se aprende en real: junta los post mortem y qué tipos de estrategia funcionan o fallan. Con eso, la minería busca más de lo que funciona y menos de lo que falla, sin dejar de explorar."},
-  {x: 32.6, y: 2.4, mira: "s", postura: "de_pie", planta: 1});
+  {x: 34.6, y: 2.4, mira: "s", postura: "de_pie", planta: PLANTA_DE.academia});
 const COMUNICADORES = [["Rebeca", "Escribe el informe del día con los datos reales: cómo va el fondo, el mejor y el peor trader, la incubadora, los relevos y los avisos de riesgo. Está en la pestaña «Informe»."],
   ["Gorka", "Lleva las noticias de la oficina y el plató de TF News: anuncia los aprobados de la incubadora y los cambios de estrategia."]]
   .map(([n, e], i) => empleado({nombre: n, rol: "comunicacion", explica: e}, PUESTOS_COM[i]));
 const NESTOR = empleado({nombre: "Néstor", rol: "it", explica: "Vigila que todo funciona: cuánto tarda cada ciclo del paper trading, si hay errores, si llegan los datos de Binance y si la minería está en marcha. Su panel está en la sala de sistemas."}, ASIENTO_NESTOR);
-const CHEMA = empleado({nombre: "Chema", rol: "barista", explica: "El barista de la cafetería de la planta 1. Sabe más de la oficina que nadie: todo el mundo le cuenta sus operaciones mientras espera el café."}, ASIENTO_CHEMA);
-const EQUIPO_P1 = [...QUANTS, PROFESORA, ...COMUNICADORES, NESTOR, CHEMA];
+const CHEMA = empleado({nombre: "Chema", rol: "barista", explica: "El barista de la cafetería de la planta 3. Sabe más de la oficina que nadie: todo el mundo le cuenta sus operaciones mientras espera el café."}, ASIENTO_CHEMA);
+const RECEPCIONISTA = empleado({nombre: "Paz", rol: "recepcion", explica: "Recibe a los traders nuevos en la planta baja y te indica dónde está cada cosa: una planta por sector (trading abajo, investigación en la 1, inversión en la 2 y dirección y servicios en la 3)."}, ASIENTO_RECEPCION);
+const MESA = [
+  ["Ramiro", "analisis", "Jefe de la mesa de análisis", "Dirige la mesa, como el «jefe» de los vídeos de bots de trading: cuando un trader de la sala de trading (o una estrategia de la incubadora) quiere entrar, junta a los cinco y anuncia si entra o pasa."],
+  ["Celeste", "analisis", "Mesa de análisis · scout", "La scout: mira el volumen de la vela de la señal frente a lo normal. Informa, pero no veta: medido con datos reales, el volumen no ayudaba a elegir."],
+  ["Cristian", "analisis", "Mesa de análisis · noticias", "Cuenta por qué se mueve: cuánto ha subido o bajado la moneda en 24 horas. Informa, no veta."],
+  ["Noemí", "analisis", "Mesa de análisis · sentimiento", "Mira el índice de miedo y codicia de cripto. Con codicia extrema (75 o más) no se compra y con miedo extremo (25 o menos) no se vende en corto: es ir con la masa."],
+  ["Amador", "analisis", "Mesa de análisis · charts", "Mira el gráfico diario: solo se compra si el precio está por encima de su media de 50 días (y solo se vende en corto si está por debajo), y solo si el objetivo está al menos a 1,5 veces la distancia del stop."],
+  ["Olga", "esceptica", "Mesa de análisis · la escéptica", "Lleva la contraria en cada operación, como el «escéptico» de los vídeos: si va contra la tendencia diaria, gana poco para lo que arriesga o va con la masa, dice PASA. Medido de 2024 a 2026: lo que deja pasar ganaba de media un 0,15 % por operación y lo que veta perdía un 0,10 %."],
+].map(([n, rol, puesto, explica], i) => empleado({nombre: n, rol, puesto, explica}, ASIENTOS_ANALISIS[i]));
+const TESORERA = empleado({nombre: "Teresa", rol: "tesoreria", explica: "Lleva la tesorería: todo el dinero del fondo que no está dentro del mercado cobra el tipo de las letras del Tesoro de EE. UU. a 3 meses, como en un monetario. Su pared enseña cuánto hay sin invertir y cuánto lleva cobrado."}, ASIENTO_TESORERIA);
+const EQUIPO_P1 = [...QUANTS, PROFESORA, ...COMUNICADORES, NESTOR, CHEMA, RECEPCIONISTA, ...MESA, TESORERA];
 
 // ---- traders de la incubadora: uno por plaza, con la acreditación naranja de «en prueba» ----
 const NOMBRES_INCUBADORA = ["Noelia", "Fermín", "Celia", "Rober", "Paola", "Saúl", "Elsa", "Iván", "Judith", "Hernán", "Lidia", "Tristán", "Miriam", "Ulises", "Claudia", "Ramón",
@@ -2260,7 +2573,7 @@ function sincronizarIncubadora(inicial) {
       a = new Agente({nombre: NOMBRES_INCUBADORA[n % NOMBRES_INCUBADORA.length], rol: "trader", incubadora: true});
       a.casa = mesa.asiento; a.mesa = mesa; mesa.trader = a; agentes.push(a);
       if (inicial) colocar(a, mesa.asiento);
-      else { a.planta = 1; a.x = ASCENSOR.x; a.y = ASCENSOR.y; ascensorPlanta[1] = T + 2; volverAlPuesto(a); }
+      else { a.planta = PLANTA_DE.incubadora; a.x = ASCENSOR.x; a.y = ASCENSOR.y; ascensorPlanta[PLANTA_DE.incubadora] = T + 2; volverAlPuesto(a); }
     }
     a.id = id; a.datos = d; a.puesto = `Incubadora · plaza ${d.plaza + 1} · ${id}`;
     if (!inicial) enCanal("operaciones", () => decir(a, `Me toca ${id}: ${ladoTxt(d.direccion).toLowerCase()} en ${moneda(d.simbolo)}, con 1.000 $ de prueba. ¡A aprobar el examen!`, 1));
@@ -2271,9 +2584,9 @@ function entregarEstrategia(a, id, d) {
   const mesa = mesaDe(d);
   if (!mesa || a.tarea === "entrega") return;
   liberarSitio(a); a.tarea = "entrega";
-  confeti(a.x, a.y, 1.2, 1); flotante(a.x, a.y, 1.6, "¡APROBADA!", "#2ee6a6", 1);
+  confeti(a.x, a.y, 1.2, PLANTA_DE.incubadora); flotante(a.x, a.y, 1.6, "¡APROBADA!", "#2ee6a6", PLANTA_DE.incubadora);
   enCanal("operaciones", () => decir(a, `¡${id} ha aprobado! Bajo a llevarla a la mesa ${d.mesa + 1}.`, 2, "bueno"));
-  irAPlanta(a, 0, mesa.asiento.x + .85, mesa.asiento.y + .1, "de_pie", "o", () => {
+  irAPlanta(a, mesa.asiento.planta || 0, mesa.asiento.x + .85, mesa.asiento.y + .1, "de_pie", "o", () => {
     const quien = mesa.trader && mesa.trader !== a ? mesa.trader : null;
     enCanal("operaciones", () => {
       decir(a, quien ? `${quien.nombre}, te traigo ${id}: aprobada en la incubadora. ¡Cuídala!` : `Mesa ${d.mesa + 1}: aquí queda ${id}, aprobada en la incubadora.`, 2, "bueno", quien);
@@ -2283,21 +2596,26 @@ function entregarEstrategia(a, id, d) {
   });
 }
 
-// ---- Satoshi, el gato: se pasea por las dos plantas y se echa donde le apetece ----
-Object.assign(GATO, {planta: 0, ruta: [], andando: false, fase: 0, velocidad: .95, mira: "o", estado: "dormir", hasta: 40, transbordo: null, alLlegar: null,
+// ---- Satoshi, el gato: se pasea por todas las plantas y se echa donde le apetece ----
+Object.assign(GATO, {planta: PLANTA_DE.descanso, ruta: [], andando: false, fase: 0, velocidad: .95, mira: "o", estado: "dormir", hasta: 40, transbordo: null, alLlegar: null,
   donde: "durmiendo en el sofá del descanso", nombre: "Satoshi"});
 const SITIOS_GATO = [
-  {x: 29.5, y: 21.1, z: .55, planta: 0, estado: "dormir", donde: "durmiendo en el sofá del descanso"},
-  {x: 26.7, y: 21.75, z: .33, planta: 0, estado: "sentado", donde: "sentado en la mesa baja del descanso, como si fuera suya"},
-  {x: 24, y: 10.2, z: 0, planta: 0, estado: "sentado", donde: "plantado en medio del pasillo, como siempre"},
-  {x: 41.9, y: 5.6, z: 0, planta: 0, estado: "sentado", donde: "mirando fijamente la moneda de bitcoin del holding"},
-  {x: 16.5, y: 7.6, z: 0, planta: 0, estado: "sentado", donde: "persiguiendo con la mirada los cubos de la cinta del laboratorio"},
-  {x: 31, y: 22.85, z: .26, planta: 1, estado: "dormir", donde: "tomando el sol en una tumbona de la terraza"},
-  {x: 38.1, y: 15.4, z: .4, planta: 1, estado: "dormir", donde: "calentito junto a la fogata de la terraza"},
-  {x: 41, y: 3.6, z: 0, planta: 1, estado: "sentado", donde: "esperando a que se le caiga algo a alguien en la cafetería"},
-  {x: 32.4, y: 3.3, z: 0, planta: 1, estado: "sentado", donde: "en primera fila de la academia (no toma apuntes)"},
-  {x: 40.2, y: 21.6, z: 0, planta: 1, estado: "dormir", donde: "durmiendo en el césped de la terraza"},
-  {x: 51.4, y: 7.45, z: .28, planta: 1, estado: "dormir", donde: "acurrucado en un puf de la sala de juegos"},
+  {x: 29.5, y: 21.1, z: .55, planta: PLANTA_DE.descanso, estado: "dormir", donde: "durmiendo en el sofá del descanso"},
+  {x: 26.7, y: 21.75, z: .33, planta: PLANTA_DE.descanso, estado: "sentado", donde: "sentado en la mesa baja del descanso, como si fuera suya"},
+  {x: 24, y: 10.2, z: 0, planta: 0, estado: "sentado", donde: "plantado en medio del pasillo de la planta baja, como siempre"},
+  {x: 12.4, y: 7.3, z: .38, planta: PLANTA_DE.recepcion, estado: "dormir", donde: "durmiendo en el sofá de la recepción"},
+  {x: 38, y: 4.85, z: .44, planta: PLANTA_DE.analisis, estado: "sentado", donde: "sentado encima de la mesa de análisis, como si fuera el escéptico"},
+  {x: 41.9, y: 5.6, z: 0, planta: PLANTA_DE.holding, estado: "sentado", donde: "mirando fijamente la moneda de bitcoin del holding"},
+  {x: 16.5, y: 7.6, z: 0, planta: PLANTA_DE.laboratorio, estado: "sentado", donde: "persiguiendo con la mirada los cubos de la cinta del laboratorio"},
+  {x: 49.5, y: 4.2, z: .44, planta: PLANTA_DE.biblioteca, estado: "dormir", donde: "durmiendo encima de los libros de la biblioteca"},
+  {x: 31.5, y: 16.5, z: 0, planta: PLANTA_DE.jardin, estado: "sentado", donde: "mirando el agua de la fuente del jardín interior"},
+  {x: 48.5, y: 4.8, z: .38, planta: PLANTA_DE.mirador, estado: "dormir", donde: "tomando el sol en el sofá del mirador"},
+  {x: 34, y: 20.55, z: .26, planta: PLANTA_DE.terraza1, estado: "dormir", donde: "tomando el sol en una tumbona de la azotea"},
+  {x: 38.1, y: 15.4, z: .4, planta: PLANTA_DE.terraza1, estado: "dormir", donde: "calentito junto a la fogata de la azotea"},
+  {x: 41, y: 3.6, z: 0, planta: PLANTA_DE.cafeteria, estado: "sentado", donde: "esperando a que se le caiga algo a alguien en la cafetería"},
+  {x: 34.4, y: 3.3, z: 0, planta: PLANTA_DE.academia, estado: "sentado", donde: "en primera fila de la academia (no toma apuntes)"},
+  {x: 43.5, y: 22.6, z: 0, planta: PLANTA_DE.terraza1, estado: "dormir", donde: "durmiendo en el césped de la azotea"},
+  {x: 51.4, y: 7.45, z: .28, planta: PLANTA_DE.juegos, estado: "dormir", donde: "acurrucado en un puf de la sala de juegos"},
 ];
 function planificarGato() {
   if (GATO.andando || GATO.transbordo || T < GATO.hasta) return;
@@ -2322,7 +2640,7 @@ function planificarGato() {
 // ropa según el puesto (bata, americana, chaleco, sudadera...) y gestos cuando no teclean.
 const ROPA = {minero: "chaleco", prueba: "bata", banco: "traje", director: "traje", supervisor: "americana", general: "americana", tendencia: "jersey",
   riesgos: "americana", riesgo2: "jersey", macro: "jersey", holder: "sudadera", trader: "camisa", quant: "jersey", profesora: "americana",
-  comunicacion: "camisa", it: "sudadera", barista: "camisa"};
+  comunicacion: "camisa", it: "sudadera", barista: "camisa", analisis: "camisa", esceptica: "americana", recepcion: "camisa", tesoreria: "traje"};
 function torsoRuta(cx, top, h, wa, wb) {
   ctx.beginPath();
   ctx.moveTo(cx - wa / 2 + 2.4, top);
@@ -2650,9 +2968,9 @@ function dibujarRobot() {
 // ========================================================== EFECTOS ==
 const paquetes = [], colaPaquetes = [], particulas = [], flotantes = [];
 let ultimoPaquete = 0, actividadLab = -99, ascensorHasta = 0;
-const ascensorAnim = [0, 0];
-function puff(x, y, z, color, n = 10) {
-  for (let i = 0; i < n; i++) particulas.push({x, y, z, vx: rand(-.6, .6), vy: rand(-.6, .6), vz: rand(.4, 1.4), vida: rand(.5, .9), t: 0, color, r: rand(1.5, 3)});
+const ascensorAnim = Array(NPLANTAS).fill(0);
+function puff(x, y, z, color, n = 10, planta = 0) {
+  for (let i = 0; i < n; i++) particulas.push({x, y, z, planta, vx: rand(-.6, .6), vy: rand(-.6, .6), vz: rand(.4, 1.4), vida: rand(.5, .9), t: 0, color, r: rand(1.5, 3)});
 }
 function confeti(x, y, z, planta = 0) {
   for (let i = 0; i < 60; i++) particulas.push({x, y, z, planta, vx: rand(-1.5, 1.5), vy: rand(-1.5, 1.5), vz: rand(1.5, 3.5), g: 4, vida: rand(1.2, 2), t: 0,
@@ -2699,16 +3017,16 @@ function moverPaquetes(dt) {
       }
       if (p.x > TUBO.x0) p.z = lerp(.36, .5, clamp((p.x - TUBO.x0) / .4, 0, 1));
       if (p.est >= 6 && p.x >= RECEPTOR.x + .3) {
-        if (p.destino === 6) { puff(RECEPTOR.x + .35, RECEPTOR.y + .4, 1, "#ff5a76", 14); p.muerto = true; }
+        if (p.destino === 6) { puff(RECEPTOR.x + .35, RECEPTOR.y + .4, 1, "#ff5a76", 14, PLANTA_DE.laboratorio); p.muerto = true; }
         else { p.fase = "vuelo"; p.t0 = T; p.x0 = p.x; p.y0 = p.y; const l = lingote(Math.min((S && S.banco || []).length, 47)); p.x1 = l.x + .2; p.y1 = l.y + .1; p.z1 = l.z + .2; }
       }
     } else if (p.fase === "cae") {
       p.y += 1.6 * dt; p.z -= 2 * dt;
-      if (p.z <= .2) { puff(p.x, 7.3, .45, "#ff5a76"); p.muerto = true; }
+      if (p.z <= .2) { puff(p.x, 7.3, .45, "#ff5a76", 10, PLANTA_DE.laboratorio); p.muerto = true; }
     } else if (p.fase === "vuelo") {
       const k = (T - p.t0) / 1.1;
       p.x = lerp(p.x0, p.x1, k); p.y = lerp(p.y0, p.y1, k); p.z = lerp(1, p.z1, k) + Math.sin(k * Math.PI) * 1.6;
-      if (k >= 1) { confeti(p.x1, p.y1, p.z1 + .3); destelloBanco = 1; giroCamara += Math.PI * 2; p.muerto = true; }
+      if (k >= 1) { confeti(p.x1, p.y1, p.z1 + .3, PLANTA_DE.banco); destelloBanco = 1; giroCamara += Math.PI * 2; p.muerto = true; }
     }
   }
   for (let i = paquetes.length - 1; i >= 0; i--) if (paquetes[i].muerto) paquetes.splice(i, 1);
@@ -2728,7 +3046,7 @@ function moverParticulas(dt) {
   if (Math.random() < dt * 5) particulas.push({x: 18.78 + rand(-.05, .05), y: 17.45, z: 1.02, vx: rand(-.05, .05), vy: 0, vz: .5, g: -.1, vida: 1.6, t: 0, color: "#ffffff", r: 2.2, vapor: true});
   // Zzz del gato (solo si duerme) y vapor de la cafetera de arriba
   if (GATO.estado === "dormir" && !GATO.andando && Math.random() < dt * .6) particulas.push({x: GATO.x + .1, y: GATO.y - .1, z: GATO.z + .45, planta: GATO.planta, vx: .1, vy: -.05, vz: .25, g: 0, vida: 2.2, t: 0, color: "#ffffff", texto: "z"});
-  if (vista === 1 && Math.random() < dt * 4) particulas.push({x: 38.75 + rand(-.05, .05), y: 2.2, z: 1.55, planta: 1, vx: rand(-.05, .05), vy: 0, vz: .45, g: -.1, vida: 1.6, t: 0, color: "#ffffff", r: 2.2, vapor: true});
+  if (vista === PLANTA_DE.cafeteria && Math.random() < dt * 4) particulas.push({x: 38.75 + rand(-.05, .05), y: 2.2, z: 1.55, planta: PLANTA_DE.cafeteria, vx: rand(-.05, .05), vy: 0, vz: .45, g: -.1, vida: 1.6, t: 0, color: "#ffffff", r: 2.2, vapor: true});
   if (S && S.mineria && S.mineria.estado === "minando" && Math.random() < dt * 14)
     particulas.push({x: HOLO.x + rand(-.25, .25), y: HOLO.y + rand(-.25, .25), z: .3, vx: 0, vy: 0, vz: rand(.6, 1.3), g: 0, vida: 1.6, t: 0, color: "#3effd0", r: 1.4});
   destelloBanco = Math.max(0, destelloBanco - dt * .8);
@@ -2784,24 +3102,27 @@ function guirnaldaTerraza() {   // luces de la barandilla de la terraza
     if (i % 3 === 0) brillo(x, y, zz - .05, 15, c, .2 + noche * .55);
   });
 }
-// Vista desde la planta 1: la planta baja se ve como el edificio que hay debajo, con sus ventanas.
-function edificioBajo() {
-  const H = ALTURA_PLANTA, piel = {top: "#20252e", izq: "#1c212a", der: "#161b23"};
+// Vista desde una planta de arriba: las de abajo se ven como el edificio que hay debajo, con sus ventanas.
+function edificioBajo(n) {
+  const H = ALTURA_PLANTA * n, piel = {top: "#20252e", izq: "#1c212a", der: "#161b23"};
   caja(0, 0, 0, W, 11, H, "", piel);
   caja(0, 11, 0, X_ALA, D - 11, H, "", piel);
-  const ventanas = (n, semilla) => {
-    ctx.fillStyle = "rgba(212,255,58,.75)"; ctx.fillRect(0, H * 100 - 14, n * 100, 3);
-    for (let k = 0; k < n; k++) {
-      const encendida = noche > .3 && hash(semilla + k) % 3 !== 0;
-      ctx.fillStyle = encendida ? "rgba(255,214,140,.82)" : "rgba(120,170,220,.24)"; ctx.fillRect(k * 100 + 12, 40, 76, H * 100 - 100);
-      ctx.fillStyle = "rgba(255,255,255,.07)"; ctx.fillRect(k * 100 + 12, 40, 18, H * 100 - 100);
+  const ventanas = (largo, semilla) => {
+    for (let p = 0; p < n; p++) {
+      const y0 = (n - 1 - p) * ALTURA_PLANTA * 100;
+      ctx.fillStyle = "rgba(212,255,58,.75)"; ctx.fillRect(0, y0 + ALTURA_PLANTA * 100 - 14, largo * 100, 3);
+      for (let k = 0; k < largo; k++) {
+        const encendida = noche > .3 && hash(semilla + p + "-" + k) % 3 !== 0;
+        ctx.fillStyle = encendida ? "rgba(255,214,140,.82)" : "rgba(120,170,220,.24)"; ctx.fillRect(k * 100 + 12, y0 + 40, 76, ALTURA_PLANTA * 100 - 100);
+        ctx.fillStyle = "rgba(255,255,255,.07)"; ctx.fillRect(k * 100 + 12, y0 + 40, 18, ALTURA_PLANTA * 100 - 100);
+      }
     }
   };
   caraY(0, D + .002, H, () => ventanas(X_ALA, "s"));
   caraX(X_ALA + .002, D, H, () => ventanas(D - 11, "e"));
   caraY(X_ALA, 11.002, H, () => ventanas(W - X_ALA, "s2"));
   caraX(W + .002, 11, H, () => ventanas(11, "e2"));
-  caraY(1, D + .004, H - .15, () => { ctx.fillStyle = "#d4ff3a"; ctx.font = "900 26px Inter, sans-serif"; ctx.fillText("TRADING FLOOR · PLANTA BAJA", 0, 28); });
+  caraY(1, D + .004, H - .15, () => { ctx.fillStyle = "#d4ff3a"; ctx.font = "900 26px Inter, sans-serif"; ctx.fillText("TRADING FLOOR · " + (n > 1 ? `${n} PLANTAS DEBAJO` : "PLANTA BAJA"), 0, 28); });
 }
 function pelotaPingPong() {
   const a = SITIOS[6].ocupante, b = SITIOS[7].ocupante;
@@ -2854,30 +3175,10 @@ function puertaAscensor(p) {
     ctx.fillStyle = "#0b0d11"; ctx.fillRect(28, 50, 144, 185);
     ctx.fillStyle = "#8b95a5"; ctx.fillRect(28 - ab, 50, 72, 185); ctx.fillRect(100 + ab, 50, 72, 185);
     ctx.fillStyle = "#6b7585"; ctx.fillRect(99 + ab, 50, 2, 185);
-    ctx.fillStyle = "#d4ff3a"; ctx.font = "900 17px Inter, sans-serif"; ctx.fillText(p ? "PLANTA 1 · ▼ 0" : "TRADING FLOOR · ▲ 1", 18, 22);
+    ctx.fillStyle = "#d4ff3a"; ctx.font = "900 15px Inter, sans-serif"; ctx.fillText(`${p ? "PLANTA " + p : "BAJA"} · ${SECTORES[p].toUpperCase()}`, 14, 22);
     ctx.fillStyle = ascensorAnim[p] > .1 ? "#2ee6a6" : "#394252"; ctx.fillRect(92, 36, 16, 8);
   });
   brillo(.1, 10, 2.1, 60, "#d4ff3a", .3);
-}
-function paredes1() {
-  const colorMuro = "#262b34";
-  caja(-.25, -.25, 0, W + .25, .25, ALTO_MURO, colorMuro, {izq: "#2d333d", top: "#3a414d"});
-  caja(-.25, 0, 0, .25, D, ALTO_MURO, colorMuro, {der: "#2a3039", top: "#3a414d"});
-  caraY(0, .002, .12, () => { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 0, W * 100, 3); });
-  caraX(.002, D, .12, () => { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 0, D * 100, 3); });
-  caraY(.3, .002, 2.34, () => cacheado("informe", 840, 205, 3, () => paredInforme(840, 205)));
-  brillo(4.5, .3, 1.6, 140, "#ff8a5c", .18);
-  caraY(9.3, .002, 2.36, () => { ctx.fillStyle = "#2ee6a6"; ctx.font = "900 19px Inter, sans-serif"; ctx.fillText("SISTEMAS · DATOS EN VIVO", 8, 20); });
-  caraY(17.3, .002, 2.34, () => cacheado("quant", 1040, 205, 2, () => paredQuant(1040, 205)));
-  brillo(22.5, .3, 1.6, 170, "#5cc0ff", .2);
-  caraY(28.3, .002, 2.3, () => cacheado("pizarra", 840, 200, 3, () => pizarraAcademia(840, 200)));
-  caraY(37.3, .002, 2.34, () => cacheado("carta", 840, 205, 30, () => cartaCafeteria(840, 205)));
-  caraY(46.3, .002, 2.34, () => cacheado("juegos", 740, 205, 1, () => paredJuegos(740, 205)));
-  brillo(50, .3, 1.7, 150, "#b58cff", .25);
-  caraX(.002, 8.6, 2.2, () => cacheado("ventana3", 820, 130, 5, () => ventana(820, 130)));
-  puertaAscensor(1);
-  caraX(.002, 23.6, 2.25, () => cacheado("examenes", 1200, 200, 1, () => pantallaExamenes(1200, 200)));
-  brillo(.1, 17.5, 1.4, 150, "#ff8a5c", .16);
 }
 function paredInforme(w, h) {
   const inf = S && S.informe;
@@ -2988,65 +3289,178 @@ function pantallaExamenes(w, h) {
     ctx.fillStyle = c; ctx.fillText(ex.estado === "aprobada" ? "APROBADA" : ex.estado === "espera_cierre" ? "AL CERRAR" : "EXAMEN", x + 500, y + 11);
   });
 }
-function paredes(p) { if (p === 1) paredes1(); else paredes0(); }
-function paredes0() {
-  const colorMuro = "#262b34";
+function paredes(p) {
+  const colorMuro = "#262b34", en = id => PLANTA_DE[id] === p;
   caja(-.25, -.25, 0, W + .25, .25, ALTO_MURO, colorMuro, {izq: "#2d333d", top: "#3a414d"});
   caja(-.25, 0, 0, .25, D, ALTO_MURO, colorMuro, {der: "#2a3039", top: "#3a414d"});
   // zócalo neón
   caraY(0, .002, .12, () => { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 0, W * 100, 3); });
   caraX(.002, D, .12, () => { ctx.fillStyle = "#d4ff3a"; ctx.fillRect(0, 0, D * 100, 3); });
-  // MINERÍA: letrero
-  caraY(.3, .002, 2.34, () => { ctx.fillStyle = "#ffc24a"; ctx.font = "900 20px Inter, sans-serif"; ctx.fillText("MINERÍA ALGORÍTMICA", 8, 22); });
-  // LABORATORIO: ventanas y cartel
-  caraY(10.6, .002, 2.1, () => cacheado("ventana1", 420, 130, 5, () => ventana(420, 130)));
-  caraY(15.4, .002, 2.1, () => cacheado("cartel", 250, 130, 60, () => {
-    ctx.fillStyle = "#f4f6f9"; ctx.fillRect(0, 0, 250, 130);
-    ctx.fillStyle = "#0e1a2b"; ctx.font = "900 20px Inter, sans-serif"; ctx.fillText("¿SUERTE O VENTAJA?", 12, 30);
-    ctx.font = "600 11px Inter, sans-serif"; ctx.fillStyle = "#44556d";
-    ["Si pruebas miles de estrategias al azar,", "algunas parecerán geniales por casualidad.", "Aquí intentamos pillarlas."].forEach((l, i) => ctx.fillText(l, 12, 56 + i * 17));
-  }));
-  caraY(18.1, .002, 2.1, () => cacheado("ventana2", 270, 130, 5, () => ventana(270, 130)));
-  // HOLDING: gráfico de zonas objetivo
-  caraY(38.25, .002, 2.34, () => cacheado("zonas", 750, 205, 1, () => pintarZonas(ctx, 750, 205, planEnPared(), true)));
-  brillo(42, .3, 1.6, 170, "#f7931a", .2);
-  // SCALPING: cinta de precios en vivo
-  caraY(46.25, .002, 2.34, () => cacheado("scalping", 750, 205, 1, () => pantallaScalping(750, 205)));
-  brillo(50, .3, 1.6, 170, "#ff4fd8", .22);
-  for (const x of [47, 49, 51, 53]) brillo(x, 4.2, 2.2, 60, "#ff4fd8", .1 + noche * .1);
-  // MACRO: gran panel de indicadores
-  caraY(30.25, .002, 2.32, () => cacheado("macro", 750, 200, 1, () => pantallaMacro(750, 200)));
-  brillo(34, .3, 1.6, 170, "#5cc0ff", .22);
-  // CÁMARA: puerta acorazada
-  caraY(21.2, .002, 2.35, () => {
-    ctx.fillStyle = "#2f2a1d"; ctx.fillRect(0, 0, 860, 235);
-    const cx = 520, cy = 118;
-    const g = ctx.createRadialGradient(cx - 20, cy - 20, 10, cx, cy, 100); g.addColorStop(0, "#fff0b8"); g.addColorStop(.5, "#d9a93a"); g.addColorStop(1, "#7a5a18");
-    ctx.fillStyle = "#1a1609"; ctx.beginPath(); ctx.arc(cx, cy, 104, 0, TAU); ctx.fill();
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, 96, 0, TAU); ctx.fill();
-    ctx.fillStyle = "#b8b8be"; ctx.beginPath(); ctx.arc(cx, cy, 70, 0, TAU); ctx.fill();
-    ctx.strokeStyle = "#6b6b73"; ctx.lineWidth = 4;
-    for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; circulo(cx + Math.cos(a) * 84, cy + Math.sin(a) * 84, 5, "#5a4413"); }
-    ctx.save(); ctx.translate(cx, cy); ctx.rotate(giroCamara * (1 - Math.exp(-T)) + T * .05);
-    ctx.strokeStyle = "#3d3d44"; ctx.lineWidth = 9;
-    for (let i = 0; i < 3; i++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(-50, 0); ctx.lineTo(50, 0); ctx.stroke(); }
-    circulo(0, 0, 14, "#3d3d44"); ctx.restore();
-    ctx.fillStyle = "#ffcf5a"; ctx.font = "900 20px Inter, sans-serif"; ctx.fillText("CÁMARA DEL BANCO", 30, 40);
-  });
-  // PARED OESTE: pantalla de minería, ascensor y videowall
-  caraX(.002, 7.6, 2.2, () => cacheado("mineria", 600, 150, .25, () => pantallaMineria(600, 150)));
-  brillo(.1, 4.6, 1.5, 120, "#ffc24a", S && S.mineria && S.mineria.estado === "minando" ? .2 : .06);
-  puertaAscensor(0);
-  const precios = S && S.papel && S.papel.precios || {};
-  const simbolos = Object.keys(precios).filter(k => (precios[k].serie || []).length > 1).slice(0, 3);
-  const paneles = [[23.6, 0], [20.5, 1], [17.4, 2], [14.3, 3]];
-  for (const [yFin, i] of paneles) {
-    caraX(.002, yFin, 2.25, () => cacheado("panel" + i, 300, 160, 1, () => {
-      ctx.fillStyle = "#07090e"; ctx.fillRect(0, 0, 300, 160);
-      ctx.strokeStyle = "#1e2430"; ctx.lineWidth = 3; ctx.strokeRect(0, 0, 300, 160);
-      if (i < 3) grafico(simbolos[i], precios[simbolos[i]], 300, 160); else resumenPared(300, 160);
+  puertaAscensor(p);
+  // ---- planta baja · trading
+  if (en("recepcion")) {
+    caraY(.3, .002, 2.34, () => {
+      ctx.fillStyle = "#14171f"; ctx.fillRect(0, 0, 1240, 205);
+      ctx.fillStyle = "#d4ff3a"; ctx.font = "900 70px Inter, sans-serif"; ctx.fillText("TRADING FLOOR", 40, 110);
+      ctx.fillStyle = "#cfd6e0"; ctx.font = "700 20px Inter, sans-serif"; ctx.fillText("Fondo de inversión simulado · dinero ficticio · precios reales", 44, 150);
+    });
+    brillo(6, .3, 1.7, 220, "#d4ff3a", .16);
+    caraX(.002, 8.6, 2.2, () => cacheado("directorio", 820, 205, 30, () => directorioPlantas(820, 205)));
+  }
+  if (en("quant")) { caraY(17.3, .002, 2.34, () => cacheado("quant", 1040, 205, 2, () => paredQuant(1040, 205))); brillo(22.5, .3, 1.6, 170, "#5cc0ff", .2); }
+  if (en("analisis")) { caraY(30.3, .002, 2.34, () => cacheado("mesa", 1540, 205, 1, () => pantallaMesa(1540, 205))); brillo(38, .3, 1.7, 220, "#d4ff3a", .18); }
+  if (en("scalping")) {
+    caraY(46.25, .002, 2.34, () => cacheado("scalping", 750, 205, 1, () => pantallaScalping(750, 205)));
+    brillo(50, .3, 1.6, 170, "#ff4fd8", .22);
+    for (const x of [47, 49, 51, 53]) brillo(x, 4.2, 2.2, 60, "#ff4fd8", .1 + noche * .1);
+  }
+  if (en("trading")) {   // videowall de la sala de trading, en la pared oeste
+    const precios = S && S.papel && S.papel.precios || {};
+    const simbolos = Object.keys(precios).filter(k => (precios[k].serie || []).length > 1).slice(0, 3);
+    const paneles = [[23.6, 0], [20.5, 1], [17.4, 2], [14.3, 3]];
+    for (const [yFin, i] of paneles) {
+      caraX(.002, yFin, 2.25, () => cacheado("panel" + i, 300, 160, 1, () => {
+        ctx.fillStyle = "#07090e"; ctx.fillRect(0, 0, 300, 160);
+        ctx.strokeStyle = "#1e2430"; ctx.lineWidth = 3; ctx.strokeRect(0, 0, 300, 160);
+        if (i < 3) grafico(simbolos[i], precios[simbolos[i]], 300, 160); else resumenPared(300, 160);
+      }));
+      brillo(.1, yFin - 1.5, 1.5, 110, i < 3 && simbolos[i] && precios[simbolos[i]].cambio_24h_pct < 0 ? "#ff5a76" : "#2ee6a6", .18);
+    }
+  }
+  // ---- planta 1 · investigación
+  if (en("mineria")) {
+    caraY(.3, .002, 2.34, () => { ctx.fillStyle = "#ffc24a"; ctx.font = "900 20px Inter, sans-serif"; ctx.fillText("MINERÍA ALGORÍTMICA", 8, 22); });
+    caraX(.002, 7.6, 2.2, () => cacheado("mineria", 600, 150, .25, () => pantallaMineria(600, 150)));
+    brillo(.1, 4.6, 1.5, 120, "#ffc24a", S && S.mineria && S.mineria.estado === "minando" ? .2 : .06);
+  }
+  if (en("laboratorio")) {
+    caraY(10.6, .002, 2.1, () => cacheado("ventana1", 420, 130, 5, () => ventana(420, 130)));
+    caraY(15.4, .002, 2.1, () => cacheado("cartel", 250, 130, 60, () => {
+      ctx.fillStyle = "#f4f6f9"; ctx.fillRect(0, 0, 250, 130);
+      ctx.fillStyle = "#0e1a2b"; ctx.font = "900 20px Inter, sans-serif"; ctx.fillText("¿SUERTE O VENTAJA?", 12, 30);
+      ctx.font = "600 11px Inter, sans-serif"; ctx.fillStyle = "#44556d";
+      ["Si pruebas miles de estrategias al azar,", "algunas parecerán geniales por casualidad.", "Aquí intentamos pillarlas."].forEach((l, i) => ctx.fillText(l, 12, 56 + i * 17));
     }));
-    brillo(.1, yFin - 1.5, 1.5, 110, i < 3 && simbolos[i] && precios[simbolos[i]].cambio_24h_pct < 0 ? "#ff5a76" : "#2ee6a6", .18);
+    caraY(18.1, .002, 2.1, () => cacheado("ventana2", 270, 130, 5, () => ventana(270, 130)));
+  }
+  if (en("banco")) caraY(21.2, .002, 2.35, puertaCamara);
+  if (en("academia")) caraY(30.3, .002, 2.3, () => cacheado("pizarra", 840, 200, 3, () => pizarraAcademia(840, 200)));
+  if (en("incubadora")) { caraX(.002, 23.6, 2.25, () => cacheado("examenes", 1200, 200, 1, () => pantallaExamenes(1200, 200))); brillo(.1, 17.5, 1.4, 150, "#ff8a5c", .16); }
+  // ---- planta 2 · inversión
+  if (en("tesoreria")) {
+    caraY(.3, .002, 2.34, () => cacheado("tesoreria", 960, 205, 2, () => paredTesoreria(960, 205)));
+    brillo(5, .3, 1.6, 160, "#ffcf5a", .18);
+    caraX(.002, 8.6, 2.2, () => cacheado("ventana4", 820, 130, 5, () => ventana(820, 130)));
+  }
+  if (en("tendencia")) {
+    for (let k = 0; k < 6; k++) caraY(14.3 + k * 2.6, .002, 2.34, () => cacheado("tend" + k, 250, 205, 2, () => panelTendencia(k, 250, 205)));
+    brillo(22, .3, 1.7, 220, "#c98500", .2);
+  }
+  if (en("macro")) { caraY(30.25, .002, 2.32, () => cacheado("macro", 750, 200, 1, () => pantallaMacro(750, 200))); brillo(34, .3, 1.6, 170, "#5cc0ff", .22); }
+  if (en("holding")) { caraY(38.25, .002, 2.34, () => cacheado("zonas", 750, 205, 1, () => pintarZonas(ctx, 750, 205, planEnPared(), true))); brillo(42, .3, 1.6, 170, "#f7931a", .2); }
+  if (en("mirador")) caraY(46.3, .002, 2.34, () => cacheado("mirador", 740, 205, 5, () => ventana(740, 205)));
+  if (en("salafondo")) { caraX(.002, 23.6, 2.3, () => cacheado("salafondo", 1260, 205, 2, () => paredFondo(1260, 205))); brillo(.1, 17.5, 1.6, 180, "#d4ff3a", .16); }
+  // ---- planta 3 · dirección y servicios
+  if (en("comunicacion")) {
+    caraY(.3, .002, 2.34, () => cacheado("informe", 840, 205, 3, () => paredInforme(840, 205)));
+    brillo(4.5, .3, 1.6, 140, "#ff8a5c", .18);
+    caraX(.002, 8.6, 2.2, () => cacheado("ventana3", 820, 130, 5, () => ventana(820, 130)));
+  }
+  if (en("infra")) caraY(9.3, .002, 2.36, () => { ctx.fillStyle = "#2ee6a6"; ctx.font = "900 19px Inter, sans-serif"; ctx.fillText("SISTEMAS · DATOS EN VIVO", 8, 20); });
+  if (en("direccion")) { caraY(17.3, .002, 2.34, () => cacheado("organigrama", 1040, 205, 30, () => directorioPlantas(1040, 205))); caraY(28.3, .002, 2.1, () => cacheado("ventana5", 820, 130, 5, () => ventana(820, 130))); }
+  if (en("cafeteria")) caraY(37.3, .002, 2.34, () => cacheado("carta", 840, 205, 30, () => cartaCafeteria(840, 205)));
+  if (en("juegos")) { caraY(46.3, .002, 2.34, () => cacheado("juegos", 740, 205, 1, () => paredJuegos(740, 205))); brillo(50, .3, 1.7, 150, "#b58cff", .25); }
+  if (en("gimnasio")) caraX(.002, 23.4, 2.25, () => { const g = ctx.createLinearGradient(0, 0, 1200, 200); g.addColorStop(0, "rgba(200,230,255,.5)"); g.addColorStop(1, "rgba(120,160,200,.3)"); ctx.fillStyle = g; ctx.fillRect(0, 0, 1200, 200); ctx.fillStyle = "#2ee6a6"; ctx.font = "900 22px Inter, sans-serif"; ctx.fillText("GIMNASIO · ESPEJO", 20, 34); });
+}
+function puertaCamara() {
+  ctx.fillStyle = "#2f2a1d"; ctx.fillRect(0, 0, 860, 235);
+  const cx = 520, cy = 118;
+  const g = ctx.createRadialGradient(cx - 20, cy - 20, 10, cx, cy, 100); g.addColorStop(0, "#fff0b8"); g.addColorStop(.5, "#d9a93a"); g.addColorStop(1, "#7a5a18");
+  ctx.fillStyle = "#1a1609"; ctx.beginPath(); ctx.arc(cx, cy, 104, 0, TAU); ctx.fill();
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, 96, 0, TAU); ctx.fill();
+  ctx.fillStyle = "#b8b8be"; ctx.beginPath(); ctx.arc(cx, cy, 70, 0, TAU); ctx.fill();
+  ctx.strokeStyle = "#6b6b73"; ctx.lineWidth = 4;
+  for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; circulo(cx + Math.cos(a) * 84, cy + Math.sin(a) * 84, 5, "#5a4413"); }
+  ctx.save(); ctx.translate(cx, cy); ctx.rotate(giroCamara * (1 - Math.exp(-T)) + T * .05);
+  ctx.strokeStyle = "#3d3d44"; ctx.lineWidth = 9;
+  for (let i = 0; i < 3; i++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.moveTo(-50, 0); ctx.lineTo(50, 0); ctx.stroke(); }
+  circulo(0, 0, 14, "#3d3d44"); ctx.restore();
+  ctx.fillStyle = "#ffcf5a"; ctx.font = "900 20px Inter, sans-serif"; ctx.fillText("CÁMARA DEL BANCO", 30, 40);
+}
+function directorioPlantas(w, h) {   // el directorio del edificio: una planta por sector
+  ctx.fillStyle = "#101318"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#d4ff3a"; ctx.font = "900 18px Inter, sans-serif"; ctx.fillText("DIRECTORIO · UNA PLANTA POR SECTOR", 16, 28);
+  const salasDe = p => SALAS_PLANTA[p].filter(s => s.nombre).map(s => s.nombre.charAt(0) + s.nombre.slice(1).toLowerCase()).join(" · ");
+  for (let p = NPLANTAS - 1, k = 0; p >= 0; p--, k++) {
+    const y = 56 + k * 37;
+    ctx.fillStyle = ["#d4ff3a", "#5cc0ff", "#f7931a", "#ffcf5a"][p]; ctx.font = "900 15px Inter, sans-serif"; ctx.fillText(`${p ? "PLANTA " + p : "BAJA"} · ${SECTORES[p].toUpperCase()}`, 16, y);
+    ctx.fillStyle = "#cfd6e0"; ctx.font = "600 12px Inter, sans-serif"; partirLineas(salasDe(p), w - 32, 1).forEach(l => ctx.fillText(l, 16, y + 16));
+  }
+}
+function pantallaMesa(w, h) {   // la mesa de análisis: la última señal que ha visto y qué ha dicho cada uno
+  const lista = (S && S.papel && S.papel.mesa_analisis || []).filter(d => !d.repetida), d = lista[0], res = S && S.papel && S.papel.mesa_resumen || {};
+  ctx.fillStyle = "#0b0e14"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#d4ff3a"; ctx.font = "900 17px Inter, sans-serif"; ctx.fillText("MESA DE ANÁLISIS · COMPRA, ESPERA O PASA", 16, 28);
+  ctx.fillStyle = "#8a94a6"; ctx.font = "700 12px Inter, sans-serif";
+  ctx.fillText(`Hoy: ${res.hoy || 0} señales · entran ${res.entran_hoy || 0}. Solo entra lo que va a favor de la tendencia diaria, gana 1,5 veces lo que arriesga y no va con la masa en un extremo.`, 16, 48);
+  if (!d) { ctx.fillStyle = "#4a5568"; ctx.font = "700 15px Inter, sans-serif"; ctx.fillText("Todavía no ha llegado ninguna señal a la mesa.", 16, 110); return; }
+  const filas = [["SCOUT", "scout"], ["NOTICIAS", "noticias"], ["SENTIMIENTO", "sentimiento"], ["CHARTS", "charts"], ["ESCÉPTICA", "esceptico"]];
+  filas.forEach(([t, k], n) => {
+    const y = 74 + n * 25;
+    ctx.fillStyle = "#5cc0ff"; ctx.font = "800 11px JetBrains Mono, monospace"; ctx.fillText(t, 16, y);
+    ctx.fillStyle = "#e9edf3"; ctx.font = "600 12px Inter, sans-serif"; ctx.fillText(partirLineas(d.roles && d.roles[k] || "", 1040, 1)[0] || "", 130, y);
+  });
+  const entra = d.entra, x0 = w - 330;
+  ctx.fillStyle = entra ? "rgba(46,230,166,.16)" : "rgba(255,90,118,.16)"; rr(x0, 62, 310, 130, 14); ctx.fill();
+  ctx.strokeStyle = entra ? "#2ee6a6" : "#ff5a76"; ctx.lineWidth = 3; rr(x0, 62, 310, 130, 14); ctx.stroke();
+  ctx.fillStyle = entra ? "#2ee6a6" : "#ff5a76"; ctx.font = "900 46px Inter, sans-serif"; ctx.textAlign = "center";
+  ctx.fillText(entra ? (d.direccion === "largo" ? "COMPRA" : "VENDE") : "PASA", x0 + 155, 132);
+  ctx.fillStyle = "#cfd6e0"; ctx.font = "700 13px JetBrains Mono, monospace"; ctx.fillText(`${d.id} · ${moneda(d.simbolo)} ${d.direccion === "largo" ? "▲" : "▼"}`, x0 + 155, 172);
+  ctx.textAlign = "start";
+}
+function paredTesoreria(w, h) {
+  const lq = S && S.liquidez || {}, F = S && S.fondo || {};
+  ctx.fillStyle = "#141005"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#ffcf5a"; ctx.font = "900 17px Inter, sans-serif"; ctx.fillText("TESORERÍA · EL DINERO SIN INVERTIR COBRA INTERESES", 16, 28);
+  const cifras = [["Sin invertir ahora", fmt.n(lq.efectivo || 0) + " $"], ["Tipo (letras del Tesoro)", NF2.format(lq.tipo_pct || 0) + " %"], ["Al día", NF2.format(lq.al_dia || 0) + " $"], ["Cobrado hasta hoy", "+" + NF2.format(lq.acumulado || 0) + " $"]];
+  cifras.forEach(([t, v], k) => {
+    const x = 16 + k * 235;
+    ctx.fillStyle = "#b7a08c"; ctx.font = "700 12px Inter, sans-serif"; ctx.fillText(t, x, 70);
+    ctx.fillStyle = "#f4f1ea"; ctx.font = "800 26px JetBrains Mono, monospace"; ctx.fillText(v, x, 104);
+  });
+  ctx.fillStyle = "#8a7a66"; ctx.font = "600 12px Inter, sans-serif";
+  ctx.fillText(`Liquidez del reparto: ${NF1.format((F.reparto || {}).liquidez || 0)} %. Lo que no está dentro del mercado cobra como en un monetario.`, 16, 150);
+}
+function panelTendencia(k, w, h) {   // una moneda de la sala de tendencia: precio, media de 50 días y si está dentro
+  const p = monedasTendencia()[k];
+  ctx.fillStyle = "#120e02"; ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = "#3a2e0c"; ctx.lineWidth = 3; ctx.strokeRect(1, 1, w - 2, h - 2);
+  if (!p) { ctx.fillStyle = "#6b5410"; ctx.font = "800 14px Inter, sans-serif"; ctx.fillText("SIN DATOS", 14, 30); return; }
+  ctx.save(); ctx.translate(10, 54); pintarTendencia(ctx, w - 20, h - 64, p, 9); ctx.restore();
+  ctx.fillStyle = "#ffe7a8"; ctx.font = "900 20px Inter, sans-serif"; ctx.fillText(moneda(p.simbolo), 12, 28);
+  ctx.fillStyle = p.peso > 0 ? "#2ee6a6" : "#c98500"; ctx.font = "800 13px JetBrains Mono, monospace";
+  ctx.fillText(p.stop ? "STOP · FUERA" : p.peso > 0 ? `DENTRO ${Math.round(p.peso * 100)} %` : "FUERA", 12, 46);
+  ctx.fillStyle = (p.resultado || 0) >= 0 ? "#2ee6a6" : "#ff5a76"; ctx.textAlign = "right"; ctx.fillText(dineroS(p.resultado || 0), w - 12, 28); ctx.textAlign = "start";
+}
+function paredFondo(w, h) {   // tu fondo en la pared de la sala de inversores
+  const F = S && S.fondo || {}, A = FONDO_ANALITICA, serie = A && A.serie || [], c = A && A.columnas || [], iv = c.indexOf("vl");
+  ctx.fillStyle = "#0b0f16"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = "#d4ff3a"; ctx.font = "900 18px Inter, sans-serif"; ctx.fillText("TU FONDO", 16, 30);
+  ctx.fillStyle = "#e9edf3"; ctx.font = "800 28px JetBrains Mono, monospace"; ctx.fillText(fmt.dinero(F.patrimonio || 0), 16, 72);
+  const r = F.resultado || 0; ctx.fillStyle = r >= 0 ? "#2ee6a6" : "#ff5a76"; ctx.font = "800 16px JetBrains Mono, monospace"; ctx.fillText(`${dineroS(r)} (${fmt.pct(F.rentabilidad_pct || 0)})`, 16, 98);
+  const rep = F.reparto || {};
+  ["trading", "scalping", "holding", "tendencia", "liquidez"].forEach((k, n) => {
+    const y = 124 + n * 15;
+    ctx.fillStyle = "#8a94a6"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText(k.charAt(0).toUpperCase() + k.slice(1), 16, y + 9);
+    ctx.fillStyle = "#1b2233"; ctx.fillRect(100, y, 200, 10); ctx.fillStyle = ["#3987e5", "#d95926", "#199e70", "#c98500", "#5b606b"][n]; ctx.fillRect(100, y, 2 * (rep[k] || 0), 10);
+    ctx.fillStyle = "#cfd6e0"; ctx.fillText(NF1.format(rep[k] || 0) + " %", 308, y + 9);
+  });
+  if (serie.length > 1 && iv >= 0) {
+    const vals = serie.map(f => f[iv]), lo = Math.min(...vals), hi = Math.max(...vals), x0 = 380, gw = w - x0 - 20, y0 = 40, gh = h - 60;
+    ctx.strokeStyle = "#1c2433"; ctx.lineWidth = 1; ctx.strokeRect(x0, y0, gw, gh);
+    ctx.strokeStyle = "#d4ff3a"; ctx.lineWidth = 2.4; ctx.beginPath();
+    vals.forEach((v, k) => ctx.lineTo(x0 + k * gw / (vals.length - 1), y0 + gh - (v - lo) / (hi - lo || 1) * gh)); ctx.stroke();
+    ctx.fillStyle = "#8a94a6"; ctx.font = "700 11px Inter, sans-serif"; ctx.fillText("Valor de cada participación", x0, y0 - 8);
   }
 }
 function grafico(sim, p, w, h) {
@@ -3224,11 +3638,11 @@ function pantallaRiesgos(w, h) {
 }
 
 // ========================================================= DIBUJO =====
-let sueloCache = [null, null], vineta = null;
+let sueloCache = Array(NPLANTAS).fill(null), vineta = null;
 function texturaSuelo(sala, w, h) {   // coordenadas del plano: 100 unidades = 1 baldosa
   const azar = (() => { let k = hash(sala.id); return () => ((k = Math.imul(k ^ (k >>> 15), 2246822507) + 0x9e3779b9 >>> 0) / 4294967296); })();
   const motas = (n, color, r = 1.4) => { ctx.fillStyle = color; for (let i = 0; i < n; i++) ctx.fillRect(azar() * w, azar() * h, r, r); };
-  if (sala.id === "trading" || sala.id === "trading2") {   // moqueta oscura con borde neón bajo las mesas
+  if (sala.id === "trading" || sala.id === "trading2" || sala.id === "analisis") {   // moqueta oscura con borde neón bajo las mesas
     const x0 = 25, y0 = 62, mw = w - 70, mh = h - 70;
     ctx.fillStyle = "#1b2433"; rr(x0, y0, mw, mh, 18); ctx.fill();
     ctx.save(); rr(x0, y0, mw, mh, 18); ctx.clip();
@@ -3253,7 +3667,7 @@ function texturaSuelo(sala, w, h) {   // coordenadas del plano: 100 unidades = 1
     ctx.strokeStyle = "rgba(255,255,255,.035)"; ctx.lineWidth = 2;
     for (let k = -h; k < w; k += 14) { ctx.beginPath(); ctx.moveTo(k, 0); ctx.lineTo(k + h, h); ctx.stroke(); }
     ctx.fillStyle = "rgba(255,194,74,.18)"; for (let u = 50; u < w; u += 100) for (let v = 50; v < h; v += 100) ctx.fillRect(u - 2, v - 2, 4, 4);
-  } else if (sala.id === "banco") {   // mármol oscuro con vetas y cenefa dorada
+  } else if (sala.id === "banco" || sala.id === "tesoreria") {   // mármol oscuro con vetas y cenefa dorada
     ctx.strokeStyle = "rgba(255,240,200,.05)"; ctx.lineWidth = 2;
     for (let i = 0; i < 26; i++) { const u = azar() * w, v = azar() * h; ctx.beginPath(); ctx.moveTo(u, v); ctx.bezierCurveTo(u + 60, v + azar() * 80, u + 120, v - azar() * 80, u + 200, v + 30); ctx.stroke(); }
     ctx.strokeStyle = "rgba(255,207,90,.3)"; ctx.lineWidth = 3; ctx.strokeRect(30, 30, w - 60, h - 60);
@@ -3276,7 +3690,12 @@ function texturaSuelo(sala, w, h) {   // coordenadas del plano: 100 unidades = 1
     ctx.fillStyle = "#3a2a1f"; rr(x0, y0, mw, mh, 18); ctx.fill();
     ctx.save(); rr(x0, y0, mw, mh, 18); ctx.clip(); motas(2200, "rgba(255,255,255,.05)"); ctx.restore();
     ctx.strokeStyle = "rgba(255,138,92,.55)"; ctx.lineWidth = 4; rr(x0, y0, mw, mh, 18); ctx.stroke();
-  } else if (sala.id === "cafeteria" || sala.id === "academia") {   // parqué
+  } else if (sala.id === "jardin") {   // césped con caminos de piedra
+    ctx.fillStyle = "#3f8f4a"; ctx.fillRect(40, 40, w - 80, h - 80);
+    for (let i = 0; i < 2200; i++) { ctx.fillStyle = azar() < .5 ? "rgba(255,255,255,.05)" : "rgba(0,40,0,.1)"; ctx.fillRect(40 + azar() * (w - 80), 40 + azar() * (h - 80), 2, 5); }
+    ctx.fillStyle = "#cfc6b8"; ctx.fillRect(0, h / 2 - 60, w, 120); ctx.fillRect(w / 2 - 60, 0, 120, h);
+    for (let i = 0; i < 80; i++) { ctx.fillStyle = ["#ffcf5a", "#ff8aa8", "#ffffff", "#b58cff"][i % 4]; ctx.beginPath(); ctx.arc(60 + azar() * (w - 120), 60 + azar() * (h - 120), 4, 0, TAU); ctx.fill(); }
+  } else if (sala.id === "cafeteria" || sala.id === "academia" || sala.id === "recepcion" || sala.id === "direccion" || sala.id === "mirador" || sala.id === "biblioteca") {   // parqué
     for (let v = 0, k = 0; v < h; v += 24, k++) {
       ctx.fillStyle = k % 2 ? "rgba(60,30,0,.07)" : "rgba(255,230,190,.06)"; ctx.fillRect(0, v, w, 24);
       ctx.fillStyle = "rgba(40,20,0,.14)"; ctx.fillRect(0, v, w, 1.4);
@@ -3309,56 +3728,35 @@ function crearSuelo(p = 0) {
   // grosor del forjado
   caja(0, 0, -.35, W, 11, .35, "#15181e", {izq: "#1b1f27", der: "#12151a"});
   caja(0, 11, -.35, X_ALA, D - 11, .35, "#15181e", {izq: "#1b1f27", der: "#12151a"});
-  if (p === 1) { sueloPlanta1(c, minX, minY, esc); ctx = principal; return; }
-  for (const s of SALAS) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
+  for (const s of SALAS_PLANTA[p]) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
     cuad(iso(x, y), iso(x + 1, y), iso(x + 1, y + 1), iso(x, y + 1), (x + y) % 2 ? s.a : s.b);
   }
-  decorarSuelo(0);
+  decorarSuelo(p);
   ctx = principal;
-  sueloCache[0] = {c, minX, minY, esc};
+  sueloCache[p] = {c, minX, minY, esc};
 }
 /** Texturas, alfombras y rótulos del suelo de una planta (los usan la vista isométrica y el paseo 3D). */
 function decorarSuelo(p) {
-  if (p === 1) return decorarSuelo1();
+  const en = id => PLANTA_DE[id] === p;
   // texturas de cada sala y sombra junto a las paredes del fondo
-  for (const sala of SALAS) plano(sala.x0, sala.y0, 0, () => texturaSuelo(sala, (sala.x1 - sala.x0) * 100, (sala.y1 - sala.y0) * 100));
-  // pasillo: líneas de neón y flechas
+  for (const sala of SALAS_PLANTA[p]) plano(sala.x0, sala.y0, 0, () => texturaSuelo(sala, (sala.x1 - sala.x0) * 100, (sala.y1 - sala.y0) * 100));
+  // pasillo: líneas de neón y flechas hacia el ascensor
   plano(0, 9, 0, () => {
     ctx.fillStyle = "rgba(212,255,58,.8)"; ctx.fillRect(0, 12, W * 100, 3); ctx.fillRect(0, 185, W * 100, 3);
     ctx.fillStyle = "rgba(212,255,58,.25)";
-    for (let x = 150; x < W * 100; x += 300) { ctx.beginPath(); ctx.moveTo(x, 80); ctx.lineTo(x + 40, 100); ctx.lineTo(x, 120); ctx.fill(); }
-  });
-  // alfombra del descanso y del comité
-  plano(22.8, 19.3, 0, () => { ctx.fillStyle = "rgba(255,138,92,.28)"; rr(0, 0, 690, 380, 60); ctx.fill(); });
-  plano(19.8, 12.3, 0, () => { ctx.fillStyle = "rgba(181,140,255,.16)"; rr(0, 0, 900, 380, 30); ctx.fill(); });
-  // rótulos en el suelo
-  plano(30, 11, 0, () => { ctx.strokeStyle = "rgba(0,0,0,.18)"; ctx.lineWidth = 2; for (let v = 25; v < 1300; v += 50) { ctx.beginPath(); ctx.moveTo(0, v); ctx.lineTo(800, v); ctx.stroke(); } });
-  const rotulos = [["scalping", 46.4, 8.7, 100], ["holding", 38.4, 8.7, 100], ["riesgos", 38.5, 23.7, 100], ["macro", 30.4, 8.7, 105], ["terraza", 30.5, 23.7, 100], ["mineria", .4, 8.7, 105], ["laboratorio", 10.4, 8.7, 88], ["banco", 21.4, 8.7, 105], ["trading", .6, 23.7, 150], ["comite", 18.5, 16.7, 95], ["descanso", 18.5, 23.8, 95]];
-  for (const [id, x, y, t] of rotulos) {
-    const s = SALAS.find(s => s.id === id);
-    plano(x, y, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
-  }
-}
-function sueloPlanta1(c, minX, minY, esc) {
-  for (const s of SALAS1) for (let x = s.x0; x < s.x1; x++) for (let y = s.y0; y < s.y1; y++) {
-    cuad(iso(x, y), iso(x + 1, y), iso(x + 1, y + 1), iso(x, y + 1), (x + y) % 2 ? s.a : s.b);
-  }
-  decorarSuelo1();
-  sueloCache[1] = {c, minX, minY, esc};
-}
-function decorarSuelo1() {
-  for (const sala of SALAS1) plano(sala.x0, sala.y0, 0, () => texturaSuelo(sala, (sala.x1 - sala.x0) * 100, (sala.y1 - sala.y0) * 100));
-  plano(0, 9, 0, () => {   // pasillo con neón y flechas hacia el ascensor
-    ctx.fillStyle = "rgba(212,255,58,.8)"; ctx.fillRect(0, 12, W * 100, 3); ctx.fillRect(0, 185, W * 100, 3);
-    ctx.fillStyle = "rgba(212,255,58,.25)";
     for (let x = 450; x < W * 100; x += 300) { ctx.beginPath(); ctx.moveTo(x, 80); ctx.lineTo(x - 40, 100); ctx.lineTo(x, 120); ctx.fill(); }
+    ctx.fillStyle = "rgba(212,255,58,.5)"; ctx.font = "900 60px Inter, sans-serif"; ctx.fillText(`${p ? "PLANTA " + p : "PLANTA BAJA"} · ${SECTORES[p].toUpperCase()}`, 260, 125);
   });
-  plano(37, 13.1, 0, () => { ctx.fillStyle = "rgba(255,138,60,.14)"; ctx.beginPath(); ctx.arc(260, 230, 230, 0, TAU); ctx.fill(); });   // alrededor de la fogata
-  const rotulos = [["comunicacion", .4, 8.7, 82], ["infra", 9.4, 8.7, 100], ["quant", 17.4, 8.7, 100], ["academia", 28.4, 8.7, 100], ["cafeteria", 37.4, 8.7, 100], ["juegos", 46.4, 8.7, 100],
-    ["incubadora", .6, 23.7, 150], ["trading2", 18.6, 23.7, 120], ["terraza1", X_TERRAZA1 + .5, 23.5, 110]];
-  for (const [id, x, y, t] of rotulos) {
-    const s = SALAS1.find(s => s.id === id);
-    plano(x, y, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
+  if (en("descanso")) plano(22.8, 19.3, 0, () => { ctx.fillStyle = "rgba(255,138,92,.28)"; rr(0, 0, 690, 380, 60); ctx.fill(); });
+  if (en("comite")) plano(19.8, 12.3, 0, () => { ctx.fillStyle = "rgba(181,140,255,.16)"; rr(0, 0, 900, 380, 30); ctx.fill(); });
+  if (en("terraza1")) plano(37, 13.1, 0, () => { ctx.fillStyle = "rgba(255,138,60,.14)"; ctx.beginPath(); ctx.arc(260, 230, 230, 0, TAU); ctx.fill(); });   // alrededor de la fogata
+  if (en("analisis")) plano(34, 3.4, 0, () => { ctx.fillStyle = "rgba(212,255,58,.08)"; rr(0, 0, 820, 320, 60); ctx.fill(); });
+  if (en("recepcion")) plano(10.6, 2.5, 0, () => { ctx.fillStyle = "rgba(60,30,0,.12)"; rr(0, 0, 440, 400, 40); ctx.fill(); });
+  // rótulos en el suelo, junto a la puerta de cada sala
+  for (const s of SALAS_PLANTA[p]) {
+    if (!s.nombre) continue;
+    const ancho = (s.x1 - s.x0) * 100, abajo = s.y0 >= 11, t = Math.min(abajo ? 150 : 105, Math.floor((ancho - 60) / (s.nombre.length * .66)));
+    plano(s.x0 + .4, abajo ? s.y1 - .35 : s.y1 - .3, 0, () => { ctx.fillStyle = s.rotulo; ctx.font = `900 ${t}px Inter, sans-serif`; ctx.fillText(s.nombre, 0, 0); });
   }
 }
 
@@ -3380,9 +3778,9 @@ function dibujar() {
   ctx.fillStyle = g; ctx.fillRect(0, 0, vw, vh);
   brillos = [];
   transformarMundo();
-  // en la planta 1 se ve el edificio de la planta baja debajo y todo lo de arriba se dibuja más alto
-  const off = vista ? ALTURA_PLANTA * ZH : 0;
-  if (vista === 1) { edificioBajo(); ctx.translate(0, -off); }
+  // en las plantas de arriba se ven debajo las de abajo (el edificio) y todo se dibuja más alto
+  const off = vista * ALTURA_PLANTA * ZH;
+  if (vista > 0) { edificioBajo(vista); ctx.translate(0, -off); }
   const s = sueloCache[vista];
   ctx.drawImage(s.c, s.minX, s.minY, s.c.width / s.esc, s.c.height / s.esc);
   paredes(vista);
@@ -3395,19 +3793,19 @@ function dibujar() {
     dinamicos.push({k: a.x + a.y + (a.postura === "sentado" ? .02 : .05), f: () => persona(a)});
   }
   for (const q of particulas) if ((q.planta || 0) === vista) dinamicos.push({k: q.x + q.y + .5, f: () => dibujarParticula(q)});
-  if (vista === 0) {
+  if (vista === PLANTA_DE.mineria) {
     for (const p of paquetes) dinamicos.push({k: p.x + p.y + .3, f: () => dibujarPaquete(p)});
     dinamicos.push({k: HOLO.x + HOLO.y, f: holograma});
-    dinamicos.push({k: GLOBO.x + GLOBO.y, f: globo});
-    dinamicos.push({k: MONEDA.x + MONEDA.y, f: monedaGigante});
-    dinamicos.push({k: BALIZA.x + BALIZA.y, f: baliza});
-    dinamicos.push({k: 62, f: guirnalda});
-    dinamicos.push({k: ROBOT.x + ROBOT.y, f: dibujarRobot});
+  }
+  if (vista === PLANTA_DE.macro) dinamicos.push({k: GLOBO.x + GLOBO.y, f: globo});
+  if (vista === PLANTA_DE.holding) dinamicos.push({k: MONEDA.x + MONEDA.y, f: monedaGigante});
+  if (vista === PLANTA_DE.riesgos) dinamicos.push({k: BALIZA.x + BALIZA.y, f: baliza});
+  if (vista === 0) dinamicos.push({k: ROBOT.x + ROBOT.y, f: dibujarRobot});
+  if (vista === PLANTA_DE.descanso) {
     const bola = pelotaPingPong();
     if (bola) dinamicos.push({k: bola.x + bola.y + .1, f: () => { const [px, py] = iso(bola.x, bola.y, bola.z); circulo(px, py, 2.2, "#fff"); }});
-  } else {
-    dinamicos.push({k: 70, f: guirnaldaTerraza});
   }
+  if (vista === PLANTA_DE.terraza1) dinamicos.push({k: 70, f: guirnaldaTerraza});
   if ((GATO.planta || 0) === vista && !GATO.transbordo) dinamicos.push({k: GATO.x + GATO.y + .3, f: gato}); else GATO.caja = null;
   dinamicos.sort((a, b) => a.k - b.k);
   const estaticos = PLANTAS[vista].estaticos;
@@ -3421,7 +3819,7 @@ function dibujar() {
   if (noche > 0) { ctx.fillStyle = `rgba(8,12,36,${noche * .5})`; ctx.fillRect(0, 0, vw, vh); }
   // brillos
   transformarMundo();
-  if (vista === 1) ctx.translate(0, -off);
+  if (vista > 0) ctx.translate(0, -off);
   ctx.save(); ctx.globalCompositeOperation = "lighter";
   const f = .45 + noche * .75;
   for (const [x, y, z, r, c, a] of brillos) {
@@ -3448,7 +3846,7 @@ function dibujarFlotantes() {
   ctx.textAlign = "center";
   for (const f of flotantes) {
     if ((f.planta || 0) !== vista) continue;
-    const [sx, sy] = aPantalla(f.x, f.y, f.z + (f.planta ? ALTURA_PLANTA : 0)), a = f.t < 2 ? 1 : 1 - (f.t - 2) / .6;
+    const [sx, sy] = aPantalla(f.x, f.y, f.z + (f.planta || 0) * ALTURA_PLANTA), a = f.t < 2 ? 1 : 1 - (f.t - 2) / .6;
     ctx.font = `800 ${13 + 3 * cam.zoom}px JetBrains Mono, monospace`;
     ctx.fillStyle = rgba(f.color, a); ctx.fillText(f.texto, sx, sy - f.t * 26 * cam.zoom - 40 * cam.zoom);
   }
@@ -3467,7 +3865,7 @@ function dibujarBurbujas() {
   const activas = agentes.filter(a => a.burbuja && T < a.burbuja.t1 && (a.planta || 0) === vista && !a.transbordo).sort((a, b) => (b.x + b.y) - (a.x + a.y));
   for (const a of activas) {
     const b = a.burbuja;
-    const [sx, sy0] = aPantalla(a.x, a.y, a.z + (a.planta ? ALTURA_PLANTA : 0));
+    const [sx, sy0] = aPantalla(a.x, a.y, a.z + (a.planta || 0) * ALTURA_PLANTA);
     ctx.font = "600 12px Inter, sans-serif";
     const lineas = partirTexto(b.texto, b.texto.length > 120 ? 250 : 200);
     const ancho = Math.max(...lineas.map(l => ctx.measureText(l).width), ctx.measureText(a.nombre).width + 10) + 20;
@@ -3493,7 +3891,7 @@ function dibujarBurbujas() {
 }
 function etiqueta(a) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const [sx, sy] = aPantalla(a.x, a.y, (a.z || 0) + (a.planta ? ALTURA_PLANTA : 0));
+  const [sx, sy] = aPantalla(a.x, a.y, (a.z || 0) + (a.planta || 0) * ALTURA_PLANTA);
   const texto = a.nombre + (a.puesto ? " · " + a.puesto : "");
   ctx.font = "700 12px Inter, sans-serif";
   const w = ctx.measureText(texto).width + 16;
@@ -3581,7 +3979,7 @@ function procesarMineria(eventos) {
     }
     else if (e.tipo === "descartada") descartes.push(e);
     else if (e.tipo === "aprobada") {
-      enfocar(26, 5.5, 2.2, 7);
+      enfocar(26, 5.5, 2.2, 7, PLANTA_DE.banco);
       const n = (S.banco || []).length;
       charla([[PROBADORES[PROBADORES.length - 1], `¡${e.id} ha superado las ocho pruebas! ${e.fuera ? "Fuera de muestra: " + e.fuera + "." : ""}`, "bueno"],
         [BANQUERA, `Guardada en la cámara (${n} en el banco). Si hay mesa libre se pone en marcha ya; si no, a la reserva.`, "oro"],
@@ -3590,7 +3988,7 @@ function procesarMineria(eventos) {
     else if (e.tipo === "descanso") { decir(SUPERVISORES[0], e.texto, 2, e.nuevas ? "bueno" : ""); decir(pick(MINEROS), pick(["Ronda terminada. ¡Café!", "Fin de ronda. Me voy al sofá.", "Los servidores descansan y yo también."])); }
     else if (e.tipo === "ronda") { charla([[SUPERVISORES[0], e.texto, ""], [pick(MINEROS), pick(["¡Otra ronda! Servidores arriba.", "Vamos con la siguiente.", "A picar datos otra vez."])]], 2); }
     else if (e.tipo === "pausa") decir(SUPERVISORES[0], e.texto, 3);
-    else if (e.tipo === "busqueda") { charla([[SUPERVISORES[0], e.texto, "bueno"], [pick(MINEROS), pick(["¡Vamos allá! Enciendo los servidores.", "A por ellas. Que el laboratorio se prepare.", "Servidores arriba. ¡A minar!"])]], 3); enfocar(5, 4.5, 2.2, 6); }
+    else if (e.tipo === "busqueda") { charla([[SUPERVISORES[0], e.texto, "bueno"], [pick(MINEROS), pick(["¡Vamos allá! Enciendo los servidores.", "A por ellas. Que el laboratorio se prepare.", "Servidores arriba. ¡A minar!"])]], 3); enfocar(5, 4.5, 2.2, 6, PLANTA_DE.mineria); }
     else if (e.tipo === "fin_busqueda") { decir(SUPERVISORES[0], e.texto, 3, e.nuevas ? "bueno" : ""); if (!e.nuevas) decir(DIRECTOR, "Mejor ninguna que una mala. El embudo está para eso.", 2); }
     else if (e.tipo === "error") decir(pick(MINEROS), `Tenemos un problema: ${e.texto}`, 2, "malo");
   }
@@ -3602,8 +4000,18 @@ function procesarMineria(eventos) {
     ultimoComentarioLab = T;
   }
 }
+function escenaMesa(e) {   // la mesa de análisis habla de una señal, como en los vídeos: cada uno su parte y la escéptica decide
+  const r = e.roles || {}, [jefe, scout, noticias, sentimiento, charts, esceptica] = MESA;
+  const lineas = [[scout, r.scout], [noticias, r.noticias], [sentimiento, r.sentimiento], [charts, r.charts], [esceptica, r.esceptico, e.entra ? "bueno" : "malo"], [jefe, r.jefe, e.entra ? "bueno" : ""]]
+    .filter(([, t]) => t).map(([a, t, tono]) => [a, t, tono || ""]);
+  enCanal("analisis", () => charla(lineas, 2));
+  flotante(37.8, 4.85, 1.7, e.entra ? (e.direccion === "largo" ? "COMPRA" : "VENDE") : "PASA", e.entra ? "#2ee6a6" : "#ff5a76", PLANTA_DE.analisis);
+}
 function procesarPapel(eventos) {
   for (const e of eventos) {
+    if (e.tipo === "mesa") { escenaMesa(e); continue; }
+    if (e.tipo === "mesa_limpia") { enCanal("analisis", () => decir(MESA[5], e.texto, 2)); continue; }
+    if (e.tipo === "mesas") { enCanal("operaciones", () => decir(supervisorDe("trading"), e.texto, 3)); continue; }
     if (e.tipo === "freno") { enCanal("riesgos", () => charla([[RIESGOS, e.texto, "malo"], [DIRECTOR, "Recibido. Nadie abre nada hasta que Riesgos diga."]], 3)); enfocar(42, 14, 2, 8); continue; }
     if (e.tipo === "reanuda") { enCanal("riesgos", () => decir(RIESGOS, e.texto, 3, "bueno")); continue; }
     if (e.tipo === "relevo") { escenaRelevo(e); if (e.causa) enCanal("analisis", () => decir(QUANTS[2], `Post mortem de ${e.anterior}: ${e.causa}`, 1, "", supervisorDe(e.grupo))); continue; }
@@ -3614,13 +4022,13 @@ function procesarPapel(eventos) {
     if (e.tipo === "incubadora") {
       const pl = plazaDe({plaza: e.plaza, grupo: e.grupo});
       enCanal("operaciones", () => decir(LORENA, `${e.id} entra de examen en la plaza ${(e.plaza || 0) + 1}: ${ladoTxt(e.direccion).toLowerCase()} en ${moneda(e.simbolo)}, con dinero de prueba que no cuenta en el fondo.`, 2));
-      if (pl) enfocar(pl.asiento.x, pl.asiento.y, 2.2, 6, 1);
+      if (pl) enfocar(pl.asiento.x, pl.asiento.y, 2.2, 6, PLANTA_DE.incubadora);
       continue;
     }
     if (e.tipo === "aprueba") {
       const pl = plazaDe({plaza: e.plaza, grupo: e.grupo});
       enCanal("operaciones", () => charla([[LORENA, `🎓 ${e.texto}`, "bueno"], [COMUNICADORES[1], `Noticia de última hora en TF News: ${e.id} aprueba en la incubadora.`]], 3));
-      if (pl) { confeti(pl.asiento.x, pl.asiento.y, 1.2, 1); flotante(pl.asiento.x, pl.asiento.y, 1.6, "APROBADA", "#2ee6a6", 1); enfocar(pl.asiento.x, pl.asiento.y, 2.4, 8, 1); }
+      if (pl) { confeti(pl.asiento.x, pl.asiento.y, 1.2, PLANTA_DE.incubadora); flotante(pl.asiento.x, pl.asiento.y, 1.6, "APROBADA", "#2ee6a6", PLANTA_DE.incubadora); enfocar(pl.asiento.x, pl.asiento.y, 2.4, 8, PLANTA_DE.incubadora); }
       continue;
     }
     if (e.tipo === "suspende") {
@@ -3629,7 +4037,7 @@ function procesarPapel(eventos) {
         decir(LORENA, e.texto, 2, "malo");
         if (quien) decir(quien, pick(["Vaya. Mejor descubrirlo con dinero de prueba que con el del fondo.", "Suspendida. Para eso está el examen.", "Una menos. Que me den la siguiente."]), 1, "", LORENA);
       });
-      if (pl) { flotante(pl.asiento.x, pl.asiento.y, 1.6, "SUSPENDIDA", "#ff5a76", 1); enfocar(pl.asiento.x, pl.asiento.y, 2.4, 6, 1); }
+      if (pl) { flotante(pl.asiento.x, pl.asiento.y, 1.6, "SUSPENDIDA", "#ff5a76", PLANTA_DE.incubadora); enfocar(pl.asiento.x, pl.asiento.y, 2.4, 6, PLANTA_DE.incubadora); }
       continue;
     }
     if (e.tipo === "banquillo") { enCanal("operaciones", () => decir(BANQUERA, `${e.id} espera en el banquillo: la incubadora está llena. Entrará en cuanto quede una plaza libre.`, 1, "oro")); continue; }
@@ -3661,7 +4069,7 @@ function procesarPapel(eventos) {
       const r = e.retorno_pct || 0, bien = r > 0;
       const motivo = {stop: "stop", objetivo: "objetivo", tiempo: "tiempo", fin: "fin", retirada: "retirada"}[e.motivo] || e.motivo;
       decir(a, `Cierro ${moneda(e.simbolo)}: ${fmt.pct(r)} (${motivo}). ${bien ? pick(["✅", "Bien.", "Así da gusto."]) : pick(["El stop está para eso.", "Sin dramas: el plan es el plan.", "Toca aceptar la pérdida."])}`, 2, bien ? "bueno" : "malo");
-      if (a.casa) flotante(a.casa.x, a.casa.y - .5, .9, (r > 0 ? "+" : "−") + NF2.format(Math.abs(r * (S.capital_por_estrategia || 1000) / 100)) + " $", bien ? "#2ee6a6" : "#ff5a76");
+      if (a.casa) flotante(a.casa.x, a.casa.y - .5, .9, (r > 0 ? "+" : "−") + NF2.format(Math.abs(r * (S.capital_por_estrategia || 1000) / 100)) + " $", bien ? "#2ee6a6" : "#ff5a76", a.casa.planta || 0);
       if (r > 1.5) { const otro = pick([...traders.values()].filter(t => t !== a)); if (otro) decir(otro, pick(["¡Buena!", "Eso es seguir el plan.", "👏"]), 1); }
     }
   }
@@ -3689,8 +4097,8 @@ function procesarTendencia(eventos) {
   const quien = simbolo => EQUIPO_TENDENCIA[["BNBUSDT", "XRPUSDT", "DOGEUSDT"].includes(simbolo) ? 1 : 0];
   for (const e of eventos) {
     if (e.tipo === "plan" || e.tipo === "estreno") decir(EQUIPO_TENDENCIA[0], "📈 " + e.texto, e.tipo === "estreno" ? 3 : 1);
-    else if (e.tipo === "compra") { decir(quien(e.simbolo), `📈 ${e.texto}`, 2, "bueno"); flotante(44.9, 4.6, 1.6, "TENDENCIA " + moneda(e.simbolo), "#2ee6a6"); }
-    else if (e.tipo === "venta") { decir(quien(e.simbolo), `📉 ${e.texto} Me aparto hasta que vuelva la tendencia.`, 2); flotante(44.9, 4.6, 1.6, "FUERA " + moneda(e.simbolo), "#ffc24a"); }
+    else if (e.tipo === "compra") { decir(quien(e.simbolo), `📈 ${e.texto}`, 2, "bueno"); flotante(18.4, 4.6, 1.6, "TENDENCIA " + moneda(e.simbolo), "#2ee6a6", PLANTA_DE.tendencia); }
+    else if (e.tipo === "venta") { decir(quien(e.simbolo), `📉 ${e.texto} Me aparto hasta que vuelva la tendencia.`, 2); flotante(18.4, 4.6, 1.6, "FUERA " + moneda(e.simbolo), "#ffc24a", PLANTA_DE.tendencia); }
     else decir(quien(e.simbolo), e.texto, 1);
   }
 }
@@ -3698,9 +4106,9 @@ function procesarHolding(eventos) {
   for (const e of eventos) {
     const h = HOLDERS[e.simbolo === "SOLUSDT" ? 1 : 0];
     if (e.tipo === "plan") decir(h, e.texto, 1);
-    else if (e.tipo === "compra") { decir(h, `💎 ${e.texto} Más barato, más cantidad.`, 2, "bueno"); flotante(MONEDA.x, MONEDA.y, 1.6, "COMPRA " + moneda(e.simbolo), "#2ee6a6"); enfocar(41, 4.5, 2.2, 6); }
-    else if (e.tipo === "venta") { decir(h, `Recojo beneficios: ${e.texto}`, 2, "oro"); flotante(MONEDA.x, MONEDA.y, 1.6, "VENTA " + moneda(e.simbolo), "#ffcf5a"); confeti(MONEDA.x, MONEDA.y, 1.4); enfocar(41, 4.5, 2.2, 6); }
-    else if (e.tipo === "aportacion") { charla([[HOLDERS[1], `💰 ${e.texto}`, "oro"], [RIESGOS, "Anotado. Sin stop, pero con la reserva contada: no se mete más de lo previsto."]], 2); flotante(MONEDA.x, MONEDA.y, 1.6, "RESERVA " + moneda(e.simbolo), "#ffcf5a"); enfocar(41, 4.5, 2.2, 6); }
+    else if (e.tipo === "compra") { decir(h, `💎 ${e.texto} Más barato, más cantidad.`, 2, "bueno"); flotante(MONEDA.x, MONEDA.y, 1.6, "COMPRA " + moneda(e.simbolo), "#2ee6a6", PLANTA_DE.holding); enfocar(41, 4.5, 2.2, 6, PLANTA_DE.holding); }
+    else if (e.tipo === "venta") { decir(h, `Recojo beneficios: ${e.texto}`, 2, "oro"); flotante(MONEDA.x, MONEDA.y, 1.6, "VENTA " + moneda(e.simbolo), "#ffcf5a", PLANTA_DE.holding); confeti(MONEDA.x, MONEDA.y, 1.4, PLANTA_DE.holding); enfocar(41, 4.5, 2.2, 6, PLANTA_DE.holding); }
+    else if (e.tipo === "aportacion") { charla([[HOLDERS[1], `💰 ${e.texto}`, "oro"], [RIESGOS, "Anotado. Sin stop, pero con la reserva contada: no se mete más de lo previsto."]], 2); flotante(MONEDA.x, MONEDA.y, 1.6, "RESERVA " + moneda(e.simbolo), "#ffcf5a", PLANTA_DE.holding); enfocar(41, 4.5, 2.2, 6, PLANTA_DE.holding); }
   }
 }
 // Cada mesa tiene su trader (el nombre va con la mesa). Si el supervisor le cambia la estrategia, sigue siendo la misma
@@ -3744,7 +4152,7 @@ function sincronizarTraders(inicial) {
     traders.set(id, nuevo); agentes.push(nuevo);
     if (inicial) colocar(nuevo, mesa.asiento);
     else {
-      nuevo.x = .6; nuevo.y = 10; nuevo.mira = "e"; ascensorHasta = T + 3;
+      nuevo.x = .6; nuevo.y = 10; nuevo.planta = mesa.asiento.planta || 0; nuevo.mira = "e"; ascensorHasta = T + 3;
       const sala = d.grupo === "scalping" ? "la sala de scalping" : "la sala de trading";
       decir(BANQUERA, `${id} ya está en marcha: la opera ${nuevo.nombre}, mesa ${d.mesa + 1} de ${sala}.`, 2, "oro");
       volverAlPuesto(nuevo, () => enCanal("operaciones", () => decir(nuevo, `Hola, soy ${nuevo.nombre}. Llevo ${id}: ${ladoTxt(d.direccion).toLowerCase()} en ${moneda(d.simbolo)}, con ${fmt.n(d.capital || 1000)} $ ficticios. Entraré cuando se cumplan todas sus condiciones.`, 2)));
@@ -3763,8 +4171,8 @@ function escenaRelevo(e) {
       [a, pick(["Entendido. Borrón y cuenta nueva.", "Vale, a por la nueva. Esta vez sale.", "Hecho. Lo perdido queda apuntado; toca recuperarlo con esta."]), "", sup]]
     : [[sup, `Fuera ${e.anterior}: ${e.motivo}.${perdio} No hay ninguna aprobada en la incubadora, así que esa mesa espera a la próxima que apruebe el examen.`, "malo"]], 3));
   if (mesa) {
-    enfocar(mesa.asiento.x, mesa.asiento.y, 2.4, 10);
-    flotante(mesa.asiento.x, mesa.asiento.y - .5, 1.3, a ? "NUEVA ESTRATEGIA" : "ESTRATEGIA RETIRADA", a ? "#d4ff3a" : "#ff5a76");
+    enfocar(mesa.asiento.x, mesa.asiento.y, 2.4, 10, mesa.asiento.planta || 0);
+    flotante(mesa.asiento.x, mesa.asiento.y - .5, 1.3, a ? "NUEVA ESTRATEGIA" : "ESTRATEGIA RETIRADA", a ? "#d4ff3a" : "#ff5a76", mesa.asiento.planta || 0);
   }
   if (!sup) return;
   if (mesa && !sup.tarea) {
@@ -3823,7 +4231,7 @@ function planificar() {
   planificarSupervision();
   if (Date.now() >= proximoComiteMs) { proximoComiteMs = siguienteComite(); comite(); }
   if (T > proximoRadar) { proximoRadar = T + rand(24, 40); radarDeSenales(); }
-  for (const p of [0, 1]) ascensorAnim[p] = clamp(ascensorAnim[p] + (T < Math.max(p ? 0 : ascensorHasta, ascensorPlanta[p]) ? .05 : -.04), 0, 1);
+  for (let p = 0; p < NPLANTAS; p++) ascensorAnim[p] = clamp(ascensorAnim[p] + (T < Math.max(p ? 0 : ascensorHasta, ascensorPlanta[p]) ? .05 : -.04), 0, 1);
 }
 function charlaDeFondo() {
   const enDescanso = agentes.filter(a => a.tarea === "descanso" && !a.andando);
@@ -3843,7 +4251,7 @@ function charlaDeFondo() {
     () => ["¿Quién va ganando al ping-pong?", "Yo, como siempre 😏"],
     () => ["¿Alguien ha dado de comer a Satoshi?", "Duerme más que los servidores en pausa."],
     () => [`¿Dónde anda Satoshi?`, `Lo último que sé: ${GATO.donde}.`],
-    () => ["¿Subimos a la terraza a comer?", pick(["Venga, que hoy hace sol.", "Después del cierre de vela.", "Solo si Chema nos sube café."])],
+    () => ["¿Subimos a la azotea a comer?", pick(["Venga, que hoy hace sol.", "Después del cierre de vela.", "Solo si Chema nos sube café."])],
     () => ["¿Has pasado por la incubadora?", "Sí: allí las estrategias se examinan con dinero de prueba antes de tocar el del fondo."],
   ];
   if (sim) opciones.push(() => [`¿Habéis visto ${moneda(sim)}? ${fmt.pct(precios[sim].cambio_24h_pct)} en 24 horas.`, pick(["Volatilidad: la mejor amiga del minero.", "Yo solo miro el plan.", "Ni lo miro, que me entran los nervios."])]);
@@ -3924,8 +4332,8 @@ function comite() {
   const ts = [...traders.values()].filter(a => estaLibre(a)).slice(0, 3);
   if (!ts.length && !S.holding) return;
   enCanal("comite", () => decir(DIRECTOR, "¡Comité! Traders, Riesgos y Holding: a la sala.", 2));
-  ts.forEach((a, i) => { a.tarea = "comite"; irAPlanta(a, 0, SILLAS_SUR[i + 1].x, SILLAS_SUR[i + 1].y, "sentado", "n"); });
-  if (!RIESGOS.tarea && !RIESGOS.andando) { RIESGOS.tarea = "comite"; irAPlanta(RIESGOS, 0, SILLAS_NORTE[0].x, SILLAS_NORTE[0].y, "sentado", "s"); ts.push(RIESGOS); }
+  ts.forEach((a, i) => { a.tarea = "comite"; irAPlanta(a, PLANTA_DE.comite, SILLAS_SUR[i + 1].x, SILLAS_SUR[i + 1].y, "sentado", "n"); });
+  if (!RIESGOS.tarea && !RIESGOS.andando) { RIESGOS.tarea = "comite"; irAPlanta(RIESGOS, PLANTA_DE.comite, SILLAS_NORTE[0].x, SILLAS_NORTE[0].y, "sentado", "s"); ts.push(RIESGOS); }
   setTimeout(() => {
     const t = totales();
     const lineas = [[DIRECTOR, `${t.n} traders, patrimonio ${fmt.n(t.patrimonio)} $ (${fmt.pct(t.pct)}).`],
@@ -4118,7 +4526,7 @@ function estadoSalas() {
   return out;
 }
 let estadosPrevios = null;
-function departamentosP1() {
+function departamentosP1() {   // salas sin supervisor propio: [id, nombre, quién, luz, texto] (con su planta en PLANTA_DE)
   const F = FONDO_ANALITICA, mc = F && F.montecarlo, ac = S.academia || {}, inf = S.informe, p = S.sistema && S.sistema.papel || {};
   const conKelly = Object.values(S.papel && S.papel.estrategias || {}).filter(t => t.kelly).length;
   return [
@@ -4127,8 +4535,11 @@ function departamentosP1() {
     ["comunicacion", "Comunicación", "Rebeca · Gorka", "ok", inf ? `Informe de las ${inf.hora}: ${inf.titular}.` : "Preparando el informe del día."],
     ["sistemas", "Sistemas", "Néstor", p.errores_seguidos ? "alerta" : "ok", p.errores_seguidos ? `${p.errores_seguidos} errores seguidos en el paper trading: ${p.ultimo_error || ""}` : `Todo funciona. Cada ciclo tarda ${p.ciclo_s == null ? "—" : NF2.format(p.ciclo_s) + " s"}.`],
     ["cafeteria", "Cafetería", "Chema", "ok", "Café recién hecho. Satoshi vigila la vitrina de los dulces."],
-    ["trading2", "Sala de trading 2", "Clara", "ok", (() => { const n = MESAS.slice(48).filter(m => m.trader).length; return `40 mesas más de la sala de trading (de la 49 a la 88): ${n ? `${n} con trader` : "todas libres por ahora"}. Se llenan después de la planta baja, con las estrategias que aprueban el examen de la incubadora.`; })()],
-    ["terraza1", "Terraza", "—", "ok", `Piscina, fogata, barbacoa y telescopio. ${GATO.planta === 1 ? "Satoshi está arriba." : "Satoshi anda por la planta baja."}`],
+    ["trading2", "Sala de trading 2", "Clara", "ok", (() => { const n = MESAS.slice(48).filter(m => m.trader).length; return `40 mesas más de la sala de trading (de la 49 a la 88), al lado de la primera: ${n ? `${n} con trader` : "todas libres por ahora"}. Se llenan después de las 48 de la primera sala.`; })()],
+    ["analisis", "Mesa de análisis", "Ramiro · Olga", "ok", (() => { const r = S.papel && S.papel.mesa_resumen || {}; return r.total ? `Hoy ${r.hoy || 0} señales y han entrado ${r.entran_hoy || 0}. Solo entra lo que va a favor de la tendencia diaria, gana 1,5 veces lo que arriesga y no va con la masa en un extremo.` : "Esperando la primera señal de la sala de trading."; })()],
+    ["tesoreria", "Tesorería", "Teresa", "ok", (() => { const lq = S.liquidez || {}; return lq.tipo_pct != null ? `${fmt.n(lq.efectivo || 0)} $ sin invertir al ${NF2.format(lq.tipo_pct)} %: ${fmt.dinero(lq.al_dia || 0)} al día y ${fmt.dinero(lq.acumulado || 0)} cobrados.` : "Los intereses empiezan con la primera vuelta del paper trading."; })()],
+    ["direccion", "Dirección", "Marta", "ok", "Desde aquí Marta hace sus rondas por las cuatro plantas."],
+    ["terraza1", "Azotea", "—", "ok", `Piscina, fogata, barbacoa y telescopio, al aire libre en la última planta. Satoshi está en la ${nombrePlanta(GATO.planta || 0).toLowerCase()}.`],
   ];
 }
 function actualizarSalas() {
@@ -4137,8 +4548,8 @@ function actualizarSalas() {
   for (const k in est) cuenta[est[k][0]]++;
   $("#salas").innerHTML = `<div class="sala" data-sup="general"><div class="cab2"><span class="luz ${cuenta.alerta ? "alerta" : cuenta.aviso ? "aviso" : "ok"}"></span>Supervisión general<small>Marta</small></div>
       <p>${cuenta.ok} salas en verde, ${cuenta.aviso} en amarillo y ${cuenta.alerta} en rojo.</p></div>` +
-    SALAS_SUP.map((sala, i) => `<div class="sala" data-sup="${i}"><div class="cab2"><span class="luz ${est[sala.id][0]}"></span>${esc(sala.nombre)}${sala.planta ? " · planta 1" : ""}<small>${esc(sala.sup)}</small><button class="ir" data-ir="${sala.id}" title="Llevar la cámara a esta sala">📍 Ver</button></div><p>${esc(est[sala.id][1])}</p></div>`).join("") +
-    `<h3 style="margin-top:14px">Planta 1</h3>` + departamentosP1().map(([id, nombre, quien, luz, texto]) => `<div class="sala"><div class="cab2"><span class="luz ${luz}"></span>${esc(nombre)}<small>${esc(quien)}</small><button class="ir" data-ir="${id}" title="Llevar la cámara">📍 Ver</button></div><p>${esc(texto)}</p></div>`).join("");
+    SALAS_SUP.map((sala, i) => `<div class="sala" data-sup="${i}"><div class="cab2"><span class="luz ${est[sala.id][0]}"></span>${esc(sala.nombre)}<small title="${esc(nombrePlanta(sala.planta || 0))}">${sala.planta ? "P" + sala.planta : "PB"} · </small><small>${esc(sala.sup)}</small><button class="ir" data-ir="${sala.id}" title="Llevar la cámara a esta sala">📍 Ver</button></div><p>${esc(est[sala.id][1])}</p></div>`).join("") +
+    `<h3 style="margin-top:14px">Otras salas</h3>` + departamentosP1().map(([id, nombre, quien, luz, texto]) => `<div class="sala"><div class="cab2"><span class="luz ${luz}"></span>${esc(nombre)}<small>${esc(quien)}</small><button class="ir" data-ir="${id}" title="Llevar la cámara">📍 Ver</button></div><p>${esc(texto)}</p></div>`).join("");
   if (estadosPrevios) for (const sala of SALAS_SUP) {
     if (est[sala.id][0] === "alerta" && estadosPrevios[sala.id][0] !== "alerta") {
       const sup = SUPERVISORES[SALAS_SUP.indexOf(sala)];
@@ -4498,7 +4909,7 @@ const PARADAS = [[5, 4.5, 1.8], [15.5, 5, 1.6], [26, 5, 1.7], [34.5, 5, 1.7], [4
   [9, 16.5, 1.25, 1], [22.5, 4.5, 1.7, 1], [32.5, 4.5, 1.8, 1], [41, 4.5, 1.8, 1], [31, 17.5, 1.25, 1], [50, 4.5, 1.8, 1], null];
 function objetivoEn(x, y, z, zoom, planta = vista) {
   const movil = vw <= 760, panelW = !movil && !$("#panel").classList.contains("plegado") ? 390 : 0;
-  const [ix, iy] = iso(x, y, z + (planta ? ALTURA_PLANTA : 0));
+  const [ix, iy] = iso(x, y, z + (planta || 0) * ALTURA_PLANTA);
   const areaW = vw - panelW - 24, arriba = 66, areaH = vh - arriba - 44;
   return {x: ix - ((12 + areaW / 2) - vw / 2) / zoom, y: iy - ((arriba + areaH / 2) - vh / 2) / zoom, zoom};
 }
@@ -4510,19 +4921,22 @@ function enfocar(x, y, zoom = 2, segundos = 6, planta = 0) {
 // Cambia la planta que se ve. La cámara se desplaza lo mismo que sube o baja el dibujo, así no da un salto.
 function cambiarPlanta(p) {
   if (p === vista) return;
-  const d = (p === 1 ? -1 : 1) * ALTURA_PLANTA * ZH;
+  const d = (vista - p) * ALTURA_PLANTA * ZH;
   cam.y += d; if (vuelo) vuelo.y += d; if (camObjetivo) camObjetivo.y += d;
   vista = p; sobre = null;
   document.querySelectorAll("#plantas [data-planta]").forEach(b => b.classList.toggle("activo", +b.dataset.planta === p));
 }
 // Botones «Ir a una sala»: la cámara vuela hasta allí (sin activar el modo cine).
-const CENTRO_SALA = {mineria: [5, 4.5, 1.8, "Minería", "#ffc24a"], laboratorio: [15.5, 5, 1.6, "Laboratorio", "#5cc0ff"], banco: [26, 5, 1.7, "Cámara", "#ffcf5a"],
-  macro: [34.5, 5, 1.7, "Macro", "#5cc0ff"], holding: [42, 4.5, 1.8, "Holding", "#f7931a"], trading: [9, 17.5, 1.2, "Trading", "#d4ff3a"],
-  scalping: [50, 4.5, 1.8, "Scalping", "#ff4fd8"], comite: [24, 14, 1.8, "Comité", "#b58cff"], riesgos: [42, 16, 1.6, "Riesgos", "#ff5a76"], descanso: [23.5, 20.5, 1.8, "Descanso", "#ff8a5c"],
-  terraza: [34, 17.5, 1.5, "Patio", "#2ee6a6"],
-  incubadora: [9, 16.5, 1.25, "Incubadora", "#ff8a5c", 1], quant: [22.5, 4.5, 1.7, "Equipo Quant", "#5cc0ff", 1], academia: [32.5, 4.5, 1.8, "Academia", "#ffcf5a", 1],
-  comunicacion: [4.5, 4.5, 1.8, "Comunicación", "#ff8a5c", 1], sistemas: [13, 4.5, 1.8, "Sistemas", "#2ee6a6", 1], cafeteria: [41, 4.5, 1.8, "Cafetería", "#ffcf5a", 1],
-  juegos: [50, 4.5, 1.8, "Juegos", "#b58cff", 1], trading2: [26.5, 17.5, 1.25, "Trading 2", "#d4ff3a", 1], terraza1: [40.5, 17.5, 1.5, "Terraza", "#2ee6a6", 1]};
+const COLOR_SALA = {recepcion: "#d4ff3a", quant: "#5cc0ff", analisis: "#d4ff3a", scalping: "#ff4fd8", trading: "#d4ff3a", trading2: "#d4ff3a", riesgos: "#ff5a76",
+  mineria: "#ffc24a", laboratorio: "#5cc0ff", banco: "#ffcf5a", academia: "#ffcf5a", biblioteca: "#ffcf5a", incubadora: "#ff8a5c", estudio: "#5cc0ff",
+  tesoreria: "#ffcf5a", tendencia: "#c98500", macro: "#5cc0ff", holding: "#f7931a", mirador: "#2ee6a6", salafondo: "#d4ff3a", jardin: "#2ee6a6",
+  comunicacion: "#ff8a5c", infra: "#2ee6a6", direccion: "#ffcf5a", cafeteria: "#ffcf5a", juegos: "#b58cff", gimnasio: "#2ee6a6", comite: "#b58cff", descanso: "#ff8a5c", terraza1: "#2ee6a6"};
+// [x, y, zoom, nombre, color, planta] del centro de cada sala, ordenadas por planta (botones «Ir a una sala» y modo cine)
+const CENTRO_SALA = Object.fromEntries(SALAS_TODAS.filter(s => s.nombre).map(s => {
+  const w = s.x1 - s.x0, h = s.y1 - s.y0, zoom = clamp(15 / Math.max(w, h * 1.3), 1.1, 1.9);
+  return [s.id, [(s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, zoom, s.nombre.charAt(0) + s.nombre.slice(1).toLowerCase(), COLOR_SALA[s.id] || "#d4ff3a", s.planta]];
+}));
+CENTRO_SALA.sistemas = CENTRO_SALA.infra;   // (la sala de sistemas se llama «infra» por dentro)
 let vuelo = null;
 function irASala(id) {
   if (id === "todo") { const guardada = {...cam}; encuadrar(); vuelo = {x: cam.x, y: cam.y, zoom: cam.zoom}; Object.assign(cam, guardada); }
@@ -4530,7 +4944,7 @@ function irASala(id) {
   if (cine) alternarCine(false);
   cam.tocada = true; $("#ayuda").style.opacity = 0;
 }
-document.querySelector(".ira").innerHTML = Object.entries(CENTRO_SALA).map(([id, c]) => `<button type="button" data-ir="${id}" style="--c:${c[4]}"><i></i>${c[3]}</button>`).join("") +
+document.querySelector(".ira").innerHTML = Object.entries(CENTRO_SALA).filter(([id]) => id !== "sistemas").map(([id, c]) => `<button type="button" data-ir="${id}" style="--c:${c[4]}" title="${esc(nombrePlanta(c[5]))}"><i></i>${c[3]}</button>`).join("") +
   `<button type="button" data-ir="todo"><i></i>Toda la oficina</button>`;
 document.querySelector(".ira").addEventListener("click", e => { const b = e.target.closest("[data-ir]"); if (b) irASala(b.dataset.ir); });
 function moverCamara(dt) {
@@ -4836,7 +5250,7 @@ async function refrescar() {
 // ============================================== INTERACCIÓN / FICHA ====
 let sobre = null, fichaAbierta = null;
 function agenteEn(sx, sy) {
-  const [ix, iy] = [(sx - vw / 2) / cam.zoom + cam.x, (sy - vh / 2) / cam.zoom + cam.y + (vista ? ALTURA_PLANTA * ZH : 0)];
+  const [ix, iy] = [(sx - vw / 2) / cam.zoom + cam.x, (sy - vh / 2) / cam.zoom + cam.y + vista * ALTURA_PLANTA * ZH];
   let mejor = null;
   for (const a of agentes) if (a.caja && ix >= a.caja[0] && ix <= a.caja[2] && iy >= a.caja[1] && iy <= a.caja[3]) if (!mejor || a.x + a.y > mejor.x + mejor.y) mejor = a;
   if (!mejor && GATO.caja && ix >= GATO.caja[0] && ix <= GATO.caja[2] && iy >= GATO.caja[1] && iy <= GATO.caja[3]) return GATO_AGENTE;
@@ -5065,7 +5479,7 @@ function encuadrar() {
   const margenIzq = !movil && !$("#resultados").classList.contains("plegado") ? 170 : 0;
   const arriba = movil ? 58 : 66, abajo = movil ? (!$("#panel").classList.contains("plegado") ? vh * .42 + 44 : 44) : 44;
   const areaW = vw - panelW - 24 - margenIzq, areaH = vh - arriba - abajo;
-  const minX = -D * TW / 2, maxX = W * TW / 2, minY = -ALTO_MURO * ZH - 10 - (vista ? ALTURA_PLANTA * ZH : 0), maxY = (X_ALA + D) * TH / 2 + 10;
+  const minX = -D * TW / 2, maxX = W * TW / 2, minY = -ALTO_MURO * ZH - 10 - vista * ALTURA_PLANTA * ZH, maxY = (X_ALA + D) * TH / 2 + 10;
   cam.zoom = clamp(Math.min(areaW / (maxX - minX), areaH / (maxY - minY)), .25, 3);
   const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
   cam.x = cx - ((12 + margenIzq + areaW / 2) - vw / 2) / cam.zoom;
@@ -5542,7 +5956,7 @@ document.querySelectorAll("#plantas [data-planta]").forEach(b => b.addEventListe
 addEventListener("keydown", e => {
   if (e.target.closest && e.target.closest("input,textarea")) return;
   if (paseo && paseo.activo()) return;   // en el paseo, las teclas las lleva paseo.js
-  if (e.key === "PageUp") cambiarPlanta(1); else if (e.key === "PageDown") cambiarPlanta(0);
+  if (e.key === "PageUp") cambiarPlanta(Math.min(NPLANTAS - 1, vista + 1)); else if (e.key === "PageDown") cambiarPlanta(Math.max(0, vista - 1));
   else if ((e.key === "p" || e.key === "P") && !vistaFondo && !e.ctrlKey && !e.metaKey && !e.altKey) alternarPaseo(true);
 });
 
@@ -5718,7 +6132,7 @@ function bucle(ahora) {
   $("#pComite").textContent = `Comité en ${String(Math.floor(falta / 60)).padStart(2, "0")}:${String(falta % 60).padStart(2, "0")}`;
   requestAnimationFrame(bucle);
 }
-crearSuelo(0); crearSuelo(1);
+for (let p = 0; p < NPLANTAS; p++) crearSuelo(p);
 redimensionar();
 refrescar();
 setInterval(refrescar, 2000);

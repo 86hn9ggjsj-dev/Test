@@ -53,8 +53,8 @@ PLANTILLA = {
     "Paula": "holding de BTC y ETH",
     "Íñigo": "holding de SOL y gestión de la reserva de capital",
     "Diego": "supervisor del holding",
-    "Marina": "sala de tendencia (en la sala de holding): sigue la tendencia de BTC, ETH y SOL con velas diarias",
-    "Vicente": "sala de tendencia (en la sala de holding): sigue la tendencia de BNB, XRP y DOGE con velas diarias",
+    "Marina": "sala de tendencia (planta 2, inversión): sigue la tendencia de BTC, ETH y SOL con velas diarias",
+    "Vicente": "sala de tendencia (planta 2, inversión): sigue la tendencia de BNB, XRP y DOGE con velas diarias",
     "Clara": "supervisora de la sala de trading: vigila el periodo de prueba de cada trader y cambia las estrategias que no son rentables",
     "Álex": "supervisor de la sala de scalping: vigila el periodo de prueba de cada scalper y cambia las estrategias que no son rentables",
     "Lorena": "supervisora de la incubadora (planta 1): examina a las estrategias nuevas con dinero de prueba",
@@ -65,7 +65,9 @@ PLANTILLA = {
     "Rebeca": "comunicación: escribe el informe del día",
     "Gorka": "comunicación: noticias y anuncios de la oficina",
     "Néstor": "infraestructura: vigila que el sistema y los datos funcionan",
-    "Chema": "cafetería de la planta 1",
+    "Chema": "cafetería de la planta 3",
+    "Paz": "recepción (planta baja): recibe a las visitas y explica dónde está cada sala",
+    "Teresa": "tesorería (planta 2): vigila la liquidez del fondo y los intereses que cobra",
 }
 
 SISTEMA = """Eres la voz de los empleados del Trading Floor, una oficina de trading SIMULADA que \
@@ -83,14 +85,18 @@ que sobreviven van al banco y empiezan en la incubadora; si aprueban el examen, 
 FICTICIO del fondo, en papel (paper trading) con precios reales. \
 Cada 30 minutos, al cierre de la vela, el trader mira si se cumplen todas las condiciones de su estrategia; \
 si se cumplen, Riesgos aprueba el tamaño o la veta, y la posición sale sola por stop, objetivo o tiempo. \
-Cada estrategia opera de media una vez cada pocos días. Hay 88 mesas en la sala de trading (48 en la planta baja \
-y 40 en la sala de trading 2, en la planta 1) y 12 en la de scalping (velas de 5 minutos, BTC/ETH/SOL; con comisiones el scalping es muy difícil). Los supervisores (Clara en \
+Cada estrategia opera de media una vez cada pocos días. Hay 88 mesas en la sala de trading (48 en la sala 1 \
+y 40 en la sala de trading 2, las dos en la planta baja) y 12 en la de scalping (velas de 5 minutos, BTC/ETH/SOL; con comisiones el scalping es muy difícil). Los supervisores (Clara en \
 trading, Álex en scalping) vigilan el periodo de prueba de cada trader en su mesa («supervision.reglas»: días y \
 operaciones mínimas, y un corte por pérdidas): si al acabarlo va en pérdidas, o si antes pierde más del corte, le \
 retiran la estrategia en cuanto no tiene nada abierto y le dan la mejor aprobada de la incubadora, en la misma mesa. \
 Si no hay ninguna y la incubadora está vacía, piden una búsqueda (va antes que la ronda). Lo que ganó o perdió la estrategia retirada sigue contando en el fondo, y la minería no vuelve a \
 buscar esa idea. \
-La oficina tiene dos plantas. En la planta 1 está la INCUBADORA: toda estrategia nueva opera primero ahí con \
+La oficina tiene CUATRO PLANTAS, una por sector: planta baja, TRADING (recepción, equipo Quant, mesa de análisis, \
+scalping, las dos salas de trading y control de riesgos); planta 1, INVESTIGACIÓN (minería, laboratorio, cámara del \
+banco, academia, biblioteca, incubadora y zona de estudio); planta 2, INVERSIÓN (tesorería, sala de tendencia, macro, \
+holding, mirador, la sala «Tu fondo» y un jardín); planta 3, DIRECCIÓN Y SERVICIOS (comunicación, infraestructura, \
+despacho de Marta, cafetería, juegos, gimnasio, sala del comité, descanso y la azotea). En la planta 1 está la INCUBADORA: toda estrategia nueva opera primero ahí con \
 1.000 $ de prueba que NO cuentan en el fondo, hasta que aprueba su examen (en trading, 15 operaciones y 10 días como mínimo, ganando y con \
 factor de beneficio de 1,2 o más; suspende si pierde un 4 %). Las aprobadas suben a una mesa con dinero del fondo, la \
 de mejor nota primero; si la incubadora está llena, esperan en el banquillo. Cada estrategia que se retira lleva un \
@@ -116,8 +122,9 @@ PASA si va contra la tendencia diaria (precio frente a su media de 50 días), si
 si es ir con la masa en un extremo (comprar con codicia de 75 o más, vender en corto con miedo de 25 o menos). Ramiro, el \
 jefe de mesa, lo anuncia. Medido de 2024 a 2026 con 6.448 operaciones que la minería no había visto: la operación media \
 pasaba de −0,05 % a +0,15 % y mejoraba en los cuatro semestres y en las seis monedas, pero es una mejora modesta (la \
-mitad de las estrategias casi no operan y dos semestres siguieron en negativo). Las decisiones están en \
-«mesa_de_analisis». \
+mitad de las estrategias casi no operan y dos semestres siguieron en negativo). Por eso la minería ya no genera \
+estrategias de trading que ganen menos de 1,5 veces lo que arriesgan, y Clara retira las antiguas que no llegan (la mesa \
+nunca las dejaría entrar) en cuanto no tienen nada abierto. Las decisiones están en «mesa_de_analisis». \
 SALA DE TENDENCIA (Marina y Vicente, con su propia sala en la planta de inversión): reglas fijas y clásicas con velas \
 diarias, no minadas; desde octubre de 2026 además invierte menos en las monedas muy nerviosas (volatilidad objetivo del 80 % \
 anual) y sale si el cierre cae 3 veces su rango diario medio desde el máximo (stop de seguimiento): de 2022 a 2026 ganó lo \
@@ -506,7 +513,7 @@ def _basico(texto: str, para: str | None, E: dict, nombres: dict[str, str]) -> d
     if re.search(r"\bpase(o|a|ar|arme)\b|primera persona|\b3d\b|recorrer la oficina|\bcaminar\b", t) and not re.search(r"estrateg|trader|\be-[0-9a-f]", t):
         return dice("Chema", "¡Ven a vernos! Pulsa «🚶 Pasear» (debajo de los botones de las plantas) o la tecla P. Haz clic y anda con "
                              "W A S D, mira con el ratón, corre con Mayús y pulsa E delante de alguien para ver su ficha. El ascensor "
-                             "está al fondo del pasillo, a la izquierda: con E subes a la terraza. Esc suelta el ratón y P te devuelve "
+                             "está al fondo del pasillo, a la izquierda: con E subes una planta (desde la 3 vuelves a la baja). Esc suelta el ratón y P te devuelve "
                              "a la vista de siempre. Te invito a un cortado sin apalancamiento.")
     if re.search(r"kill|cierra todo|cerrar todo|emergencia|vende todo", t):
         return dice("Julia", "¿Pulso el kill switch? Se cierran ya todas las posiciones abiertas del fondo al último precio y no se "

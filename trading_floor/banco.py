@@ -34,9 +34,11 @@ def descartadas() -> list[dict]:
     return almacen.cargar("descartadas", [])
 
 
-def descartar(id_: str, motivo: str, por: str = "jefe", post_mortem: dict | None = None) -> dict | None:
+def descartar(id_: str, motivo: str, por: str = "jefe", post_mortem: dict | None = None,
+              funcionaba: bool | None = None) -> dict | None:
     """Saca una estrategia del banco y la guarda como descartada (con cuándo, por qué, quién y, si lo hay, su post
-    mortem). `por` es «jefe», «supervisor» o «incubadora». Devuelve la entrada."""
+    mortem). `por` es «jefe», «supervisor», «incubadora» o «mesa» (la mesa de análisis nunca la dejaría entrar; en ese
+    caso `funcionaba` dice si iba bien en real, para que la academia no pierda esa pista). Devuelve la entrada."""
     with _cerrojo:
         items = cargar()
         fuera = [b for b in items if b["id"].upper() == id_.upper()]
@@ -44,7 +46,8 @@ def descartar(id_: str, motivo: str, por: str = "jefe", post_mortem: dict | None
             return None
         almacen.guardar("banco", [b for b in items if b["id"].upper() != id_.upper()])
         entrada = {**fuera[0], "retirada": dt.datetime.now().astimezone().isoformat(timespec="seconds"),
-                   "motivo": motivo, "por": por, **({"post_mortem": post_mortem} if post_mortem else {})}
+                   "motivo": motivo, "por": por, **({"post_mortem": post_mortem} if post_mortem else {}),
+                   **({"funcionaba": funcionaba} if funcionaba is not None else {})}
         almacen.guardar("descartadas", [d for d in descartadas() if d["id"] != entrada["id"]] + [entrada])
     return entrada
 

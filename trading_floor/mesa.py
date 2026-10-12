@@ -32,10 +32,10 @@ import numpy as np
 import pandas as pd
 
 from . import almacen
+from .config import RB_MINIMO   # el objetivo, al menos a 1,5 veces la distancia del stop
 from .mercado import Mercado
 
 MEDIA_DIAS = 50
-RB_MINIMO = 1.5          # el objetivo, al menos a 1,5 veces la distancia del stop
 CODICIA_EXTREMA = 75     # no comprar con el índice en 75 o más
 MIEDO_EXTREMO = 25       # no vender en corto con el índice en 25 o menos
 ROLES = {

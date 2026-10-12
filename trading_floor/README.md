@@ -81,8 +81,8 @@ Telegram de Jarvis, si lo tienes configurado.
    mejor nota primero (la nota mide lo clara que es su ventaja: media entre dispersión por la raíz del
    número de operaciones). Si la incubadora está llena (24 plazas de trading y 8 de scalping), esperan en
    el banquillo. Las suspendidas se descartan con su post mortem sin haber tocado tu dinero.
-6. **Paper trading** (`papel.py`). Cada trader tiene su mesa (88 en trading: 48 en la planta baja y 40 en la
-   **sala de trading 2**, en la planta 1, que se llenan después de las de abajo; 12 en scalping) y el
+6. **Paper trading** (`papel.py`). Cada trader tiene su mesa (88 en trading: 48 en la sala de trading y 40 en
+   la **sala de trading 2**, que se llenan después; las dos en la planta baja; 12 en scalping) y el
    capital ficticio que le toca según tu reparto. Al cerrar cada vela comprueba si se cumplen
    **todas** sus condiciones: si falta alguna, espera; si se cumplen, pide permiso a Riesgos y entra;
    después sale sola por stop, objetivo o tiempo máximo. Son reglas exigentes: cada estrategia opera de
@@ -91,13 +91,30 @@ Telegram de Jarvis, si lo tienes configurado.
    precio de mercado vela a vela, de ahí salen el resultado total, el de hoy y el de cada día.
    Además calcula el **radar de señales** de cada trader: cuántas de sus condiciones se cumplen
    ahora mismo, cuál falta, cuándo cierra la próxima vela, soporte, resistencia y ATR.
+   - **Mesa de análisis** (`mesa.py`, idea de los vídeos de «6 bots de trading en un chat de grupo»). Antes
+     de entrar, cada señal de la sala de trading (y de sus estrategias en la incubadora) pasa por una mesa
+     de seis: Celeste (scout: el volumen de la vela), Cristian (noticias: cuánto se ha movido en 24 horas),
+     Noemí (sentimiento: el índice de miedo y codicia), Amador (charts: la tendencia diaria y el
+     riesgo/beneficio), Olga, la escéptica, que intenta tumbarla, y Ramiro, el jefe de mesa, que lo anuncia.
+     Olga dice **PASA** si la operación va contra la tendencia diaria (el último cierre frente a su media de
+     50 días), si gana menos de **1,5 veces lo que arriesga** (objetivo frente a stop) o si es ir con la
+     masa en un extremo (comprar con codicia de 75 o más, vender en corto con miedo de 25 o menos). Lo que
+     pasa no se opera; la decisión queda guardada y no se repite. Solo cuenta desde que la mesa existe: lo
+     ya operado no cambia. El scalping no pasa por la mesa. La conversación sale en el chat (canal de
+     análisis) y en el chat basta con «¿qué dice la mesa?».
+     Como la mesa nunca dejaría entrar a una estrategia que gana menos de 1,5 veces lo que arriesga, la
+     minería ya no genera estrategias de trading así (si el objetivo se queda corto, lo sube al primer valor
+     que cumple), y las antiguas se retiran en cuanto no tienen nada abierto (en la incubadora, la plaza
+     queda para otra; en una mesa, Clara la cambia por la mejor aprobada o la mesa queda libre cobrando
+     intereses). No cuenta como que hayan fallado: la academia no aprende nada de ellas.
    - **Supervisor y periodo de prueba** (`config.PRUEBA`). Clara (trading) y Álex (scalping) vigilan
      a cada trader con su estrategia: en trading, 14 días y 6 operaciones cerradas; en scalping, 3 días
      y 20 operaciones. Si al acabar la prueba va en pérdidas, o si antes pierde un 5 % de su capital (un
      4 % en scalping), el supervisor le retira la estrategia **cuando no tiene nada abierto** y le da la
      mejor aprobada de la incubadora, en la misma mesa y con un periodo de prueba nuevo. Pasada la prueba
      sigue vigilando: si vuelve a pérdidas, se repite. Si no hay ninguna aprobada y la incubadora está
-     vacía, la mesa espera y el supervisor pide un ciclo de búsqueda.
+     vacía, la mesa espera y el supervisor pide un ciclo de búsqueda. También retira, cuando no tienen
+     nada abierto, las estrategias antiguas que la mesa de análisis no dejaría entrar nunca.
    - **Kelly prudente** (`config.KELLY_*`). Con 30 operaciones reales o más (contando las del examen), el
      riesgo de cada operación sale de la fórmula de Kelly, f = A − (1 − A) / R, con el acierto A rebajado
      en un error estándar (por si ha tenido suerte) y R = ganancia media / pérdida media. Se usa una cuarta
@@ -157,9 +174,14 @@ Telegram de Jarvis, si lo tienes configurado.
    - Así cada moneda está al 0, al 50 o al 100 % de su parte. Solo compra: sin cortos ni dinero
      prestado. Lo que no está invertido espera en efectivo. Se decide al cerrar el día (00:00 UTC) y se
      opera a la apertura siguiente, pagando comisión y deslizamiento.
+   - **Desde octubre de 2026, dos reglas más** (solo para las decisiones nuevas; lo de antes no cambia):
+     invierte menos en las monedas muy nerviosas (**volatilidad objetivo del 80 % al año**: si una moneda
+     se mueve el doble de eso, entra con la mitad, en pasos del 10 %), y sale si el cierre cae **3 veces su
+     rango diario medio** (el ATR de 14 días) desde el máximo desde que entró (un stop que sube con el
+     precio). Con datos de 2022 a 2026 ganó lo mismo con menos caída (ver «Lo que dicen los datos»).
 
    Su presupuesto es el % de «tendencia» de tu reparto. La llevan Marina (BTC, ETH y SOL) y Vicente
-   (BNB, XRP y DOGE), sentados en la sala de holding; tiene su pestaña «Tendencia» en el panel.
+   (BNB, XRP y DOGE), en su propia sala de la planta 2 (inversión); tiene su pestaña «Tendencia» en el panel.
 
    **Por qué existe.** Se midió qué gana de verdad cada sala con datos que la minería no había visto
    (ver «Lo que dicen los datos», más abajo). Las estrategias minadas de 30 minutos apenas tienen
@@ -233,6 +255,26 @@ minería no había visto, y se miró qué habría pasado después:
 - **Scalping.** Lo mismo con un año de velas de 5 minutos (minando 120 días y mirando el mes siguiente,
   en 8 meses distintos): las aprobadas perdieron un 1,7 % de media el mes siguiente y solo ganaron 33 de
   cada 100, aun con comisión de «maker».
+- **La mesa de análisis** (las ideas del vídeo, medidas). Con las mismas 213 estrategias y sus 6.448
+  operaciones en datos que la minería no había visto (2024-2026):
+
+  | | Operaciones | Media por operación |
+  |---|---|---|
+  | Todas | 6.448 | −0,05 % |
+  | Las que la mesa deja pasar | 1.265 (una de cada cinco) | **+0,15 %** |
+  | Las que la mesa veta | 5.183 | −0,10 % |
+
+  Por estrategia y semestre, con la mesa mejora en los cuatro semestres (−0,71 → +0,81 %, +0,37 → +1,20 %,
+  −3,93 → −1,21 % y −0,59 → −0,38 %) y la operación media queda en positivo en las seis monedas. Funciona
+  igual con la media de 50 días que con variantes cercanas (entre +0,08 y +0,18 % por operación), pero
+  con una media de 20 días ya no ayuda. **Es una mejora modesta, no una máquina de hacer dinero**: dos de
+  los cuatro semestres siguieron en negativo y la mitad de las estrategias casi no llegan a operar. Del
+  vídeo se ha tomado la idea de los papeles (scout, noticias, sentimiento, charts, escéptico y jefe) y del
+  escéptico que pide un riesgo/beneficio mínimo; las promesas de ganancias del vídeo no se pudieron
+  comprobar y no se han usado.
+- **Tendencia con las dos reglas nuevas** (volatilidad objetivo y stop de 3 ATR), de 2022 a 2026: +32,4 %
+  al año frente a +32,2 %, caída máxima −23,3 % frente a −27,4 %, Sharpe 1,17 frente a 1,05, y 2022 (el
+  peor año) −15,8 % frente a −23,2 %. Gana lo mismo con menos sustos.
 - **Holding** (el plan sin stop): en periodos de 12 meses empezando cada semestre desde 2022, de media
   +32 % en BTC, ETH y SOL, pero entre −45 % y −91 % en los años malos.
 - **Tendencia** (las reglas de la sala, tal cual): desde 2022 y con las 6 monedas, +29 % al año con una
@@ -295,26 +337,31 @@ traders muestran su posición y su resultado, y el videowall los precios en vivo
 comentan en el chat lo que ocurre (aprobaciones, descartes, operaciones, vetos, holding, datos
 macro, radar de señales), a veces dirigiéndose a alguien ("Rocío → Jana"). El chat se puede filtrar
 por canal: operaciones, riesgos, minería, análisis, macro, holding, comité y charla. El comité se
-reúne cada 15 minutos (con cuenta atrás arriba), y cuando no hay trabajo se van a la sala de
-descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o la terraza.
+reúne cada 15 minutos (con cuenta atrás arriba), y cuando no hay trabajo suben a la planta 3: sala de
+descanso, cafetería, sala de juegos, gimnasio o la azotea.
 
-- **Dos plantas** (botones arriba a la izquierda o teclas Re Pág / Av Pág). La **planta baja**: minería,
-  laboratorio, cámara del banco, macro, holding, sala de trading, scalping, riesgos, comité, descanso y
-  patio. La **planta 1**, que se ve encima del edificio de la planta baja:
-  - **Incubadora**: 32 mesas de examen, el tablón de exámenes en la pared y Lorena, su supervisora.
-  - **Sala de trading 2**: 40 mesas más de la sala de trading (de la 49 a la 88), con la misma moqueta y
-    las mismas pantallas que la de abajo. Se llenan cuando las 48 de la planta baja están ocupadas; sus
-    traders tienen nombres propios (Aurora, Fabio, Gala…) y Clara los supervisa igual.
-  - **Equipo Quant**: Ainara (Kelly), Bernat (Monte Carlo) y Yago (post mortem), con una gran pantalla del
-    Monte Carlo del fondo, Sharpe, Sortino, Calmar y el Kelly de cada trader.
-  - **Academia**: Begoña da clase con lo aprendido en real (la pizarra lo muestra).
-  - **Comunicación**: Rebeca y Gorka escriben el informe del día (pestaña «Informe»), con plató de TF News.
-  - **Sistemas**: Néstor y los servidores; un panel enseña la salud del sistema (errores, duración del ciclo).
-  - **Cafetería** con Chema el barista, **sala de juegos** (futbolín, recreativas, dardos y pufs) y una
-    **terraza al aire libre** (más pequeña, para hacer sitio a la sala de trading 2) con piscina y tumbonas,
-    fogata con sofás, sombrilla, barbacoa, césped, árboles, telescopio y luces por la noche.
+- **Cuatro plantas, una por sector** (botones arriba a la izquierda o teclas Re Pág / Av Pág). Cada planta
+  se ve encima del edificio de las de abajo:
+  - **Planta baja · Trading**: recepción (Paz te dice dónde está cada cosa y en la pared hay un directorio de
+    plantas), **equipo Quant** (Ainara, Bernat y Yago, con la pantalla del Monte Carlo, Sharpe, Sortino,
+    Calmar y el Kelly de cada trader), **mesa de análisis** (seis sillas alrededor de una mesa y una pantalla
+    con sus últimas decisiones: COMPRA, VENDE o PASA), **scalping**, la **sala de trading** (48 mesas) y la
+    **sala de trading 2** (40 mesas más, de la 49 a la 88, que se llenan después; sus traders tienen nombres
+    propios y Clara los supervisa igual) y **control de riesgos**.
+  - **Planta 1 · Investigación**: minería, laboratorio con la cinta de las ocho pruebas, cámara del banco,
+    **academia** (Begoña da clase con lo aprendido en real), **biblioteca**, **incubadora** (32 mesas de
+    examen, el tablón de exámenes y Lorena, su supervisora) y una **zona de estudio**.
+  - **Planta 2 · Inversión**: **tesorería** (Teresa, con la caja fuerte y una pared con lo que hay sin
+    invertir y los intereses que cobra), **sala de tendencia** (Marina y Vicente, con una pantalla por
+    moneda), macro (el globo), holding (la moneda gigante), un **mirador**, la sala **«Tu fondo»** (una gran
+    pared con el valor de tu fondo y su reparto) y un **jardín interior** con fuente, árboles y bancos.
+  - **Planta 3 · Dirección y servicios**: comunicación (Rebeca y Gorka escriben el informe del día, con
+    plató de TF News), sistemas (Néstor y los servidores, con la salud del sistema), el **despacho de
+    dirección** de Marta, cafetería con Chema el barista, sala de juegos (futbolín, recreativas, dardos y
+    pufs), **gimnasio**, sala del comité, sala de descanso y la **azotea al aire libre**, con piscina,
+    tumbonas, fogata con sofás, sombrilla, barbacoa, césped, árboles, telescopio y luces por la noche.
   La gente sube y baja en **ascensor**. Cuando una estrategia aprueba en la incubadora, su trader baja a
-  entregarla a la mesa. **Satoshi, el gato**, se pasea por las dos plantas: duerme en el sofá o en una
+  entregarla a la mesa. **Satoshi, el gato**, se pasea por todas las plantas: duerme en el sofá o en una
   tumbona, se sienta junto a la fogata o se sube a la mesa de algún trader. Su ficha dice dónde está.
 - **Botonera** (abajo): Comité, Megáfono (dices algo a toda la oficina), A trabajar, Descanso, Pausar todo
   o Reabrir, y Kill switch (con confirmación). En la cabecera, junto al patrimonio, está la caída del fondo
@@ -366,7 +413,7 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
 - 🚶 **Pasear** (botón bajo las plantas, o tecla P): recorres la oficina **en primera persona**, en 3D.
   Haz clic para empezar; **W A S D** (o las flechas) para andar, el **ratón** para mirar, **Mayús** para
   correr, **E** (o clic) para ver la ficha de quien tengas delante y, junto al ascensor (al fondo del pasillo,
-  a la izquierda), para cambiar de planta; Re Pág / Av Pág también te llevan de una planta a otra.
+  a la izquierda), para subir una planta (desde la 3 vuelve a la baja); Re Pág / Av Pág suben y bajan.
   **Esc** suelta el ratón y «✕ Salir del paseo» (o P) vuelve a la vista de siempre, justo donde estabas.
   La escena 3D se construye sola a partir de la oficina isométrica: las mismas mesas, tabiques, carteles y
   pantallas (con los datos en vivo), la misma gente con sus bocadillos, el gato, el robot, el holograma, la
@@ -395,10 +442,11 @@ descanso, al patio, al gimnasio o arriba, a la cafetería, la sala de juegos o l
 | `academia.py` | Lo aprendido en real y los pesos que usa la minería |
 | `informe.py` | Informe del día (departamento de Comunicación) |
 | `papel.py` | Paper trading, curva de resultados, resultado diario y resumen de cada sala |
+| `mesa.py` | Mesa de análisis: tendencia diaria, riesgo/beneficio y miedo y codicia antes de cada entrada |
 | `fondo.py` | Tu fondo: participaciones, valor liquidativo, aportaciones, métricas (Sharpe, Sortino, Calmar), Monte Carlo y comparación con BTC |
 | `riesgo.py` | Tamaño de las operaciones, límites, vetos y frenos |
 | `holding.py` | Carteras de largo plazo sin stop: promedian a la baja y salen por partes sobre el coste medio |
-| `tendencia.py` | Sala de tendencia: media de 50 días y ruptura 20/10 en velas diarias, solo compras |
+| `tendencia.py` | Sala de tendencia: media de 50 días y ruptura 20/10 en velas diarias, solo compras, con volatilidad objetivo y stop de 3 ATR |
 | `liquidez.py` | Liquidez remunerada: el dinero que no está en el mercado cobra el tipo de las letras del Tesoro |
 | `macro.py` | Datos macroeconómicos y régimen de mercado |
 | `control.py` | Tus decisiones: búsqueda de estrategias, pausar todo, reabrir, kill switch, traders, límites de riesgo |

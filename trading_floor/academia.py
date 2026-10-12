@@ -46,6 +46,9 @@ def evidencias(papel: dict | None = None) -> list[dict]:
         if d.get("por") in ("supervisor", "incubadora"):
             filas.append({"estrategia": d["estrategia"], "funciona": False, "fase": d.get("por"), "id": d["id"]})
             vistos.add(d["id"])
+        elif d.get("por") == "mesa" and d.get("funcionaba"):   # iba bien, pero la mesa de análisis no la dejaría entrar
+            filas.append({"estrategia": d["estrategia"], "funciona": True, "fase": "mesa", "id": d["id"]})
+            vistos.add(d["id"])
     for id_, t in (papel.get("estrategias") or {}).items():
         b = en_banco.get(id_)
         if not b or id_ in vistos:

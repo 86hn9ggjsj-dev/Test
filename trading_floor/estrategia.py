@@ -13,6 +13,8 @@ from dataclasses import asdict, dataclass
 
 import numpy as np
 
+from .config import RB_MINIMO, es_scalping
+
 _RSI = [5, 7, 10, 14, 21, 28]
 _RAPIDAS = [3, 5, 8, 10, 15, 20, 30]
 _LENTAS = [40, 50, 75, 100, 150, 200]
@@ -184,6 +186,14 @@ def _condicion_de_familia(rng: np.random.Generator, familia: str) -> dict:
     return _condicion(rng, _elegir(rng, list(FAMILIAS[familia])))
 
 
+def _salida_para_la_mesa(e: Estrategia) -> Estrategia:
+    """En la sala de trading, la mesa de análisis solo deja entrar lo que gana al menos 1,5 veces lo que arriesga: si el
+    objetivo se queda corto, se sube al primer valor permitido que cumple (en scalping no hay mesa y no se toca)."""
+    if not es_scalping(e.intervalo) and e.objetivo_atr < RB_MINIMO * e.stop_atr:
+        e.objetivo_atr = min(o for o in SALIDAS["objetivo_atr"] if o >= RB_MINIMO * e.stop_atr)
+    return e
+
+
 def aleatoria(rng: np.random.Generator, simbolo: str, intervalo: str, pesos: dict | None = None) -> Estrategia:
     """Estrategia al azar. Con `pesos` (de la academia), los tipos de condición y la dirección que funcionan en real
     salen más a menudo y los que fallan, menos; una parte (la exploración) sigue siendo al azar."""
@@ -207,13 +217,13 @@ def aleatoria(rng: np.random.Generator, simbolo: str, intervalo: str, pesos: dic
                 condiciones.append(_condicion(rng, tipo))
         wd = np.array([float(pesos.get("direcciones", {}).get(d, 1.0)) for d in ("largo", "corto")])
         direccion = ["largo", "corto"][int(rng.choice(2, p=(1 - explora) * wd / wd.sum() + explora / 2))]
-    return Estrategia(
+    return _salida_para_la_mesa(Estrategia(
         simbolo=simbolo,
         intervalo=intervalo,
         direccion=direccion,
         condiciones=condiciones,
         **{k: _elegir(rng, v) for k, v in SALIDAS.items()},
-    )
+    ))
 
 
 def mutar(e: Estrategia, rng: np.random.Generator) -> Estrategia:
@@ -242,7 +252,7 @@ def mutar(e: Estrategia, rng: np.random.Generator) -> Estrategia:
         k = _elegir(rng, list(SALIDAS))
         d[k] = _vecino(rng, SALIDAS[k], d[k])
     d["condiciones"] = conds
-    return Estrategia.de_dict(d)
+    return _salida_para_la_mesa(Estrategia.de_dict(d))
 
 
 def cruzar(a: Estrategia, b: Estrategia, rng: np.random.Generator) -> Estrategia:
@@ -255,7 +265,7 @@ def cruzar(a: Estrategia, b: Estrategia, rng: np.random.Generator) -> Estrategia
     if len(conds) > 3:
         conds = [conds[j] for j in rng.permutation(len(conds))[:3]]
     salidas = {k: getattr(a if rng.random() < 0.5 else b, k) for k in SALIDAS}
-    return Estrategia(a.simbolo, a.intervalo, a.direccion, conds, **salidas)
+    return _salida_para_la_mesa(Estrategia(a.simbolo, a.intervalo, a.direccion, conds, **salidas))
 
 
 def vecina(e: Estrategia, rng: np.random.Generator) -> Estrategia:
