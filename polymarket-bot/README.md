@@ -238,7 +238,23 @@ evento suman entre 95% y 110% (`coherent_only`).
 **Resultado real (solo precios, `run_price_backtest`, 30 días, 13.600 mercados con precios coherentes):** el mercado
 está bien calibrado (cada tramo de precio acierta con la frecuencia que promete, ±3–5 pp de ruido). Corregir los
 precios con lo aprendido no mejora el Brier (0,0538 vs 0,0535) y no aparece ningún trade con edge > 8 pp.
-**Sin previsiones, no hay ventaja.** Lo que falta medir es si las previsiones meteorológicas baten al precio.
+**Sin previsiones, no hay ventaja.**
+
+**Resultado real con previsiones (13-oct-2026; eventos del 14-sep al 12-oct, 51 estaciones; test del 25-sep al 12-oct;
+~7.800 mercados en test):**
+
+| Variante | $50 → | Trades | |
+|---|---|---|---|
+| Reglas del bot, spread 2 pp | **$26,66** | 18 | toca la parada del 40% |
+| Aguantar hasta resolver, spread 2 pp | $27,76 | 22 | |
+| Reglas del bot, spread 4 pp | $27,66 | 16 | |
+| Aguantar, spread 4 pp | $28,17 | 22 | |
+
+El mercado acierta más que la previsión pública en todas las antelaciones (Brier, más bajo = mejor):
+máximas a 2 días 0,078 (previsión) frente a 0,063 (mercado); a 3 días 0,081 frente a 0,066. Corregir el sesgo de cada
+estación no lo cambia (0,0766 frente a 0,0535), y mezclar solo un 10% de previsión con el precio ya empeora el
+resultado (0,0539). La previsión es correcta (error medio ~2,2–2,6 °F, lo normal), pero el mercado ya la descuenta
+y sabe más. **Conclusión: con previsiones públicas no hay ventaja en estos mercados; el bot pierde dinero.**
 
 Limitaciones: solo mercados de **temperatura diaria** de las ciudades de la tabla `STATIONS` (amplíala si hace falta);
 spread supuesto; sin filtro de liquidez histórica. Si casi todo el beneficio viene de salidas anticipadas y no de mercados
