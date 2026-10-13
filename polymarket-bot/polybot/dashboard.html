@@ -308,6 +308,7 @@
     ["triage", "⚑", "TRIAGE", "criba barata por lotes · Claude", (s) => [`${s.flagged ?? 0}`, ` marcados de ${s.screened ?? 0} cribados`]],
     ["analyst", "◆", "ANALISTA", "fair value con web + NOAA · Claude", (s) => [`${s.edges_found ?? 0}`, ` con edge de ${s.estimates ?? 0} análisis`]],
     ["skeptic", "✕", "ESCÉPTICO", "segunda opinión, puede vetar · Claude", (s) => [`${s.vetoes ?? 0}`, ` vetos · ${s.approvals ?? 0} aprobados`]],
+    ["sharp", "⚖", "CUOTAS", "deportes frente a Pinnacle · código", (s) => [`${s.signals ?? 0}`, ` desvíos · ${s.matched ?? 0} emparejados`]],
     ["risk", "▣", "RIESGO", "Kelly, reglas duras, órdenes · código", (s) => [`${s.orders ?? 0}`, ` órdenes · ${s.blocked ?? 0} ideas frenadas`]],
   ];
   function renderAgents(d) {

@@ -69,6 +69,29 @@ Por qué está montado así:
 El panel muestra una tarjeta por agente con lo que ha hecho: mercados cribados y marcados, análisis, vetos,
 órdenes e ideas frenadas.
 
+### Agente CUOTAS: deportes frente a Pinnacle (`SHARP_ENABLED=true`)
+
+Lo que hacen muchos traders de deportes que ganan: las cuotas de **Pinnacle**, sin el margen de la casa, son una de las
+mejores estimaciones públicas de la probabilidad real de un partido. Cuando Polymarket se desvía de ellas, la ventaja
+suele estar del lado de Pinnacle. El agente CUOTAS (`polybot/sharp.py`):
+
+1. Descarga las cuotas de Pinnacle de los deportes de `SHARP_SPORTS` (The Odds API) cada `SHARP_REFRESH_MINUTES`.
+2. Les quita el margen de la casa (normalización multiplicativa) para tener probabilidades justas.
+3. Empareja cada mercado de Polymarket (ganador, empate, más/menos, hándicap) con su partido: mismos dos equipos
+   (con nombres normalizados: "FC Bayern München" = "Bayern Munich", pero "AC Milan" ≠ "Inter Milan") y hora de
+   inicio con menos de 3 h de diferencia.
+4. Edge = probabilidad de Pinnacle − precio real de compra en el CLOB − comisión de Polymarket.
+5. **Opera solo con las reglas duras** (edge > 8 pp, 1/4 Kelly, 6%...). Va antes que Claude, así que no gasta en la API.
+6. **Registro en la sombra:** cada desvío ≥ `SHARP_SHADOW_EDGE` (2 pp) se guarda en `decisions.jsonl` aunque no se opere.
+   `python -m polybot report` calcula, cuando los partidos terminan, cuánto habría ganado apostar $1 a esos desvíos con
+   cada umbral (2, 4, 6, 8 pp). Así se mide la estrategia sin romper las reglas.
+
+Las posiciones abiertas por CUOTAS se revisan con Pinnacle, sin llamar a Claude.
+
+**Puesta en marcha:** crea una clave en https://the-odds-api.com, ponla en `ODDS_API_KEY` y activa `SHARP_ENABLED=true`.
+Si el bot corre en un entorno con red restringida, permite el dominio `api.the-odds-api.com`. El plan gratuito
+(~500 créditos/mes) da para pocos días con la configuración por defecto (ver `.env.example`).
+
 ### TURBO: "modo minero" (`TURBO=true`, activado en `.env.example`)
 
 Picar poco a poco, pero todo el rato: muchas apuestas pequeñas ($1–3 con $50) en mercados que resuelven en días,
@@ -104,6 +127,8 @@ polymarket-bot/
 │   ├── agent.py       el ciclo de 10 minutos
 │   ├── brain.py       agente ANALISTA (web + NOAA) y el bucle común de Claude
 │   ├── agents.py      agentes TRIAGE y ESCÉPTICO
+│   ├── sharp.py       agente CUOTAS: deportes frente a Pinnacle (The Odds API)
+│   ├── scanner.py     escáner de ventaja en todo Polymarket
 │   ├── weather.py     detección de mercados del tiempo + cliente de api.weather.gov
 │   ├── dashboard.py   panel web en directo (+ dashboard.html)
 │   ├── simulate.py    simulación Monte Carlo del bot
@@ -117,7 +142,7 @@ polymarket-bot/
 │   ├── journal.py     logs, diarios JSONL y status.md
 │   ├── postmortem.py  informe automático al llegar al 40% de drawdown
 │   └── config.py      configuración + límites duros
-├── tests/             61 tests (reglas, Kelly, filtros, ciclo, agentes, NOAA, panel, TURBO, backtest, report)
+├── tests/             84 tests (reglas, Kelly, comisiones, filtros, ciclo, agentes, cuotas, NOAA, panel, TURBO, backtest, escáner, report)
 ├── deploy/            servicio systemd + instalador para VPS
 ├── Dockerfile, docker-compose.yml
 └── .env.example

@@ -166,7 +166,53 @@ def build_report(cfg: Config, data=None) -> str:
             start = prev_end
             lines.append(f"| {month} | ${start:.2f} | ${vals[-1]:.2f} | {(vals[-1] / start - 1) * 100:+.1f}% |")
             prev_end = vals[-1]
+    lines += sharp_section(cfg, data)
     text = "\n".join(lines) + "\n"
     (cfg.data_dir / "report.md").parent.mkdir(parents=True, exist_ok=True)
     (cfg.data_dir / "report.md").write_text(text, encoding="utf-8")
     return text
+
+
+def sharp_section(cfg: Config, data) -> list[str]:
+    """Agente CUOTAS: ¿habría ganado apostar $1 a cada desvío frente a Pinnacle? (hasta la resolución)."""
+    from . import risk
+
+    rows = [d for d in _read_jsonl(cfg.data_dir / "decisions.jsonl") if d.get("kind") == "sharp"]
+    if not rows:
+        return []
+    first: dict[str, dict] = {}
+    for d in rows:
+        first.setdefault(d["market_id"], d)  # primera señal de cada mercado: la que se habría operado
+    resolved = []
+    for mid, d in first.items():
+        try:
+            m = data.fetch_market(mid)
+            winner = m.resolved_outcome() if m else None
+        except Exception:
+            winner = None
+        if winner is None:
+            continue
+        price = float(d["side_price"])
+        fee = risk.taker_fee(price, float(d.get("fee_rate") or 0), 1.0)
+        shares = (1 - fee / price) / price  # $1 apostado, comisión descontada en shares
+        resolved.append((float(d["edge"]), d.get("sports_type") or "?", shares * (winner == d["side_index"]) - 1))
+    lines = ["", "## 4. Agente CUOTAS frente a Pinnacle (registro en la sombra)", "",
+             f"Señales: {len(first)} mercados · ya resueltos: {len(resolved)}. Apuesta fija de $1 al precio real de "
+             "compra, con comisión, hasta la resolución.", "",
+             "| Desvío mínimo | Apuestas | Rendimiento medio por apuesta | Ganancia total |", "|---|---|---|---|"]
+    for thr in (0.02, 0.04, 0.06, 0.08):
+        r = [x[2] for x in resolved if x[0] >= thr]
+        if not r:
+            lines.append(f"| ≥ {thr * 100:.0f} pp | 0 | — | — |")
+            continue
+        mean = sum(r) / len(r)
+        se = (sum((x - mean) ** 2 for x in r) / max(1, len(r) - 1)) ** 0.5 / len(r) ** 0.5
+        lines.append(f"| ≥ {thr * 100:.0f} pp | {len(r)} | {mean * 100:+.1f}% ± {2 * se * 100:.1f}% | ${sum(r):+.2f} |")
+    by = defaultdict(list)
+    for e, k, r in resolved:
+        by[k].append(r)
+    for k, v in sorted(by.items()):
+        lines.append(f"- {k}: {len(v)} apuestas, {sum(v) / len(v) * 100:+.1f}% de media")
+    if len(resolved) < MIN_SAMPLE:
+        lines.append(f"\n⏳ Menos de {MIN_SAMPLE} apuestas resueltas: aún no se puede concluir nada.")
+    return lines

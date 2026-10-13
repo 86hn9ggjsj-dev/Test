@@ -109,6 +109,16 @@ class Config:
     skeptic_model: str = "claude-opus-5-5"
     skeptic_effort: str = "medium"
     skeptic_web_searches: int = 3
+
+    # --- Agente CUOTAS (deportes contra Pinnacle, vía The Odds API) ---
+    sharp_enabled: bool = False
+    odds_api_key: str = field(default="", repr=False)
+    sharp_bookmaker: str = "pinnacle"
+    sharp_sports: str = ("soccer_uefa_champs_league,soccer_epl,soccer_spain_la_liga,soccer_italy_serie_a,"
+                         "soccer_germany_bundesliga,baseball_mlb,americanfootball_nfl,basketball_nba,icehockey_nhl")
+    sharp_markets: str = "h2h,totals"
+    sharp_refresh_minutes: float = 360.0     # cada refresco cuesta (nº deportes × nº mercados) créditos
+    sharp_shadow_edge: float = 0.02          # se registran en la sombra los desvíos >= 2 pp (no se operan)
     daily_api_budget_usd: float = 3.00       # tope de gasto diario en la API de Claude
     vps_monthly_usd: float = 6.00            # para el contador de supervivencia
 
@@ -142,6 +152,8 @@ class Config:
             errors.append("MIN_HOURS_TO_RESOLUTION no puede ser menor que 2")
         if self.max_drawdown > HARD_LIMITS["max_drawdown"]:
             errors.append("MAX_DRAWDOWN no puede superar 0.40")
+        if self.sharp_enabled and not self.odds_api_key:
+            errors.append("SHARP_ENABLED requiere ODDS_API_KEY (https://the-odds-api.com)")
         if not 0 <= self.fv_smoothing < 1:
             errors.append("FV_SMOOTHING debe estar entre 0 y 1")
         if self.min_confidence not in ("low", "medium", "high"):
@@ -232,6 +244,13 @@ def load_config(env_file: str | None = ".env") -> Config:
         skeptic_model=_env("SKEPTIC_MODEL", "claude-opus-5-5"),
         skeptic_effort=_env("SKEPTIC_EFFORT", "medium"),
         skeptic_web_searches=_int("SKEPTIC_WEB_SEARCHES", 3),
+        sharp_enabled=_env("SHARP_ENABLED", "false").lower() in ("1", "true", "yes", "si", "sí"),
+        odds_api_key=_env("ODDS_API_KEY", ""),
+        sharp_bookmaker=_env("SHARP_BOOKMAKER", "pinnacle"),
+        sharp_sports=_env("SHARP_SPORTS", Config.sharp_sports),
+        sharp_markets=_env("SHARP_MARKETS", "h2h,totals"),
+        sharp_refresh_minutes=_float("SHARP_REFRESH_MINUTES", 360.0),
+        sharp_shadow_edge=_float("SHARP_SHADOW_EDGE", 0.02),
         daily_api_budget_usd=_float("DAILY_API_BUDGET_USD", 3.00),
         vps_monthly_usd=_float("VPS_MONTHLY_USD", 6.00),
         live_confirm=_env("LIVE_TRADING_CONFIRM", "no").lower() == "yes",

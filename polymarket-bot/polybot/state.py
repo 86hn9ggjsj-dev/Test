@@ -41,6 +41,7 @@ class Position:
     neg_risk: bool = False
     fee_rate: float = 0.0
     fee_exponent: float = 1.0
+    source: str = "claude"     # quién propuso la entrada: "claude" (analista) o "sharp" (cuotas de Pinnacle)
 
     @property
     def value(self) -> float:

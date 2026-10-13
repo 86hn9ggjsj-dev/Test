@@ -24,6 +24,7 @@ from .config import Config
 from .executor import make_executor
 from .journal import Journal
 from .polymarket import Market, OrderBook, PolymarketData
+from .sharp import OddsClient, SharpBook
 from .postmortem import write_postmortem
 from .state import BotState, ClosedTrade, Position, now_iso, today
 from .weather import is_weather_market
@@ -39,12 +40,17 @@ def _minutes_since(iso: str) -> float:
 
 class Agent:
     def __init__(self, cfg: Config, *, data=None, brain=None, executor=None, journal=None, state=None,
-                 triage=None, skeptic=None):
+                 triage=None, skeptic=None, sharp=None):
         self.cfg = cfg
         self.data = data or PolymarketData()
         self.brain = brain or Brain(cfg)
         self.triage = triage if triage is not None else (Triage(cfg) if cfg.triage_enabled else None)
         self.skeptic = skeptic if skeptic is not None else (Skeptic(cfg) if cfg.skeptic_enabled else None)
+        if sharp is None and cfg.sharp_enabled:
+            sports = [x.strip() for x in cfg.sharp_sports.split(",") if x.strip()]
+            sharp = SharpBook(OddsClient(cfg.odds_api_key, bookmaker=cfg.sharp_bookmaker), sports,
+                              cfg.sharp_markets, cfg.sharp_refresh_minutes)
+        self.sharp = sharp
         self.executor = executor or make_executor(cfg)
         self.journal = journal or Journal(cfg.data_dir)
         self.state = state or BotState.load_or_new(cfg.state_path, cfg.mode, cfg.initial_bankroll)
@@ -74,6 +80,12 @@ class Agent:
             log.error("No se pudo escanear Gamma: %s", exc)
             self.journal.event(kind="scan_error", error=str(exc))
             markets = None
+
+        if self.sharp is not None and markets is not None:
+            try:
+                self.sharp.refresh_if_stale()
+            except Exception as exc:
+                log.warning("No se pudieron refrescar las cuotas: %s", exc)
 
         # Las posiciones se revisan aunque el escaneo falle (cada una se consulta por separado).
         self._review_positions({m.id: m for m in markets or []})
@@ -171,7 +183,14 @@ class Agent:
         else:
             stale = _minutes_since(p.last_estimate_at) >= self.cfg.position_reeval_minutes
             moved = abs(mid - p.last_estimate_price) >= self.cfg.reeval_price_move
-            if (stale or moved) and self._budget_left():
+            if p.source == "sharp" and self.sharp is not None:
+                fair, _ = self.sharp.fair_yes(m)  # posiciones de CUOTAS: se revisan con Pinnacle, sin gastar en Claude
+                if fair is not None:
+                    new_fv = fair if p.outcome_index == 0 else 1 - fair
+                    a = self.cfg.fv_smoothing
+                    p.last_fair_value = a * p.last_fair_value + (1 - a) * new_fv
+                    p.last_estimate_at, p.last_estimate_price = now_iso(), mid
+            elif (stale or moved) and self._budget_left():
                 est = self._estimate(m, book0.best_ask, book1.best_ask)
                 if est is not None:
                     new_fv = est.fair_yes if p.outcome_index == 0 else 1 - est.fair_yes
@@ -220,6 +239,10 @@ class Agent:
         self._prune_estimates()
 
         slots = cfg.max_open_positions - len(st.positions)
+        if self.sharp is not None:  # CUOTAS va primero: no gasta en Claude y registra la sombra aunque no haya hueco
+            handled, entered = self._sharp_entries(candidates, max(slots, 0))
+            slots -= entered
+            candidates = [m for m in candidates if m.id not in handled]
         if slots <= 0:
             log.info("Máximo de %d posiciones alcanzado; no se buscan entradas", cfg.max_open_positions)
             return
@@ -246,6 +269,56 @@ class Agent:
                 continue
             evaluations += evaluated
             slots -= entered
+
+    def _sharp_entries(self, candidates: list[Market], slots: int) -> tuple[set, int]:
+        """CUOTAS: compara cada partido con Pinnacle. Opera solo con las reglas duras; el resto, a la sombra."""
+        st, cfg = self.state, self.cfg
+        handled, entered = set(), 0
+        for m in candidates:
+            if not (m.raw or {}).get("sportsMarketType"):
+                continue
+            try:
+                fair, why = self.sharp.fair_yes(m)
+            except Exception as exc:
+                log.debug("emparejado %s: %s", m.id, exc)
+                continue
+            if fair is None:
+                self._stat("sharp", "unmatched")
+                continue
+            handled.add(m.id)
+            self._stat("sharp", "matched")
+            if abs(fair - m.prices[0]) < cfg.sharp_shadow_edge:  # prefiltro barato antes de pedir libros
+                continue
+            try:
+                book0, book1 = self._books(m)
+            except Exception as exc:
+                log.warning("Libro de %s: %s", m.id, exc)
+                continue
+            ask0, ask1 = book0.best_ask, book1.best_ask
+            choice = risk.best_side(fair, ask0, ask1, cfg.taker_fee, m.fee_rate, m.fee_exponent)
+            if choice is None or choice.edge < cfg.sharp_shadow_edge:
+                continue
+            base = {"kind": "sharp", "market_id": m.id, "question": m.question, "url": m.url,
+                    "ask": [ask0, ask1], "mid_yes": book0.mid, "price_yes": m.prices[0],
+                    "fair_yes": round(fair, 4), "match": why, "sports_type": m.raw.get("sportsMarketType"),
+                    "side": m.outcomes[choice.outcome_index], "side_index": choice.outcome_index,
+                    "side_price": choice.price, "side_fair_value": round(choice.fair_value, 4),
+                    "edge": round(choice.edge, 4), "fee_rate": m.fee_rate, "game_start": m.raw.get("gameStartTime")}
+            blockers = risk.entry_blockers(edge=choice.edge, confidence="high", resolution_clear=True,
+                                           open_positions=len(st.positions), halted=st.halted, cfg=cfg)
+            if not blockers and entered >= slots:
+                blockers.append(f"sin huecos libres ({cfg.max_open_positions} posiciones)")
+            book = book0 if choice.outcome_index == 0 else book1
+            stake, kelly, exec_edge = self._size_check(m, choice, book, blockers)
+            self.journal.decision(**base, exec_edge=None if exec_edge is None else round(exec_edge, 4),
+                                  stake_usd=stake, **kelly, decision="SHADOW" if blockers else "TRADE",
+                                  reasons=blockers)
+            self._stat("sharp", "signals", last=f"{choice.edge * 100:+.1f} pp {base['side']} · {m.question[:60]}")
+            log.info("CUOTAS %s | Pinnacle %.3f vs ask %s/%s | edge %+.1f pp | %s", m.question[:60], fair, ask0, ask1,
+                     choice.edge * 100, "TRADE" if not blockers else "sombra: " + "; ".join(blockers))
+            if not blockers and self._open_position(m, choice, book, stake, exec_edge, base, source="sharp"):
+                entered += 1
+        return handled, entered
 
     def _run_triage(self, candidates: list[Market]) -> list[Market]:
         """TRIAGE: criba barata por lotes. Devuelve la lista corta para el analista, en orden."""
@@ -351,23 +424,7 @@ class Agent:
         st.estimates[m.id]["fair_yes"] = fair_yes
 
         book = book0 if choice.outcome_index == 0 else book1
-        stake, kelly = risk.position_size_usd(st.equity, st.cash, choice.fair_value, choice.price, cfg)
-
-        exec_edge, avg_price = None, None
-        if not blockers:
-            sim = book.fill_buy(stake) if stake > 0 else None
-            if sim is None:
-                blockers.append("sin profundidad para el tamaño o tamaño 0")
-            else:
-                shares, avg_price = sim
-                exec_edge = (choice.fair_value - avg_price - cfg.taker_fee
-                            - risk.taker_fee(avg_price, m.fee_rate, m.fee_exponent))
-                if exec_edge <= cfg.min_edge:
-                    blockers.append(f"edge al precio medio de ejecución {exec_edge * 100:.1f} pp <= {cfg.min_edge * 100:.0f} pp")
-                if shares < m.min_order_size:
-                    blockers.append(f"{shares:.2f} shares < mínimo del mercado ({m.min_order_size:g})")
-                if stake < 1.0:
-                    blockers.append(f"tamaño ${stake:.2f} < $1 mínimo")
+        stake, kelly, exec_edge = self._size_check(m, choice, book, blockers)
 
         self.journal.decision(
             **base, fair_yes=round(fair_yes, 4), analyst_fair_yes=round(est.fair_yes, 4),
@@ -390,12 +447,41 @@ class Agent:
                 self._stat("risk", "blocked", last=f"bloqueado: {blockers[0][:100]}")
             return calls, 0
 
+        if not self._open_position(m, choice, book, stake, exec_edge, base, source="claude"):
+            return calls, 0
+        return calls, 1
+
+    # ------------------------------------------------------ comunes a todas las fuentes
+    def _size_check(self, m: Market, choice, book: OrderBook, blockers: list[str]) -> tuple[float, dict, float | None]:
+        """RIESGO: tamaño (1/4 Kelly, tope 6%) y comprobaciones al precio real de ejecución."""
+        st, cfg = self.state, self.cfg
+        stake, kelly = risk.position_size_usd(st.equity, st.cash, choice.fair_value, choice.price, cfg)
+        exec_edge = None
+        if not blockers:
+            sim = book.fill_buy(stake) if stake > 0 else None
+            if sim is None:
+                blockers.append("sin profundidad para el tamaño o tamaño 0")
+            else:
+                shares, avg_price = sim
+                exec_edge = (choice.fair_value - avg_price - cfg.taker_fee
+                             - risk.taker_fee(avg_price, m.fee_rate, m.fee_exponent))
+                if exec_edge <= cfg.min_edge:
+                    blockers.append(f"edge al precio medio de ejecución {exec_edge * 100:.1f} pp <= {cfg.min_edge * 100:.0f} pp")
+                if shares < m.min_order_size:
+                    blockers.append(f"{shares:.2f} shares < mínimo del mercado ({m.min_order_size:g})")
+                if stake < 1.0:
+                    blockers.append(f"tamaño ${stake:.2f} < $1 mínimo")
+        return stake, kelly, exec_edge
+
+    def _open_position(self, m: Market, choice, book: OrderBook, stake: float, exec_edge: float | None,
+                       base: dict, source: str) -> bool:
+        st, cfg = self.state, self.cfg
         fill = self.executor.buy(m.token_ids[choice.outcome_index], stake, book, m.tick_size, m.neg_risk,
                                  fee_rate=m.fee_rate, fee_exponent=m.fee_exponent)
         if fill is None:
             self.journal.decision(**base, decision="FAILED", reasons=["la orden no se ejecutó"])
             self._stat("risk", "failed_orders")
-            return calls, 0
+            return False
         st.cash -= fill.usd
         p = Position(
             market_id=m.id, question=m.question, outcome=m.outcomes[choice.outcome_index],
@@ -406,15 +492,16 @@ class Agent:
             end_date=m.end_date.isoformat() if m.end_date else None, slug=m.slug,
             last_estimate_at=now_iso(), last_estimate_price=book.mid or fill.avg_price,
             min_order_size=m.min_order_size, tick_size=m.tick_size, neg_risk=m.neg_risk,
-            fee_rate=m.fee_rate, fee_exponent=m.fee_exponent,
+            fee_rate=m.fee_rate, fee_exponent=m.fee_exponent, source=source,
         )
         st.positions[m.id] = p
         self.journal.trade(action="OPEN", mode=cfg.mode, market_id=m.id, question=m.question,
                            outcome=p.outcome, shares=p.shares, price=p.entry_price, usd=p.cost,
-                           fair_value=p.entry_fair_value, edge=exec_edge, order_id=fill.order_id)
-        log.info("ABIERTA %s [%s] %.2f shares @ %.3f ($%.2f)", m.question[:60], p.outcome, p.shares, p.entry_price, p.cost)
+                           fair_value=p.entry_fair_value, edge=exec_edge, order_id=fill.order_id, source=source)
+        log.info("ABIERTA [%s] %s [%s] %.2f shares @ %.3f ($%.2f)", source, m.question[:60], p.outcome, p.shares,
+                 p.entry_price, p.cost)
         self._stat("risk", "orders", last=f"ORDER ${p.cost:.2f} {p.outcome} · {m.question[:70]}")
-        return calls, 1
+        return True
 
     def _prune_estimates(self) -> None:
         cutoff = datetime.now(timezone.utc) - timedelta(days=2)
