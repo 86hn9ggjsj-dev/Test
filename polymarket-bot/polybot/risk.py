@@ -25,6 +25,16 @@ def kelly_fraction(prob_win: float, price: float) -> float:
     return max(0.0, (prob_win - price) / (1 - price))
 
 
+def taker_fee(price: float, rate: float, exponent: float = 1.0) -> float:
+    """Comisión taker de Polymarket por share, en $: precio × tasa × (precio·(1−precio))^exponente.
+
+    Máxima al 50% (con tasa 0.05 y exponente 1: 1,25% del importe) y casi nula en los extremos.
+    """
+    if rate <= 0 or not (0 < price < 1):
+        return 0.0
+    return price * rate * (price * (1 - price)) ** exponent
+
+
 @dataclass
 class SideChoice:
     outcome_index: int
@@ -33,13 +43,16 @@ class SideChoice:
     edge: float        # fair_value - price - comisión
 
 
-def best_side(fair_yes: float, ask_yes: float | None, ask_no: float | None, fee: float = 0.0) -> SideChoice | None:
-    """Elige el lado con más edge. `fair_yes` es la probabilidad del resultado 0."""
+def best_side(fair_yes: float, ask_yes: float | None, ask_no: float | None, fee: float = 0.0,
+              fee_rate: float = 0.0, fee_exponent: float = 1.0) -> SideChoice | None:
+    """Elige el lado con más edge NETO de comisiones. `fair_yes` es la probabilidad del resultado 0."""
     options = []
     if ask_yes is not None:
-        options.append(SideChoice(0, fair_yes, ask_yes, fair_yes - ask_yes - fee))
+        cost = fee + taker_fee(ask_yes, fee_rate, fee_exponent)
+        options.append(SideChoice(0, fair_yes, ask_yes, fair_yes - ask_yes - cost))
     if ask_no is not None:
-        options.append(SideChoice(1, 1 - fair_yes, ask_no, (1 - fair_yes) - ask_no - fee))
+        cost = fee + taker_fee(ask_no, fee_rate, fee_exponent)
+        options.append(SideChoice(1, 1 - fair_yes, ask_no, (1 - fair_yes) - ask_no - cost))
     return max(options, key=lambda s: s.edge) if options else None
 
 

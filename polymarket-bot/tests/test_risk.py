@@ -103,3 +103,14 @@ def test_turbo_raises_throughput_but_not_hard_rules(monkeypatch, tmp_path):
         (0.06, 5, 0.08, 0.25, 0.40)
     for k in TURBO_DEFAULTS:
         monkeypatch.delenv(k, raising=False)
+
+
+def test_polymarket_taker_fee_formula():
+    # tasa 0.05, exponente 1: máximo al 50% -> 0.5 * 0.05 * 0.25 = 0.00625 $/share = 1,25% del importe
+    assert risk.taker_fee(0.5, 0.05, 1) == pytest.approx(0.00625)
+    assert risk.taker_fee(0.5, 0.072, 1) / 0.5 == pytest.approx(0.018)     # cripto: 1,8% máx.
+    assert risk.taker_fee(0.5, 0.03, 0.5) / 0.5 == pytest.approx(0.015)    # economía: 1,5% máx.
+    assert risk.taker_fee(0.02, 0.05, 1) < 0.0001
+    assert risk.taker_fee(0.5, 0.0, 1) == 0.0
+    s = risk.best_side(0.60, 0.50, 0.52, fee_rate=0.05)
+    assert s.edge == pytest.approx(0.10 - 0.00625)

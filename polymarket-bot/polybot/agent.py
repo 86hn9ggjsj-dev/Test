@@ -195,7 +195,8 @@ class Agent:
             self._exit(p, held, reason)
 
     def _exit(self, p: Position, book: OrderBook, reason: str) -> None:
-        fill = self.executor.sell(p.token_id, p.shares, book, p.tick_size, p.neg_risk)
+        fill = self.executor.sell(p.token_id, p.shares, book, p.tick_size, p.neg_risk,
+                                  fee_rate=p.fee_rate, fee_exponent=p.fee_exponent)
         if fill is None:
             log.warning("No se pudo salir de %s (%s); se reintentará", p.question[:60], reason)
             return
@@ -312,7 +313,7 @@ class Agent:
             return 1, 0
         st.estimates[m.id] = {"at": now_iso(), "price_yes": m.prices[0], "fair_yes": est.fair_yes}
 
-        analyst_choice = risk.best_side(est.fair_yes, ask0, ask1, cfg.taker_fee)
+        analyst_choice = risk.best_side(est.fair_yes, ask0, ask1, cfg.taker_fee, m.fee_rate, m.fee_exponent)
         self._stat("analyst", "estimates", last=f"FV {est.fair_yes:.2f} · {m.question[:80]}")
         if analyst_choice.edge > cfg.min_edge:
             self._stat("analyst", "edges_found")
@@ -337,7 +338,7 @@ class Agent:
                 else:
                     self._stat("skeptic", "reviews")
                     fair_yes = (est.fair_yes + review.fair_yes) / 2
-                    choice = risk.best_side(fair_yes, ask0, ask1, cfg.taker_fee)
+                    choice = risk.best_side(fair_yes, ask0, ask1, cfg.taker_fee, m.fee_rate, m.fee_exponent)
                     if review.verdict == "veto":
                         self._stat("skeptic", "vetoes", last=f"VETO {m.question[:60]}: {review.objection[:70]}")
                         blockers.append(f"vetado por el escéptico: {review.objection[:160]}")
@@ -359,7 +360,8 @@ class Agent:
                 blockers.append("sin profundidad para el tamaño o tamaño 0")
             else:
                 shares, avg_price = sim
-                exec_edge = choice.fair_value - avg_price - cfg.taker_fee
+                exec_edge = (choice.fair_value - avg_price - cfg.taker_fee
+                            - risk.taker_fee(avg_price, m.fee_rate, m.fee_exponent))
                 if exec_edge <= cfg.min_edge:
                     blockers.append(f"edge al precio medio de ejecución {exec_edge * 100:.1f} pp <= {cfg.min_edge * 100:.0f} pp")
                 if shares < m.min_order_size:
@@ -388,7 +390,8 @@ class Agent:
                 self._stat("risk", "blocked", last=f"bloqueado: {blockers[0][:100]}")
             return calls, 0
 
-        fill = self.executor.buy(m.token_ids[choice.outcome_index], stake, book, m.tick_size, m.neg_risk)
+        fill = self.executor.buy(m.token_ids[choice.outcome_index], stake, book, m.tick_size, m.neg_risk,
+                                 fee_rate=m.fee_rate, fee_exponent=m.fee_exponent)
         if fill is None:
             self.journal.decision(**base, decision="FAILED", reasons=["la orden no se ejecutó"])
             self._stat("risk", "failed_orders")
@@ -403,6 +406,7 @@ class Agent:
             end_date=m.end_date.isoformat() if m.end_date else None, slug=m.slug,
             last_estimate_at=now_iso(), last_estimate_price=book.mid or fill.avg_price,
             min_order_size=m.min_order_size, tick_size=m.tick_size, neg_risk=m.neg_risk,
+            fee_rate=m.fee_rate, fee_exponent=m.fee_exponent,
         )
         st.positions[m.id] = p
         self.journal.trade(action="OPEN", mode=cfg.mode, market_id=m.id, question=m.question,

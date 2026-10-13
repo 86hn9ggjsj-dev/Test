@@ -39,6 +39,8 @@ class Position:
     min_order_size: float = 5.0
     tick_size: float = 0.01
     neg_risk: bool = False
+    fee_rate: float = 0.0
+    fee_exponent: float = 1.0
 
     @property
     def value(self) -> float:

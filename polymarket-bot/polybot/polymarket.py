@@ -37,6 +37,8 @@ class Market:
     min_order_size: float = 5.0
     tick_size: float = 0.01
     neg_risk: bool = False
+    fee_rate: float = 0.0        # comisión taker: precio × tasa × (precio·(1−precio))^exponente por share
+    fee_exponent: float = 1.0
     raw: dict = field(default_factory=dict, repr=False)
 
     def hours_to_resolution(self, now: datetime | None = None) -> float | None:
@@ -150,6 +152,12 @@ def parse_market(raw: dict) -> Market | None:
     prices = [_float(p) for p in _json_list(raw.get("outcomePrices"))]
     if len(outcomes) != 2 or len(token_ids) != 2 or len(prices) != 2:
         return None
+    fee_rate, fee_exp = 0.0, 1.0
+    if raw.get("feesEnabled"):
+        sched = raw.get("feeSchedule") or {}
+        # Sin tabla explícita, asumimos la tasa habitual (conservador: mejor descontar de más).
+        fee_rate = _float(sched.get("rate"), 0.05) if isinstance(sched, dict) else 0.05
+        fee_exp = _float(sched.get("exponent"), 1.0) if isinstance(sched, dict) else 1.0
     return Market(
         id=str(raw.get("id", "")),
         question=str(raw.get("question", "")).strip(),
@@ -167,6 +175,8 @@ def parse_market(raw: dict) -> Market | None:
         min_order_size=_float(raw.get("orderMinSize"), 5.0) or 5.0,
         tick_size=_float(raw.get("orderPriceMinTickSize"), 0.01) or 0.01,
         neg_risk=bool(raw.get("negRisk", False)),
+        fee_rate=fee_rate,
+        fee_exponent=fee_exp,
         raw=raw,
     )
 

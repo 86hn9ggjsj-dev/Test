@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 
 from .config import Config
 from .polymarket import CLOB_URL, OrderBook
+from .risk import taker_fee
 
 log = logging.getLogger("polybot.exec")
 
@@ -49,21 +50,26 @@ class PaperExecutor:
     def __init__(self, cfg: Config):
         self.cfg = cfg
 
-    def buy(self, token_id: str, usd: float, book: OrderBook, tick: float, neg_risk: bool) -> Fill | None:
+    def buy(self, token_id: str, usd: float, book: OrderBook, tick: float, neg_risk: bool,
+            fee_rate: float = 0.0, fee_exponent: float = 1.0) -> Fill | None:
         sim = book.fill_buy(usd)
         if sim is None:
             log.info("[paper] sin profundidad suficiente para comprar $%.2f", usd)
             return None
         shares, avg = sim
-        return Fill(shares=round(shares, 4), avg_price=avg, usd=usd, order_id="paper")
+        fee_usd = shares * taker_fee(avg, fee_rate, fee_exponent)
+        shares -= fee_usd / avg  # la comisión se descuenta en shares
+        return Fill(shares=round(shares, 4), avg_price=usd / shares, usd=usd, order_id="paper")
 
-    def sell(self, token_id: str, shares: float, book: OrderBook, tick: float, neg_risk: bool) -> Fill | None:
+    def sell(self, token_id: str, shares: float, book: OrderBook, tick: float, neg_risk: bool,
+             fee_rate: float = 0.0, fee_exponent: float = 1.0) -> Fill | None:
         sim = book.fill_sell(shares)
         if sim is None:
             log.info("[paper] sin profundidad suficiente para vender %.2f shares", shares)
             return None
         proceeds, avg = sim
-        return Fill(shares=shares, avg_price=avg, usd=proceeds, order_id="paper")
+        proceeds -= shares * taker_fee(avg, fee_rate, fee_exponent)
+        return Fill(shares=shares, avg_price=proceeds / shares, usd=proceeds, order_id="paper")
 
     def wallet_cash(self) -> float | None:
         return None
@@ -94,7 +100,8 @@ class LiveExecutor:
         resp = self.client.post_order(signed, OrderType.FOK)
         return resp if isinstance(resp, dict) else {"raw": resp}
 
-    def buy(self, token_id: str, usd: float, book: OrderBook, tick: float, neg_risk: bool) -> Fill | None:
+    def buy(self, token_id: str, usd: float, book: OrderBook, tick: float, neg_risk: bool,
+            fee_rate: float = 0.0, fee_exponent: float = 1.0) -> Fill | None:
         expected = book.fill_buy(usd)
         if expected is None:
             return None
@@ -112,7 +119,8 @@ class LiveExecutor:
         shares = float(resp.get("takingAmount") or expected[0])
         return Fill(shares=shares, avg_price=spent / shares, usd=spent, order_id=str(resp.get("orderID", "")), raw=resp)
 
-    def sell(self, token_id: str, shares: float, book: OrderBook, tick: float, neg_risk: bool) -> Fill | None:
+    def sell(self, token_id: str, shares: float, book: OrderBook, tick: float, neg_risk: bool,
+             fee_rate: float = 0.0, fee_exponent: float = 1.0) -> Fill | None:
         expected = book.fill_sell(shares)
         if expected is None:
             return None
