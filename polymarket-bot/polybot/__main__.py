@@ -122,7 +122,7 @@ def main(argv: list[str] | None = None) -> int:
         import requests
 
         try:
-            res = run_backtest(HistoryClient(), cfg, days=args.days, train_frac=args.train_frac, spread=args.spread,
+            res = run_backtest(HistoryClient(cache_dir=cfg.data_dir / "backtest_cache"), cfg, days=args.days, train_frac=args.train_frac, spread=args.spread,
                                bankroll=args.bankroll, max_markets=args.max_markets, hold=args.hold)
         except requests.RequestException as exc:
             print(f"No se pudieron descargar los datos históricos: {exc}\n"

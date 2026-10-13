@@ -19,6 +19,8 @@ Uso:  python -m polybot backtest --days 90
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import math
 import re
@@ -26,6 +28,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, replace
 from datetime import date, datetime, timedelta, timezone
+from pathlib import Path
 
 import requests
 
@@ -198,12 +201,26 @@ class HistoryClient:
 
     DAILY_TEMPERATURE_TAG = "daily-temperature"
 
-    def __init__(self, session: requests.Session | None = None, timeout: float = 60.0):
+    def __init__(self, session: requests.Session | None = None, timeout: float = 60.0, cache_dir=None):
         self.session = session or requests.Session()
         self.session.headers.setdefault("User-Agent", "polybot-backtest/1.0")
         self.timeout = timeout
+        self.cache_dir = Path(cache_dir) if cache_dir else None  # caché en disco: reinicios sin re-descargar
+        if self.cache_dir:
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self._last_meteo = 0.0
 
-    def _get(self, url: str, params: dict | None = None, retries: int = 5):
+    def _cached(self, key: str, fetch):
+        if not self.cache_dir:
+            return fetch()
+        path = self.cache_dir / (hashlib.sha1(key.encode()).hexdigest() + ".json")
+        if path.exists():
+            return json.loads(path.read_text())
+        data = fetch()
+        path.write_text(json.dumps(data))
+        return data
+
+    def _get(self, url: str, params: dict | None = None, retries: int = 6):
         for attempt in range(retries):
             try:
                 resp = self.session.get(url, params=params, timeout=self.timeout)
@@ -213,7 +230,7 @@ class HistoryClient:
                 time.sleep(min(2 ** attempt, 30))
                 continue
             if resp.status_code == 429 or resp.status_code >= 500:
-                wait = float(resp.headers.get("retry-after") or 0) or min(2 ** attempt, 30)
+                wait = float(resp.headers.get("retry-after") or 0) or min(5 * 2 ** attempt, 120)
                 time.sleep(wait)
                 continue
             resp.raise_for_status()
@@ -269,9 +286,14 @@ class HistoryClient:
 
     def price_history(self, token_id: str, start: datetime, end: datetime) -> list[tuple[datetime, float]]:
         params = {"market": token_id, "startTs": int(start.timestamp()), "endTs": int(end.timestamp()), "fidelity": 60}
-        data = self._get(f"{CLOB_URL}/prices-history", params)
-        if not data.get("history"):
-            data = self._get(f"{CLOB_URL}/prices-history", {"market": token_id, "interval": "max", "fidelity": 60})
+
+        def fetch():
+            data = self._get(f"{CLOB_URL}/prices-history", params)
+            if not data.get("history"):
+                data = self._get(f"{CLOB_URL}/prices-history", {"market": token_id, "interval": "max", "fidelity": 60})
+            return data
+
+        data = self._cached(f"ph:{token_id}:{params['startTs']}:{params['endTs']}", fetch)
         return sorted((datetime.fromtimestamp(int(h["t"]), timezone.utc), float(h["p"])) for h in data.get("history", []))
 
     def previous_runs(self, lat: float, lon: float, start: date, end: date, unit: str) -> dict:
@@ -280,7 +302,18 @@ class HistoryClient:
             "hourly": ",".join(f"temperature_2m_previous_day{n}" for n in range(1, MAX_LEAD_DAYS + 1)),
             "temperature_unit": "fahrenheit" if unit == "F" else "celsius", "timezone": "auto",
         }
-        return self._get(PREVIOUS_RUNS_URL, params)
+
+        def fetch():
+            # Open-Meteo gratuito limita peticiones por minuto: espaciarlas.
+            wait = 6.0 - (time.monotonic() - self._last_meteo)
+            if wait > 0:
+                time.sleep(wait)
+            try:
+                return self._get(PREVIOUS_RUNS_URL, params)
+            finally:
+                self._last_meteo = time.monotonic()
+
+        return self._cached(f"om:{lat}:{lon}:{start}:{end}:{unit}", fetch)
 
 
 # ------------------------------------------------------------- simulación
