@@ -107,6 +107,8 @@ polymarket-bot/
 │   ├── weather.py     detección de mercados del tiempo + cliente de api.weather.gov
 │   ├── dashboard.py   panel web en directo (+ dashboard.html)
 │   ├── simulate.py    simulación Monte Carlo del bot
+│   ├── backtest.py    backtest honesto de mercados de temperatura (Polymarket + Open-Meteo)
+│   ├── report.py      informe del paper trading: Claude vs mercado, calibración, crecimiento mensual
 │   ├── risk.py        Kelly fraccional, edge, reglas duras, drawdown
 │   ├── filters.py     filtro de mercados elegibles
 │   ├── polymarket.py  Gamma API + libros del CLOB (lectura)
@@ -115,7 +117,7 @@ polymarket-bot/
 │   ├── journal.py     logs, diarios JSONL y status.md
 │   ├── postmortem.py  informe automático al llegar al 40% de drawdown
 │   └── config.py      configuración + límites duros
-├── tests/             53 tests (reglas, Kelly, filtros, ciclo, equipo de agentes, NOAA, panel, TURBO)
+├── tests/             61 tests (reglas, Kelly, filtros, ciclo, agentes, NOAA, panel, TURBO, backtest, report)
 ├── deploy/            servicio systemd + instalador para VPS
 ├── Dockerfile, docker-compose.yml
 └── .env.example
@@ -170,6 +172,8 @@ Tests: `pip install -r requirements-dev.txt && pytest`
 | `python -m polybot status` | Balance, pico, drawdown, posiciones, win rate, costes |
 | `python -m polybot scan` | Lista los mercados que pasan el filtro |
 | `python -m polybot dashboard` | Panel web en http://127.0.0.1:8080 |
+| `python -m polybot report` | ¿Bate Claude al mercado? Brier, calibración, vetos y crecimiento mensual del paper trading |
+| `python -m polybot backtest --days 90` | Backtest honesto de mercados de temperatura con datos históricos reales |
 | `python -m polybot.simulate` | Simulación Monte Carlo (supuestos, no resultados) |
 | `python -m polybot approve --yes --note "..."` | Reanuda tras una parada por drawdown (el pico pasa a ser la equity actual) |
 | `python -m polybot reset --yes` | Solo paper: reinicia con el bankroll inicial |
@@ -196,6 +200,50 @@ condiciones (`python -m polybot.simulate`), Kelly completo con hasta un 30% por 
 | Claude con mucha ventaja y mercados ineficientes | mediana $353 | mediana $1.143 (p10 $149, p90 $7.039) |
 
 Ser agresivo solo compensa si la ventaja es real, y eso no lo sabremos hasta medirla. Si no lo es, te arruina.
+
+---
+
+## Backtest y verificación
+
+**La trampa:** un backtest normal con Claude sale falso. Claude conoce el resultado de muchos eventos pasados (los vio
+en su entrenamiento) y la búsqueda web devuelve noticias de hoy, incluido cómo acabó el mercado. Por eso hay dos
+herramientas, y ninguna deja mirar al futuro:
+
+### 1. `python -m polybot backtest` — mercados de temperatura, datos históricos reales, sin Claude
+
+- **Precio** que tenía cada mercado en cada momento: historial del CLOB de Polymarket (`prices-history`).
+- **Previsión tal como estaba publicada en ese momento:** Open-Meteo *Previous Runs* (para cada hora, la previsión
+  emitida N días antes). El bot solo usa previsiones emitidas antes del momento de decidir (`required_lead`).
+- **Resultado** de cada mercado: su resolución en Polymarket.
+- Mismas reglas que el bot real (`risk.py`): edge > 8 pp, 1/4 Kelly, 6%, 5 posiciones, salidas y parada al 40%.
+- **Walk-forward:** el sesgo y la dispersión del modelo se ajustan con el primer 40% de los días y se opera SOLO en el
+  60% posterior, para no hacer trampa con los parámetros.
+- Devuelve el Brier score de la previsión frente al precio del mercado (¿quién acierta más?), los trades, el PnL y el
+  bankroll final. Se guarda en `data/backtest.md`.
+
+Opciones: `--days`, `--bankroll`, `--spread` (súbelo para ver si el resultado aguanta costes peores), `--train-frac`.
+
+Validado con mundos sintéticos donde se sabe la respuesta (`tests/test_backtest.py`):
+- Si el mercado **ignora** la previsión, el backtest gana.
+- Si el mercado **sabe más** que la previsión, el backtest pierde ($50 → $30) y salta la parada del 40%.
+
+No está trucado para ganar.
+
+Limitaciones: solo mercados de **máxima diaria** de las ciudades de la tabla `STATIONS` (amplíala si hace falta);
+spread supuesto; sin filtro de liquidez histórica. Si casi todo el beneficio viene de salidas anticipadas y no de mercados
+resueltos, desconfía: puede ser rebote entre bid y ask. Necesita acceso a `gamma-api.polymarket.com`,
+`clob.polymarket.com` y `previous-runs-api.open-meteo.com`.
+
+### 2. `python -m polybot report` — ¿bate Claude al mercado? (paper trading)
+
+El bot guarda cada estimación **antes** de saber el resultado. Cuando los mercados resuelven, `report` compara:
+- **Brier score** del precio del mercado, del analista y del fair value final (analista + escéptico);
+- **calibración:** cuando el bot dice 70%, ¿pasa un 70% de las veces?;
+- **escéptico:** cuántas veces acertaron sus vetos y sus aprobaciones;
+- **dinero:** PnL, win rate, costes, neto de supervivencia y **crecimiento mes a mes**.
+
+Da un veredicto: ✅ ventaja real, 🟡 ventaja mínima, ❌ el mercado acierta más, o ⏳ muestra pequeña (< 30). **No pases a
+live hasta tener un ✅ con muestra suficiente.** Se guarda en `data/report.md`.
 
 ---
 

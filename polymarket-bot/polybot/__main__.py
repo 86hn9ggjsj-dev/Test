@@ -5,6 +5,8 @@
   python -m polybot status          muestra el estado
   python -m polybot scan            lista mercados elegibles (sin llamar a Claude, sin operar)
   python -m polybot dashboard       panel web en directo (http://127.0.0.1:8080)
+  python -m polybot report          ¿bate Claude al mercado? (paper trading) + crecimiento mensual
+  python -m polybot backtest        backtest honesto de mercados de temperatura (datos históricos reales)
   python -m polybot approve --yes   reanuda tras un parón por drawdown
   python -m polybot reset --yes     borra el estado PAPER y empieza de nuevo con el bankroll inicial
 """
@@ -78,6 +80,13 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("once")
     sub.add_parser("status")
     sub.add_parser("scan")
+    sub.add_parser("report")
+    bp = sub.add_parser("backtest")
+    bp.add_argument("--days", type=int, default=90, help="días hacia atrás (por defecto 90)")
+    bp.add_argument("--bankroll", type=float, default=50.0)
+    bp.add_argument("--spread", type=float, default=0.02, help="spread supuesto (por defecto 2 pp)")
+    bp.add_argument("--train-frac", type=float, default=0.4, help="fracción inicial para ajustar el modelo")
+    bp.add_argument("--max-markets", type=int, default=3000)
     dp = sub.add_parser("dashboard")
     dp.add_argument("--host", default=None, help="por defecto 127.0.0.1 (o DASHBOARD_HOST)")
     dp.add_argument("--port", type=int, default=None, help="por defecto 8080 (o DASHBOARD_PORT)")
@@ -100,6 +109,31 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_run(cfg, once=args.cmd == "once")
     if args.cmd == "scan":
         return cmd_scan(cfg)
+    if args.cmd == "report":
+        from .report import build_report
+
+        print(build_report(cfg))
+        print(f"(guardado en {cfg.data_dir / 'report.md'})")
+        return 0
+    if args.cmd == "backtest":
+        from .backtest import HistoryClient, render, run_backtest
+
+        import requests
+
+        try:
+            res = run_backtest(HistoryClient(), cfg, days=args.days, train_frac=args.train_frac, spread=args.spread,
+                               bankroll=args.bankroll, max_markets=args.max_markets)
+        except requests.RequestException as exc:
+            print(f"No se pudieron descargar los datos históricos: {exc}\n"
+                  "El backtest necesita acceso a gamma-api.polymarket.com, clob.polymarket.com y "
+                  "previous-runs-api.open-meteo.com.", file=sys.stderr)
+            return 1
+        text = render(res, args.bankroll)
+        cfg.data_dir.mkdir(parents=True, exist_ok=True)
+        (cfg.data_dir / "backtest.md").write_text(text, encoding="utf-8")
+        print(text)
+        print(f"(guardado en {cfg.data_dir / 'backtest.md'})")
+        return 0
     if args.cmd == "dashboard":
         import os
 

@@ -297,7 +297,8 @@ class Agent:
         book0, book1 = self._books(m)
         ask0, ask1 = book0.best_ask, book1.best_ask
         base = {"kind": "entry", "market_id": m.id, "question": m.question, "url": m.url,
-                "ask": [ask0, ask1], "liquidity": m.liquidity, "volume_24h": m.volume_24h}
+                "ask": [ask0, ask1], "mid_yes": book0.mid, "price_yes": m.prices[0],
+                "liquidity": m.liquidity, "volume_24h": m.volume_24h}
 
         if ask0 is None or book0.best_bid is None or (ask0 - book0.best_bid) > cfg.max_spread:
             self.journal.decision(**base, decision="SKIP", reasons=["spread demasiado ancho o libro vacío"])
