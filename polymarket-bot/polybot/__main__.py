@@ -1,0 +1,130 @@
+"""Línea de comandos.
+
+  python -m polybot run             loop 24/7 (un ciclo cada LOOP_MINUTES)
+  python -m polybot once            un solo ciclo
+  python -m polybot status          muestra el estado
+  python -m polybot scan            lista mercados elegibles (sin llamar a Claude, sin operar)
+  python -m polybot approve --yes   reanuda tras un parón por drawdown
+  python -m polybot reset --yes     borra el estado PAPER y empieza de nuevo con el bankroll inicial
+"""
+
+from __future__ import annotations
+
+import argparse
+import logging
+import signal
+import sys
+import time
+
+from . import filters
+from .config import load_config
+from .journal import Journal, render_status, setup_logging
+from .polymarket import PolymarketData
+from .state import BotState
+
+log = logging.getLogger("polybot")
+_stop = False
+
+
+def _handle_signal(signum, _frame):
+    global _stop
+    _stop = True
+    log.info("Señal %s recibida: termino al acabar el ciclo actual", signum)
+
+
+def cmd_run(cfg, once: bool) -> int:
+    from .agent import Agent
+
+    import os
+
+    if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
+        log.warning("ANTHROPIC_API_KEY no configurada: el bot escaneará mercados pero Claude no podrá estimar fair values")
+    agent = Agent(cfg)
+    signal.signal(signal.SIGTERM, _handle_signal)
+    signal.signal(signal.SIGINT, _handle_signal)
+    log.info("Polybot arrancado en modo %s · bankroll $%.2f · loop cada %g min",
+             cfg.mode.upper(), agent.state.equity, cfg.loop_minutes)
+    while True:
+        started = time.monotonic()
+        try:
+            agent.run_cycle()
+        except Exception:
+            log.exception("Error no controlado en el ciclo; continúo en el siguiente")
+        if once or _stop:
+            return 0
+        wait = cfg.loop_minutes * 60 - (time.monotonic() - started)
+        while wait > 0 and not _stop:
+            time.sleep(min(wait, 5))
+            wait -= 5
+        if _stop:
+            return 0
+
+
+def cmd_scan(cfg) -> int:
+    markets = PolymarketData().fetch_active_markets(cfg.max_markets_scan)
+    ok = filters.eligible_markets(markets, cfg)
+    print(f"{len(markets)} mercados escaneados, {len(ok)} elegibles:\n")
+    for m in ok[:50]:
+        print(f"  {m.prices[0]:.3f}  liq ${m.liquidity:>10,.0f}  vol24h ${m.volume_24h:>10,.0f}  "
+              f"{m.hours_to_resolution():>7.1f} h  {m.question[:80]}")
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="polybot", description="Agente autónomo de trading en Polymarket")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("run")
+    sub.add_parser("once")
+    sub.add_parser("status")
+    sub.add_parser("scan")
+    ap = sub.add_parser("approve")
+    ap.add_argument("--yes", action="store_true")
+    ap.add_argument("--note", default="")
+    rp = sub.add_parser("reset")
+    rp.add_argument("--yes", action="store_true")
+    parser.add_argument("--env", default=".env", help="fichero .env (por defecto ./.env)")
+    args = parser.parse_args(argv)
+
+    try:
+        cfg = load_config(args.env)
+    except ValueError as exc:
+        print(exc, file=sys.stderr)
+        return 2
+    setup_logging(cfg.log_dir)
+
+    if args.cmd in ("run", "once"):
+        return cmd_run(cfg, once=args.cmd == "once")
+    if args.cmd == "scan":
+        return cmd_scan(cfg)
+
+    state = BotState.load_or_new(cfg.state_path, cfg.mode, cfg.initial_bankroll)
+    if args.cmd == "status":
+        print(render_status(state, cfg.vps_monthly_usd))
+        return 0
+    if args.cmd == "approve":
+        if not state.halted:
+            print("El bot no está detenido; no hay nada que aprobar.")
+            return 0
+        if not args.yes:
+            print(f"Detenido por: {state.halt_reason}. Revisa el post-mortem en {cfg.data_dir} y repite con --yes.")
+            return 1
+        from .agent import Agent
+        Agent(cfg, state=state).approve_restart(args.note)
+        print("Aprobado. El bot volverá a operar en el próximo ciclo.")
+        return 0
+    if args.cmd == "reset":
+        if cfg.mode != "paper":
+            print("reset solo está permitido en modo paper.")
+            return 1
+        if not args.yes:
+            print("Esto borra el estado paper. Repite con --yes para confirmar.")
+            return 1
+        BotState.new("paper", cfg.initial_bankroll).save(cfg.state_path)
+        Journal(cfg.data_dir).event(kind="paper_reset", bankroll=cfg.initial_bankroll)
+        print(f"Estado paper reiniciado con ${cfg.initial_bankroll:.2f}.")
+        return 0
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

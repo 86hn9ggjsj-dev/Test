@@ -1,0 +1,19 @@
+# systemd: copia a /etc/systemd/system/polybot.service (install_vps.sh lo hace por ti)
+[Unit]
+Description=Polybot - agente de trading en Polymarket
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=polybot
+WorkingDirectory=/opt/polybot
+ExecStart=/opt/polybot/.venv/bin/python -m polybot run
+Restart=always
+RestartSec=30
+# Da tiempo a terminar el ciclo en curso al parar
+TimeoutStopSec=600
+KillSignal=SIGTERM
+
+[Install]
+WantedBy=multi-user.target

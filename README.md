@@ -1,5 +1,7 @@
 # J.A.R.V.I.S.
 
+> **Nuevo:** en [`polymarket-bot/`](polymarket-bot/README.md) hay un agente autónomo de trading en Polymarket (paper trading por defecto).
+
 Asistente personal al estilo del de Tony Stark, hecho con la API de Claude (`claude-opus-5`).
 Hablas con él por texto o por voz, y en modo vigilancia está atento al mercado y a tu correo
 y **te avisa al móvil por Telegram** cuando pasa algo.

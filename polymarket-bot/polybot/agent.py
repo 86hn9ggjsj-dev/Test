@@ -1,0 +1,338 @@
+"""Un ciclo del agente (se ejecuta cada 10 minutos).
+
+  1. Sincroniza caja (live), liquida mercados resueltos y valora posiciones
+  2. Comprueba el drawdown: al 40% se detiene y escribe el post-mortem
+  3. Escanea hasta 1.000 mercados (Gamma) y los filtra
+  4. Revisa posiciones abiertas: sale si el edge desaparece, el fair value se
+     mueve > 5 pp en contra o el mercado está a punto de resolver
+  5. Para los mejores candidatos: libro del CLOB -> fair value (Claude) -> edge
+     -> Kelly -> reglas duras -> orden
+  6. Guarda estado, logs y resumen
+"""
+
+from __future__ import annotations
+
+import logging
+from collections import Counter
+from datetime import datetime, timedelta, timezone
+
+from . import filters, risk
+from .brain import Brain, Estimate
+from .config import Config
+from .executor import make_executor
+from .journal import Journal
+from .polymarket import Market, OrderBook, PolymarketData
+from .postmortem import write_postmortem
+from .state import BotState, ClosedTrade, Position, now_iso
+
+log = logging.getLogger("polybot.agent")
+
+
+def _minutes_since(iso: str) -> float:
+    if not iso:
+        return float("inf")
+    return (datetime.now(timezone.utc) - datetime.fromisoformat(iso)).total_seconds() / 60
+
+
+class Agent:
+    def __init__(self, cfg: Config, *, data=None, brain=None, executor=None, journal=None, state=None):
+        self.cfg = cfg
+        self.data = data or PolymarketData()
+        self.brain = brain or Brain(cfg)
+        self.executor = executor or make_executor(cfg)
+        self.journal = journal or Journal(cfg.data_dir)
+        self.state = state or BotState.load_or_new(cfg.state_path, cfg.mode, cfg.initial_bankroll)
+        if self.state.mode != cfg.mode:
+            raise ValueError(f"El estado {cfg.state_path} es de modo {self.state.mode}, no {cfg.mode}")
+
+    # ------------------------------------------------------------------ ciclo
+    def run_cycle(self) -> None:
+        st = self.state
+        st.cycles += 1
+        log.info("──── Ciclo %d (%s) ────", st.cycles, self.cfg.mode.upper())
+
+        self._sync_wallet()
+        self._refresh_positions()
+        st.update_peak()
+
+        if not st.halted and risk.drawdown_breached(st.equity, st.peak_equity, self.cfg):
+            self._halt()
+        if st.halted:
+            log.warning("Trading DETENIDO (%s). Esperando aprobación humana: python -m polybot approve", st.halt_reason)
+            self._finish()
+            return
+
+        try:
+            markets = self.data.fetch_active_markets(self.cfg.max_markets_scan)
+        except Exception as exc:
+            log.error("No se pudo escanear Gamma: %s", exc)
+            self.journal.event(kind="scan_error", error=str(exc))
+            markets = None
+
+        # Las posiciones se revisan aunque el escaneo falle (cada una se consulta por separado).
+        self._review_positions({m.id: m for m in markets or []})
+        if markets is not None:
+            self._find_entries(markets)
+        self._finish()
+
+    # -------------------------------------------------------------- helpers
+    def _budget_left(self) -> bool:
+        return self.state.api_cost_today() < self.cfg.daily_api_budget_usd
+
+    def _books(self, m: Market) -> tuple[OrderBook, OrderBook]:
+        return self.data.order_book(m.token_ids[0]), self.data.order_book(m.token_ids[1])
+
+    def _estimate(self, m: Market, ask0: float | None, ask1: float | None) -> Estimate | None:
+        est = self.brain.estimate(m, ask0, ask1)
+        self.state.add_api_cost(getattr(self.brain, "last_cost", 0.0) or 0.0)
+        return est
+
+    def _sync_wallet(self) -> None:
+        """Live: la caja del bot nunca supera el saldo real, y nunca crece por depósitos externos."""
+        wallet = self.executor.wallet_cash()
+        if wallet is not None and wallet < self.state.cash - 0.01:
+            log.warning("Saldo wallet $%.2f < caja interna $%.2f: ajusto a la baja", wallet, self.state.cash)
+            self.journal.event(kind="cash_adjust", internal=self.state.cash, wallet=wallet)
+            self.state.cash = wallet
+
+    # ------------------------------------------------- posiciones existentes
+    def _refresh_positions(self) -> None:
+        for mid, p in list(self.state.positions.items()):
+            try:
+                m = self.data.fetch_market(mid)
+            except Exception as exc:
+                log.warning("No se pudo refrescar el mercado %s: %s", mid, exc)
+                continue
+            if m is None:
+                continue
+            winner = m.resolved_outcome()
+            if winner is not None:
+                self._settle(p, won=(winner == p.outcome_index))
+                continue
+            if m.closed:
+                continue  # cerrado pero aún sin resolver: mantener valoración
+            try:
+                book = self.data.order_book(p.token_id)
+                p.last_price = book.best_bid if book.best_bid is not None else (book.mid or p.last_price)
+            except Exception as exc:
+                log.warning("No se pudo leer el libro de %s: %s", mid, exc)
+
+    def _settle(self, p: Position, won: bool) -> None:
+        payout = p.shares if won else 0.0
+        self.state.cash += payout
+        self._close(p, exit_price=1.0 if won else 0.0, proceeds=payout, reason="resolved_win" if won else "resolved_loss")
+        if self.cfg.mode == "live" and won:
+            log.warning("Mercado %s resuelto a favor: reclama (redeem) las ganancias en polymarket.com", p.market_id)
+
+    def _close(self, p: Position, exit_price: float, proceeds: float, reason: str) -> None:
+        trade = ClosedTrade(
+            market_id=p.market_id, question=p.question, outcome=p.outcome, shares=p.shares,
+            entry_price=p.entry_price, exit_price=exit_price, cost=p.cost, proceeds=proceeds,
+            pnl=proceeds - p.cost, reason=reason, opened_at=p.opened_at, closed_at=now_iso(),
+        )
+        self.state.closed_trades.append(trade)
+        self.state.positions.pop(p.market_id, None)
+        self.journal.trade(action="CLOSE", mode=self.cfg.mode, **trade.__dict__)
+        log.info("CERRADA %s [%s] pnl $%+.2f (%s)", p.question[:60], p.outcome, trade.pnl, reason)
+
+    def _review_positions(self, by_id: dict[str, Market]) -> None:
+        for mid, p in list(self.state.positions.items()):
+            try:
+                self._review_one(p, by_id.get(mid))
+            except Exception as exc:
+                log.exception("Error revisando la posición %s: %s", mid, exc)
+
+    def _review_one(self, p: Position, m: Market | None) -> None:
+        m = m or self.data.fetch_market(p.market_id)
+        if m is None:
+            return
+        book0, book1 = self._books(m)
+        held = book0 if p.outcome_index == 0 else book1
+        mid = held.mid if held.mid is not None else p.last_price
+        hours = m.hours_to_resolution()
+        reason = None
+
+        if hours is not None and hours < self.cfg.exit_hours_before_resolution:
+            reason = "near_resolution"
+        else:
+            stale = _minutes_since(p.last_estimate_at) >= self.cfg.position_reeval_minutes
+            moved = abs(mid - p.last_estimate_price) >= self.cfg.reeval_price_move
+            if (stale or moved) and self._budget_left():
+                est = self._estimate(m, book0.best_ask, book1.best_ask)
+                if est is not None:
+                    p.last_fair_value = est.fair_yes if p.outcome_index == 0 else 1 - est.fair_yes
+                    p.last_estimate_at = now_iso()
+                    p.last_estimate_price = mid
+            if p.entry_fair_value - p.last_fair_value > self.cfg.fv_move_exit:
+                reason = "fair_value_moved_against"
+            elif p.last_fair_value - mid < self.cfg.exit_edge:
+                reason = "edge_gone"
+
+        self.journal.decision(
+            kind="review", market_id=p.market_id, question=p.question, outcome=p.outcome,
+            entry_fv=p.entry_fair_value, fair_value=p.last_fair_value, mid=mid,
+            edge_now=round(p.last_fair_value - mid, 4), hours_to_resolution=hours,
+            decision="EXIT" if reason else "HOLD", reason=reason,
+        )
+        if reason:
+            self._exit(p, held, reason)
+
+    def _exit(self, p: Position, book: OrderBook, reason: str) -> None:
+        fill = self.executor.sell(p.token_id, p.shares, book, p.tick_size, p.neg_risk)
+        if fill is None:
+            log.warning("No se pudo salir de %s (%s); se reintentará", p.question[:60], reason)
+            return
+        self.state.cash += fill.usd
+        self._close(p, exit_price=fill.avg_price, proceeds=fill.usd, reason=reason)
+
+    # --------------------------------------------------------- nuevas entradas
+    def _find_entries(self, markets: list[Market]) -> None:
+        st, cfg = self.state, self.cfg
+        rejected = Counter()
+        for m in markets:
+            r = filters.rejection_reason(m, cfg)
+            if r:
+                rejected[r.split(" ")[0]] += 1
+        candidates = [m for m in filters.eligible_markets(markets, cfg) if m.id not in st.positions]
+        self.journal.event(kind="scan", scanned=len(markets), eligible=len(candidates), rejected=dict(rejected))
+        log.info("Mercados: %d escaneados, %d elegibles", len(markets), len(candidates))
+        self._prune_estimates()
+
+        slots = cfg.max_open_positions - len(st.positions)
+        if slots <= 0:
+            log.info("Máximo de %d posiciones alcanzado; no se buscan entradas", cfg.max_open_positions)
+            return
+
+        evaluations = 0
+        for m in candidates:
+            if slots <= 0 or evaluations >= cfg.max_evaluations_per_cycle:
+                break
+            if not self._budget_left():
+                log.warning("Presupuesto diario de API agotado ($%.2f); sin nuevas evaluaciones", cfg.daily_api_budget_usd)
+                self.journal.event(kind="budget_exhausted", spent_today=st.api_cost_today())
+                break
+            cached = st.estimates.get(m.id)
+            if cached and _minutes_since(cached["at"]) < cfg.reevaluate_after_minutes \
+                    and abs(m.prices[0] - cached["price_yes"]) < cfg.reeval_price_move:
+                continue
+            try:
+                evaluated, entered = self._consider(m)
+            except Exception as exc:
+                log.exception("Error evaluando %s: %s", m.id, exc)
+                continue
+            evaluations += evaluated
+            slots -= entered
+
+    def _consider(self, m: Market) -> tuple[int, int]:
+        """Evalúa un mercado. Devuelve (llamadas a Claude, posiciones abiertas)."""
+        st, cfg = self.state, self.cfg
+        book0, book1 = self._books(m)
+        ask0, ask1 = book0.best_ask, book1.best_ask
+        base = {"kind": "entry", "market_id": m.id, "question": m.question, "url": m.url,
+                "ask": [ask0, ask1], "liquidity": m.liquidity, "volume_24h": m.volume_24h}
+
+        if ask0 is None or book0.best_bid is None or (ask0 - book0.best_bid) > cfg.max_spread:
+            self.journal.decision(**base, decision="SKIP", reasons=["spread demasiado ancho o libro vacío"])
+            return 0, 0
+
+        est = self._estimate(m, ask0, ask1)
+        if est is None:
+            st.estimates[m.id] = {"at": now_iso(), "price_yes": m.prices[0], "fair_yes": None}
+            self.journal.decision(**base, decision="SKIP", reasons=["sin estimación de Claude"])
+            return 1, 0
+        st.estimates[m.id] = {"at": now_iso(), "price_yes": m.prices[0], "fair_yes": est.fair_yes}
+
+        choice = risk.best_side(est.fair_yes, ask0, ask1, cfg.taker_fee)
+        book = book0 if choice.outcome_index == 0 else book1
+        stake, kelly = risk.position_size_usd(st.equity, st.cash, choice.fair_value, choice.price, cfg)
+        blockers = risk.entry_blockers(
+            edge=choice.edge, confidence=est.confidence, resolution_clear=est.resolution_clear,
+            open_positions=len(st.positions), halted=st.halted, cfg=cfg,
+        )
+
+        exec_edge, avg_price = None, None
+        if not blockers:
+            sim = book.fill_buy(stake) if stake > 0 else None
+            if sim is None:
+                blockers.append("sin profundidad para el tamaño o tamaño 0")
+            else:
+                shares, avg_price = sim
+                exec_edge = choice.fair_value - avg_price - cfg.taker_fee
+                if exec_edge <= cfg.min_edge:
+                    blockers.append(f"edge al precio medio de ejecución {exec_edge * 100:.1f} pp <= {cfg.min_edge * 100:.0f} pp")
+                if shares < m.min_order_size:
+                    blockers.append(f"{shares:.2f} shares < mínimo del mercado ({m.min_order_size:g})")
+                if stake < 1.0:
+                    blockers.append(f"tamaño ${stake:.2f} < $1 mínimo")
+
+        self.journal.decision(
+            **base, fair_yes=round(est.fair_yes, 4), confidence=est.confidence,
+            resolution_clear=est.resolution_clear, resolution_source=est.resolution_source,
+            side=m.outcomes[choice.outcome_index], side_fair_value=round(choice.fair_value, 4),
+            edge=round(choice.edge, 4), exec_edge=None if exec_edge is None else round(exec_edge, 4),
+            stake_usd=stake, **kelly, equity=round(st.equity, 2),
+            decision="SKIP" if blockers else "TRADE", reasons=blockers,
+            reasoning=est.reasoning, evidence=est.evidence, cost_usd=round(est.cost_usd, 4),
+        )
+        log.info("%s | FV %.3f vs ask %s/%s | edge %+.1f pp | %s",
+                 m.question[:70], est.fair_yes, ask0, ask1, choice.edge * 100,
+                 "TRADE" if not blockers else "skip: " + "; ".join(blockers))
+        if blockers:
+            return 1, 0
+
+        fill = self.executor.buy(m.token_ids[choice.outcome_index], stake, book, m.tick_size, m.neg_risk)
+        if fill is None:
+            self.journal.decision(**base, decision="FAILED", reasons=["la orden no se ejecutó"])
+            return 1, 0
+        st.cash -= fill.usd
+        p = Position(
+            market_id=m.id, question=m.question, outcome=m.outcomes[choice.outcome_index],
+            outcome_index=choice.outcome_index, token_id=m.token_ids[choice.outcome_index],
+            shares=fill.shares, entry_price=fill.avg_price, cost=fill.usd,
+            entry_fair_value=choice.fair_value, last_fair_value=choice.fair_value,
+            last_price=book.best_bid or fill.avg_price, opened_at=now_iso(),
+            end_date=m.end_date.isoformat() if m.end_date else None, slug=m.slug,
+            last_estimate_at=now_iso(), last_estimate_price=book.mid or fill.avg_price,
+            min_order_size=m.min_order_size, tick_size=m.tick_size, neg_risk=m.neg_risk,
+        )
+        st.positions[m.id] = p
+        self.journal.trade(action="OPEN", mode=cfg.mode, market_id=m.id, question=m.question,
+                           outcome=p.outcome, shares=p.shares, price=p.entry_price, usd=p.cost,
+                           fair_value=p.entry_fair_value, edge=exec_edge, order_id=fill.order_id)
+        log.info("ABIERTA %s [%s] %.2f shares @ %.3f ($%.2f)", m.question[:60], p.outcome, p.shares, p.entry_price, p.cost)
+        return 1, 1
+
+    def _prune_estimates(self) -> None:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=2)
+        self.state.estimates = {
+            k: v for k, v in self.state.estimates.items() if datetime.fromisoformat(v["at"]) > cutoff
+        }
+
+    # ------------------------------------------------------------ parada/fin
+    def _halt(self) -> None:
+        st = self.state
+        dd = risk.drawdown(st.equity, st.peak_equity)
+        st.halted = True
+        st.halt_reason = f"drawdown {dd * 100:.1f}% desde el pico ${st.peak_equity:.2f}"
+        st.halted_at = now_iso()
+        log.critical("DRAWDOWN %.1f%% >= 40%%: TRADING DETENIDO", dd * 100)
+        path = write_postmortem(st, self.cfg, self.brain)
+        self.journal.event(kind="halt", reason=st.halt_reason, postmortem=str(path))
+
+    def approve_restart(self, note: str = "") -> None:
+        st = self.state
+        st.halted = False
+        st.halt_reason = ""
+        st.peak_equity = st.equity  # el drawdown se mide desde aquí a partir de ahora
+        self.journal.event(kind="human_approval", equity=st.equity, note=note)
+        st.save(self.cfg.state_path)
+
+    def _finish(self) -> None:
+        st = self.state
+        st.last_cycle_at = now_iso()
+        st.save(self.cfg.state_path)
+        self.journal.equity(st)
+        self.journal.write_status(st, self.cfg.vps_monthly_usd)
+        log.info("Equity $%.2f | caja $%.2f | pico $%.2f | DD %.1f%% | %d posiciones | API hoy $%.2f",
+                 st.equity, st.cash, st.peak_equity, risk.drawdown(st.equity, st.peak_equity) * 100,
+                 len(st.positions), st.api_cost_today())
