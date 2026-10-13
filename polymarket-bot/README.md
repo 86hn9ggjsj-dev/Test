@@ -262,6 +262,27 @@ resueltos, desconfía: puede ser rebote entre bid y ask. Necesita acceso a `gamm
 `clob.polymarket.com` y `previous-runs-api.open-meteo.com`. El plan gratuito de Open-Meteo tiene un cupo diario
 por IP: si se agota, el backtest avisa y hay que repetirlo al día siguiente (lo descargado queda en caché).
 
+### Escáner de todo Polymarket: `python -m polybot scan-edges`
+
+Busca categorías (deportes, cripto, política, economía, cultura, tiempo) donde los precios fallen de forma
+sistemática, con las mismas precauciones (selección por fecha de cierre programada, precios congelados e
+incoherentes fuera, aprendizaje en el primer 40% y prueba en el resto).
+
+**Resultado real (13-oct-2026; 37.857 mercados con volumen ≥ $10k, cierre programado entre el 13-sep y el 12-oct):**
+- Cripto, política, economía, cultura, tiempo: precios bien calibrados; los descuadres del periodo de aprendizaje
+  no se repiten en el de prueba (en cripto incluso cambian de signo).
+- **Deportes:** sesgo persistente en los dos periodos y antes del partido. Los "underdogs" ganan más de lo que dice su
+  precio y los favoritos menos. En partidos con volumen ≥ $50k, el tramo 12–30% gana +7,2 ± 2,9 pp; en mercados de
+  más de $250k se reduce a +5 ± 5 pp (ya no significativo). En mercados poco líquidos es mayor, pero ahí el precio
+  del historial (punto medio de libros anchos) exagera el efecto.
+- **Con las reglas del bot (edge > 8 pp): 0 trades.** Con una regla hipotética de > 4 pp los resultados oscilan entre
+  +5% y +72% según el spread y el bankroll, con solo ~15 trades: no es evidencia suficiente.
+- Con $50, el tope del 6% ($3) y el mínimo de 5 participaciones impiden comprar cualquier lado que cueste más de
+  $0,60, y Kelly da apuestas de ~$1 cuando la ventaja es pequeña: muchas ideas ni siquiera se pueden ejecutar.
+
+Para confirmar la pista de deportes harían falta 3–6 meses de historia y precios de compra reales (libros de órdenes),
+por ejemplo registrándolos en paper trading a partir de ahora.
+
 ### 2. `python -m polybot report` — ¿bate Claude al mercado? (paper trading)
 
 El bot guarda cada estimación **antes** de saber el resultado. Cuando los mercados resuelven, `report` compara:
