@@ -175,3 +175,18 @@ def test_report_small_sample_is_inconclusive(cfg):
         {"ts": "t", "kind": "entry", "market_id": "a", "question": "q", "mid_yes": 0.5, "fair_yes": 0.9}))
     text = build_report(cfg, FakeResolved({"a": True}))
     assert "Muestra pequeña" in text
+
+
+def test_coherence_filter_drops_unexecutable_prices():
+    from polybot.backtest import Observation, coherent_only
+
+    t = datetime(2026, 8, 25, 12, tzinfo=timezone.utc)
+    tms = [parse_temp_market(mk(f"Will the highest temperature in Miami be between {a}-{a + 1}°F on August 26?",
+                                mid=f"b{a}")) for a in range(80, 90, 2)]
+    good = [Observation(t, tm, p, 1, 85.0, 0) for tm, p in zip(tms, [0.1, 0.2, 0.4, 0.2, 0.1])]   # suma 1.0
+    t2 = t + timedelta(hours=2)
+    bad = [Observation(t2, tm, p, 1, 85.0, 0) for tm, p in zip(tms, [0.5, 0.5, 0.4, 0.5, 0.5])]   # suma 2.4
+    skipped = {}
+    kept = coherent_only(good + bad, skipped=skipped)
+    assert kept == good
+    assert skipped["observaciones con precios incoherentes (no operables)"] == 5

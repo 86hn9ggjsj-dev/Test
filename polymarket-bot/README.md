@@ -229,10 +229,22 @@ Validado con mundos sintéticos donde se sabe la respuesta (`tests/test_backtest
 
 No está trucado para ganar.
 
-Limitaciones: solo mercados de **máxima diaria** de las ciudades de la tabla `STATIONS` (amplíala si hace falta);
+**Trampa encontrada con datos reales (y corregida):** el historial de precios del CLOB da un "precio" también a los
+rangos sin órdenes reales (el punto medio de un libro casi vacío). En los ~30.000 mercados de temperatura de un mes,
+los precios de "Sí" de los 11 rangos de un evento sumaban de mediana un **181%** (deberían sumar ~100%). Con esos
+precios, un primer backtest daba $50 → $256: falso. Por eso el backtest solo usa los instantes en que los rangos de un
+evento suman entre 95% y 110% (`coherent_only`).
+
+**Resultado real (solo precios, `run_price_backtest`, 30 días, 13.600 mercados con precios coherentes):** el mercado
+está bien calibrado (cada tramo de precio acierta con la frecuencia que promete, ±3–5 pp de ruido). Corregir los
+precios con lo aprendido no mejora el Brier (0,0538 vs 0,0535) y no aparece ningún trade con edge > 8 pp.
+**Sin previsiones, no hay ventaja.** Lo que falta medir es si las previsiones meteorológicas baten al precio.
+
+Limitaciones: solo mercados de **temperatura diaria** de las ciudades de la tabla `STATIONS` (amplíala si hace falta);
 spread supuesto; sin filtro de liquidez histórica. Si casi todo el beneficio viene de salidas anticipadas y no de mercados
 resueltos, desconfía: puede ser rebote entre bid y ask. Necesita acceso a `gamma-api.polymarket.com`,
-`clob.polymarket.com` y `previous-runs-api.open-meteo.com`.
+`clob.polymarket.com` y `previous-runs-api.open-meteo.com`. El plan gratuito de Open-Meteo tiene un cupo diario
+por IP: si se agota, el backtest avisa y hay que repetirlo al día siguiente (lo descargado queda en caché).
 
 ### 2. `python -m polybot report` — ¿bate Claude al mercado? (paper trading)
 

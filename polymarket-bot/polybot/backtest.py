@@ -417,6 +417,34 @@ def build_observations(client: HistoryClient, markets: list[Market], step_hours:
     return obs, skipped, offsets
 
 
+def coherent_only(obs: list[Observation], lo: float = 0.95, hi: float = 1.10, min_share: float = 0.8,
+                  skipped: dict | None = None) -> list[Observation]:
+    """Quita los momentos en que los precios de un evento no cuadran.
+
+    Los rangos de un evento son excluyentes: sus precios de 'Sí' deberían sumar ~100%. En el
+    historial del CLOB, los rangos sin órdenes reales tienen 'precios' (puntos medios de libros
+    vacíos) que hacen sumar 180-400%: no eran operables. Solo se conservan los instantes en que
+    hay datos de casi todos los rangos y la suma está entre `lo` y `hi`.
+    """
+    event_markets: dict[tuple, set] = {}
+    for o in obs:
+        event_markets.setdefault((o.tm.station, o.tm.stat, o.tm.target), set()).add(o.tm.market.id)
+    groups: dict[tuple, list[Observation]] = {}
+    for o in obs:
+        t = o.t.replace(minute=0, second=0, microsecond=0)
+        groups.setdefault((o.tm.station, o.tm.stat, o.tm.target, t), []).append(o)
+    keep = []
+    for (st, stat, tgt, _), rows in groups.items():
+        n_event = len(event_markets[(st, stat, tgt)])
+        total = sum(o.price for o in rows)
+        if len(rows) >= max(2, min_share * n_event) and lo <= total <= hi:
+            keep.extend(rows)
+    if skipped is not None:
+        skipped["observaciones con precios incoherentes (no operables)"] = len(obs) - len(keep)
+    keep.sort(key=lambda o: o.t)
+    return keep
+
+
 DEFAULT_PARAMS = {"bias": 0.0, "sd_base": 2.5}
 
 
@@ -552,7 +580,7 @@ def brier(obs: list[Observation], params: dict) -> tuple[float | None, float | N
 
 def run_backtest(client: HistoryClient, cfg: Config, *, days: int = 90, train_frac: float = 0.4,
                  spread: float = 0.02, bankroll: float = 50.0, max_markets: int = 3000, hold: bool = False,
-                 cache: dict | None = None) -> BacktestResult:
+                 cache: dict | None = None, coherence: bool = True) -> BacktestResult:
     cfg = replace(cfg, initial_bankroll=bankroll)
     if cache is not None and "obs" in cache:
         obs, skipped, offsets = cache["obs"], cache["skipped"], cache["offsets"]
@@ -561,6 +589,9 @@ def run_backtest(client: HistoryClient, cfg: Config, *, days: int = 90, train_fr
         obs, skipped, offsets = build_observations(client, markets)
         if cache is not None:
             cache.update(obs=obs, skipped=skipped, offsets=offsets)
+    if coherence:
+        skipped = dict(skipped)
+        obs = coherent_only(obs, skipped=skipped)
     targets = sorted({o.tm.target for o in obs})
     if not targets:
         return BacktestResult(params={}, train_markets=0, test_markets=0, observations=0, skipped=skipped,
@@ -649,7 +680,8 @@ def calibrated(price: float, table: list[dict]) -> float:
 
 def run_price_backtest(client: HistoryClient, cfg: Config, *, days: int = 30, train_frac: float = 0.4,
                        spread: float = 0.02, bankroll: float = 50.0, max_markets: int = 30000,
-                       hold: bool = False, cache: dict | None = None) -> tuple[BacktestResult, list[dict]]:
+                       hold: bool = False, cache: dict | None = None,
+                       coherence: bool = True) -> tuple[BacktestResult, list[dict]]:
     cfg = replace(cfg, initial_bankroll=bankroll)
     if cache is not None and "pobs" in cache:
         obs, skipped, offsets = cache["pobs"], cache["pskipped"], cache["poffsets"]
@@ -658,6 +690,9 @@ def run_price_backtest(client: HistoryClient, cfg: Config, *, days: int = 30, tr
         obs, skipped, offsets = build_price_observations(client, markets)
         if cache is not None:
             cache.update(pobs=obs, pskipped=skipped, poffsets=offsets)
+    if coherence:
+        skipped = dict(skipped)
+        obs = coherent_only(obs, skipped=skipped)
     targets = sorted({o.tm.target for o in obs})
     if not targets:
         return BacktestResult(params={}, train_markets=0, test_markets=0, observations=0, skipped=skipped,
