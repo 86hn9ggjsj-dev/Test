@@ -88,6 +88,8 @@ suele estar del lado de Pinnacle. El agente CUOTAS (`polybot/sharp.py`):
 
 Las posiciones abiertas por CUOTAS se revisan con Pinnacle, sin llamar a Claude.
 
+`python -m polybot sharp-scan` hace una pasada sin operar y lista los mayores desvíos actuales frente a Pinnacle.
+
 **Puesta en marcha:** crea una clave en https://the-odds-api.com, ponla en `ODDS_API_KEY` y activa `SHARP_ENABLED=true`.
 Si el bot corre en un entorno con red restringida, permite el dominio `api.the-odds-api.com`. El plan gratuito
 (~500 créditos/mes) da para pocos días con la configuración por defecto (ver `.env.example`).

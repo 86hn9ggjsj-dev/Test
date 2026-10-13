@@ -8,6 +8,7 @@
   python -m polybot report          ¿bate Claude al mercado? (paper trading) + crecimiento mensual
   python -m polybot backtest        backtest honesto de mercados de temperatura (datos históricos reales)
   python -m polybot scan-edges      busca categorías de mercados con precios sistemáticamente erróneos
+  python -m polybot sharp-scan      desvíos actuales de Polymarket frente a Pinnacle (necesita ODDS_API_KEY)
   python -m polybot approve --yes   reanuda tras un parón por drawdown
   python -m polybot reset --yes     borra el estado PAPER y empieza de nuevo con el bankroll inicial
 """
@@ -74,6 +75,41 @@ def cmd_scan(cfg) -> int:
     return 0
 
 
+def cmd_sharp_scan(cfg) -> int:
+    """Una pasada del agente CUOTAS sin operar: lista los mayores desvíos frente a Pinnacle."""
+    from . import risk
+    from .sharp import OddsClient, SharpBook
+
+    if not cfg.odds_api_key:
+        print("Falta ODDS_API_KEY (clave gratuita en https://the-odds-api.com).", file=sys.stderr)
+        return 2
+    sports = [x.strip() for x in cfg.sharp_sports.split(",") if x.strip()]
+    book = SharpBook(OddsClient(cfg.odds_api_key, bookmaker=cfg.sharp_bookmaker), sports, cfg.sharp_markets, 0)
+    book.refresh_if_stale()
+    data = PolymarketData()
+    markets = [m for m in data.fetch_active_markets(cfg.max_markets_scan) if (m.raw or {}).get("sportsMarketType")]
+    rows, matched = [], 0
+    for m in markets:
+        fair, why = book.fair_yes(m)
+        if fair is None:
+            continue
+        matched += 1
+        if abs(fair - m.prices[0]) < cfg.sharp_shadow_edge:
+            continue
+        b0, b1 = data.order_book(m.token_ids[0]), data.order_book(m.token_ids[1])
+        c = risk.best_side(fair, b0.best_ask, b1.best_ask, cfg.taker_fee, m.fee_rate, m.fee_exponent)
+        if c is not None and c.edge >= cfg.sharp_shadow_edge:
+            rows.append((c.edge, m.outcomes[c.outcome_index], c.price, c.fair_value, m.question))
+    print(f"Partidos de Pinnacle: {len(book.events)} · mercados deportivos de Polymarket: {len(markets)} · "
+          f"emparejados: {matched} · créditos restantes: {book.client.remaining}\n")
+    for edge, side, price, fv, q in sorted(rows, reverse=True)[:30]:
+        flag = "OPERARÍA" if edge > cfg.min_edge else "sombra  "
+        print(f"  {flag} {edge * 100:+5.1f} pp  comprar '{side}' a {price:.3f} (Pinnacle {fv:.3f})  ·  {q[:70]}")
+    if not rows:
+        print("  Ningún desvío por encima del umbral ahora mismo.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="polybot", description="Agente autónomo de trading en Polymarket")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -82,6 +118,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("status")
     sub.add_parser("scan")
     sub.add_parser("report")
+    sub.add_parser("sharp-scan")
     se = sub.add_parser("scan-edges")
     se.add_argument("--days", type=int, default=30)
     se.add_argument("--min-volume", type=float, default=10000)
@@ -121,6 +158,8 @@ def main(argv: list[str] | None = None) -> int:
         print(build_report(cfg))
         print(f"(guardado en {cfg.data_dir / 'report.md'})")
         return 0
+    if args.cmd == "sharp-scan":
+        return cmd_sharp_scan(cfg)
     if args.cmd == "scan-edges":
         from .backtest import HistoryClient
         from .scanner import render_scan, run_scan
