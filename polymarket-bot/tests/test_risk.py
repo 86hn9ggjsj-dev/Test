@@ -77,3 +77,13 @@ def test_live_requires_explicit_confirmation():
     with pytest.raises(ValueError):
         replace(Config(), mode="live", private_key="0xabc", funder="0xdef").validate()
     replace(Config(), mode="live", private_key="0xabc", funder="0xdef", live_confirm=True).validate()
+
+
+def test_simulation_smoke():
+    from polybot.simulate import EVAL_COST, simulate_run, summarize
+
+    cfg = Config()
+    res = [simulate_run(s, months=1, skill=0.5, claude_noise=0.05, market_err=0.04, eval_cost=EVAL_COST["haiku"],
+                        budget=0.5, spread=0.02, vol=0.25, cfg=cfg) for s in range(3)]
+    out = summarize(res, 1, 6.0, cfg.initial_bankroll)
+    assert len(out["median"]) == 1 and out["median"][0] > 0

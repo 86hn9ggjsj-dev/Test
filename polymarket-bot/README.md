@@ -146,7 +146,15 @@ Para que tenga alguna opción de pagarse solo:
 3. Usa un VPS de $4–5/mes.
 4. Sube `MIN_CONFIDENCE=high` para operar menos y solo con convicción.
 
-Aun así, lo más probable es que con $50 no cubra costes. Usa el paper trading para medirlo con números reales
+Aun así, lo más probable es que con $50 no cubra costes.
+
+### Simulación
+
+`python -m polybot.simulate` ejecuta las mismas reglas del bot (Kelly, topes, salidas, presupuesto de API, parada al
+40%) durante 12 meses en un mercado sintético, con distintos niveles de "habilidad" de Claude (qué fracción del
+error del mercado detecta). Son supuestos, no resultados. Con los valores por defecto, ni siquiera un Claude que
+detecta todo el error del mercado cubre los costes con $50: los beneficios crecen con el capital y los costes no.
+Opciones: `--skill`, `--claude-noise`, `--market-err`, `--model opus|sonnet|haiku`, `--budget`, `--runs`, `--months`. Usa el paper trading para medirlo con números reales
 antes de arriesgar dinero.
 
 ---
