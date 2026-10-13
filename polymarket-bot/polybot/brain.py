@@ -129,86 +129,115 @@ def market_prompt(m: Market, price_yes: float | None, price_no: float | None, we
     )
 
 
+def run_tool_loop(
+    client: anthropic.Anthropic,
+    *,
+    model: str,
+    system: str,
+    prompt: str,
+    tools: list,
+    submit_name: str,
+    effort: str,
+    local_tools: dict | None = None,
+    max_tokens: int = 16000,
+    max_turns: int = 10,
+    label: str = "",
+) -> tuple[dict | None, float]:
+    """Bucle común de todos los agentes con Claude.
+
+    Ejecuta las herramientas locales que Claude pida (p. ej. NOAA), reanuda las pausas de
+    la búsqueda web del servidor y termina cuando Claude llama a `submit_name`.
+    Devuelve (argumentos de submit o None, coste en USD). Nunca lanza errores de la API.
+    """
+    local_tools = local_tools or {}
+    messages: list = [{"role": "user", "content": prompt}]
+    cost, nudged = 0.0, False
+    try:
+        for _ in range(max_turns):
+            resp = client.beta.messages.create(
+                model=model,
+                max_tokens=max_tokens,
+                system=system,
+                messages=messages,
+                tools=tools,
+                output_config={"effort": effort},
+                cache_control={"type": "ephemeral"},
+                # Si un clasificador de seguridad rechaza la petición, la API la repite
+                # en el modelo de respaldo recomendado en lugar de devolver un rechazo.
+                betas=["server-side-fallback-2026-07-01"],
+                fallbacks="default",
+            )
+            cost += _usage_cost(model, resp.usage)
+            if resp.stop_reason == "refusal":
+                log.warning("Claude rechazó la petición (%s)", label)
+                return None, cost
+
+            for block in resp.content:
+                if block.type == "tool_use" and block.name == submit_name:
+                    data = block.input
+                    if isinstance(data, str):
+                        try:
+                            data = json.loads(data)
+                        except json.JSONDecodeError:
+                            return None, cost
+                    return data, cost
+
+            calls = [b for b in resp.content if b.type == "tool_use" and b.name in local_tools]
+            if calls:
+                messages.append({"role": "assistant", "content": resp.content})
+                results = []
+                for call in calls:
+                    data, is_error = local_tools[call.name](call.input)
+                    results.append({"type": "tool_result", "tool_use_id": call.id,
+                                    "content": json.dumps(data, ensure_ascii=False), "is_error": is_error})
+                messages.append({"role": "user", "content": results})  # todos los resultados en un mensaje
+                continue
+
+            if resp.stop_reason == "pause_turn":
+                # Bucle de búsqueda del servidor en pausa: reenviar para que continúe.
+                messages.append({"role": "assistant", "content": resp.content})
+                continue
+            if resp.stop_reason in ("end_turn", "max_tokens") and not nudged:
+                messages.append({"role": "assistant", "content": resp.content})
+                messages.append({"role": "user", "content": f"Please call {submit_name} now with your final answer."})
+                nudged = True
+                continue
+            break
+        log.warning("Claude no llamó a %s (%s)", submit_name, label)
+        return None, cost
+    except anthropic.APIError as exc:
+        log.error("Error de la API de Claude (%s): %s", label, exc)
+        return None, cost
+
+
+def web_search_tool(max_uses: int) -> dict:
+    return {"type": "web_search_20260209", "name": "web_search", "max_uses": max_uses}
+
+
 class Brain:
+    """Agente ANALISTA: fair value a fondo con búsqueda web (y NOAA en mercados del tiempo)."""
+
     def __init__(self, cfg: Config, client: anthropic.Anthropic | None = None):
         self.cfg = cfg
         self.client = client or anthropic.Anthropic(max_retries=3, timeout=300.0)
         self.last_cost = 0.0  # coste de la última estimación, aunque fallara
         self.nws = NWSClient()
 
-    def _create(self, messages: list, weather: bool = False):
-        return self.client.beta.messages.create(
-            model=self.cfg.model,
-            max_tokens=16000,
-            system=SYSTEM_PROMPT,
-            messages=messages,
-            tools=[
-                {"type": "web_search_20260209", "name": "web_search", "max_uses": self.cfg.max_web_searches},
-                SUBMIT_TOOL,
-                *([NWS_TOOL] if weather else []),
-            ],
-            output_config={"effort": self.cfg.effort},
-            cache_control={"type": "ephemeral"},
-            # Si un clasificador de seguridad rechaza la petición, la API la repite
-            # en el modelo de respaldo recomendado en lugar de devolver un rechazo.
-            betas=["server-side-fallback-2026-07-01"],
-            fallbacks="default",
-        )
-
     def estimate(self, m: Market, price_yes: float | None, price_no: float | None) -> Estimate | None:
         """Devuelve una estimación, o None si Claude no la produjo. Registra siempre el coste."""
         weather = is_weather_market(m)
-        messages: list = [{"role": "user", "content": market_prompt(m, price_yes, price_no, weather)}]
-        total_cost = 0.0
-        nudged = False
-        self.last_cost = 0.0
-        try:
-            for _ in range(10):
-                resp = self._create(messages, weather)
-                total_cost += _usage_cost(self.cfg.model, resp.usage)
-                self.last_cost = total_cost
-
-                if resp.stop_reason == "refusal":
-                    log.warning("Claude rechazó evaluar %s", m.id)
-                    return None
-
-                for block in resp.content:
-                    if block.type == "tool_use" and block.name == "submit_estimate":
-                        return self._to_estimate(block.input, total_cost)
-
-                nws_calls = [b for b in resp.content if b.type == "tool_use" and b.name == "get_nws_forecast"]
-                if nws_calls:
-                    messages.append({"role": "assistant", "content": resp.content})
-                    results = []
-                    for call in nws_calls:
-                        data, is_error = run_nws_tool(self.nws, call.input)
-                        results.append({"type": "tool_result", "tool_use_id": call.id,
-                                        "content": json.dumps(data, ensure_ascii=False), "is_error": is_error})
-                    messages.append({"role": "user", "content": results})  # todos los resultados en un mensaje
-                    continue
-
-                if resp.stop_reason == "pause_turn":
-                    # Bucle de búsqueda del servidor en pausa: reenviar para que continúe.
-                    messages.append({"role": "assistant", "content": resp.content})
-                    continue
-                if resp.stop_reason in ("end_turn", "max_tokens") and not nudged:
-                    messages.append({"role": "assistant", "content": resp.content})
-                    messages.append({"role": "user", "content": "Please call submit_estimate now with your final answer."})
-                    nudged = True
-                    continue
-                break
-            log.warning("Claude no envió estimación para %s", m.id)
-            return None
-        except anthropic.APIError as exc:
-            log.error("Error de la API de Claude evaluando %s: %s", m.id, exc)
-            return None
+        tools = [web_search_tool(self.cfg.max_web_searches), SUBMIT_TOOL, *([NWS_TOOL] if weather else [])]
+        data, cost = run_tool_loop(
+            self.client, model=self.cfg.model, system=SYSTEM_PROMPT,
+            prompt=market_prompt(m, price_yes, price_no, weather), tools=tools,
+            submit_name="submit_estimate", effort=self.cfg.effort,
+            local_tools={"get_nws_forecast": lambda i: run_nws_tool(self.nws, i)} if weather else None,
+            label=f"analista {m.id}",
+        )
+        self.last_cost = cost
+        return self._to_estimate(data, cost) if data is not None else None
 
     def _to_estimate(self, data, cost: float) -> Estimate | None:
-        if isinstance(data, str):
-            try:
-                data = json.loads(data)
-            except json.JSONDecodeError:
-                return None
         try:
             prob = float(data["probability"])
         except (KeyError, TypeError, ValueError):

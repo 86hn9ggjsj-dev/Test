@@ -94,6 +94,21 @@ class Config:
     model: str = "claude-opus-5-5"
     effort: str = "high"
     max_web_searches: int = 5
+    fv_smoothing: float = 0.5                # re-estimaciones de posiciones: media móvil (menos salidas por ruido)
+
+    # --- Equipo de agentes ---
+    triage_enabled: bool = True
+    triage_model: str = "claude-opus-5-5"
+    triage_effort: str = "low"
+    triage_batch: int = 25                   # mercados por llamada
+    triage_max_per_cycle: int = 50
+    triage_refresh_hours: float = 6.0        # no volver a cribar un mercado antes de esto (salvo si el precio se mueve)
+    triage_threshold: float = 0.06           # el triage marca descuadres de ~6 pp o más
+    triage_daily_budget_usd: float = 1.00    # parte del presupuesto diario reservada a la criba
+    skeptic_enabled: bool = True
+    skeptic_model: str = "claude-opus-5-5"
+    skeptic_effort: str = "medium"
+    skeptic_web_searches: int = 3
     daily_api_budget_usd: float = 3.00       # tope de gasto diario en la API de Claude
     vps_monthly_usd: float = 6.00            # para el contador de supervivencia
 
@@ -105,6 +120,7 @@ class Config:
     max_slippage: float = 0.02               # precio límite = precio esperado ± 2 pp
 
     # --- Rutas ---
+    turbo: bool = False
     data_dir: Path = Path("data")
     log_dir: Path = Path("logs")
 
@@ -126,6 +142,8 @@ class Config:
             errors.append("MIN_HOURS_TO_RESOLUTION no puede ser menor que 2")
         if self.max_drawdown > HARD_LIMITS["max_drawdown"]:
             errors.append("MAX_DRAWDOWN no puede superar 0.40")
+        if not 0 <= self.fv_smoothing < 1:
+            errors.append("FV_SMOOTHING debe estar entre 0 y 1")
         if self.min_confidence not in ("low", "medium", "high"):
             errors.append("MIN_CONFIDENCE debe ser low, medium o high")
         if self.mode == "live":
@@ -143,9 +161,34 @@ class Config:
         return self.data_dir / f"state_{self.mode}.json"
 
 
+# TURBO: máximo volumen DENTRO de las reglas duras. Cambia valores por defecto (cualquier
+# variable puesta a mano en .env sigue mandando). No toca: 6%, 5 posiciones, edge > 8 pp,
+# 1/4 Kelly, liquidez > $5k, > 2 h ni la parada al 40%.
+TURBO_DEFAULTS = {
+    "MAX_DAYS_TO_RESOLUTION": 7,       # solo mercados que resuelven en <= 7 días: el capital gira rápido
+    "MIN_VOLUME_24H": 500,
+    "MAX_EVALUATIONS_PER_CYCLE": 10,
+    "REEVALUATE_AFTER_MINUTES": 90,
+    "TRIAGE_MAX_PER_CYCLE": 150,
+    "TRIAGE_REFRESH_HOURS": 2,
+    "TRIAGE_DAILY_BUDGET_USD": 2.0,
+    "DAILY_API_BUDGET_USD": 10.0,
+    "CLAUDE_EFFORT": "medium",         # análisis más baratos -> más análisis por dólar
+    "MAX_WEB_SEARCHES": 3,
+    "SKEPTIC_EFFORT": "low",
+    "SKEPTIC_WEB_SEARCHES": 2,
+    "POSITION_REEVAL_MINUTES": 45,
+}
+
+
 def load_config(env_file: str | None = ".env") -> Config:
     if load_dotenv and env_file and Path(env_file).exists():
         load_dotenv(env_file)
+    turbo = _env("TURBO", "false").lower() in ("1", "true", "yes", "si", "sí")
+    if turbo:
+        for key, value in TURBO_DEFAULTS.items():
+            if not os.environ.get(key, "").strip():
+                os.environ[key] = str(value)
     cfg = Config(
         mode=_env("TRADING_MODE", "paper").lower(),
         initial_bankroll=_float("INITIAL_BANKROLL", 50.0),
@@ -176,6 +219,19 @@ def load_config(env_file: str | None = ".env") -> Config:
         model=_env("CLAUDE_MODEL", "claude-opus-5-5"),
         effort=_env("CLAUDE_EFFORT", "high"),
         max_web_searches=_int("MAX_WEB_SEARCHES", 5),
+        fv_smoothing=_float("FV_SMOOTHING", 0.5),
+        triage_enabled=_env("TRIAGE_ENABLED", "true").lower() in ("1", "true", "yes", "si", "sí"),
+        triage_model=_env("TRIAGE_MODEL", "claude-opus-5-5"),
+        triage_effort=_env("TRIAGE_EFFORT", "low"),
+        triage_batch=_int("TRIAGE_BATCH", 25),
+        triage_max_per_cycle=_int("TRIAGE_MAX_PER_CYCLE", 50),
+        triage_refresh_hours=_float("TRIAGE_REFRESH_HOURS", 6.0),
+        triage_threshold=_float("TRIAGE_THRESHOLD", 0.06),
+        triage_daily_budget_usd=_float("TRIAGE_DAILY_BUDGET_USD", 1.00),
+        skeptic_enabled=_env("SKEPTIC_ENABLED", "true").lower() in ("1", "true", "yes", "si", "sí"),
+        skeptic_model=_env("SKEPTIC_MODEL", "claude-opus-5-5"),
+        skeptic_effort=_env("SKEPTIC_EFFORT", "medium"),
+        skeptic_web_searches=_int("SKEPTIC_WEB_SEARCHES", 3),
         daily_api_budget_usd=_float("DAILY_API_BUDGET_USD", 3.00),
         vps_monthly_usd=_float("VPS_MONTHLY_USD", 6.00),
         live_confirm=_env("LIVE_TRADING_CONFIRM", "no").lower() == "yes",
@@ -183,6 +239,7 @@ def load_config(env_file: str | None = ".env") -> Config:
         funder=_env("POLYMARKET_FUNDER", ""),
         signature_type=_int("POLYMARKET_SIGNATURE_TYPE", 1),
         max_slippage=_float("MAX_SLIPPAGE", 0.02),
+        turbo=turbo,
         data_dir=Path(_env("DATA_DIR", "data")),
         log_dir=Path(_env("LOG_DIR", "logs")),
     )

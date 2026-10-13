@@ -77,4 +77,6 @@ class FakeBrain:
 
 @pytest.fixture
 def cfg(tmp_path) -> Config:
-    return replace(Config(), data_dir=tmp_path / "data", log_dir=tmp_path / "logs")
+    # Los tests del núcleo usan solo el analista; el equipo completo se prueba en test_team.py
+    return replace(Config(), data_dir=tmp_path / "data", log_dir=tmp_path / "logs",
+                   triage_enabled=False, skeptic_enabled=False)

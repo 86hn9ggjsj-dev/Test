@@ -80,6 +80,11 @@ class BotState:
     claude_calls: int = 0
     # Cache de estimaciones de mercados sin posición: market_id -> {fair_yes, price_yes, at, ...}
     estimates: dict[str, dict] = field(default_factory=dict)
+    # Cache del triage: market_id -> {at, price_yes, fair_yes, flag, reason}
+    screens: dict[str, dict] = field(default_factory=dict)
+    triage_cost_by_day: dict[str, float] = field(default_factory=dict)
+    # Contadores por agente para el panel: scout / triage / analyst / skeptic / risk
+    agent_stats: dict[str, dict] = field(default_factory=dict)
 
     # ---- métricas ----
     @property

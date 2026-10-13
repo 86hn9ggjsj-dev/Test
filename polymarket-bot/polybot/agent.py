@@ -5,8 +5,9 @@
   3. Escanea hasta 1.000 mercados (Gamma) y los filtra
   4. Revisa posiciones abiertas: sale si el edge desaparece, el fair value se
      mueve > 5 pp en contra o el mercado está a punto de resolver
-  5. Para los mejores candidatos: libro del CLOB -> fair value (Claude) -> edge
-     -> Kelly -> reglas duras -> orden
+  5. Equipo de agentes sobre los candidatos:
+       SCOUT (filtro) -> TRIAGE (criba barata por lotes) -> ANALISTA (fair value a fondo)
+       -> ESCÉPTICO (segunda opinión, puede vetar) -> RIESGO (Kelly, reglas duras, orden)
   6. Guarda estado, logs y resumen
 """
 
@@ -17,13 +18,15 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 
 from . import filters, risk
+from .agents import Skeptic, Triage
 from .brain import Brain, Estimate
 from .config import Config
 from .executor import make_executor
 from .journal import Journal
 from .polymarket import Market, OrderBook, PolymarketData
 from .postmortem import write_postmortem
-from .state import BotState, ClosedTrade, Position, now_iso
+from .state import BotState, ClosedTrade, Position, now_iso, today
+from .weather import is_weather_market
 
 log = logging.getLogger("polybot.agent")
 
@@ -35,10 +38,13 @@ def _minutes_since(iso: str) -> float:
 
 
 class Agent:
-    def __init__(self, cfg: Config, *, data=None, brain=None, executor=None, journal=None, state=None):
+    def __init__(self, cfg: Config, *, data=None, brain=None, executor=None, journal=None, state=None,
+                 triage=None, skeptic=None):
         self.cfg = cfg
         self.data = data or PolymarketData()
         self.brain = brain or Brain(cfg)
+        self.triage = triage if triage is not None else (Triage(cfg) if cfg.triage_enabled else None)
+        self.skeptic = skeptic if skeptic is not None else (Skeptic(cfg) if cfg.skeptic_enabled else None)
         self.executor = executor or make_executor(cfg)
         self.journal = journal or Journal(cfg.data_dir)
         self.state = state or BotState.load_or_new(cfg.state_path, cfg.mode, cfg.initial_bankroll)
@@ -78,6 +84,14 @@ class Agent:
     # -------------------------------------------------------------- helpers
     def _budget_left(self) -> bool:
         return self.state.api_cost_today() < self.cfg.daily_api_budget_usd
+
+    def _stat(self, agent: str, key: str, inc: float = 1, last: str | None = None) -> None:
+        """Contadores por agente para el panel."""
+        s = self.state.agent_stats.setdefault(agent, {})
+        s[key] = s.get(key, 0) + inc
+        if last is not None:
+            s["last"] = last[:140]
+            s["last_at"] = now_iso()
 
     def _books(self, m: Market) -> tuple[OrderBook, OrderBook]:
         return self.data.order_book(m.token_ids[0]), self.data.order_book(m.token_ids[1])
@@ -160,7 +174,10 @@ class Agent:
             if (stale or moved) and self._budget_left():
                 est = self._estimate(m, book0.best_ask, book1.best_ask)
                 if est is not None:
-                    p.last_fair_value = est.fair_yes if p.outcome_index == 0 else 1 - est.fair_yes
+                    new_fv = est.fair_yes if p.outcome_index == 0 else 1 - est.fair_yes
+                    # Media móvil: una sola re-estimación con ruido no dispara una salida.
+                    a = self.cfg.fv_smoothing
+                    p.last_fair_value = a * p.last_fair_value + (1 - a) * new_fv
                     p.last_estimate_at = now_iso()
                     p.last_estimate_price = mid
             if p.entry_fair_value - p.last_fair_value > self.cfg.fv_move_exit:
@@ -196,12 +213,18 @@ class Agent:
         candidates = [m for m in filters.eligible_markets(markets, cfg) if m.id not in st.positions]
         self.journal.event(kind="scan", scanned=len(markets), eligible=len(candidates), rejected=dict(rejected))
         log.info("Mercados: %d escaneados, %d elegibles", len(markets), len(candidates))
+        self._stat("scout", "scanned", len(markets), last=f"{len(markets)} escaneados, {len(candidates)} elegibles")
+        self._stat("scout", "cycles")
+        self.state.agent_stats["scout"]["eligible_now"] = len(candidates)
         self._prune_estimates()
 
         slots = cfg.max_open_positions - len(st.positions)
         if slots <= 0:
             log.info("Máximo de %d posiciones alcanzado; no se buscan entradas", cfg.max_open_positions)
             return
+
+        if self.triage is not None:
+            candidates = self._run_triage(candidates)
 
         evaluations = 0
         for m in candidates:
@@ -223,6 +246,51 @@ class Agent:
             evaluations += evaluated
             slots -= entered
 
+    def _run_triage(self, candidates: list[Market]) -> list[Market]:
+        """TRIAGE: criba barata por lotes. Devuelve la lista corta para el analista, en orden."""
+        st, cfg = self.state, self.cfg
+        fast_weather = lambda m: cfg.fast_mode and is_weather_market(m)  # noqa: E731
+
+        def stale(m: Market) -> bool:
+            sc = st.screens.get(m.id)
+            return (sc is None or _minutes_since(sc["at"]) >= cfg.triage_refresh_hours * 60
+                    or abs(m.prices[0] - sc["price_yes"]) >= cfg.reeval_price_move)
+
+        # Los mercados del tiempo van directos al analista: sin datos de NOAA la criba no aporta.
+        pending = [m for m in candidates if not fast_weather(m) and stale(m)][: cfg.triage_max_per_cycle]
+        for i in range(0, len(pending), cfg.triage_batch):
+            if st.triage_cost_by_day.get(today(), 0.0) >= cfg.triage_daily_budget_usd or not self._budget_left():
+                log.info("Presupuesto de triage agotado por hoy")
+                break
+            batch = pending[i:i + cfg.triage_batch]
+            screens = self.triage.screen(batch)
+            cost = getattr(self.triage, "last_cost", 0.0) or 0.0
+            st.add_api_cost(cost)
+            st.triage_cost_by_day[today()] = st.triage_cost_by_day.get(today(), 0.0) + cost
+            by_id = {m.id: m for m in batch}
+            flagged = 0
+            for sc in screens:
+                st.screens[sc.market_id] = {"at": now_iso(), "price_yes": by_id[sc.market_id].prices[0],
+                                            "fair_yes": sc.fair_yes, "flag": sc.flag, "reason": sc.reason}
+                flagged += sc.flag
+            self._stat("triage", "screened", len(batch))
+            self._stat("triage", "flagged", flagged, last=f"lote de {len(batch)}: {flagged} marcados")
+            self._stat("triage", "cost", cost)
+            self.journal.decision(kind="triage", cost_usd=round(cost, 4), markets=[
+                {"market_id": sc.market_id, "question": by_id[sc.market_id].question,
+                 "price_yes": by_id[sc.market_id].prices[0], "fair_yes": round(sc.fair_yes, 3),
+                 "flag": sc.flag, "reason": sc.reason} for sc in screens])
+            log.info("TRIAGE: %d mercados cribados, %d marcados ($%.3f)", len(batch), flagged, cost)
+
+        def gap(m: Market) -> float:
+            sc = st.screens.get(m.id)
+            return abs(sc["fair_yes"] - m.prices[0]) if sc else 0.0
+
+        shortlist = [m for m in candidates if fast_weather(m)
+                     or ((sc := st.screens.get(m.id)) and (sc["flag"] or gap(m) >= cfg.triage_threshold))]
+        shortlist.sort(key=lambda m: (not fast_weather(m), -gap(m)))
+        return shortlist
+
     def _consider(self, m: Market) -> tuple[int, int]:
         """Evalúa un mercado. Devuelve (llamadas a Claude, posiciones abiertas)."""
         st, cfg = self.state, self.cfg
@@ -236,19 +304,52 @@ class Agent:
             return 0, 0
 
         est = self._estimate(m, ask0, ask1)
+        calls = 1
         if est is None:
             st.estimates[m.id] = {"at": now_iso(), "price_yes": m.prices[0], "fair_yes": None}
             self.journal.decision(**base, decision="SKIP", reasons=["sin estimación de Claude"])
             return 1, 0
         st.estimates[m.id] = {"at": now_iso(), "price_yes": m.prices[0], "fair_yes": est.fair_yes}
 
-        choice = risk.best_side(est.fair_yes, ask0, ask1, cfg.taker_fee)
-        book = book0 if choice.outcome_index == 0 else book1
-        stake, kelly = risk.position_size_usd(st.equity, st.cash, choice.fair_value, choice.price, cfg)
+        analyst_choice = risk.best_side(est.fair_yes, ask0, ask1, cfg.taker_fee)
+        self._stat("analyst", "estimates", last=f"FV {est.fair_yes:.2f} · {m.question[:80]}")
+        if analyst_choice.edge > cfg.min_edge:
+            self._stat("analyst", "edges_found")
         blockers = risk.entry_blockers(
-            edge=choice.edge, confidence=est.confidence, resolution_clear=est.resolution_clear,
+            edge=analyst_choice.edge, confidence=est.confidence, resolution_clear=est.resolution_clear,
             open_positions=len(st.positions), halted=st.halted, cfg=cfg,
         )
+
+        # ESCÉPTICO: solo revisa ideas que ya pasan las reglas; su veto bloquea y, si aprueba,
+        # el fair value final es la media de las dos opiniones (menos ruido).
+        choice, fair_yes, review = analyst_choice, est.fair_yes, None
+        if not blockers and self.skeptic is not None:
+            if not self._budget_left():
+                blockers.append("sin presupuesto de API para el escéptico")
+            else:
+                side_name = m.outcomes[analyst_choice.outcome_index]
+                review = self.skeptic.review(m, ask0, ask1, est, side_name)
+                st.add_api_cost(getattr(self.skeptic, "last_cost", 0.0) or 0.0)
+                calls += 1
+                if review is None:
+                    blockers.append("el escéptico no respondió")
+                else:
+                    self._stat("skeptic", "reviews")
+                    fair_yes = (est.fair_yes + review.fair_yes) / 2
+                    choice = risk.best_side(fair_yes, ask0, ask1, cfg.taker_fee)
+                    if review.verdict == "veto":
+                        self._stat("skeptic", "vetoes", last=f"VETO {m.question[:60]}: {review.objection[:70]}")
+                        blockers.append(f"vetado por el escéptico: {review.objection[:160]}")
+                    else:
+                        self._stat("skeptic", "approvals", last=f"OK {m.question[:80]}")
+                    if choice.outcome_index != analyst_choice.outcome_index:
+                        blockers.append("analista y escéptico no coinciden en el lado")
+                    elif choice.edge <= cfg.min_edge:
+                        blockers.append(f"edge combinado {choice.edge * 100:.1f} pp <= {cfg.min_edge * 100:.0f} pp")
+        st.estimates[m.id]["fair_yes"] = fair_yes
+
+        book = book0 if choice.outcome_index == 0 else book1
+        stake, kelly = risk.position_size_usd(st.equity, st.cash, choice.fair_value, choice.price, cfg)
 
         exec_edge, avg_price = None, None
         if not blockers:
@@ -266,7 +367,11 @@ class Agent:
                     blockers.append(f"tamaño ${stake:.2f} < $1 mínimo")
 
         self.journal.decision(
-            **base, fair_yes=round(est.fair_yes, 4), confidence=est.confidence,
+            **base, fair_yes=round(fair_yes, 4), analyst_fair_yes=round(est.fair_yes, 4),
+            skeptic_fair_yes=None if review is None else round(review.fair_yes, 4),
+            skeptic_verdict=None if review is None else review.verdict,
+            skeptic_objection=None if review is None else review.objection,
+            triage=st.screens.get(m.id), confidence=est.confidence,
             resolution_clear=est.resolution_clear, resolution_source=est.resolution_source,
             side=m.outcomes[choice.outcome_index], side_fair_value=round(choice.fair_value, 4),
             edge=round(choice.edge, 4), exec_edge=None if exec_edge is None else round(exec_edge, 4),
@@ -275,15 +380,18 @@ class Agent:
             reasoning=est.reasoning, evidence=est.evidence, cost_usd=round(est.cost_usd, 4),
         )
         log.info("%s | FV %.3f vs ask %s/%s | edge %+.1f pp | %s",
-                 m.question[:70], est.fair_yes, ask0, ask1, choice.edge * 100,
+                 m.question[:70], fair_yes, ask0, ask1, choice.edge * 100,
                  "TRADE" if not blockers else "skip: " + "; ".join(blockers))
         if blockers:
-            return 1, 0
+            if analyst_choice.edge > cfg.min_edge:  # era una idea con edge y algo la frenó
+                self._stat("risk", "blocked", last=f"bloqueado: {blockers[0][:100]}")
+            return calls, 0
 
         fill = self.executor.buy(m.token_ids[choice.outcome_index], stake, book, m.tick_size, m.neg_risk)
         if fill is None:
             self.journal.decision(**base, decision="FAILED", reasons=["la orden no se ejecutó"])
-            return 1, 0
+            self._stat("risk", "failed_orders")
+            return calls, 0
         st.cash -= fill.usd
         p = Position(
             market_id=m.id, question=m.question, outcome=m.outcomes[choice.outcome_index],
@@ -300,12 +408,16 @@ class Agent:
                            outcome=p.outcome, shares=p.shares, price=p.entry_price, usd=p.cost,
                            fair_value=p.entry_fair_value, edge=exec_edge, order_id=fill.order_id)
         log.info("ABIERTA %s [%s] %.2f shares @ %.3f ($%.2f)", m.question[:60], p.outcome, p.shares, p.entry_price, p.cost)
-        return 1, 1
+        self._stat("risk", "orders", last=f"ORDER ${p.cost:.2f} {p.outcome} · {m.question[:70]}")
+        return calls, 1
 
     def _prune_estimates(self) -> None:
         cutoff = datetime.now(timezone.utc) - timedelta(days=2)
         self.state.estimates = {
             k: v for k, v in self.state.estimates.items() if datetime.fromisoformat(v["at"]) > cutoff
+        }
+        self.state.screens = {
+            k: v for k, v in self.state.screens.items() if datetime.fromisoformat(v["at"]) > cutoff
         }
 
     # ------------------------------------------------------------ parada/fin

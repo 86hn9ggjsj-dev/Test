@@ -87,3 +87,19 @@ def test_simulation_smoke():
                         budget=0.5, spread=0.02, vol=0.25, cfg=cfg) for s in range(3)]
     out = summarize(res, 1, 6.0, cfg.initial_bankroll)
     assert len(out["median"]) == 1 and out["median"][0] > 0
+
+
+def test_turbo_raises_throughput_but_not_hard_rules(monkeypatch, tmp_path):
+    from polybot.config import TURBO_DEFAULTS, load_config
+
+    for k in list(TURBO_DEFAULTS) + ["TURBO", "DAILY_API_BUDGET_USD"]:
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setenv("TURBO", "true")
+    monkeypatch.setenv("DAILY_API_BUDGET_USD", "4")      # lo puesto a mano manda
+    cfg = load_config(env_file=None)
+    assert cfg.turbo and cfg.max_days_to_resolution == 7 and cfg.triage_max_per_cycle == 150
+    assert cfg.daily_api_budget_usd == 4
+    assert (cfg.max_position_pct, cfg.max_open_positions, cfg.min_edge, cfg.kelly_fraction, cfg.max_drawdown) == \
+        (0.06, 5, 0.08, 0.25, 0.40)
+    for k in TURBO_DEFAULTS:
+        monkeypatch.delenv(k, raising=False)

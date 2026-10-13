@@ -110,6 +110,8 @@ def build_data(cfg: Config) -> dict:
         "scanned_total": sum(e.get("scanned", 0) for e in scans),
         "avg_edge": sum(open_edges) / len(open_edges) if open_edges else None,
         "claude_calls": st.claude_calls,
+        "turbo": cfg.turbo,
+        "agents": st.agent_stats,
         "series": _downsample(series),
         "positions": [
             {"question": p.question, "outcome": p.outcome, "shares": p.shares, "entry": p.entry_price,

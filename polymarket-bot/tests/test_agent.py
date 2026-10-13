@@ -103,6 +103,21 @@ def test_exit_when_fair_value_moves_against(cfg):
     agent.run_cycle()
     brain.fair["a"] = 0.55                       # FV baja 7 pp (> 5)
     agent.run_cycle()
+    # con media móvil (0.5): 0.585 -> solo -3.5 pp, todavía no sale por una sola lectura
+    assert "a" in agent.state.positions
+    agent.run_cycle()                            # se confirma: 0.5675 -> -5.25 pp
+    assert agent.state.closed_trades[-1].reason == "fair_value_moved_against"
+
+
+def test_exit_fair_value_without_smoothing(cfg):
+    cfg = replace(cfg, position_reeval_minutes=0, fv_smoothing=0.0)
+    data = FakeData()
+    data.add(make_market("a", price=0.40))
+    brain = FakeBrain({"a": 0.62})
+    agent = make_agent(cfg, data, brain)
+    agent.run_cycle()
+    brain.fair["a"] = 0.55
+    agent.run_cycle()
     assert agent.state.closed_trades[-1].reason == "fair_value_moved_against"
 
 

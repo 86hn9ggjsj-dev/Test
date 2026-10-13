@@ -7,6 +7,8 @@ para estimar el *fair value* de cada mercado y opera solo cuando el edge supera 
 - **Modo por defecto: Paper Trading con $50.** Simula cada orden contra el libro de órdenes real del CLOB.
 - **Live Trading** solo si lo activas a propósito (dos llaves: `TRADING_MODE=live` + `LIVE_TRADING_CONFIRM=yes`).
 - Todo queda registrado: cada mercado evaluado, cada edge, cada trade, cada balance.
+- **Equipo de 5 agentes:** Scout → Triage → Analista → Escéptico → Riesgo (ver abajo).
+- **TURBO ("modo minero"):** muchos trades pequeños, todo el rato, dentro de las reglas duras.
 - **Modo tiempo:** prioriza mercados meteorológicos y le da a Claude la previsión oficial de NOAA/NWS.
 - **Panel web en directo:** balance, PnL, coste diario, runway, log de órdenes y posiciones.
 
@@ -26,12 +28,68 @@ cada 10 min
  │ 3. Gamma API: hasta 1.000 mercados activos                           │
  │ 4. Filtro: liquidez > $5k, volumen, resuelve en > 2 h, fuente oficial │
  │ 5. Revisa posiciones: sale si edge < 2 pp, FV −5 pp, o resuelve ya   │
- │ 6. Mejores candidatos → libro CLOB → Claude estima fair value        │
+ │ 6. Equipo: Triage → Analista → Escéptico → Riesgo (ver abajo)        │
  │       edge = fair value − precio de compra (ask)                     │
  │       edge > 8 pp → 1/4 Kelly (tope 6%) → reglas → orden             │
  │ 7. Guarda estado, logs, status.md                                    │
  └──────────────────────────────────────────────────────────────────────┘
 ```
+
+### El equipo de 5 agentes
+
+```
+1.000 mercados
+   │
+   ▼
+ SCOUT ───── código ────── filtra (liquidez, volumen, < 2 h, fuente oficial) y ordena:
+   │                       primero mercados del tiempo y los que resuelven antes
+   ▼  ~100–300 elegibles
+ TRIAGE ──── Claude ────── criba barata por lotes de 25, sin búsqueda web (~$0,003/mercado):
+   │                       marca los que parecen mal valorados
+   ▼  ~1 de cada 5
+ ANALISTA ── Claude ────── fair value a fondo: búsqueda web + previsión oficial de NOAA
+   │
+   ▼  solo si edge > 8 pp y pasa las reglas
+ ESCÉPTICO ─ Claude ────── busca por qué el mercado tiene razón; puede VETAR.
+   │                       Si aprueba: fair value final = media de las dos opiniones
+   ▼  solo si sigue habiendo edge > 8 pp con la media
+ RIESGO ──── código ────── 1/4 Kelly, tope 6%, máx. 5 posiciones, simula el fill en el libro,
+                           ejecuta y vigila salidas
+```
+
+Por qué está montado así:
+- **Triage** es lo que permite operar mucho: mira cientos de mercados al día por céntimos, y el análisis caro
+  solo se gasta en los prometedores.
+- **Escéptico** ataca el mayor problema que salió en la simulación: Claude cree ver ventaja donde solo hay ruido.
+  Una segunda opinión independiente que intenta tumbar la idea, y promediar las dos, reduce las entradas falsas.
+- **Riesgo** es código y es el único con "manos". Ningún agente de IA puede colocar una orden ni saltarse una regla.
+- En las posiciones abiertas el fair value es una **media móvil** (`FV_SMOOTHING`), para que una sola
+  re-estimación con ruido no fuerce una venta (y pagar el spread otra vez).
+
+El panel muestra una tarjeta por agente con lo que ha hecho: mercados cribados y marcados, análisis, vetos,
+órdenes e ideas frenadas.
+
+### TURBO: "modo minero" (`TURBO=true`, activado en `.env.example`)
+
+Picar poco a poco, pero todo el rato: muchas apuestas pequeñas ($1–3 con $50) en mercados que resuelven en días,
+para que el capital vuelva rápido y se reinvierta. TURBO sube el volumen sin tocar las reglas duras:
+
+| | Normal | TURBO |
+|---|---|---|
+| Mercados que resuelven en | ≤ 60 días | **≤ 7 días** |
+| Cribados por ciclo (triage) | 50 | **150** |
+| Análisis a fondo por ciclo | 4 | **10** |
+| Re-criba de un mercado | 6 h | **2 h** |
+| Presupuesto Claude / día | $3 | **$10** (triage $2) |
+| Esfuerzo analista / escéptico | high / medium | medium / low (más análisis por dólar) |
+
+Estimación (no medida): con $10/día, unos 600–800 mercados cribados y 30–50 análisis completos al día. Cuántos
+acaban en trade depende de cuántos tengan de verdad más de 8 puntos de edge. **Coste: hasta ~$300/mes de API.**
+Con $50 de bankroll eso no se paga solo (ver la simulación). Baja `DAILY_API_BUDGET_USD` si quieres gastar menos.
+
+**El límite de volumen lo ponen tus reglas.** Con máximo 5 posiciones y edge > 8 pp, el bot es un buscador de
+pepitas más que un minero de migajas. Un "minero" de verdad (miles de operaciones con 1–2 puntos de ventaja)
+sería un *market maker*: otra estrategia, con otra infraestructura, y que romperían esas dos reglas.
 
 **Claude es el cerebro, pero no tiene las manos.** Claude solo devuelve una probabilidad (a través de una
 herramienta con esquema estricto). El tamaño, el permiso para entrar y la orden los decide código
@@ -44,7 +102,8 @@ polymarket-bot/
 ├── polybot/
 │   ├── __main__.py    CLI: run / once / status / scan / approve / reset
 │   ├── agent.py       el ciclo de 10 minutos
-│   ├── brain.py       Claude + web search (+ NOAA en mercados del tiempo) → fair value
+│   ├── brain.py       agente ANALISTA (web + NOAA) y el bucle común de Claude
+│   ├── agents.py      agentes TRIAGE y ESCÉPTICO
 │   ├── weather.py     detección de mercados del tiempo + cliente de api.weather.gov
 │   ├── dashboard.py   panel web en directo (+ dashboard.html)
 │   ├── simulate.py    simulación Monte Carlo del bot
@@ -56,7 +115,7 @@ polymarket-bot/
 │   ├── journal.py     logs, diarios JSONL y status.md
 │   ├── postmortem.py  informe automático al llegar al 40% de drawdown
 │   └── config.py      configuración + límites duros
-├── tests/             46 tests (reglas, Kelly, filtros, ciclo completo, cerebro, NOAA, panel)
+├── tests/             53 tests (reglas, Kelly, filtros, ciclo, equipo de agentes, NOAA, panel, TURBO)
 ├── deploy/            servicio systemd + instalador para VPS
 ├── Dockerfile, docker-compose.yml
 └── .env.example
@@ -189,7 +248,7 @@ Las cuentas son duras, y conviene verlas antes de empezar:
 - Una evaluación con Opus 5.5, esfuerzo `high` y hasta 5 búsquedas web cuesta del orden de **$0,15–0,40**.
 - Con $50 y un tope del 6%, cada posición es de **~$3**. Una apuesta con 10 pp de edge real gana de media
   unos **$0,30–0,60**.
-- Con el presupuesto por defecto (`DAILY_API_BUDGET_USD=3`) gastas hasta ~$90/mes en Claude + $6 de VPS. Cubrir eso
+- Con el presupuesto normal (`DAILY_API_BUDGET_USD=3`) gastas hasta ~$90/mes en Claude + $6 de VPS; con TURBO, hasta ~$300/mes. Cubrir eso
   con $50 exigiría casi duplicar el capital cada mes. **No es realista.**
 
 Para que tenga alguna opción de pagarse solo:

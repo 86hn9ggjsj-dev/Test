@@ -68,6 +68,20 @@
   details summary { cursor: pointer; color: var(--muted); font: 12px var(--mono); margin-top: 8px; }
   .banner { display: none; border: 1px solid var(--bad); color: var(--bad); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; font: 13px var(--mono); }
   .stack > * + * { margin-top: 10px; }
+  .agents { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 10px; }
+  .agent .top { display: flex; align-items: center; gap: 8px; }
+  .agent .icon { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 16px;
+                 border: 1px solid var(--border); }
+  .agent .name { font: 600 13px var(--mono); letter-spacing: .08em; }
+  .agent .top > div { min-width: 0; }
+  .agent .icon { flex-shrink: 0; }
+  .agent .role { font: 11px var(--mono); color: var(--muted); margin-top: 6px; }
+  .agent .stat { font: 600 15px var(--mono); margin-top: 10px; font-variant-numeric: tabular-nums; }
+  .agent .stat small { font-weight: 400; color: var(--ink-2); font-size: 12px; }
+  .agent .last { font: 11px var(--mono); color: var(--ink-2); margin-top: 6px; overflow: hidden; text-overflow: ellipsis;
+                 white-space: nowrap; }
+  .agent .live { margin-left: auto; font: 11px var(--mono); color: var(--muted); white-space: nowrap; }
+  .agent .live.on { color: var(--good); }
 </style>
 </head>
 <body>
@@ -93,6 +107,8 @@
     <div class="card tile"><div class="label">Runway</div><div class="value" id="t-runway">—</div><div class="sub" id="t-runway-sub"></div></div>
     <div class="card tile"><div class="label">Drawdown</div><div class="value" id="t-dd">—</div><div class="sub" id="t-dd-sub"></div></div>
   </section>
+
+  <section class="agents" id="agents" aria-label="Equipo de agentes"></section>
 
   <section class="main">
     <div class="card">
@@ -236,7 +252,7 @@
     last = d;
     const st = $("status");
     st.textContent = d.halted ? "⛔ DETENIDO" : "● ALIVE"; st.className = "pill " + (d.halted ? "halted" : "alive");
-    $("mode").textContent = d.mode.toUpperCase();
+    $("mode").textContent = d.mode.toUpperCase() + (d.turbo ? " · TURBO" : "");
     $("cycle").textContent = `ciclo #${d.cycles}`;
     $("updated").textContent = d.last_cycle_at ? `último ciclo ${hhmm(d.last_cycle_at)}` : "sin ciclos aún";
     const ban = $("banner");
@@ -257,6 +273,7 @@
     const dd = $("t-dd"); dd.textContent = pct(d.drawdown); dd.classList.toggle("down", d.drawdown >= d.max_drawdown * 0.5);
     $("t-dd-sub").textContent = `pico $${d.peak.toFixed(2)} · límite ${pct(d.max_drawdown, 0)}`;
 
+    renderAgents(d);
     drawChart(d);
     table($("series-table"), ["Fecha", "Balance"], d.series.slice(-50).reverse().map(([t, v]) => [[dt(t)], ["$" + Number(v).toFixed(2)]]), "Sin datos");
 
@@ -284,6 +301,37 @@
     table($("closed"), ["Cerrado", "Mercado", "Lado", "PnL", "Motivo"], d.closed_trades.map((t) =>
       [[dt(t.closed_at)], [t.question, "q"], [t.outcome], [arrow(t.pnl) + usd(t.pnl, true), t.pnl > 0 ? "up" : t.pnl < 0 ? "down" : ""], [t.reason]]
     ), "Ningún trade cerrado todavía.");
+  }
+
+  const TEAM = [
+    ["scout", "◎", "SCOUT", "escanea y filtra · código", (s) => [`${(s.eligible_now ?? 0)}`, ` elegibles · ${(s.scanned ?? 0).toLocaleString()} escaneados`]],
+    ["triage", "⚑", "TRIAGE", "criba barata por lotes · Claude", (s) => [`${s.flagged ?? 0}`, ` marcados de ${s.screened ?? 0} cribados`]],
+    ["analyst", "◆", "ANALISTA", "fair value con web + NOAA · Claude", (s) => [`${s.edges_found ?? 0}`, ` con edge de ${s.estimates ?? 0} análisis`]],
+    ["skeptic", "✕", "ESCÉPTICO", "segunda opinión, puede vetar · Claude", (s) => [`${s.vetoes ?? 0}`, ` vetos · ${s.approvals ?? 0} aprobados`]],
+    ["risk", "▣", "RIESGO", "Kelly, reglas duras, órdenes · código", (s) => [`${s.orders ?? 0}`, ` órdenes · ${s.blocked ?? 0} ideas frenadas`]],
+  ];
+  function renderAgents(d) {
+    const root = $("agents"); root.replaceChildren();
+    TEAM.forEach(([key, icon, name, role, fmt]) => {
+      const s = (d.agents || {})[key] || {};
+      const card = document.createElement("div"); card.className = "card agent";
+      const top = document.createElement("div"); top.className = "top";
+      const ic = document.createElement("div"); ic.className = "icon"; ic.textContent = icon; ic.setAttribute("aria-hidden", "true");
+      const txt = document.createElement("div");
+      const nm = document.createElement("div"); nm.className = "name"; nm.textContent = name;
+      const rl = document.createElement("div"); rl.className = "role"; rl.textContent = role;
+      txt.append(nm);
+      const live = document.createElement("span"); live.className = "live";
+      const recent = s.last_at && (Date.now() - new Date(s.last_at).getTime()) < 30 * 60 * 1000;
+      live.textContent = d.halted ? "■ parado" : recent ? "● activo" : "○ en espera"; if (recent && !d.halted) live.classList.add("on");
+      top.append(ic, txt, live);
+      const [big, small] = fmt(s);
+      const stat = document.createElement("div"); stat.className = "stat"; stat.textContent = big;
+      const sm = document.createElement("small"); sm.textContent = small; stat.appendChild(sm);
+      const last = document.createElement("div"); last.className = "last";
+      last.textContent = s.last ? `${when(s.last_at)} · ${s.last}` : "sin actividad todavía"; last.title = last.textContent;
+      card.append(top, rl, stat, last); root.appendChild(card);
+    });
   }
 
   async function refresh() {
