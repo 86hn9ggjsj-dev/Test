@@ -280,8 +280,26 @@ incoherentes fuera, aprendizaje en el primer 40% y prueba en el resto).
 - Con $50, el tope del 6% ($3) y el mínimo de 5 participaciones impiden comprar cualquier lado que cueste más de
   $0,60, y Kelly da apuestas de ~$1 cuando la ventaja es pequeña: muchas ideas ni siquiera se pueden ejecutar.
 
-Para confirmar la pista de deportes harían falta 3–6 meses de historia y precios de compra reales (libros de órdenes),
-por ejemplo registrándolos en paper trading a partir de ahora.
+**Ampliación a 4 meses (15-jun → 12-oct-2026; 26.099 mercados de deportes con volumen ≥ $50k; análisis fijado antes de
+ver los datos):** el sesgo aprendido en los dos primeros meses es de +3 a +5 pp para los tramos 12–30%. Tras spread y
+comisión, el bot con sus reglas (edge > 8 pp) **no hace ningún trade**. Apostando $1 fijo a cada underdog con edge neto
+positivo, en los dos meses de prueba (márgenes de error agrupados por partido):
+
+| Tipo | Apuestas | Coste de compra +1c | +2c | +3c |
+|---|---|---|---|---|
+| Ganador del partido | 1.181 | +13% ± 11 | +9% ± 11 | +28% ± 23 (365) |
+| Hándicap | 341 | +29% ± 32 | +24% ± 30 | +21% ± 65 (123) |
+| Más/menos (O/U) | 509 | **+58% ± 22** | **+50% ± 21** | **+54% ± 31** (261) |
+
+- Ganador y hándicap: no significativo (en mercados de $10k–$50k, ganador da +2% ± 18).
+- **O/U: patrón fuerte y repetido** en todos los tramos de volumen ($10k–$50k: +44% ± 22).
+- Comprobación en vivo (13-oct): en los underdogs de ganador y hándicap el precio real de compra está a ~0,5c del precio
+  del historial. En O/U la mediana es +1c, pero 1 de cada 10 cuesta +7c o más: parte del efecto puede no ser operable.
+- Riesgo de sesgo: los mercados se eligen por su volumen final, y un partido con sorpresa atrae más volumen.
+
+**Conclusión provisional:** los underdogs en mercados de más/menos son la única pista que ha sobrevivido a todas las
+pruebas, pero falta confirmarla con precios de compra reales y hacia delante (paper trading). Con las reglas actuales
+(edge > 8 pp) el bot no la opera.
 
 ### 2. `python -m polybot report` — ¿bate Claude al mercado? (paper trading)
 
