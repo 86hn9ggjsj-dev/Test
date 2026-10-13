@@ -87,6 +87,7 @@ def main(argv: list[str] | None = None) -> int:
     bp.add_argument("--spread", type=float, default=0.02, help="spread supuesto (por defecto 2 pp)")
     bp.add_argument("--train-frac", type=float, default=0.4, help="fracción inicial para ajustar el modelo")
     bp.add_argument("--max-markets", type=int, default=3000)
+    bp.add_argument("--hold", action="store_true", help="sin salidas anticipadas: aguantar hasta la resolución")
     dp = sub.add_parser("dashboard")
     dp.add_argument("--host", default=None, help="por defecto 127.0.0.1 (o DASHBOARD_HOST)")
     dp.add_argument("--port", type=int, default=None, help="por defecto 8080 (o DASHBOARD_PORT)")
@@ -122,7 +123,7 @@ def main(argv: list[str] | None = None) -> int:
 
         try:
             res = run_backtest(HistoryClient(), cfg, days=args.days, train_frac=args.train_frac, spread=args.spread,
-                               bankroll=args.bankroll, max_markets=args.max_markets)
+                               bankroll=args.bankroll, max_markets=args.max_markets, hold=args.hold)
         except requests.RequestException as exc:
             print(f"No se pudieron descargar los datos históricos: {exc}\n"
                   "El backtest necesita acceso a gamma-api.polymarket.com, clob.polymarket.com y "

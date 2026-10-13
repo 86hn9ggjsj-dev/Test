@@ -104,7 +104,13 @@ class FakeHistory:
         return self.history[token_id]
 
     def previous_runs(self, lat, lon, start, end, unit):
-        return self.runs[start]
+        merged = {"utc_offset_seconds": -14400, "hourly": {}}
+        d = start
+        while d <= end:
+            for k, v in self.runs[d]["hourly"].items():
+                merged["hourly"].setdefault(k, []).extend(v)
+            d += timedelta(days=1)
+        return merged
 
 
 @pytest.fixture
