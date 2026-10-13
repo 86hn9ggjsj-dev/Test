@@ -1,0 +1,15 @@
+# Panel web de Polybot (solo lectura). install_vps.sh lo instala junto al bot.
+[Unit]
+Description=Polybot - panel web
+After=network-online.target
+
+[Service]
+Type=simple
+User=polybot
+WorkingDirectory=/opt/polybot
+ExecStart=/opt/polybot/.venv/bin/python -m polybot dashboard
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

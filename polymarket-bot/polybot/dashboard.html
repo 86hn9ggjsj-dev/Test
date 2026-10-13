@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polybot · Survival Mode</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    color-scheme: light;
+    --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+    --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10);
+    --series: #2a78d6; --good: #006300; --bad: #d03b3b; --warn: #8a5a00;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+      --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+      --series: #3987e5; --good: #0ca30c; --bad: #e66767; --warn: #fab219;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10);
+    --series: #3987e5; --good: #0ca30c; --bad: #e66767; --warn: #fab219;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 14px/1.45 var(--sans); }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 48px; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  h1 { font: 600 16px/1 var(--mono); letter-spacing: .08em; margin: 0; }
+  h1 span { color: var(--muted); font-weight: 400; }
+  .pill { font: 600 12px/1 var(--mono); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); }
+  .pill.alive { color: var(--good); } .pill.halted { color: var(--bad); }
+  .meta { font: 12px var(--mono); color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .meta button { font: inherit; color: var(--ink-2); background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 10px; }
+  .tile .label { font: 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .tile .value { font: 600 24px/1.2 var(--mono); margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .tile .sub { font: 12px var(--mono); color: var(--ink-2); margin-top: 2px; }
+  .up { color: var(--good); } .down { color: var(--bad); } .warn { color: var(--warn); }
+  .main { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 10px; margin-bottom: 10px; }
+  @media (max-width: 860px) { .main { grid-template-columns: 1fr; } }
+  .card h2 { font: 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; display: flex; justify-content: space-between; }
+  .chart { position: relative; }
+  .chart svg { display: block; width: 100%; height: 280px; outline: none; }
+  .chart svg:focus-visible { box-shadow: 0 0 0 2px var(--series); border-radius: 4px; }
+  .tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+         padding: 6px 8px; font: 12px var(--mono); box-shadow: 0 4px 16px rgba(0,0,0,.18); white-space: nowrap; display: none; }
+  .tip strong { display: block; font-size: 14px; color: var(--ink); }
+  .tip span { color: var(--ink-2); }
+  .log { font: 12px/1.6 var(--mono); max-height: 300px; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+  .log li { display: grid; grid-template-columns: 112px 1fr; gap: 8px; border-bottom: 1px solid var(--grid); padding: 3px 0; }
+  .log time { color: var(--muted); }
+  .log .msg { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
+  .log .tag { font-weight: 600; color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; font: 12px var(--mono); }
+  th { text-align: left; color: var(--muted); font-weight: 400; padding: 4px 6px; border-bottom: 1px solid var(--axis); }
+  td { padding: 5px 6px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+  td.q { max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .scroll { overflow-x: auto; }
+  .empty { color: var(--muted); font: 12px var(--mono); padding: 8px 0; }
+  details summary { cursor: pointer; color: var(--muted); font: 12px var(--mono); margin-top: 8px; }
+  .banner { display: none; border: 1px solid var(--bad); color: var(--bad); border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; font: 13px var(--mono); }
+  .stack > * + * { margin-top: 10px; }
+  .agents { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-bottom: 10px; }
+  .agent .top { display: flex; align-items: center; gap: 8px; }
+  .agent .icon { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font-size: 16px;
+                 border: 1px solid var(--border); }
+  .agent .name { font: 600 13px var(--mono); letter-spacing: .08em; }
+  .agent .top > div { min-width: 0; }
+  .agent .icon { flex-shrink: 0; }
+  .agent .role { font: 11px var(--mono); color: var(--muted); margin-top: 6px; }
+  .agent .stat { font: 600 15px var(--mono); margin-top: 10px; font-variant-numeric: tabular-nums; }
+  .agent .stat small { font-weight: 400; color: var(--ink-2); font-size: 12px; }
+  .agent .last { font: 11px var(--mono); color: var(--ink-2); margin-top: 6px; overflow: hidden; text-overflow: ellipsis;
+                 white-space: nowrap; }
+  .agent .live { margin-left: auto; font: 11px var(--mono); color: var(--muted); white-space: nowrap; }
+  .agent .live.on { color: var(--good); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>POLYBOT <span>/ SURVIVAL MODE</span></h1>
+    <div class="meta">
+      <span id="status" class="pill">…</span>
+      <span id="mode"></span>
+      <span id="cycle"></span>
+      <span id="updated"></span>
+      <button id="theme" type="button" aria-label="Cambiar tema">◐ tema</button>
+    </div>
+  </header>
+
+  <div id="banner" class="banner" role="alert"></div>
+
+  <section class="tiles" aria-label="Métricas">
+    <div class="card tile"><div class="label">Balance actual</div><div class="value" id="t-equity">—</div><div class="sub" id="t-equity-sub"></div></div>
+    <div class="card tile"><div class="label">PnL total</div><div class="value" id="t-pnl">—</div><div class="sub" id="t-pnl-sub"></div></div>
+    <div class="card tile"><div class="label">Neto supervivencia</div><div class="value" id="t-net">—</div><div class="sub" id="t-net-sub"></div></div>
+    <div class="card tile"><div class="label">Win rate</div><div class="value" id="t-wr">—</div><div class="sub" id="t-wr-sub"></div></div>
+    <div class="card tile"><div class="label">Runway</div><div class="value" id="t-runway">—</div><div class="sub" id="t-runway-sub"></div></div>
+    <div class="card tile"><div class="label">Drawdown</div><div class="value" id="t-dd">—</div><div class="sub" id="t-dd-sub"></div></div>
+  </section>
+
+  <section class="agents" id="agents" aria-label="Equipo de agentes"></section>
+
+  <section class="main">
+    <div class="card">
+      <h2><span>Balance</span><span id="range"></span></h2>
+      <div class="chart" id="chart">
+        <svg id="svg" role="img" aria-label="Evolución del balance" tabindex="0"></svg>
+        <div class="tip" id="tip"></div>
+      </div>
+      <details><summary>Ver datos en tabla</summary><div class="scroll"><table id="series-table"></table></div></details>
+    </div>
+    <div class="card">
+      <h2><span>Actividad</span><span id="act-count"></span></h2>
+      <ul class="log" id="log"></ul>
+    </div>
+  </section>
+
+  <section class="stack">
+    <div class="card">
+      <h2><span>Posiciones abiertas</span><span id="pos-count"></span></h2>
+      <div class="scroll"><table id="positions"></table></div>
+    </div>
+    <div class="card">
+      <h2><span>Trades cerrados</span><span id="closed-count"></span></h2>
+      <div class="scroll"><table id="closed"></table></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const qs = location.search;
+  const usd = (v, sign) => v == null ? "—" : (sign && v > 0 ? "+" : v < 0 ? "−" : "") + "$" + Math.abs(v).toFixed(2);
+  const pct = (v, d = 1) => v == null ? "—" : (v * 100).toFixed(d) + "%";
+  const hhmm = (iso) => { const d = new Date(iso); return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); };
+  const when = (iso) => { const d = new Date(iso); return d.toDateString() === new Date().toDateString() ? hhmm(iso)
+    : d.toLocaleDateString([], { day: "numeric", month: "short" }) + " " + hhmm(iso); };
+  const dt = (iso) => new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  const trend = (el, v) => { el.classList.remove("up", "down"); if (v > 0) el.classList.add("up"); if (v < 0) el.classList.add("down"); };
+  const arrow = (v) => v > 0 ? "▲ " : v < 0 ? "▼ " : "";
+
+  // Tema: sigue al sistema; el botón alterna y se recuerda en este navegador.
+  try { const t = localStorage.getItem("polybot-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $("theme").addEventListener("click", () => {
+    const cur = document.documentElement.dataset.theme ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const next = cur === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("polybot-theme", next); } catch (e) {}
+    if (last) drawChart(last);
+  });
+
+  function cell(tr, text, cls) { const td = document.createElement("td"); td.textContent = text; if (cls) td.className = cls; tr.appendChild(td); return td; }
+  function table(el, headers, rows, empty) {
+    el.replaceChildren();
+    if (!rows.length) { const tr = el.insertRow(); const td = cell(tr, empty, "empty"); td.colSpan = headers.length; return; }
+    const head = el.createTHead().insertRow();
+    headers.forEach((h) => { const th = document.createElement("th"); th.textContent = h; head.appendChild(th); });
+    const body = el.createTBody();
+    rows.forEach((r) => { const tr = body.insertRow(); r.forEach(([text, cls]) => cell(tr, text, cls)); });
+  }
+
+  // ---- gráfico de balance (una serie, crosshair + tooltip) ----
+  const NS = "http://www.w3.org/2000/svg";
+  let last = null, hoverIdx = null;
+  function el(name, attrs) { const n = document.createElementNS(NS, name); for (const k in attrs) n.setAttribute(k, attrs[k]); return n; }
+
+  function drawChart(d) {
+    const svg = $("svg"); svg.replaceChildren();
+    const pts = d.series.map(([t, v]) => [new Date(t).getTime(), v]);
+    if (pts.length < 2) { const t = el("text", { x: 12, y: 24, fill: "var(--muted)", "font-size": 12, "font-family": "monospace" }); t.textContent = "Esperando el primer ciclo…"; svg.appendChild(t); return; }
+    const W = svg.clientWidth || 600, H = 280, L = 52, R = 12, T = 12, B = 26;
+    const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]).concat([d.initial]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs);
+    let y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const nice = (x) => { const e = Math.pow(10, Math.floor(Math.log10(x))), f = x / e; return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * e; };
+    const step = nice(Math.max(y1 - y0, 0.5) / 4); y0 = Math.floor(y0 / step) * step; y1 = Math.ceil(y1 / step) * step;
+    if (y1 - y0 < step * 2) y1 = y0 + step * 2;
+    const X = (t) => L + (x1 === x0 ? 0 : (t - x0) / (x1 - x0)) * (W - L - R);
+    const Y = (v) => T + (1 - (v - y0) / (y1 - y0)) * (H - T - B);
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+
+    // rejilla y eje Y (4 marcas)
+    for (let v = y0; v <= y1 + step / 2; v += step) {
+      const y = Y(v);
+      svg.appendChild(el("line", { x1: L, x2: W - R, y1: y, y2: y, stroke: "var(--grid)", "stroke-width": 1 }));
+      const lab = el("text", { x: L - 8, y: y + 4, "text-anchor": "end", fill: "var(--muted)", "font-size": 11, "font-family": "monospace" });
+      lab.textContent = "$" + v.toFixed(step >= 1 ? 0 : 2); svg.appendChild(lab);
+    }
+    // eje X: inicio, (medio si cabe) y fin
+    const ticks = W < 520 ? [[x0, "start"], [x1, "end"]] : [[x0, "start"], [(x0 + x1) / 2, "middle"], [x1, "end"]];
+    ticks.forEach(([t, anchor]) => {
+      const lab = el("text", { x: X(t), y: H - 6, "text-anchor": anchor, fill: "var(--muted)", "font-size": 11, "font-family": "monospace" });
+      lab.textContent = dt(new Date(t).toISOString()); svg.appendChild(lab);
+    });
+    // línea base: bankroll inicial
+    const yb = Y(d.initial);
+    svg.appendChild(el("line", { x1: L, x2: W - R, y1: yb, y2: yb, stroke: "var(--axis)", "stroke-width": 1, "stroke-dasharray": "4 4" }));
+    const bl = el("text", { x: W - R, y: yb - 6 < T + 10 ? yb + 14 : yb - 6, "text-anchor": "end", fill: "var(--muted)", "font-size": 11, "font-family": "monospace" });
+    bl.textContent = "inicial $" + d.initial.toFixed(0); svg.appendChild(bl);
+    // serie
+    const path = pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1)).join("");
+    svg.appendChild(el("path", { d: path, fill: "none", stroke: "var(--series)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    // último valor, etiqueta directa
+    const lp = pts[pts.length - 1];
+    svg.appendChild(el("circle", { cx: X(lp[0]), cy: Y(lp[1]), r: 4, fill: "var(--series)", stroke: "var(--surface)", "stroke-width": 2 }));
+
+    // capa de hover
+    const cross = el("line", { y1: T, y2: H - B, stroke: "var(--axis)", "stroke-width": 1, visibility: "hidden" });
+    const dot = el("circle", { r: 5, fill: "var(--series)", stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" });
+    svg.append(cross, dot);
+    const tip = $("tip");
+    const show = (i) => {
+      hoverIdx = i; const [t, v] = pts[i], cx = X(t), cy = Y(v);
+      cross.setAttribute("x1", cx); cross.setAttribute("x2", cx); cross.setAttribute("visibility", "visible");
+      dot.setAttribute("cx", cx); dot.setAttribute("cy", cy); dot.setAttribute("visibility", "visible");
+      tip.replaceChildren();
+      const s = document.createElement("strong"); s.textContent = "$" + v.toFixed(2);
+      const delta = v - d.initial; const sp = document.createElement("span");
+      sp.textContent = `${arrow(delta)}${usd(delta, true)} · ${dt(new Date(t).toISOString())}`;
+      tip.append(s, sp); tip.style.display = "block";
+      const box = $("chart").getBoundingClientRect(), sx = box.width / W;
+      let left = cx * sx + 12; if (left + tip.offsetWidth > box.width) left = cx * sx - tip.offsetWidth - 12;
+      tip.style.left = Math.max(0, left) + "px"; tip.style.top = Math.max(0, cy * (280 / H) - 20) + "px";
+    };
+    const hide = () => { hoverIdx = null; cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); tip.style.display = "none"; };
+    const nearest = (px) => { let best = 0, bd = Infinity; pts.forEach((p, i) => { const dd = Math.abs(X(p[0]) - px); if (dd < bd) { bd = dd; best = i; } }); return best; };
+    svg.onpointermove = (e) => { const r = svg.getBoundingClientRect(); show(nearest((e.clientX - r.left) * (W / r.width))); };
+    svg.onpointerleave = hide;
+    svg.onblur = hide;
+    svg.onkeydown = (e) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      e.preventDefault();
+      const i = hoverIdx == null ? pts.length - 1 : Math.min(pts.length - 1, Math.max(0, hoverIdx + (e.key === "ArrowRight" ? 1 : -1)));
+      show(i);
+    };
+    $("range").textContent = `${dt(new Date(x0).toISOString())} → ${dt(new Date(x1).toISOString())}`;
+  }
+
+  function render(d) {
+    last = d;
+    const st = $("status");
+    st.textContent = d.halted ? "⛔ DETENIDO" : "● ALIVE"; st.className = "pill " + (d.halted ? "halted" : "alive");
+    $("mode").textContent = d.mode.toUpperCase() + (d.turbo ? " · TURBO" : "");
+    $("cycle").textContent = `ciclo #${d.cycles}`;
+    $("updated").textContent = d.last_cycle_at ? `último ciclo ${hhmm(d.last_cycle_at)}` : "sin ciclos aún";
+    const ban = $("banner");
+    if (d.halted) { ban.textContent = `Trading detenido: ${d.halt_reason}. Revisa el post-mortem y ejecuta "python -m polybot approve --yes" para reanudar.`; ban.style.display = "block"; }
+    else ban.style.display = "none";
+
+    $("t-equity").textContent = usd(d.equity);
+    $("t-equity-sub").textContent = `inicial $${d.initial.toFixed(2)} · caja $${d.cash.toFixed(2)}`;
+    const pnl = $("t-pnl"); pnl.textContent = arrow(d.pnl) + usd(d.pnl, true); trend(pnl, d.pnl);
+    $("t-pnl-sub").textContent = pct(d.pnl / d.initial) + " sobre el inicial";
+    const net = $("t-net"); net.textContent = arrow(d.net) + usd(d.net, true); trend(net, d.net);
+    $("t-net-sub").textContent = `API $${d.api_cost_total.toFixed(2)} + VPS $${d.vps_cost.toFixed(2)} · ${d.net >= 0 ? "se paga solo" : "aún no se paga"}`;
+    $("t-wr").textContent = d.win_rate == null ? "—" : pct(d.win_rate, 0);
+    $("t-wr-sub").textContent = `${d.wins}W / ${d.closed - d.wins}L · ${d.trades_opened} órdenes`;
+    const rw = $("t-runway"); rw.textContent = d.runway_days == null ? "—" : `${Math.floor(d.runway_days)} días`;
+    rw.classList.toggle("warn", d.runway_days != null && d.runway_days < 14);
+    $("t-runway-sub").textContent = `coste diario −$${d.daily_cost.toFixed(2)}`;
+    const dd = $("t-dd"); dd.textContent = pct(d.drawdown); dd.classList.toggle("down", d.drawdown >= d.max_drawdown * 0.5);
+    $("t-dd-sub").textContent = `pico $${d.peak.toFixed(2)} · límite ${pct(d.max_drawdown, 0)}`;
+
+    renderAgents(d);
+    drawChart(d);
+    table($("series-table"), ["Fecha", "Balance"], d.series.slice(-50).reverse().map(([t, v]) => [[dt(t)], ["$" + Number(v).toFixed(2)]]), "Sin datos");
+
+    const log = $("log"); log.replaceChildren();
+    if (!d.activity.length) { const li = document.createElement("li"); li.textContent = "Sin actividad todavía."; li.className = "empty"; log.appendChild(li); }
+    d.activity.forEach((a) => {
+      const li = document.createElement("li"); const time = document.createElement("time"); time.textContent = when(a.ts); time.dateTime = a.ts;
+      const msg = document.createElement("span"); msg.className = "msg"; const tag = document.createElement("span"); tag.className = "tag";
+      let rest = "";
+      if (a.kind === "order") { tag.textContent = `ORDER $${(a.usd || 0).toFixed(2)} `; rest = `${a.side} · "${a.text}"` + (a.edge != null ? ` · edge ${(a.edge * 100).toFixed(1)}%` : ""); }
+      else if (a.kind === "close") { tag.textContent = (a.reason || "").startsWith("resolved") ? "RESOLVED " : "EXIT "; tag.classList.add(a.usd >= 0 ? "up" : "down"); tag.textContent += usd(a.usd, true) + " "; rest = `"${a.text}" · ${a.reason}`; }
+      else if (a.kind === "scan") { tag.textContent = "SCAN "; rest = `${a.scanned} mercados, ${a.eligible} elegibles`; }
+      else { tag.textContent = a.kind.toUpperCase() + " "; rest = a.text || ""; if (a.kind === "halt") tag.classList.add("down"); }
+      msg.append(tag, document.createTextNode(rest)); msg.title = tag.textContent + rest;
+      li.append(time, msg); log.appendChild(li);
+    });
+    $("act-count").textContent = `${d.scanned_total.toLocaleString()} escaneados · ${d.claude_calls} análisis`;
+
+    $("pos-count").textContent = `${d.positions.length} / 5`;
+    table($("positions"), ["Mercado", "Lado", "Shares", "Entrada", "Actual", "FV", "PnL"], d.positions.map((p) => {
+      const v = p.value - p.cost;
+      return [[p.question, "q"], [p.outcome], [p.shares.toFixed(2)], [p.entry.toFixed(3)], [p.price.toFixed(3)], [p.fv.toFixed(3)], [arrow(v) + usd(v, true), v > 0 ? "up" : v < 0 ? "down" : ""]];
+    }), "Sin posiciones abiertas.");
+    $("closed-count").textContent = `${d.closed} en total`;
+    table($("closed"), ["Cerrado", "Mercado", "Lado", "PnL", "Motivo"], d.closed_trades.map((t) =>
+      [[dt(t.closed_at)], [t.question, "q"], [t.outcome], [arrow(t.pnl) + usd(t.pnl, true), t.pnl > 0 ? "up" : t.pnl < 0 ? "down" : ""], [t.reason]]
+    ), "Ningún trade cerrado todavía.");
+  }
+
+  const TEAM = [
+    ["scout", "◎", "SCOUT", "escanea y filtra · código", (s) => [`${(s.eligible_now ?? 0)}`, ` elegibles · ${(s.scanned ?? 0).toLocaleString()} escaneados`]],
+    ["triage", "⚑", "TRIAGE", "criba barata por lotes · Claude", (s) => [`${s.flagged ?? 0}`, ` marcados de ${s.screened ?? 0} cribados`]],
+    ["analyst", "◆", "ANALISTA", "fair value con web + NOAA · Claude", (s) => [`${s.edges_found ?? 0}`, ` con edge de ${s.estimates ?? 0} análisis`]],
+    ["skeptic", "✕", "ESCÉPTICO", "segunda opinión, puede vetar · Claude", (s) => [`${s.vetoes ?? 0}`, ` vetos · ${s.approvals ?? 0} aprobados`]],
+    ["sharp", "⚖", "CUOTAS", "deportes frente a Pinnacle · código", (s) => [`${s.signals ?? 0}`, ` desvíos · ${s.matched ?? 0} emparejados`]],
+    ["risk", "▣", "RIESGO", "Kelly, reglas duras, órdenes · código", (s) => [`${s.orders ?? 0}`, ` órdenes · ${s.blocked ?? 0} ideas frenadas`]],
+  ];
+  function renderAgents(d) {
+    const root = $("agents"); root.replaceChildren();
+    TEAM.forEach(([key, icon, name, role, fmt]) => {
+      const s = (d.agents || {})[key] || {};
+      const card = document.createElement("div"); card.className = "card agent";
+      const top = document.createElement("div"); top.className = "top";
+      const ic = document.createElement("div"); ic.className = "icon"; ic.textContent = icon; ic.setAttribute("aria-hidden", "true");
+      const txt = document.createElement("div");
+      const nm = document.createElement("div"); nm.className = "name"; nm.textContent = name;
+      const rl = document.createElement("div"); rl.className = "role"; rl.textContent = role;
+      txt.append(nm);
+      const live = document.createElement("span"); live.className = "live";
+      const recent = s.last_at && (Date.now() - new Date(s.last_at).getTime()) < 30 * 60 * 1000;
+      live.textContent = d.halted ? "■ parado" : recent ? "● activo" : "○ en espera"; if (recent && !d.halted) live.classList.add("on");
+      top.append(ic, txt, live);
+      const [big, small] = fmt(s);
+      const stat = document.createElement("div"); stat.className = "stat"; stat.textContent = big;
+      const sm = document.createElement("small"); sm.textContent = small; stat.appendChild(sm);
+      const last = document.createElement("div"); last.className = "last";
+      last.textContent = s.last ? `${when(s.last_at)} · ${s.last}` : "sin actividad todavía"; last.title = last.textContent;
+      card.append(top, rl, stat, last); root.appendChild(card);
+    });
+  }
+
+  async function refresh() {
+    try {
+      const r = await fetch("/api/data" + qs, { cache: "no-store" });
+      if (!r.ok) throw new Error(r.status);
+      render(await r.json());
+    } catch (e) {
+      $("updated").textContent = "sin conexión con el bot (" + e.message + ")";
+    }
+  }
+  addEventListener("resize", () => { if (last) drawChart(last); });
+  refresh(); setInterval(refresh, 15000);
+})();
+</script>
+</body>
+</html>
