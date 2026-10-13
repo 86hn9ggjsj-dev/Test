@@ -221,7 +221,8 @@ def corrected(price: float, table: list[dict]) -> float:
     return price
 
 
-def simulate(test: list[Obs], tables: dict, cfg: Config, spread: float) -> tuple[list[dict], float]:
+def simulate(test: list[Obs], tables: dict, cfg: Config, spread: float, fee_rate: float = 0.05,
+             fee_exponent: float = 1.0) -> tuple[list[dict], float]:
     half = spread / 2
     cash = peak = cfg.initial_bankroll
     positions: dict[str, dict] = {}
@@ -247,7 +248,7 @@ def simulate(test: list[Obs], tables: dict, cfg: Config, spread: float) -> tuple
         if not (cfg.min_price <= o.price <= cfg.max_price) or hours_left < cfg.min_hours_to_resolution:
             continue
         fair = corrected(o.price, tables.get(o.cat, []))
-        choice = risk.best_side(fair, o.price + half, 1 - o.price + half, cfg.taker_fee)
+        choice = risk.best_side(fair, o.price + half, 1 - o.price + half, cfg.taker_fee, fee_rate, fee_exponent)
         eq = equity()
         stake, _ = risk.position_size_usd(eq, cash, choice.fair_value, choice.price, cfg)
         if risk.entry_blockers(edge=choice.edge, confidence="high", resolution_clear=True,
@@ -256,7 +257,9 @@ def simulate(test: list[Obs], tables: dict, cfg: Config, spread: float) -> tuple
         if stake < 1.0 or stake / choice.price < 5:
             continue
         cash -= stake
-        positions[o.market_id] = {"side": choice.outcome_index, "shares": stake / choice.price, "cost": stake,
+        shares = stake / choice.price
+        shares -= shares * risk.taker_fee(choice.price, fee_rate, fee_exponent) / choice.price  # comisión en shares
+        positions[o.market_id] = {"side": choice.outcome_index, "shares": shares, "cost": stake,
                                   "closed_at": o.closed_at, "y": o.outcome, "cat": o.cat, "q": o.question}
         eq = equity()
         peak = max(peak, eq)
