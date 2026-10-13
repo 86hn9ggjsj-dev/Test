@@ -40,6 +40,8 @@ from .weather import is_weather_market
 log = logging.getLogger("polybot.backtest")
 PREVIOUS_RUNS_URL = "https://previous-runs-api.open-meteo.com/v1/forecast"
 MAX_LEAD_DAYS = 7
+FETCH_LEADS = 3      # estos mercados abren 2-3 días antes: no hace falta pedir más (peticiones más ligeras)
+FETCH_CHUNK_DAYS = 14
 
 # Estaciones de resolución habituales (aeropuertos). Polymarket suele resolver con Weather
 # Underground en estas estaciones; revisa la descripción de cada mercado y amplía la tabla si hace falta.
@@ -303,9 +305,22 @@ class HistoryClient:
         return sorted((datetime.fromtimestamp(int(h["t"]), timezone.utc), float(h["p"])) for h in data.get("history", []))
 
     def previous_runs(self, lat: float, lon: float, start: date, end: date, unit: str) -> dict:
+        """Previsiones pasadas por tramos de 14 días (cada tramo cuenta como una sola petición)."""
+        merged: dict = {"hourly": {}}
+        chunk_start = start
+        while chunk_start <= end:
+            chunk_end = min(end, chunk_start + timedelta(days=FETCH_CHUNK_DAYS - 1))
+            part = self._previous_runs_chunk(lat, lon, chunk_start, chunk_end, unit)
+            merged["utc_offset_seconds"] = part.get("utc_offset_seconds", 0)
+            for key, values in part.get("hourly", {}).items():
+                merged["hourly"].setdefault(key, []).extend(values)
+            chunk_start = chunk_end + timedelta(days=1)
+        return merged
+
+    def _previous_runs_chunk(self, lat: float, lon: float, start: date, end: date, unit: str) -> dict:
         params = {
             "latitude": lat, "longitude": lon, "start_date": start.isoformat(), "end_date": end.isoformat(),
-            "hourly": ",".join(f"temperature_2m_previous_day{n}" for n in range(1, MAX_LEAD_DAYS + 1)),
+            "hourly": ",".join(f"temperature_2m_previous_day{n}" for n in range(1, FETCH_LEADS + 1)),
             "temperature_unit": "fahrenheit" if unit == "F" else "celsius", "timezone": "auto",
         }
 
@@ -319,7 +334,7 @@ class HistoryClient:
             finally:
                 self._last_meteo = time.monotonic()
 
-        return self._cached(f"om:{lat}:{lon}:{start}:{end}:{unit}", fetch)
+        return self._cached(f"om3:{lat}:{lon}:{start}:{end}:{unit}", fetch)
 
 
 # ------------------------------------------------------------- simulación
@@ -370,12 +385,20 @@ def build_observations(client: HistoryClient, markets: list[Market], step_hours:
     by_station: dict[tuple, list[TempMarket]] = {}
     for tm in parsed:
         by_station.setdefault((tm.station, tm.unit), []).append(tm)
+    limit_hits = 0
     for (station, unit), tms in by_station.items():
         first, last = min(t.target for t in tms), max(t.target for t in tms)
+        if limit_hits >= 3:  # cupo diario agotado: no insistir, se queda en caché lo ya bajado
+            runs[(station, unit)] = {}
+            skip("estación sin previsiones (cupo diario de Open-Meteo agotado)", len(tms))
+            continue
         try:
             runs[(station, unit)] = client.previous_runs(tms[0].lat, tms[0].lon, first, last, unit)
+            limit_hits = 0
         except DailyLimitError:
-            raise
+            limit_hits += 1
+            log.warning("Open-Meteo: cupo diario agotado (%s)", station)
+            runs[(station, unit)] = {}
         except (requests.RequestException, ValueError) as exc:
             log.warning("Open-Meteo %s: %s", station, exc)
             runs[(station, unit)] = {}
