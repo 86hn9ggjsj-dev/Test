@@ -7,6 +7,7 @@
   python -m polybot dashboard       panel web en directo (http://127.0.0.1:8080)
   python -m polybot report          ¿bate Claude al mercado? (paper trading) + crecimiento mensual
   python -m polybot backtest        backtest honesto de mercados de temperatura (datos históricos reales)
+  python -m polybot scan-edges      busca categorías de mercados con precios sistemáticamente erróneos
   python -m polybot approve --yes   reanuda tras un parón por drawdown
   python -m polybot reset --yes     borra el estado PAPER y empieza de nuevo con el bankroll inicial
 """
@@ -81,6 +82,10 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("status")
     sub.add_parser("scan")
     sub.add_parser("report")
+    se = sub.add_parser("scan-edges")
+    se.add_argument("--days", type=int, default=30)
+    se.add_argument("--min-volume", type=float, default=10000)
+    se.add_argument("--spread", type=float, default=0.02)
     bp = sub.add_parser("backtest")
     bp.add_argument("--days", type=int, default=90, help="días hacia atrás (por defecto 90)")
     bp.add_argument("--bankroll", type=float, default=50.0)
@@ -115,6 +120,17 @@ def main(argv: list[str] | None = None) -> int:
 
         print(build_report(cfg))
         print(f"(guardado en {cfg.data_dir / 'report.md'})")
+        return 0
+    if args.cmd == "scan-edges":
+        from .backtest import HistoryClient
+        from .scanner import render_scan, run_scan
+
+        res = run_scan(HistoryClient(cache_dir=cfg.data_dir / "backtest_cache"), cfg, days=args.days,
+                       min_volume=args.min_volume, spread=args.spread)
+        text = render_scan(res, cfg.initial_bankroll)
+        cfg.data_dir.mkdir(parents=True, exist_ok=True)
+        (cfg.data_dir / "scan_edges.md").write_text(text, encoding="utf-8")
+        print(text)
         return 0
     if args.cmd == "backtest":
         from .backtest import HistoryClient, render, run_backtest
