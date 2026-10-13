@@ -125,6 +125,12 @@ def main(argv: list[str] | None = None) -> int:
             res = run_backtest(HistoryClient(cache_dir=cfg.data_dir / "backtest_cache"), cfg, days=args.days, train_frac=args.train_frac, spread=args.spread,
                                bankroll=args.bankroll, max_markets=args.max_markets, hold=args.hold)
         except requests.RequestException as exc:
+            from .backtest import DailyLimitError
+
+            if isinstance(exc, DailyLimitError):
+                print("Open-Meteo ha agotado el cupo gratuito diario de esta IP. Vuelve a intentarlo mañana "
+                      "(los datos ya descargados quedan en caché).", file=sys.stderr)
+                return 1
             print(f"No se pudieron descargar los datos históricos: {exc}\n"
                   "El backtest necesita acceso a gamma-api.polymarket.com, clob.polymarket.com y "
                   "previous-runs-api.open-meteo.com.", file=sys.stderr)

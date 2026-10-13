@@ -196,6 +196,10 @@ def forecast_max(prev_runs: dict, target: date, lead: int, stat: str = "max") ->
 
 
 # ------------------------------------------------------------- datos
+class DailyLimitError(requests.HTTPError):
+    """La API (p. ej. Open-Meteo gratuito) ha agotado el cupo diario de esta IP."""
+
+
 class HistoryClient:
     """Descarga de datos históricos reales: Gamma (eventos cerrados), CLOB (precios), Open-Meteo."""
 
@@ -229,6 +233,8 @@ class HistoryClient:
                     raise
                 time.sleep(min(2 ** attempt, 30))
                 continue
+            if resp.status_code == 429 and "daily" in resp.text.lower():
+                raise DailyLimitError(resp.text[:200])  # no tiene sentido reintentar hasta mañana
             if resp.status_code == 429 or resp.status_code >= 500:
                 wait = float(resp.headers.get("retry-after") or 0) or min(5 * 2 ** attempt, 120)
                 time.sleep(wait)
@@ -368,6 +374,8 @@ def build_observations(client: HistoryClient, markets: list[Market], step_hours:
         first, last = min(t.target for t in tms), max(t.target for t in tms)
         try:
             runs[(station, unit)] = client.previous_runs(tms[0].lat, tms[0].lon, first, last, unit)
+        except DailyLimitError:
+            raise
         except (requests.RequestException, ValueError) as exc:
             log.warning("Open-Meteo %s: %s", station, exc)
             runs[(station, unit)] = {}
@@ -447,7 +455,7 @@ def local_day_start(o: Observation, offsets: dict) -> datetime:
 
 
 def simulate(obs: list[Observation], params: dict, cfg: Config, spread: float, *, hold: bool = False,
-             offsets: dict | None = None) -> tuple[list[dict], list, float]:
+             offsets: dict | None = None, prob_fn=None) -> tuple[list[dict], list, float]:
     """Mismas reglas que el bot (risk.py) sobre las observaciones en orden temporal.
 
     Solo se entra ANTES de que empiece el día local objetivo: después, el mercado ya ve la
@@ -455,6 +463,7 @@ def simulate(obs: list[Observation], params: dict, cfg: Config, spread: float, *
     hold=True: sin salidas anticipadas, se mantiene hasta la resolución.
     """
     offsets = offsets or {}
+    prob_fn = prob_fn or (lambda o: model_prob(o, params))
     half = spread / 2
     cash = peak = cfg.initial_bankroll
     halted = False
@@ -486,7 +495,7 @@ def simulate(obs: list[Observation], params: dict, cfg: Config, spread: float, *
             close(mid, p["shares"] if won else 0.0, "resolved_win" if won else "resolved_loss", ends[mid][0])
         m = o.tm.market
         marks[m.id] = o.price
-        fair_yes = model_prob(o, params)
+        fair_yes = prob_fn(o)
         hours_left = (m.end_date - o.t).total_seconds() / 3600
 
         if m.id in positions and not halted and not hold:  # parado = no se opera, ni para salir
@@ -568,6 +577,116 @@ def run_backtest(client: HistoryClient, cfg: Config, *, days: int = 90, train_fr
         test_markets=len({o.tm.market.id for o in test}), observations=len(obs),
         trades=trades, equity_curve=curve, final_equity=final, brier_model=bm, brier_market=bk, skipped=skipped,
     )
+
+
+# ------------------------------------------------- modo solo precios (calibración)
+CAL_EDGES = [0.0, 0.03, 0.07, 0.12, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.88, 0.93, 0.97, 1.0]
+
+
+def build_price_observations(client: HistoryClient, markets: list[Market], step_hours: int = 2,
+                             workers: int = 8) -> tuple[list[Observation], dict, dict]:
+    """Como build_observations pero sin previsiones: solo precio y resultado (no usa Open-Meteo)."""
+    skipped: dict[str, int] = {}
+    parsed = []
+    for m in markets:
+        tm = parse_temp_market(m)
+        if tm is None or m.resolved_outcome() is None:
+            skipped["no reconocible o sin resolución"] = skipped.get("no reconocible o sin resolución", 0) + 1
+        else:
+            parsed.append(tm)
+
+    def fetch(tm):
+        start = datetime(tm.target.year, tm.target.month, tm.target.day, tzinfo=timezone.utc) - timedelta(days=4)
+        try:
+            return tm, client.price_history(tm.market.token_ids[0], start, tm.market.end_date)
+        except (requests.RequestException, ValueError, KeyError):
+            return tm, None
+
+    obs: list[Observation] = []
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for done, (tm, history) in enumerate(pool.map(fetch, parsed), start=1):
+            if done % 2000 == 0:
+                log.info("Historiales descargados: %d/%d", done, len(parsed))
+            if not history:
+                skipped["sin historial de precios"] = skipped.get("sin historial de precios", 0) + 1
+                continue
+            outcome = 1 if tm.market.resolved_outcome() == 0 else 0
+            t, idx = history[0][0], 0
+            while t <= tm.market.end_date:
+                while idx + 1 < len(history) and history[idx + 1][0] <= t:
+                    idx += 1
+                obs.append(Observation(t, tm, history[idx][1], 0, float("nan"), outcome))
+                t += timedelta(hours=step_hours)
+    obs.sort(key=lambda o: o.t)
+    # Sin Open-Meteo no hay huso horario: aproximación por longitud (15° = 1 h).
+    offsets = {(tm.station, tm.unit): int(round(tm.lon / 15)) * 3600 for tm in parsed}
+    return obs, skipped, offsets
+
+
+def fit_calibration(train: list[Observation], k: float = 20.0) -> list[dict]:
+    """Frecuencia real de acierto por tramo de precio (con suavizado hacia el propio precio)."""
+    table = []
+    for lo, hi in zip(CAL_EDGES, CAL_EDGES[1:]):
+        rows = [o for o in train if lo <= o.price < hi or (hi == 1.0 and o.price == 1.0)]
+        n_markets = len({o.tm.market.id for o in rows})
+        mean_price = sum(o.price for o in rows) / len(rows) if rows else (lo + hi) / 2
+        wins = sum(o.outcome for o in rows)
+        # el suavizado usa el nº de MERCADOS, no de observaciones (las de un mismo mercado no son independientes)
+        weight = n_markets / (n_markets + k)
+        freq = weight * (wins / len(rows) if rows else mean_price) + (1 - weight) * mean_price
+        table.append({"lo": lo, "hi": hi, "n_obs": len(rows), "n_markets": n_markets,
+                      "mean_price": mean_price, "freq": freq})
+    return table
+
+
+def calibrated(price: float, table: list[dict]) -> float:
+    for row in table:
+        if row["lo"] <= price < row["hi"] or (row["hi"] == 1.0 and price >= 1.0):
+            # corrige el precio por el sesgo medido en su tramo
+            return min(max(price + (row["freq"] - row["mean_price"]), 0.001), 0.999)
+    return price
+
+
+def run_price_backtest(client: HistoryClient, cfg: Config, *, days: int = 30, train_frac: float = 0.4,
+                       spread: float = 0.02, bankroll: float = 50.0, max_markets: int = 30000,
+                       hold: bool = False, cache: dict | None = None) -> tuple[BacktestResult, list[dict]]:
+    cfg = replace(cfg, initial_bankroll=bankroll)
+    if cache is not None and "pobs" in cache:
+        obs, skipped, offsets = cache["pobs"], cache["pskipped"], cache["poffsets"]
+    else:
+        markets = client.closed_weather_markets(days, max_markets)
+        obs, skipped, offsets = build_price_observations(client, markets)
+        if cache is not None:
+            cache.update(pobs=obs, pskipped=skipped, poffsets=offsets)
+    targets = sorted({o.tm.target for o in obs})
+    if not targets:
+        return BacktestResult(params={}, train_markets=0, test_markets=0, observations=0, skipped=skipped,
+                              final_equity=bankroll), []
+    cut = targets[min(len(targets) - 1, int(len(targets) * train_frac))]
+    train = [o for o in obs if o.tm.target < cut]
+    test = [o for o in obs if o.tm.target >= cut]
+    table = fit_calibration(train)
+    trades, curve, final = simulate(test, {}, cfg, spread, hold=hold, offsets=offsets,
+                                    prob_fn=lambda o: calibrated(o.price, table))
+    bm = sum((calibrated(o.price, table) - o.outcome) ** 2 for o in test) / len(test) if test else None
+    bk = sum((o.price - o.outcome) ** 2 for o in test) / len(test) if test else None
+    res = BacktestResult(params={}, train_markets=len({o.tm.market.id for o in train}),
+                         test_markets=len({o.tm.market.id for o in test}), observations=len(obs), trades=trades,
+                         equity_curve=curve, final_equity=final, brier_model=bm, brier_market=bk, skipped=skipped,
+                         period=(cut.isoformat(), targets[-1].isoformat()))
+    return res, table
+
+
+def render_calibration(table: list[dict], title: str = "Calibración de precios (tramo de entrenamiento)") -> str:
+    lines = [f"## {title}", "", "Cuando el mercado cotizaba en este tramo, ¿cuántas veces ganó de verdad?", "",
+             "| Precio | Mercados | Precio medio | Ganó de verdad | Diferencia |", "|---|---|---|---|---|"]
+    for r in table:
+        if not r["n_obs"]:
+            continue
+        raw = r["freq"]
+        lines.append(f"| {r['lo'] * 100:.0f}–{r['hi'] * 100:.0f}% | {r['n_markets']} | {r['mean_price'] * 100:.1f}% | "
+                     f"{raw * 100:.1f}% | {(raw - r['mean_price']) * 100:+.1f} pp |")
+    return "\n".join(lines) + "\n"
 
 
 def render(res: BacktestResult, bankroll: float) -> str:
