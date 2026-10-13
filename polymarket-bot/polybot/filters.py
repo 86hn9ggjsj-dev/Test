@@ -7,6 +7,7 @@ from datetime import datetime
 
 from .config import Config
 from .polymarket import Market
+from .weather import is_weather_market
 
 # Pistas de que la descripción nombra una fuente de resolución concreta.
 _SOURCE_HINTS = re.compile(
@@ -45,6 +46,11 @@ def rejection_reason(m: Market, cfg: Config, now: datetime | None = None) -> str
 
 def eligible_markets(markets: list[Market], cfg: Config, now: datetime | None = None) -> list[Market]:
     ok = [m for m in markets if rejection_reason(m, cfg, now) is None]
-    # Prioriza lo más líquido y activo: mejor ejecución y más información pública.
-    ok.sort(key=lambda m: (m.volume_24h, m.liquidity), reverse=True)
+    if cfg.fast_mode:
+        # Primero mercados del tiempo (datos oficiales, posible ventaja real) y, dentro de cada
+        # grupo, los que resuelven antes: el capital vuelve antes y se puede reinvertir.
+        ok.sort(key=lambda m: (not is_weather_market(m), m.hours_to_resolution(now) or 0.0))
+    else:
+        # Lo más líquido y activo: mejor ejecución y más información pública.
+        ok.sort(key=lambda m: (m.volume_24h, m.liquidity), reverse=True)
     return ok

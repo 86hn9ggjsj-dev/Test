@@ -4,6 +4,7 @@
   python -m polybot once            un solo ciclo
   python -m polybot status          muestra el estado
   python -m polybot scan            lista mercados elegibles (sin llamar a Claude, sin operar)
+  python -m polybot dashboard       panel web en directo (http://127.0.0.1:8080)
   python -m polybot approve --yes   reanuda tras un parón por drawdown
   python -m polybot reset --yes     borra el estado PAPER y empieza de nuevo con el bankroll inicial
 """
@@ -77,6 +78,9 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("once")
     sub.add_parser("status")
     sub.add_parser("scan")
+    dp = sub.add_parser("dashboard")
+    dp.add_argument("--host", default=None, help="por defecto 127.0.0.1 (o DASHBOARD_HOST)")
+    dp.add_argument("--port", type=int, default=None, help="por defecto 8080 (o DASHBOARD_PORT)")
     ap = sub.add_parser("approve")
     ap.add_argument("--yes", action="store_true")
     ap.add_argument("--note", default="")
@@ -96,6 +100,14 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_run(cfg, once=args.cmd == "once")
     if args.cmd == "scan":
         return cmd_scan(cfg)
+    if args.cmd == "dashboard":
+        import os
+
+        from .dashboard import serve
+
+        serve(cfg, args.host or os.environ.get("DASHBOARD_HOST", "127.0.0.1"),
+              args.port or int(os.environ.get("DASHBOARD_PORT", "8080")), os.environ.get("DASHBOARD_TOKEN", ""))
+        return 0
 
     state = BotState.load_or_new(cfg.state_path, cfg.mode, cfg.initial_bankroll)
     if args.cmd == "status":

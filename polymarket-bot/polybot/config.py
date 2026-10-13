@@ -75,6 +75,7 @@ class Config:
     max_days_to_resolution: float = 60.0     # capital atado demasiado tiempo = coste de oportunidad
     min_confidence: str = "medium"           # "low" | "medium" | "high"
     taker_fee: float = 0.0                   # comisión por $ apostado (se resta del edge)
+    fast_mode: bool = True                   # prioriza mercados del tiempo y los que resuelven antes
 
     # --- Salidas ---
     exit_edge: float = 0.02                  # el edge "desaparece" si cae por debajo de 2 pp
@@ -162,6 +163,7 @@ def load_config(env_file: str | None = ".env") -> Config:
         max_days_to_resolution=_float("MAX_DAYS_TO_RESOLUTION", 60.0),
         min_confidence=_env("MIN_CONFIDENCE", "medium").lower(),
         taker_fee=_float("TAKER_FEE", 0.0),
+        fast_mode=_env("FAST_MODE", "true").lower() in ("1", "true", "yes", "si", "sí"),
         exit_edge=_float("EXIT_EDGE", 0.02),
         fv_move_exit=_float("FV_MOVE_EXIT", 0.05),
         exit_hours_before_resolution=_float("EXIT_HOURS_BEFORE_RESOLUTION", 2.0),

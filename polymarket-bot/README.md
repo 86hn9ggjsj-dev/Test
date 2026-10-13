@@ -7,6 +7,8 @@ para estimar el *fair value* de cada mercado y opera solo cuando el edge supera 
 - **Modo por defecto: Paper Trading con $50.** Simula cada orden contra el libro de órdenes real del CLOB.
 - **Live Trading** solo si lo activas a propósito (dos llaves: `TRADING_MODE=live` + `LIVE_TRADING_CONFIRM=yes`).
 - Todo queda registrado: cada mercado evaluado, cada edge, cada trade, cada balance.
+- **Modo tiempo:** prioriza mercados meteorológicos y le da a Claude la previsión oficial de NOAA/NWS.
+- **Panel web en directo:** balance, PnL, coste diario, runway, log de órdenes y posiciones.
 
 > ⚠️ **Antes de usarlo.** Polymarket no está permitido en todas las jurisdicciones y bloquea operar desde
 > algunos países. Comprueba que es legal donde vives y que el VPS está en una región permitida; no uses VPN
@@ -42,7 +44,10 @@ polymarket-bot/
 ├── polybot/
 │   ├── __main__.py    CLI: run / once / status / scan / approve / reset
 │   ├── agent.py       el ciclo de 10 minutos
-│   ├── brain.py       Claude + web search → fair value
+│   ├── brain.py       Claude + web search (+ NOAA en mercados del tiempo) → fair value
+│   ├── weather.py     detección de mercados del tiempo + cliente de api.weather.gov
+│   ├── dashboard.py   panel web en directo (+ dashboard.html)
+│   ├── simulate.py    simulación Monte Carlo del bot
 │   ├── risk.py        Kelly fraccional, edge, reglas duras, drawdown
 │   ├── filters.py     filtro de mercados elegibles
 │   ├── polymarket.py  Gamma API + libros del CLOB (lectura)
@@ -51,7 +56,7 @@ polymarket-bot/
 │   ├── journal.py     logs, diarios JSONL y status.md
 │   ├── postmortem.py  informe automático al llegar al 40% de drawdown
 │   └── config.py      configuración + límites duros
-├── tests/             38 tests (reglas, Kelly, filtros, ciclo completo, cerebro)
+├── tests/             46 tests (reglas, Kelly, filtros, ciclo completo, cerebro, NOAA, panel)
 ├── deploy/            servicio systemd + instalador para VPS
 ├── Dockerfile, docker-compose.yml
 └── .env.example
@@ -105,8 +110,57 @@ Tests: `pip install -r requirements-dev.txt && pytest`
 | `python -m polybot once` | Un solo ciclo |
 | `python -m polybot status` | Balance, pico, drawdown, posiciones, win rate, costes |
 | `python -m polybot scan` | Lista los mercados que pasan el filtro |
+| `python -m polybot dashboard` | Panel web en http://127.0.0.1:8080 |
+| `python -m polybot.simulate` | Simulación Monte Carlo (supuestos, no resultados) |
 | `python -m polybot approve --yes --note "..."` | Reanuda tras una parada por drawdown (el pico pasa a ser la equity actual) |
 | `python -m polybot reset --yes` | Solo paper: reinicia con el bankroll inicial |
+
+---
+
+## Modo tiempo y velocidad (`FAST_MODE=true`, por defecto)
+
+Los mercados meteorológicos (temperatura máxima en una ciudad, lluvia, nieve, huracanes, tormentas con nombre)
+resuelven en pocos días con datos oficiales, y las previsiones públicas a 1–3 días son buenas (unos 2–3 °F de
+error en la máxima del día siguiente). Es el nicho con más opciones de encontrar ventaja real. Con `FAST_MODE`:
+
+1. Los candidatos se ordenan con **los mercados del tiempo primero** y, dentro de cada grupo, **los que resuelven
+   antes**. El capital vuelve antes y se reinvierte más veces (interés compuesto más rápido).
+2. En mercados del tiempo, Claude recibe la herramienta `get_nws_forecast`: la previsión oficial de NWS a 7 días
+   y la última observación de la estación más cercana (solo EE. UU.), además de la búsqueda web para avisos del NHC.
+
+Las reglas duras no cambian. **¿Por qué no hacerlo más agresivo para ganar más rápido?** Simulado con las mismas
+condiciones (`python -m polybot.simulate`), Kelly completo con hasta un 30% por apuesta y sin parada:
+
+| Escenario | Reglas actuales | Agresivo |
+|---|---|---|
+| Claude con poca ventaja | mediana $47, 0% acaba con < $10 | mediana **$9**, **61% acaba con < $10** |
+| Claude con mucha ventaja y mercados ineficientes | mediana $353 | mediana $1.143 (p10 $149, p90 $7.039) |
+
+Ser agresivo solo compensa si la ventaja es real, y eso no lo sabremos hasta medirla. Si no lo es, te arruina.
+
+---
+
+## Panel en directo
+
+![Panel de Polybot (datos de demostración)](docs/dashboard.png)
+
+*Captura con datos de demostración generados con mercados simulados.*
+
+```bash
+python -m polybot dashboard                       # http://127.0.0.1:8080
+```
+
+Muestra balance, PnL, neto de supervivencia (PnL − API − VPS), win rate, runway (días que el bankroll cubriría los
+costes), drawdown frente al límite, la gráfica de balance (con tooltip al pasar el ratón), el log de órdenes y
+cierres, y las posiciones. Se actualiza cada 15 s, funciona en el móvil y tiene modo claro y oscuro. Es de solo lectura:
+lee los ficheros del bot y nunca opera.
+
+**En el VPS** el panel escucha solo en local. Para verlo desde tu ordenador:
+```bash
+ssh -L 8080:localhost:8080 usuario@IP_DEL_VPS     # y abre http://localhost:8080
+```
+Si quieres abrirlo directamente por internet (p. ej. desde el móvil), arráncalo con `--host 0.0.0.0` y pon
+`DASHBOARD_TOKEN=una-clave-larga` en `.env`; entonces se abre con `http://IP:8080/?token=una-clave-larga`.
 
 ---
 
@@ -205,7 +259,7 @@ scp -r polymarket-bot usuario@IP_DEL_VPS:~/
 cd ~/polymarket-bot
 sudo bash deploy/install_vps.sh          # instala en /opt/polybot con su propio usuario
 sudo nano /opt/polybot/.env              # pon ANTHROPIC_API_KEY (y lo de live si aplica)
-sudo systemctl start polybot
+sudo systemctl start polybot polybot-dashboard
 sudo journalctl -u polybot -f            # logs en directo
 cd /opt/polybot && sudo -u polybot .venv/bin/python -m polybot status
 ```
@@ -218,7 +272,7 @@ termine el ciclo en curso.
 ```bash
 cd polymarket-bot
 cp .env.example .env && nano .env
-docker compose up -d --build
+docker compose up -d --build            # bot + panel (127.0.0.1:8080)
 docker compose logs -f
 docker compose exec polybot python -m polybot status
 ```

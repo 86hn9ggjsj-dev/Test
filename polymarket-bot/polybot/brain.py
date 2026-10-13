@@ -16,6 +16,7 @@ import anthropic
 
 from .config import MODEL_PRICES, WEB_SEARCH_PRICE_PER_REQUEST, Config
 from .polymarket import Market
+from .weather import NWS_TOOL, NWSClient, is_weather_market, run_nws_tool
 
 log = logging.getLogger("polybot.brain")
 
@@ -101,7 +102,16 @@ def _usage_cost(model: str, usage) -> float:
     return tokens_in / 1e6 * in_price + tokens_out / 1e6 * out_price + searches * WEB_SEARCH_PRICE_PER_REQUEST
 
 
-def market_prompt(m: Market, price_yes: float | None, price_no: float | None) -> str:
+WEATHER_HINT = (
+    "\n\nThis is a weather market. Call get_nws_forecast with the coordinates of the exact city or "
+    "station named in the resolution rules, and compare the official forecast with the market's "
+    "threshold. Short-range forecasts are skilled: day-1 high-temperature errors are typically "
+    "2-3 °F, growing with lead time. Check which source and station decide resolution and the time "
+    "zone of the reporting day. For tropical systems, use web search for the latest NHC advisories."
+)
+
+
+def market_prompt(m: Market, price_yes: float | None, price_no: float | None, weather: bool = False) -> str:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     end = m.end_date.strftime("%Y-%m-%d %H:%M UTC") if m.end_date else "unknown"
     description = m.description.strip()[:4000]
@@ -115,6 +125,7 @@ def market_prompt(m: Market, price_yes: float | None, price_no: float | None) ->
         f"Liquidity: ${m.liquidity:,.0f}  ·  24h volume: ${m.volume_24h:,.0f}\n\n"
         f"Resolution rules / description:\n{description or '(empty)'}\n\n"
         f"Estimate the probability that outcome [0] '{m.outcomes[0]}' resolves true, then call submit_estimate."
+        + (WEATHER_HINT if weather else "")
     )
 
 
@@ -123,8 +134,9 @@ class Brain:
         self.cfg = cfg
         self.client = client or anthropic.Anthropic(max_retries=3, timeout=300.0)
         self.last_cost = 0.0  # coste de la última estimación, aunque fallara
+        self.nws = NWSClient()
 
-    def _create(self, messages: list):
+    def _create(self, messages: list, weather: bool = False):
         return self.client.beta.messages.create(
             model=self.cfg.model,
             max_tokens=16000,
@@ -133,6 +145,7 @@ class Brain:
             tools=[
                 {"type": "web_search_20260209", "name": "web_search", "max_uses": self.cfg.max_web_searches},
                 SUBMIT_TOOL,
+                *([NWS_TOOL] if weather else []),
             ],
             output_config={"effort": self.cfg.effort},
             cache_control={"type": "ephemeral"},
@@ -144,13 +157,14 @@ class Brain:
 
     def estimate(self, m: Market, price_yes: float | None, price_no: float | None) -> Estimate | None:
         """Devuelve una estimación, o None si Claude no la produjo. Registra siempre el coste."""
-        messages: list = [{"role": "user", "content": market_prompt(m, price_yes, price_no)}]
+        weather = is_weather_market(m)
+        messages: list = [{"role": "user", "content": market_prompt(m, price_yes, price_no, weather)}]
         total_cost = 0.0
         nudged = False
         self.last_cost = 0.0
         try:
-            for _ in range(6):
-                resp = self._create(messages)
+            for _ in range(10):
+                resp = self._create(messages, weather)
                 total_cost += _usage_cost(self.cfg.model, resp.usage)
                 self.last_cost = total_cost
 
@@ -161,6 +175,17 @@ class Brain:
                 for block in resp.content:
                     if block.type == "tool_use" and block.name == "submit_estimate":
                         return self._to_estimate(block.input, total_cost)
+
+                nws_calls = [b for b in resp.content if b.type == "tool_use" and b.name == "get_nws_forecast"]
+                if nws_calls:
+                    messages.append({"role": "assistant", "content": resp.content})
+                    results = []
+                    for call in nws_calls:
+                        data, is_error = run_nws_tool(self.nws, call.input)
+                        results.append({"type": "tool_result", "tool_use_id": call.id,
+                                        "content": json.dumps(data, ensure_ascii=False), "is_error": is_error})
+                    messages.append({"role": "user", "content": results})  # todos los resultados en un mensaje
+                    continue
 
                 if resp.stop_reason == "pause_turn":
                     # Bucle de búsqueda del servidor en pausa: reenviar para que continúe.

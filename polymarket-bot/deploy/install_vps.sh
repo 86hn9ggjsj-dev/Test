@@ -26,11 +26,13 @@ chmod 600 "$APP_DIR/.env"
 chown -R polybot:polybot "$APP_DIR"
 
 cp "$APP_DIR/deploy/polybot.service" /etc/systemd/system/polybot.service
+cp "$APP_DIR/deploy/polybot-dashboard.service" /etc/systemd/system/polybot-dashboard.service
 systemctl daemon-reload
-systemctl enable polybot
+systemctl enable polybot polybot-dashboard
 
 echo
 echo "Listo. Comandos útiles:"
-echo "  sudo systemctl start polybot        # arrancar"
+echo "  sudo systemctl start polybot polybot-dashboard   # arrancar bot y panel"
 echo "  sudo journalctl -u polybot -f       # ver logs en directo"
 echo "  cd $APP_DIR && sudo -u polybot .venv/bin/python -m polybot status"
+echo "  Panel: desde tu ordenador ejecuta  ssh -L 8080:localhost:8080 usuario@IP_DEL_VPS  y abre http://localhost:8080"

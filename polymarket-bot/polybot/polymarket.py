@@ -221,7 +221,7 @@ class PolymarketData:
             except RuntimeError:
                 if offset > 0:
                     break  # nos quedamos con lo ya descargado
-                log.warning("Gamma rechazó el orden por volumen; reintento sin ordenar")
+                log.warning("Falló la petición ordenada por volumen; reintento sin ordenar")
                 params.pop("order")
                 params.pop("ascending")
                 page = self._get(f"{GAMMA_URL}/markets", params)
