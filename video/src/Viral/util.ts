@@ -23,12 +23,14 @@ export const FUENTE = "Montserrat, sans-serif";
 
 export const SANS = "'Inter Tight', sans-serif";
 export const SERIF = "'Instrument Serif', serif";
+export const MONO = "'JetBrains Mono', monospace";
 
 const FUENTES: [string, string, FontFaceDescriptors][] = [
   ["Montserrat", "montserrat-latin-800-normal", { weight: "800" }],
   ["Montserrat", "montserrat-latin-900-normal", { weight: "900" }],
   ...[500, 600, 700, 800].map((w): [string, string, FontFaceDescriptors] => ["Inter Tight", `inter-tight-latin-${w}-normal`, { weight: String(w) }]),
   ["Instrument Serif", "instrument-serif-latin-400-italic", { weight: "400", style: "italic" }],
+  ["JetBrains Mono", "jetbrains-mono-latin-500-normal", { weight: "500" }],
 ];
 const cargando = delayRender("fuentes");
 Promise.all(

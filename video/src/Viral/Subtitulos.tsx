@@ -16,6 +16,8 @@ type Props = {
   estilo?: "impacto" | "premium";
   // premium con más energía: cada palabra entra con un pequeño rebote
   dinamico?: boolean;
+  // premium: las palabras clave brillan con un halo de su color
+  brillo?: boolean;
 };
 
 export const ORO = "#f2c96b";
@@ -48,7 +50,7 @@ const agrupar = (palabras: Palabra[], cortes: number[], claves: Record<string, s
 
 const yPorDefecto = () => Y_SUBS / ALTO;
 
-export const Subtitulos: React.FC<Props> = ({ t, palabras, cortes, claves, duracion, y = yPorDefecto, estilo = "impacto", dinamico = false }) => {
+export const Subtitulos: React.FC<Props> = ({ t, palabras, cortes, claves, duracion, y = yPorDefecto, estilo = "impacto", dinamico = false, brillo = false }) => {
   const bloques = useMemo(() => agrupar(palabras, cortes, claves), [palabras, cortes, claves]);
   const intervalo = (k: number) => {
     const b = bloques[k];
@@ -61,7 +63,7 @@ export const Subtitulos: React.FC<Props> = ({ t, palabras, cortes, claves, durac
   });
   if (idx < 0) return null;
   const b = bloques[idx];
-  if (estilo === "premium") return <BloquePremium t={t} b={b} claves={claves} dinamico={dinamico} top={y(...(intervalo(idx) as [number, number])) * ALTO} />;
+  if (estilo === "premium") return <BloquePremium t={t} b={b} claves={claves} dinamico={dinamico} brillo={brillo} top={y(...(intervalo(idx) as [number, number])) * ALTO} />;
   const chars = b.map((w) => w.w).join(" ").length;
   // Ancho medio de Montserrat Black en mayúsculas ≈ 0.72em; se reserva hueco para el escalado de la palabra activa
   const size = Math.min(104, (ANCHO - 2 * SAFE.lados) / (chars * 0.72 * 1.12 + 0.3 * (b.length - 1)));
@@ -113,7 +115,7 @@ export const Subtitulos: React.FC<Props> = ({ t, palabras, cortes, claves, durac
   );
 };
 
-const BloquePremium: React.FC<{ t: number; b: Palabra[]; claves: Record<string, string>; top: number; dinamico: boolean }> = ({ t, b, claves, top, dinamico }) => {
+const BloquePremium: React.FC<{ t: number; b: Palabra[]; claves: Record<string, string>; top: number; dinamico: boolean; brillo: boolean }> = ({ t, b, claves, top, dinamico, brillo }) => {
   // Inter Tight 700 ≈ 0.5em por carácter; la serif cursiva va a 1.3x pero es más estrecha
   const ancho = b.reduce((a, w) => a + w.w.length * (claves[limpia(w.w)] ? 0.5 : 0.52), 0);
   const size = Math.min(94, (ANCHO - 2 * SAFE.lados) / (ancho + 0.28 * (b.length - 1)));
@@ -145,9 +147,10 @@ const BloquePremium: React.FC<{ t: number; b: Palabra[]; claves: Record<string, 
           }}
         />
         {b.map((w, k) => {
-          const clave = !!claves[limpia(w.w)];
+          const color = claves[limpia(w.w)];
+          const clave = !!color;
           const dicha = t >= w.s - 0.02;
-          const brillo = 0.72 + 0.28 * suave(Math.min(Math.max((t - w.s + 0.02) / 0.12, 0), 1));
+          const nitidez = 0.72 + 0.28 * suave(Math.min(Math.max((t - w.s + 0.02) / 0.12, 0), 1));
           return (
             <span
               key={k}
@@ -157,9 +160,9 @@ const BloquePremium: React.FC<{ t: number; b: Palabra[]; claves: Record<string, 
                 fontWeight: clave ? 400 : 800,
                 fontSize: clave ? size * 1.35 : size,
                 letterSpacing: clave ? "0" : "-0.015em",
-                color: clave && dicha ? ORO : C.blanco,
-                opacity: brillo,
-                textShadow: SOMBRA_PREMIUM,
+                color: clave && dicha ? color : C.blanco,
+                opacity: nitidez,
+                textShadow: brillo && clave && dicha ? `${SOMBRA_PREMIUM}, 0 0 20px ${color}99, 0 0 44px ${color}44` : SOMBRA_PREMIUM,
                 lineHeight: 1,
                 display: "inline-block",
                 transform: dinamico ? `scale(${0.8 + 0.2 * pop(t, w.s - 0.04, 320)})` : undefined,

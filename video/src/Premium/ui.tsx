@@ -19,9 +19,9 @@ export const Revela: React.FC<{ t: number; t0: number; fin?: number; children: R
 };
 
 // Línea dorada fina que se dibuja desde el centro
-export const Linea: React.FC<{ t: number; t0: number; fin?: number; ancho?: number }> = ({ t, t0, fin, ancho = 220 }) => {
+export const Linea: React.FC<{ t: number; t0: number; fin?: number; ancho?: number; color?: string }> = ({ t, t0, fin, ancho = 220, color = ORO }) => {
   const k = lerp(t, t0, t0 + 0.6, 0, 1, salida) * (fin === undefined ? 1 : 1 - lerp(t, fin - 0.3, fin, 0, 1, recogida));
-  return <div style={{ width: ancho, height: 3, borderRadius: 2, background: ORO, transform: `scaleX(${k})`, boxShadow: "0 1px 6px rgba(0,0,0,0.6)" }} />;
+  return <div style={{ width: ancho, height: 3, borderRadius: 2, background: color, transform: `scaleX(${k})`, boxShadow: "0 1px 6px rgba(0,0,0,0.6)" }} />;
 };
 
 export const SOMBRA = SOMBRA_PREMIUM;
@@ -68,14 +68,14 @@ export const tarjeta = (v: number): React.CSSProperties => ({
   transform: `translateY(${(1 - v) * 12}px) scale(${0.94 + 0.06 * v})`,
 });
 
-export const Filo: React.FC = () => (
-  <div style={{ position: "absolute", top: 0, left: "12%", right: "12%", height: 2, background: `linear-gradient(90deg, transparent, ${ORO}, transparent)` }} />
+export const Filo: React.FC<{ color?: string }> = ({ color = ORO }) => (
+  <div style={{ position: "absolute", top: 0, left: "12%", right: "12%", height: 2, background: `linear-gradient(90deg, transparent, ${color}, transparent)` }} />
 );
 
-export const Arriba: React.FC<{ t: number; t0: number; fin?: number; top?: number; children: React.ReactNode }> = ({ t, t0, fin, top = 245, children }) => (
+export const Arriba: React.FC<{ t: number; t0: number; fin?: number; top?: number; filo?: string; children: React.ReactNode }> = ({ t, t0, fin, top = 245, filo, children }) => (
   <div style={{ position: "absolute", top, width: ANCHO, display: "flex", justifyContent: "center" }}>
     <div style={{ ...tarjeta(aparicion(t, t0, fin)), padding: "26px 48px 30px", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-      <Filo />
+      <Filo color={filo} />
       {children}
     </div>
   </div>

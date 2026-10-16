@@ -1,9 +1,9 @@
 import { AbsoluteFill, Audio, OffthreadVideo, staticFile, useCurrentFrame } from "remotion";
 import datos from "../gen/bot.json";
-import { Arriba, etiqueta, Linea, Progreso, Revela, salida, sans, serif } from "../Premium/ui";
-import { ORO, Subtitulos } from "../Viral/Subtitulos";
+import { Arriba, Linea, Progreso, Revela, salida, sans, serif } from "../Premium/ui";
+import { Subtitulos } from "../Viral/Subtitulos";
 import { fondoEn, Pantallas, PANTALLAS } from "./Pantallas";
-import { golpeZoom, lerp, suave } from "../Viral/util";
+import { golpeZoom, lerp, MONO, suave } from "../Viral/util";
 
 export const BOT_FPS = datos.fps;
 export const BOT_FRAMES = Math.round(datos.duracion * datos.fps);
@@ -11,11 +11,15 @@ export const BOT_FRAMES = Math.round(datos.duracion * datos.fps);
 const EV = datos.eventos;
 const esc = (id: string) => datos.escenas.find((e) => e.id === id)!;
 
-// Palabras clave: serif cursiva dorada
+// Estilo monocromo (como los motion graphics): las palabras clave van en serif cursiva blanca con resplandor
+const BLANCO = "#ffffff";
+const LUZ = "0 0 2px rgba(255,255,255,0.8), 0 0 18px rgba(255,255,255,0.42), 0 0 48px rgba(255,255,255,0.18)";
 const CLAVES: Record<string, string> = {};
 for (const w of ["tres", "libertad", "tiempo", "100%", "99%", "psicológica", "automático", "rentabilidad", "proporcional", "tabla", "privado"]) {
-  CLAVES[w] = ORO;
+  CLAVES[w] = BLANCO;
 }
+const kicker: React.CSSProperties = { fontFamily: MONO, fontWeight: 500, fontSize: 26, letterSpacing: "0.12em", color: "rgba(255,255,255,0.75)" };
+const titulo = (size: number): React.CSSProperties => ({ ...serif(size, BLANCO), textShadow: LUZ });
 
 type Tipo = "medio" | "captura" | "tabla";
 const planoEn = (t: number) => (datos.planos.find((p) => t >= p.s && t < p.e) ?? datos.planos[datos.planos.length - 1]) as { s: number; e: number; tipo: Tipo; pieza: number };
@@ -78,7 +82,8 @@ export const Bot: React.FC = () => {
       </AbsoluteFill>
       <Pantallas t={t} />
 
-      <Subtitulos t={t} palabras={datos.palabras} cortes={CORTES} claves={CLAVES} duracion={datos.duracion} y={ySubtitulo} estilo="premium" dinamico />
+      {/* En el CTA la frase ya aparece en píldoras: no se duplica con subtítulos */}
+      {t < EV.p_cta_s && <Subtitulos t={t} palabras={datos.palabras} cortes={CORTES} claves={CLAVES} duracion={datos.duracion} y={ySubtitulo} estilo="premium" dinamico brillo />}
       <Progreso t={t} duracion={datos.duracion} />
     </AbsoluteFill>
   );
@@ -100,14 +105,14 @@ const Ventaja: React.FC<{ t: number; t0: number; fin: number; numero: string; ch
 }) => {
   if (t < t0 - 0.05 || t >= fin) return null;
   return (
-    <Arriba t={t} t0={t0} fin={fin}>
+    <Arriba t={t} t0={t0} fin={fin} filo="rgba(255,255,255,0.7)">
       <Revela t={t} t0={t0 + 0.03} fin={fin}>
-        <div style={etiqueta}>Ventaja {numero}</div>
+        <div style={kicker}>VENTAJA {numero}</div>
       </Revela>
       <Revela t={t} t0={t0 + 0.1} fin={fin}>
         {children}
       </Revela>
-      <Linea t={t} t0={t0 + 0.2} fin={fin} ancho={240} />
+      <Linea t={t} t0={t0 + 0.2} fin={fin} ancho={240} color="rgba(255,255,255,0.85)" />
       {pie && (
         <Revela t={t} t0={tPie ?? t0 + 0.3} fin={fin}>
           {pie}
@@ -121,7 +126,7 @@ const Ventaja1: React.FC<{ t: number }> = ({ t }) => (
   <Ventaja t={t} t0={esc("v1").s} fin={EV.p_reloj_s} numero="01">
     <Fila>
       <span style={sans(58)}>Libertad de</span>
-      <span style={serif(100)}>tiempo</span>
+      <span style={titulo(100)}>tiempo</span>
     </Fila>
   </Ventaja>
 );
@@ -130,14 +135,14 @@ const Ventaja2: React.FC<{ t: number }> = ({ t }) => (
   <Ventaja t={t} t0={esc("v2").s} fin={EV.p_noventa_s} numero="02">
     <Fila>
       <span style={sans(54)}>Adiós a la</span>
-      <span style={serif(96)}>psicología</span>
+      <span style={titulo(96)}>psicología</span>
     </Fila>
   </Ventaja>
 );
 
 const Ventaja3: React.FC<{ t: number }> = ({ t }) => (
   <Ventaja t={t} t0={esc("v3").s} fin={EV.p_prop_s} numero="03" tPie={EV.capital} pie={<div style={{ ...sans(34), fontWeight: 600 }}>incluso con poco capital</div>}>
-    <span style={serif(110)}>Rentabilidad</span>
+    <span style={titulo(110)}>Rentabilidad</span>
   </Ventaja>
 );
 
@@ -153,10 +158,10 @@ const NotasCaptura: React.FC<{ t: number }> = ({ t }) => {
           top: 1012,
           width: 858,
           height: 60,
-          border: `2px solid ${ORO}`,
+          border: `2px solid ${BLANCO}`,
           borderRadius: 10,
-          background: "rgba(242,201,107,0.14)",
-          boxShadow: `0 0 24px ${ORO}66`,
+          background: "rgba(255,255,255,0.1)",
+          boxShadow: "0 0 24px rgba(255,255,255,0.4)",
           clipPath: `inset(0 ${(1 - caja) * 100}% 0 0)`,
         }}
       />
@@ -182,7 +187,7 @@ const NotasTabla: React.FC<{ t: number }> = ({ t }) => {
               top: y - 33,
               width: 854,
               height: 66,
-              border: `1.5px solid ${ORO}`,
+              border: `1.5px solid ${BLANCO}`,
               borderRadius: 8,
               clipPath: `inset(0 ${(1 - v) * 100}% 0 0)`,
             }}
@@ -197,8 +202,8 @@ const NotasTabla: React.FC<{ t: number }> = ({ t }) => {
           width: 446,
           height: FILAS_TABLA[2] - FILAS_TABLA[0] + 66,
           borderRadius: 8,
-          background: "rgba(242,201,107,0.16)",
-          boxShadow: `inset 0 0 0 2px ${ORO}`,
+          background: "rgba(255,255,255,0.12)",
+          boxShadow: `inset 0 0 0 2px ${BLANCO}, 0 0 24px rgba(255,255,255,0.3)`,
           opacity: suave(beneficio),
         }}
       />

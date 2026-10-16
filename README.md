@@ -145,6 +145,11 @@ npx remotion render Reto out/reto.mp4 --video-bitrate=12M --audio-codec=aac
 
 ### Video "3 ventajas de un bot"
 
+Las pantallas de motion graphics (`src/Bot/Pantallas.tsx`) siguen un estilo monocromo de diagramas 3D de alambre:
+nodos esféricos, rejillas de puntos, velas y capas apiladas con cámara en movimiento, profundidad de campo y brillo,
+cifras en JetBrains Mono y frases en Instrument Serif cursiva. Se dibujan con un motor 3D mínimo en SVG
+(`src/Bot/tres.tsx`: proyección en perspectiva, órbita de cámara y desenfoque por capas de profundidad).
+
 ```bash
 cd video
 python scripts/bot.py <ruta-a-ffmpeg>
