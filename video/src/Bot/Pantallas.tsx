@@ -38,6 +38,9 @@ const muelle = (t: number, t0: number, rigidez = 140, amort = 15, masa = 0.9) =>
 const L = (t: number, a: number, b: number, va: number, vb: number, e = io) => lerp(t, a, b, va, vb, e);
 const dos = (n: number) => (n < 10 ? "0" : "") + n;
 const euros = (n: number) => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+const pct2 = (n: number) => n.toFixed(2).replace(".", ",");
+// Momento en que se dice una palabra (la primera vez a partir de "desde")
+const momento = (w: string, desde = 0) => datos.palabras.find((p) => p.s >= desde - 0.1 && p.w.toLowerCase().replace(/[.,¿?¡!]/g, "") === w)?.s ?? desde;
 
 const SOMBRA = "0 2px 12px rgba(0,0,0,0.7)";
 const mono = (size: number, o = 1): React.CSSProperties => ({
@@ -606,3 +609,297 @@ const Cta: React.FC<P> = ({ t, s, e }) => {
     </>
   );
 };
+
+// ================================================================== versión 100 % motion graphics (sin el video a cámara)
+// Las pantallas cubren todo el audio y se encadenan con un fundido corto entre ellas.
+
+// ------------------------------------------------------------------ Capítulo: riel de tres tramos; se enciende el de la ventaja
+const CAPITULOS: Record<number, string> = { 1: "libertad de *tiempo*", 2: "adiós al mayor *fallo*", 3: "con poco *capital*" };
+const Capitulo = (n: number): React.FC<P> => {
+  const Pieza: React.FC<P> = ({ t, s, e }) => {
+    const X = (k: number) => (k - 2) * 1.05;
+    const cam = orbita(
+      [clave(t, [[s, (n === 1 ? X(1) - 0.9 : X(n - 1)) * 0.35], [s + 0.9, X(n) * 0.35]]), 0.2, 0],
+      L(t, s, e, 9.2, 8.4),
+      L(t, s, e, 0.35, 0.12),
+      L(t, s, e, 0.6, 0.48),
+      { apertura: 40, centroY: 1100 },
+    );
+    const tr: Trazo[] = [...polvo(0.3)];
+    const llena = L(t, s + 0.35, s + 1.1, 0, 1, salida);
+    for (let k = 1; k <= 3; k++) {
+      const o = k < n ? 0.75 : k === n ? 1 : 0.3;
+      for (const [a, b] of caja([X(k) - 0.43, 0, -0.26], [X(k) + 0.43, 0.1, 0.26])) tr.push({ t: "l", a, b, w: k === n ? 1.8 : 1.2, o });
+      // Rayado de la cara superior: completo en las ventajas ya vistas, avanzando en la actual
+      const rayas = k < n ? 12 : k === n ? Math.round(12 * llena) : 0;
+      for (let r = 0; r < rayas; r++) {
+        const x = X(k) - 0.39 + (0.72 * r) / 11;
+        tr.push({ t: "l", a: [x, 0.1, -0.22], b: [x + 0.06, 0.1, 0.22], w: 1.2, o: k === n ? 0.9 : 0.4, luz: k === n ? 0.35 : 0 });
+      }
+      if (k < 3) tr.push({ t: "l", a: [X(k) + 0.47, 0.05, 0], b: [X(k + 1) - 0.47, 0.05, 0], w: 1, o: 0.35, dash: "4 8" });
+    }
+    const pr = proyector(cam);
+    const num = pr([X(n), 0.7, 0]);
+    const k = muelle(t, s + 0.15, 170, 16);
+    return (
+      <>
+        <Escena cam={cam} trazos={tr} />
+        <div style={{ position: "absolute", left: num.x, top: num.y, transform: "translate(-50%, -50%)", overflow: "hidden", paddingBottom: 10 }}>
+          <div style={{ ...mono(200), transform: `translateY(${(1 - Math.min(k, 1)) * 105}%)` }}>{`0${n}`}</div>
+        </div>
+        <div style={{ position: "absolute", top: 250, left: 0, width: ANCHO, display: "flex", justifyContent: "center" }}>
+          <Teclea t={t} t0={s + 0.1} texto={`VENTAJA 0${n} / 03`} size={26} o={0.6} />
+        </div>
+        <Arriba top={300}>
+          <Titular t={t} t0={s + 0.25} texto={CAPITULOS[n]} size={84} />
+        </Arriba>
+      </>
+    );
+  };
+  return Pieza;
+};
+
+// ------------------------------------------------------------------ Calma: el ruido de las emociones se aplana cuando opera el bot
+const EMOCIONES: [string, number][] = [
+  ["MIEDO", -1.05],
+  ["AVARICIA", 0.1],
+  ["DUDA", 1.15],
+];
+const Calma: React.FC<P> = ({ t, s, e }) => {
+  const tAuto = momento("automático", s);
+  const calma = Math.min(muelle(t, tAuto - 0.15, 80, 16), 1.05);
+  const cam = orbita([0, 0, 0], L(t, s, e, 8.2, 7.6), L(t, s, e, 0.14, -0.14), L(t, s, e, 0.3, 0.18), { apertura: 40, centroY: 1000 });
+  const tr: Trazo[] = [...polvo(0.3)];
+  const amp = 0.48 * (1 - calma) + 0.04;
+  const fase = t * 1.6;
+  const ruidoEmocion = (x: number) =>
+    Math.sin(x * 3.1 + fase * 2.2) * 0.45 + Math.sin(x * 7.3 - fase * 3.1) * 0.3 + Math.sin(x * 13.7 + fase * 5) * 0.2 + EMOCIONES.reduce((a, [, px]) => a + Math.exp(-((x - px) ** 2) * 14) * 0.95, 0);
+  const dib = L(t, s + 0.05, s + 0.7, 0, 1, salida);
+  for (let j = 0; j < 5; j++) {
+    const z = (j - 2) * 0.32;
+    const pts: V3[] = Array.from({ length: 121 }, (_, i) => {
+      const x = -2.4 + i * 0.04;
+      // Calmado: una pendiente suave y limpia
+      const y = amp * ruidoEmocion(x + (j - 2) * 0.7) * (j === 2 ? 1 : 0.7) + calma * (x + 2.4) * 0.07;
+      return [x, y, z] as V3;
+    });
+    tr.push({ t: "p", pts, w: j === 2 ? 2.4 : 1, o: j === 2 ? 1 : 0.28, prog: dib, luz: j === 2 ? 0.3 + 0.5 * calma : 0 });
+  }
+  tr.push({ t: "l", a: [-2.4, 0, 0], b: [2.4, 0, 0], w: 1, o: 0.2, dash: "4 10" });
+  const pr = proyector(cam);
+  const inicio = pr([-2.4, 0, 0]);
+  return (
+    <>
+      <Escena cam={cam} trazos={tr} />
+      {EMOCIONES.map(([txt, px], i) => {
+        const q = pr([px, amp * 1.9 + 0.12, 0]);
+        return (
+          <div key={txt} style={{ position: "absolute", left: q.x, top: q.y - 40, transform: "translateX(-50%)", opacity: (1 - Math.min(calma, 1)) * Math.min(muelle(t, s + 0.3 + i * 0.15, 200, 18), 1) }}>
+            <span style={mono(28, 0.8)}>{txt}</span>
+          </div>
+        );
+      })}
+      <Etiqueta t={t} t0={tAuto + 0.1} x={inicio.x + 10} y={inicio.y - 60} size={28}>
+        BOT · AUTO
+      </Etiqueta>
+      <Arriba top={300}>
+        <Titular t={t} t0={s + 0.15} texto="sin *emociones*" size={96} />
+      </Arriba>
+    </>
+  );
+};
+
+// ------------------------------------------------------------------ Rentabilidad: la curva real de la cuenta (+50,52 %) con sus datos
+const GANANCIA = 50.52;
+const EQUIDAD: number[] = (() => {
+  const v: number[] = [];
+  for (let i = 0; i <= 48; i++) {
+    const u = i / 48;
+    // Subida con un drawdown marcado a mitad de recorrido y pequeñas oscilaciones
+    const dd = Math.exp(-((u - 0.58) ** 2) * 160) * 7.66;
+    v.push(GANANCIA * Math.pow(u, 1.15) - dd + (i % 48 ? Math.sin(i * 2.3) * 0.9 * u : 0));
+  }
+  return v.map((x, i) => (i === 48 ? GANANCIA : Math.max(x, 0)));
+})();
+const Rent: React.FC<P> = ({ t, s, e }) => {
+  const Y = (pct: number) => (pct / 100) * 4;
+  const X = (i: number) => -1.9 + (3.8 * i) / 48;
+  const cam = orbita([0, 0.95, 0], L(t, s, e, 7.4, 6.6), L(t, s, e, -0.55, -0.2), L(t, s, e, 0.12, 0.24), { apertura: 40, centroY: 960 });
+  const tr: Trazo[] = [...polvo(0.3)];
+  const rejilla = L(t, s, s + 0.5, 0, 1, salida);
+  for (let p = 0; p <= 50; p += 10) tr.push({ t: "l", a: [-1.95, Y(p), 0], b: [1.95, Y(p), 0], w: 1, o: (p ? 0.14 : 0.4) * rejilla, dash: p ? "4 10" : undefined });
+  const dib = L(t, s + 0.25, s + 1.7, 0, 1, Easing.bezier(0.35, 0, 0.2, 1));
+  const pts = EQUIDAD.map((v, i): V3 => [X(i), Y(v), 0]);
+  tr.push({ t: "p", pts, w: 3, o: 1, prog: dib, luz: 0.5 });
+  // Cortina bajo la curva
+  pts.forEach((p, i) => {
+    if (i / 48 <= dib && i % 2 === 0) tr.push({ t: "l", a: p, b: [p[0], 0, 0], w: 1, o: 0.12 });
+  });
+  const pos = dib * 48;
+  const i0 = Math.min(Math.floor(pos), 47);
+  const actual = EQUIDAD[i0] + (EQUIDAD[i0 + 1] - EQUIDAD[i0]) * (pos - i0);
+  const cabeza: V3 = [X(pos), Y(actual), 0];
+  if (dib > 0) tr.push({ t: "e", c: cabeza, r: 0.05, tipo: "punto", luz: 1 });
+  const pr = proyector(cam);
+  const DATOS: [string, string][] = [
+    ["DIARIO", "+0,64%"],
+    ["MENSUAL", "+21,22%"],
+    ["DRAWDOWN", "7,66%"],
+  ];
+  return (
+    <>
+      <Escena cam={cam} trazos={tr} encima={(p) => <Reticula q={p(cabeza)} r={30} k={dib >= 1 ? muelle(t, s + 1.7, 220, 14) : 0} />} />
+      {[10, 20, 30, 40, 50].map((p) => {
+        const q = pr([1.98, Y(p), 0]);
+        return (
+          <Etiqueta key={p} t={t} t0={s + 0.2 + p * 0.004} x={q.x + 12} y={q.y} size={22} o={0.45}>
+            {`${p}%`}
+          </Etiqueta>
+        );
+      })}
+      <div style={{ position: "absolute", top: 230, left: 0, width: ANCHO, display: "flex", justifyContent: "center" }}>
+        <Teclea t={t} t0={s + 0.1} texto="XAUUSD · CUENTA REAL · MT5" size={26} o={0.6} />
+      </div>
+      <Arriba top={275}>
+        <span style={{ ...mono(116), opacity: dib > 0 ? 1 : 0 }}>{`+${pct2(actual)}%`}</span>
+        <Titular t={t} t0={momento("rentabilidad", s) - 0.35} texto="de *rentabilidad*" size={70} />
+      </Arriba>
+      <div style={{ position: "absolute", top: 1255, left: 0, width: ANCHO, display: "flex", justifyContent: "center", gap: 54 }}>
+        {DATOS.map(([k, v], i) => {
+          const m = muelle(t, s + 1.75 + i * 0.12, 200, 18);
+          return (
+            <div key={k} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: Math.min(m * 1.6, 1), transform: `translateY(${(1 - Math.min(m, 1)) * 30}px)` }}>
+              <span style={mono(22, 0.5)}>{k}</span>
+              <span style={mono(40)}>{v}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ position: "absolute", top: 1385, left: 0, width: ANCHO, textAlign: "center", ...mono(17, 0.38) }}>RENTABILIDADES PASADAS NO GARANTIZAN RESULTADOS FUTUROS</div>
+    </>
+  );
+};
+
+// ------------------------------------------------------------------ Tabla: capital y beneficio hasta la fecha, en un panel 3D
+const FILAS_TABLA: [number, string][] = [
+  [1000, "505,2"],
+  [10000, "5.052"],
+  [100000, "50.520"],
+];
+const Tabla: React.FC<P> = ({ t, s, e }) => {
+  const tCant = momento("cantidades", s);
+  const tGen = momento("generado", s);
+  const panel = muelle(t, s + 0.05, 140, 17);
+  const cam = orbita([0, 0, 0], 9, L(t, s, e, 0.3, -0.3), 0.25, { apertura: 40 });
+  const FILA = 128;
+  return (
+    <>
+      <Escena cam={cam} trazos={polvo(0.35)} />
+      <div style={{ position: "absolute", top: 560, left: 0, width: ANCHO, height: 700, perspective: 1400, display: "flex", justifyContent: "center" }}>
+        <div
+          style={{
+            width: 900,
+            height: FILA * 4,
+            borderRadius: 22,
+            border: "1.5px solid rgba(255,255,255,0.5)",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))",
+            transform: `rotateX(${L(t, s, e, 26, 10)}deg) rotateY(${L(t, s, e, 20, -8)}deg) translateY(${(1 - panel) * 160}px)`,
+            opacity: Math.min(panel * 1.6, 1),
+            overflow: "hidden",
+            position: "relative",
+          }}
+        >
+          {/* Divisoria de columnas */}
+          <div style={{ position: "absolute", left: 450, top: 0, width: 1, height: "100%", background: "rgba(255,255,255,0.22)", transform: `scaleY(${L(t, s + 0.3, s + 0.9, 0, 1, salida)})`, transformOrigin: "50% 0" }} />
+          {[0, 1, 2, 3].map((r) => {
+            const linea = L(t, s + 0.35 + r * 0.08, s + 0.9 + r * 0.08, 0, 1, salida);
+            const fila = r > 0 ? FILAS_TABLA[r - 1] : null;
+            const k = fila ? muelle(t, tCant + (r - 1) * 0.15, 200, 18) : muelle(t, s + 0.3, 200, 18);
+            const marca = fila ? L(t, tCant + 0.9 + (r - 1) * 0.08, tCant + 1.3 + (r - 1) * 0.08, 0, 1, salida) : 0;
+            return (
+              <div key={r} style={{ position: "absolute", left: 0, top: r * FILA, width: 900, height: FILA, display: "flex", alignItems: "center" }}>
+                {r > 0 && <div style={{ position: "absolute", top: 0, left: 0, width: 900, height: 1, background: "rgba(255,255,255,0.22)", transform: `scaleX(${linea})`, transformOrigin: "0 50%" }} />}
+                {/* Columna de beneficio invertida (fondo blanco) cuando se resalta */}
+                {fila && <div style={{ position: "absolute", left: 451, top: 1, width: 449, height: FILA - 1, background: "#fff", transform: `scaleX(${marca})`, transformOrigin: "0 50%" }} />}
+                {/* Esqueleto de carga hasta que llegan las cifras */}
+                {fila && k < 0.05 && (
+                  <>
+                    <div style={{ position: "absolute", left: 44, width: 220, height: 22, borderRadius: 11, background: `rgba(255,255,255,${0.08 + 0.05 * Math.sin(t * 5 + r)})` }} />
+                    <div style={{ position: "absolute", left: 495, width: 180, height: 22, borderRadius: 11, background: `rgba(255,255,255,${0.08 + 0.05 * Math.sin(t * 5 + r + 1)})` }} />
+                  </>
+                )}
+                <div style={{ position: "absolute", left: 44, overflow: "hidden" }}>
+                  <div style={{ ...(fila ? mono(50) : mono(26, 0.55)), transform: `translateY(${(1 - Math.min(k, 1)) * 110}%)` }}>{fila ? `${euros(fila[0])} €` : "INVERSIÓN"}</div>
+                </div>
+                <div style={{ position: "absolute", left: 495, overflow: "hidden" }}>
+                  <div style={{ ...(fila ? mono(50) : mono(26, 0.55)), color: marca > 0.5 ? "#000" : undefined, transform: `translateY(${(1 - Math.min(k, 1)) * 110}%)` }}>{fila ? `+${fila[1]} €` : "BENEFICIO"}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div style={{ position: "absolute", top: 1215, left: 0, width: ANCHO, display: "flex", justifyContent: "center", gap: 30 }}>
+        <Teclea t={t} t0={tGen + 0.15} texto="HASTA LA FECHA · +50,52%" size={28} o={0.75} />
+      </div>
+      <div style={{ position: "absolute", top: 1385, left: 0, width: ANCHO, textAlign: "center", ...mono(17, 0.38), opacity: panel }}>RENTABILIDADES PASADAS NO GARANTIZAN RESULTADOS FUTUROS</div>
+      <Arriba top={300}>
+        <Titular t={t} t0={s + 0.9} fin={tGen - 0.2} texto="¿con cuánto *entrar?*" size={84} />
+      </Arriba>
+      <Arriba top={300}>
+        <Titular t={t} t0={tGen - 0.15} texto="lo que habrías *generado*" size={76} />
+      </Arriba>
+    </>
+  );
+};
+
+// ------------------------------------------------------------------ línea de tiempo y contenedor
+const esc = (id: string) => datos.escenas.find((x) => x.id === id)!;
+const PIEZAS_MG: Record<string, React.FC<P>> = {
+  intro: Intro,
+  cap1: Capitulo(1),
+  reloj: Reloj,
+  auto: Auto,
+  cap2: Capitulo(2),
+  noventa: Noventa,
+  calma: Calma,
+  gestion: Gestion,
+  cap3: Capitulo(3),
+  rent: Rent,
+  prop: Prop,
+  tabla: Tabla,
+  cta: Cta,
+};
+const CORTES_MG: [string, number][] = [
+  ["intro", 0],
+  ["cap1", esc("v1").s],
+  ["reloj", EV.p_reloj_s],
+  ["auto", EV.p_auto_s],
+  ["cap2", esc("v2").s],
+  ["noventa", EV.p_noventa_s],
+  ["calma", momento("al", EV.psicologica) - 0.06],
+  ["gestion", EV.p_gestion_s],
+  ["cap3", esc("v3").s],
+  ["rent", momento("nuestro", esc("v3").s) - 0.1],
+  ["prop", EV.p_prop_s],
+  ["tabla", momento("os", EV.p_prop_s) - 0.12],
+  ["cta", EV.p_cta_s],
+];
+export const PANTALLAS_MG: Tramo[] = CORTES_MG.map(([id, ini], i) => ({ id, s: ini, e: i + 1 < CORTES_MG.length ? CORTES_MG[i + 1][1] : datos.duracion }));
+
+// Fundido cruzado de 0,36 s entre pantallas consecutivas
+const FUNDE = 0.18;
+export const PantallasMG: React.FC<{ t: number }> = ({ t }) => (
+  <AbsoluteFill style={{ background: "radial-gradient(ellipse 90% 70% at 50% 45%, #0b0b0c, #000)" }}>
+    {PANTALLAS_MG.filter((p) => t >= p.s - FUNDE && t < p.e + FUNDE).map((p) => {
+      const Pieza = PIEZAS_MG[p.id];
+      const entra = p.s <= 0.01 ? 1 : lerp(t, p.s - FUNDE, p.s + FUNDE, 0, 1, io);
+      const sale = p.e >= datos.duracion - 0.01 ? 0 : lerp(t, p.e - FUNDE, p.e + FUNDE, 0, 1, io);
+      return (
+        <AbsoluteFill key={p.id} style={{ opacity: entra * (1 - sale), transform: `translateY(${(1 - entra) * 40 - sale * 40}px)` }}>
+          <Pieza t={t} s={p.s} e={p.e} />
+        </AbsoluteFill>
+      );
+    })}
+  </AbsoluteFill>
+);

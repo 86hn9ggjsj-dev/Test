@@ -1,5 +1,6 @@
 import { Composition } from "remotion";
 import { Bot, BOT_FPS, BOT_FRAMES } from "./Bot/Bot";
+import { BotMG } from "./Bot/BotMG";
 import { Intro } from "./Intro";
 import { Reto, RETO_FPS, RETO_FRAMES } from "./Reto/Reto";
 import { DURACION_FRAMES, Viral } from "./Viral/Viral";
@@ -27,6 +28,14 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Bot"
         component={Bot}
+        durationInFrames={BOT_FRAMES}
+        fps={BOT_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="BotMG"
+        component={BotMG}
         durationInFrames={BOT_FRAMES}
         fps={BOT_FPS}
         width={ANCHO}

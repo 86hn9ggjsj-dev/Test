@@ -154,6 +154,8 @@ bloques de capital ×10 y un chat para el CTA; cámara en movimiento, profundida
 cd video
 python scripts/bot.py <ruta-a-ffmpeg>
 npx remotion render Bot out/bot_raw.mp4 --video-bitrate=12M --audio-codec=aac
+# Versión 100 % motion graphics (solo el audio, sin el video a cámara):
+npx remotion render BotMG out/botmg_raw.mp4 --video-bitrate=12M --audio-codec=aac
 # Acelerar a 1,1x (imagen y voz) para más ritmo:
 ffmpeg -i out/bot_raw.mp4 -filter_complex "[0:v]setpts=PTS/1.1[v];[0:a]atempo=1.1[a]" -map "[v]" -map "[a]" out/bot.mp4
 ```
