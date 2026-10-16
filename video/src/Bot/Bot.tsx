@@ -11,15 +11,14 @@ export const BOT_FRAMES = Math.round(datos.duracion * datos.fps);
 const EV = datos.eventos;
 const esc = (id: string) => datos.escenas.find((e) => e.id === id)!;
 
-// Estilo monocromo (como los motion graphics): las palabras clave van en serif cursiva blanca con resplandor
+// Estilo monocromo, a juego con los motion graphics: las palabras clave van en serif cursiva blanca
 const BLANCO = "#ffffff";
-const LUZ = "0 0 2px rgba(255,255,255,0.8), 0 0 18px rgba(255,255,255,0.42), 0 0 48px rgba(255,255,255,0.18)";
 const CLAVES: Record<string, string> = {};
 for (const w of ["tres", "libertad", "tiempo", "100%", "99%", "psicológica", "automático", "rentabilidad", "proporcional", "tabla", "privado"]) {
   CLAVES[w] = BLANCO;
 }
 const kicker: React.CSSProperties = { fontFamily: MONO, fontWeight: 500, fontSize: 26, letterSpacing: "0.12em", color: "rgba(255,255,255,0.75)" };
-const titulo = (size: number): React.CSSProperties => ({ ...serif(size, BLANCO), textShadow: LUZ });
+const titulo = (size: number): React.CSSProperties => serif(size, BLANCO);
 
 type Tipo = "medio" | "captura" | "tabla";
 const planoEn = (t: number) => (datos.planos.find((p) => t >= p.s && t < p.e) ?? datos.planos[datos.planos.length - 1]) as { s: number; e: number; tipo: Tipo; pieza: number };
@@ -82,8 +81,7 @@ export const Bot: React.FC = () => {
       </AbsoluteFill>
       <Pantallas t={t} />
 
-      {/* En el CTA la frase ya aparece en píldoras: no se duplica con subtítulos */}
-      {t < EV.p_cta_s && <Subtitulos t={t} palabras={datos.palabras} cortes={CORTES} claves={CLAVES} duracion={datos.duracion} y={ySubtitulo} estilo="premium" dinamico brillo />}
+      <Subtitulos t={t} palabras={datos.palabras} cortes={CORTES} claves={CLAVES} duracion={datos.duracion} y={ySubtitulo} estilo="premium" dinamico />
       <Progreso t={t} duracion={datos.duracion} />
     </AbsoluteFill>
   );

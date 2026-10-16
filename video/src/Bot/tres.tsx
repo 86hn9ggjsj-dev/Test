@@ -2,7 +2,7 @@
 // Todo se dibuja en un único SVG a pantalla completa; las coordenadas del mundo usan y hacia arriba.
 import React from "react";
 import { Easing, interpolate } from "remotion";
-import { ALTO, ANCHO } from "../Viral/util";
+import { ALTO, ANCHO, ruido } from "../Viral/util";
 
 export type V3 = [number, number, number];
 export type Camara = { pos: V3; mira: V3; fov?: number; foco?: number; apertura?: number; centroY?: number };
@@ -96,7 +96,7 @@ export const clave = (t: number, puntos: [number, number][], easing = io) =>
 export type Trazo =
   | { t: "l"; a: V3; b: V3; w?: number; o?: number; dash?: string; luz?: number }
   | { t: "p"; pts: V3[]; w?: number; o?: number; dash?: string; prog?: number; luz?: number; relleno?: string }
-  | { t: "e"; c: V3; r: number; o?: number; tipo?: "esfera" | "nodo" | "punto" | "aro"; luz?: number; w?: number };
+  | { t: "e"; c: V3; r: number; o?: number; tipo?: "nodo" | "punto" | "aro"; luz?: number; w?: number };
 
 const DESENFOQUES = [0, 1.4, 3, 5.5, 9, 14];
 
@@ -146,11 +146,9 @@ export const Escena: React.FC<{ cam: Camara; trazos: Trazo[]; encima?: (pr: (p: 
     } else {
       const c = pr(tr.c);
       const r = Math.max(tr.r * c.k, 0.6);
-      const tipo = tr.tipo ?? "esfera";
+      const tipo = tr.tipo ?? "punto";
       nodo =
-        tipo === "esfera" ? (
-          <circle key={i} cx={c.x} cy={c.y} r={r} fill="url(#esfera)" stroke="#fff" strokeOpacity={0.85 * o} strokeWidth={Math.max(1, r * 0.035)} opacity={o} />
-        ) : tipo === "nodo" ? (
+        tipo === "nodo" ? (
           <circle key={i} cx={c.x} cy={c.y} r={r} fill="rgba(140,140,140,0.5)" stroke="#fff" strokeWidth={tr.w ?? 1.3} opacity={o} />
         ) : tipo === "aro" ? (
           <circle key={i} cx={c.x} cy={c.y} r={r} fill="none" stroke="#fff" strokeWidth={tr.w ?? 1.5} opacity={o} />
@@ -166,13 +164,6 @@ export const Escena: React.FC<{ cam: Camara; trazos: Trazo[]; encima?: (pr: (p: 
   return (
     <svg width={ANCHO} height={ALTO} style={{ position: "absolute", inset: 0, overflow: "visible" }}>
       <defs>
-        <radialGradient id="esfera" cx="40%" cy="34%" r="70%" fx="32%" fy="24%">
-          <stop offset="0" stopColor="#ffffff" />
-          <stop offset="0.14" stopColor="#d9d9d9" />
-          <stop offset="0.5" stopColor="#7d7d7d" />
-          <stop offset="0.86" stopColor="#3b3b3b" />
-          <stop offset="1" stopColor="#6a6a6a" />
-        </radialGradient>
         {DESENFOQUES.map((b, c) =>
           b ? (
             <filter key={c} id={`dof${c}`} {...region}>
@@ -202,15 +193,12 @@ export const Escena: React.FC<{ cam: Camara; trazos: Trazo[]; encima?: (pr: (p: 
   );
 };
 
-// Campo de aros desenfocados al fondo (el bokeh de la referencia)
-export const bokeh = (plano: "fondo" | "suelo", o = 0.1, desplaza = 0): Trazo[] => {
-  const out: Trazo[] = [];
-  for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 8; j++) {
-      const x = (i - 4) * 2.1 + (j % 2) * 1.05 + desplaza;
-      const c: V3 = plano === "fondo" ? [x, (j - 3) * 1.9, -11] : [x, -4.5, (j - 6) * 2.1];
-      out.push({ t: "e", c, r: 0.42, tipo: "aro", o, w: 2.5 });
-    }
-  }
-  return out;
-};
+// Polvo de puntos diminutos repartidos en profundidad: da paralaje cuando la cámara se mueve
+export const polvo = (o = 0.35, n = 140, min: V3 = [-8, -5, -12], max: V3 = [8, 6, 4]): Trazo[] =>
+  Array.from({ length: n }, (_, i): Trazo => ({
+    t: "e",
+    c: [min[0] + (max[0] - min[0]) * ruido(i * 3 + 1), min[1] + (max[1] - min[1]) * ruido(i * 7 + 2), min[2] + (max[2] - min[2]) * ruido(i * 11 + 3)],
+    r: 0.01 + 0.012 * ruido(i * 13 + 4),
+    tipo: "punto",
+    o: o * (0.35 + 0.65 * ruido(i * 17 + 5)),
+  }));
