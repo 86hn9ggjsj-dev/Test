@@ -2,7 +2,7 @@
 
 Uso: python scripts/explica.py <ffmpeg>
 Voz: si existe input/explica_voz.(mp3|wav) (p. ej. grabada o de ElevenLabs con este mismo guion) se usa esa;
-si no, se sintetiza con Kokoro (voz em_alex). En ambos casos los tiempos por palabra salen de Whisper,
+si no, se sintetiza con Kokoro (voz femenina española ef_dora, fonemas castellanos). En ambos casos los tiempos por palabra salen de Whisper,
 alineados contra el guion para que los subtítulos muestren el texto exacto.
 Salida: public/gen/explica_mezcla.wav, src/gen/explica.json, guiones/que_hace_un_bot.md
 """
@@ -39,6 +39,9 @@ GUION = [
     ("codigo", ["Un bot no es magia.", "Es disciplina convertida en código."]),
     ("cta", ["Sígueme, y en el próximo vídeo te enseño cómo se prueba un bot antes de arriesgar un solo euro."]),
 ]
+# Voz: femenina, española y cálida; un poco más pausada que una locución comercial
+VOZ = "ef_dora"
+VELOCIDAD = 1.04
 PAUSA_FRASE = 0.06
 PAUSA_ESCENA = 0.14
 
@@ -71,17 +74,17 @@ else:
     trozos = []
     for k, (_, frases) in enumerate(GUION):
         for j, frase in enumerate(frases):
-            audio = np.concatenate([a.numpy() if hasattr(a, "numpy") else a for _, _, a in kp(frase, voice="em_alex", speed=1.1)])
+            audio = np.concatenate([a.numpy() if hasattr(a, "numpy") else a for _, _, a in kp(frase, voice=VOZ, speed=VELOCIDAD)])
             trozos.append(recorta(resample_poly(audio, 2, 1)))  # 24 kHz -> 48 kHz
             fin_escena = j == len(frases) - 1
             trozos.append(np.zeros(int((PAUSA_ESCENA if fin_escena else PAUSA_FRASE) * SR)))
     sf.write(bruta, np.concatenate([np.zeros(int(0.12 * SR))] + trozos), SR)
 
-# Tratamiento: fuera graves, presencia, compresión suave
+# Tratamiento para una voz dulce: calidez en medios-graves, presencia suave, sin aspereza en agudos
 voz_wav = GEN / "explica_voz.wav"
 subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(bruta), "-af",
-                "highpass=f=75,equalizer=f=200:t=q:w=1:g=1.5,equalizer=f=3800:t=q:w=1.2:g=2.5,"
-                "acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120:makeup=2",
+                "highpass=f=90,equalizer=f=260:t=q:w=1:g=1.5,equalizer=f=3200:t=q:w=1.2:g=1.2,"
+                "equalizer=f=7500:t=q:w=1.5:g=-2,acompressor=threshold=-20dB:ratio=2.2:attack=10:release=140:makeup=2",
                 "-ar", str(SR), "-c:a", "pcm_f32le", str(voz_wav)], check=True)
 voz, _ = sf.read(voz_wav)
 dur = round(len(voz) / SR + 0.6, 3)

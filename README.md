@@ -162,7 +162,7 @@ ffmpeg -i out/bot_raw.mp4 -filter_complex "[0:v]setpts=PTS/1.1[v];[0:a]atempo=1.
 
 ### Video desde cero: "Qué hace de verdad un bot de trading"
 
-Todo generado aquí: guion (`video/guiones/que_hace_un_bot.md`), voz en off con Kokoro (voz `em_alex`), tiempos por
+Todo generado aquí: guion (`video/guiones/que_hace_un_bot.md`), voz en off con Kokoro (voz femenina española `ef_dora`), tiempos por
 palabra con Whisper alineados al guion, música, SFX, mezcla a -14 LUFS y 8 pantallas de motion graphics
 (`src/Explica/Explica.tsx`). Para usar otra voz (grabada o de ElevenLabs) con el mismo guion, deja el archivo en
 `input/explica_voz.mp3` y vuelve a ejecutar el script: todo se resincroniza solo.
