@@ -160,5 +160,19 @@ npx remotion render BotMG out/botmg_raw.mp4 --video-bitrate=12M --audio-codec=aa
 ffmpeg -i out/bot_raw.mp4 -filter_complex "[0:v]setpts=PTS/1.1[v];[0:a]atempo=1.1[a]" -map "[v]" -map "[a]" out/bot.mp4
 ```
 
+### Video desde cero: "Qué hace de verdad un bot de trading"
+
+Todo generado aquí: guion (`video/guiones/que_hace_un_bot.md`), voz en off con Kokoro (voz `em_alex`), tiempos por
+palabra con Whisper alineados al guion, música, SFX, mezcla a -14 LUFS y 8 pantallas de motion graphics
+(`src/Explica/Explica.tsx`). Para usar otra voz (grabada o de ElevenLabs) con el mismo guion, deja el archivo en
+`input/explica_voz.mp3` y vuelve a ejecutar el script: todo se resincroniza solo.
+
+```bash
+cd video
+pip install kokoro faster-whisper soundfile scipy   # y espeak-ng en el sistema
+python scripts/explica.py <ruta-a-ffmpeg>
+npx remotion render Explica out/explica.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
 `scripts/sonido.py` reúne la síntesis de música y SFX y la mezcla con ducking y -14 LUFS que
 usan ambos pipelines.
