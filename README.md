@@ -104,3 +104,77 @@ Para el modo voz: `pip install -r requirements-voz.txt`. En Linux puede que nece
 - Tus datos (memoria, alertas, estado de la vigilancia) se guardan en `~/.jarvis/`.
 - Jarvis nunca envía correos ni ejecuta comandos sin preguntarte antes.
 - Si el modelo principal rechaza una petición, la API reintenta automáticamente con un modelo alternativo.
+
+## Vídeos con Remotion
+
+En la carpeta `video/` hay un proyecto de [Remotion](https://www.remotion.dev/) para crear
+vídeos con React. Necesita **Node.js 18 o superior**.
+
+```bash
+cd video
+npm install        # solo la primera vez
+npm run dev        # abre Remotion Studio en el navegador
+npm run render     # genera out/intro.mp4
+```
+
+Las composiciones se registran en `video/src/Root.tsx`.
+
+### Video viral a partir de una voz en off
+
+La composición `Viral` (1080x1920, 60 fps) convierte `video/input/voz.mp3` en un video vertical
+con subtítulos karaoke, gráfico animado, motion graphics, música y efectos sintetizados.
+
+```bash
+cd video
+# 1. Transcripción por palabra (faster-whisper) -> input/palabras.json
+# 2. Audio: jump cuts, hook, música, SFX, ducking y -14 LUFS
+python scripts/audio.py <ruta-a-ffmpeg>
+# 3. Render
+npx remotion render Viral out/viral.mp4 --video-bitrate=10M --audio-codec=aac
+```
+
+### Editar un video grabado
+
+La composición `Reto` (1080x1920, 30 fps) edita un video a cámara: jump cuts, grading, subtítulos que esquivan la cara y las capturas, anotaciones sobre
+las capturas y la tabla, música, SFX y CTA final.
+
+```bash
+cd video
+# input/reto.mp4 (no se versiona) + input/reto_palabras.json (Whisper)
+python scripts/reto.py <ruta-a-ffmpeg>
+npx remotion render Reto out/reto.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
+### Video "3 ventajas de un bot"
+
+Las pantallas de motion graphics (`src/Bot/Pantallas.tsx`) usan un lenguaje monocromo de alambre 3D con motivos del propio mensaje:
+gráfico con retículas, reloj que va marcando operaciones, registro de órdenes, 100 curvas de capital, velas con SL/BE/TP,
+bloques de capital ×10 y un chat para el CTA; cámara en movimiento, profundidad de campo, cifras en JetBrains Mono y titulares en sans con la palabra clave en serif cursiva. Se dibujan con un motor 3D mínimo en SVG
+(`src/Bot/tres.tsx`: proyección en perspectiva, órbita de cámara y desenfoque por capas de profundidad).
+
+```bash
+cd video
+python scripts/bot.py <ruta-a-ffmpeg>
+npx remotion render Bot out/bot_raw.mp4 --video-bitrate=12M --audio-codec=aac
+# Versión 100 % motion graphics (solo el audio, sin el video a cámara):
+npx remotion render BotMG out/botmg_raw.mp4 --video-bitrate=12M --audio-codec=aac
+# Acelerar a 1,1x (imagen y voz) para más ritmo:
+ffmpeg -i out/bot_raw.mp4 -filter_complex "[0:v]setpts=PTS/1.1[v];[0:a]atempo=1.1[a]" -map "[v]" -map "[a]" out/bot.mp4
+```
+
+### Video desde cero: "Qué hace de verdad un bot de trading"
+
+Todo generado aquí: guion (`video/guiones/que_hace_un_bot.md`), voz en off con Kokoro (voz femenina española `ef_dora`), tiempos por
+palabra con Whisper alineados al guion, música, SFX, mezcla a -14 LUFS y 8 pantallas de motion graphics
+(`src/Explica/Explica.tsx`). Para usar otra voz (grabada o de ElevenLabs) con el mismo guion, deja el archivo en
+`input/explica_voz.mp3` y vuelve a ejecutar el script: todo se resincroniza solo.
+
+```bash
+cd video
+pip install kokoro faster-whisper soundfile scipy   # y espeak-ng en el sistema
+python scripts/explica.py <ruta-a-ffmpeg>
+npx remotion render Explica out/explica.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
+`scripts/sonido.py` reúne la síntesis de música y SFX y la mezcla con ducking y -14 LUFS que
+usan ambos pipelines.
