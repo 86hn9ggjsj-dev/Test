@@ -28,7 +28,7 @@ Sígueme, y en el próximo vídeo te enseño cómo se prueba un bot antes de arr
 
 ## Versión con gestos (ElevenLabs, modelo Eleven v3)
 
-Las etiquetas entre corchetes no se leen: marcan entonación, risas, suspiros, susurros y pausas. Pegar con una línea en blanco entre párrafos.
+Las etiquetas entre corchetes no se leen: marcan respiraciones, pausas y tono. Las palabras son las mismas que arriba, así el vídeo se sincroniza solo. Pegar con una línea en blanco entre párrafos.
 
 [inhales] Un bot de trading no adivina el futuro. [short pause] Hace algo... mucho más aburrido. [chuckles] Y por eso es tan útil.
 

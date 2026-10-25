@@ -1,11 +1,11 @@
-"""Voz en off del guion con ElevenLabs: voz femenina española con tono de asistente virtual -> input/explica_voz.mp3
+"""Voz en off del guion con ElevenLabs -> input/<video>_voz.mp3
 
-Uso:  ELEVENLABS_API_KEY=... python scripts/voz_elevenlabs.py [--voz VOICE_ID|matilda|sarah|…] [--modelo eleven_v3]
+Uso:  ELEVENLABS_API_KEY=... python scripts/voz_elevenlabs.py [--video explica|prueba] [--voz VOICE_ID|matilda|sarah|…] [--modelo eleven_v3]
 
 Por defecto: voz George (masculina, suave y cálida) con el modelo eleven_v3 y la indicación de acento castellano
 en cada párrafo. Medido con palabras de c/z frente a s, distinguen como en España George y Matilda (voz femenina);
 con eleven_multilingual_v2 o sin la indicación, las voces predeterminadas sesean.
-Después: python scripts/explica.py <ffmpeg>  (detecta el mp3 y resincroniza subtítulos, animaciones y mezcla)
+Después: python scripts/<video>.py <ffmpeg>  (detecta el mp3 y resincroniza subtítulos, animaciones y mezcla)
 
 Sin --voz (ni ELEVENLABS_VOICE_ID) busca en la biblioteca de voces compartidas una voz femenina en español de
 España, conversacional y cercana (como una asistente: amable, clara y tranquila), la añade a tu cuenta y la usa.
@@ -14,6 +14,7 @@ los ajustes priorizan un tono estable y natural, con algo de calidez, sin dramat
 """
 import argparse
 import hashlib
+import importlib
 import json
 import os
 import ssl
@@ -22,8 +23,6 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
-
-from guion_explica import GESTOS, GUION
 
 API = "https://api.elevenlabs.io/v1"
 RAIZ = Path(__file__).resolve().parent.parent
@@ -76,6 +75,7 @@ def busca_voz():
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--video", default="explica", choices=("explica", "prueba"), help="guion a locutar (scripts/guion_<video>.py)")
     ap.add_argument("--voz", default=os.environ.get("ELEVENLABS_VOICE_ID") or "george")
     ap.add_argument("--modelo", default="eleven_v3")
     ap.add_argument("--velocidad", type=float, default=1.08)
@@ -83,6 +83,7 @@ def main():
     ap.add_argument("--forzar", action="store_true", help="genera aunque no haya cambios (gasta créditos)")
     ap.add_argument("--acento", default="con acento castellano de España, voz masculina suave, cálida y cercana")
     args = ap.parse_args()
+    guion = importlib.import_module(f"guion_{args.video}")
     if not CLAVE:
         sys.exit("Falta ELEVENLABS_API_KEY en el entorno")
     voz = PREDETERMINADAS.get((args.voz or "").lower(), args.voz)
@@ -98,14 +99,14 @@ def main():
     v3 = args.modelo == "eleven_v3"
     etiqueta = f"[{args.acento}] " if v3 and args.acento else ""
     # Con v3, cada párrafo lleva sus gestos (risas, suspiros, pausas, susurros); v2 leería las etiquetas
-    parrafo = (lambda id_, frases: GESTOS[id_]) if v3 and not args.sin_gestos else (lambda id_, frases: " ".join(frases))
-    texto = "\n\n".join(etiqueta + parrafo(id_, frases) for id_, frases in GUION)
+    parrafo = (lambda id_, frases: guion.GESTOS[id_]) if v3 and not args.sin_gestos else (lambda id_, frases: " ".join(frases))
+    texto = "\n\n".join(etiqueta + parrafo(id_, frases) for id_, frases in guion.GUION)
     # v3 solo admite estabilidad 0 (creativa), 0,5 (natural) o 1 (robusta)
     ajustes = ({"stability": 0.5, "similarity_boost": 0.8, "use_speaker_boost": True, "speed": args.velocidad} if args.modelo == "eleven_v3"
                else {"stability": 0.55, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True, "speed": args.velocidad})
     peticion = {"text": texto, "model_id": args.modelo, "voice_settings": ajustes}
     # Para no gastar créditos: si ya existe una locución de este mismo guion, voz y ajustes, se reutiliza
-    destino = RAIZ / "input/explica_voz.mp3"
+    destino = RAIZ / f"input/{args.video}_voz.mp3"
     firma_ruta = destino.with_suffix(".firma")
     firma = hashlib.sha256(json.dumps({"voz": voz, **peticion}, sort_keys=True).encode()).hexdigest()
     if destino.exists() and firma_ruta.exists() and firma_ruta.read_text() == firma and not args.forzar:

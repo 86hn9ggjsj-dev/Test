@@ -1,35 +1,19 @@
 // "Qué hace de verdad un bot de trading": video 100 % motion graphics con guion, voz, música y SFX propios.
 // Ocho pantallas encadenadas con fundido; cada una ilustra una frase del guion y se anima con los tiempos
 // de las palabras (src/gen/explica.json, generado por scripts/explica.py).
-import { AbsoluteFill, Audio, Easing, staticFile, useCurrentFrame } from "remotion";
+import { Easing, useCurrentFrame } from "remotion";
 import datos from "../gen/explica.json";
-import { Progreso, salida } from "../Premium/ui";
-import { Subtitulos } from "../Viral/Subtitulos";
-import { ANCHO, lerp, ruido, SANS } from "../Viral/util";
+import { salida } from "../Premium/ui";
+import { ANCHO, ruido } from "../Viral/util";
 import { Arriba, Etiqueta, L, mono, muelle, Reticula, Teclea, Titular } from "../Bot/piezas";
 import { caja, circulo, clave, Escena, io, orbita, polvo, proyector, Trazo, V3 } from "../Bot/tres";
+import { BotonSeguir, claves, cuando, Kicker, Montaje, P, paseo } from "./Montaje";
 
 export const EXPLICA_FPS = datos.fps;
 export const EXPLICA_FRAMES = Math.round(datos.duracion * datos.fps);
 
 const EV = datos.eventos;
-const norm = (w: string) => w.toLowerCase().replace(/[^\wáéíóúñü%]/g, "");
-// Momento en que se dice una palabra (la primera vez a partir de "desde")
-const en = (w: string, desde = 0) => datos.palabras.find((p) => p.s >= desde - 0.1 && norm(p.w) === w)?.s ?? desde;
-
-type P = { t: number; s: number; e: number };
-
-// Paseo aleatorio suave y reproducible
-const paseo = (n: number, semilla: number, paso: number, deriva = 0): number[] => {
-  const v = [0];
-  for (let i = 1; i < n; i++) v.push(v[i - 1] + deriva + (ruido(semilla * 131 + i * 17) - 0.5) * paso);
-  return v;
-};
-const Kicker: React.FC<{ t: number; t0: number; texto: string }> = ({ t, t0, texto }) => (
-  <div style={{ position: "absolute", top: 228, left: 0, width: ANCHO, display: "flex", justifyContent: "center" }}>
-    <Teclea t={t} t0={t0} texto={texto} size={26} o={0.6} />
-  </div>
-);
+const en = cuando(datos);
 
 // ------------------------------------------------------------------ 1. Hook: el futuro es un abanico de caminos; el bot no lo adivina
 const PASADO: V3[] = paseo(36, 3, 0.16, 0.012).map((y, i) => [-3.2 + i * (3.2 / 35), y * 1.1 - 0.35, 0]);
@@ -465,9 +449,6 @@ const Codigo: React.FC<P> = ({ t, s, e }) => {
 const BACKTEST: V3[] = paseo(61, 21, 0.2, 0.03).map((y, i): V3 => [-1.9 + i * (3.8 / 60), y * 0.7 - 0.6, 0]);
 const Cta: React.FC<P> = ({ t, s, e }) => {
   const cam = orbita([0, -0.2, 0], L(t, s, e, 9, 8.2), L(t, s, e, -0.4, 0.05), 0.2, { apertura: 35, centroY: 900 });
-  const boton = muelle(t, s + 0.05, 200, 16);
-  const pulsa = muelle(t, s + 0.5, 260, 15);
-  const onda = L(t, s + 0.5, s + 1.1, 0, 1, salida);
   const dib = L(t, EV.prueba - 0.6, EV.euro - 0.05, 0, 1, Easing.bezier(0.3, 0, 0.3, 1));
   const tr: Trazo[] = [...polvo(0.3)];
   const eje = L(t, s + 0.6, s + 1.2, 0, 1, salida);
@@ -478,7 +459,6 @@ const Cta: React.FC<P> = ({ t, s, e }) => {
   if (dib > 0 && dib < 1) tr.push({ t: "l", a: [cabeza[0], -1.3, 0], b: [cabeza[0], 1.2, 0], w: 1, o: 0.5 });
   const pr = proyector(cam);
   const fin = pr(BACKTEST[60]);
-  const blanco = pulsa > 0.5;
   return (
     <>
       <Escena cam={cam} trazos={tr} encima={() => <Reticula q={fin} r={30} k={muelle(t, EV.euro, 220, 14)} />} />
@@ -496,14 +476,7 @@ const Cta: React.FC<P> = ({ t, s, e }) => {
       <Etiqueta t={t} t0={EV.euro} x={Math.min(fin.x + 20, 1030)} y={fin.y - 64} size={30} alinea="der">
         0 € EN RIESGO
       </Etiqueta>
-      <div style={{ position: "absolute", top: 470, left: 0, width: ANCHO, display: "flex", justifyContent: "center" }}>
-        <div style={{ position: "relative", opacity: Math.min(boton * 1.6, 1), transform: `scale(${(0.8 + 0.2 * boton) * (1 - 0.06 * Math.sin(Math.min(pulsa, 1) * Math.PI))})` }}>
-          {onda > 0 && onda < 1 && <div style={{ position: "absolute", inset: -20 - 40 * onda, borderRadius: 999, border: "2px solid #fff", opacity: 1 - onda }} />}
-          <div style={{ padding: "26px 60px", borderRadius: 999, border: "2px solid #fff", background: blanco ? "#fff" : "transparent", color: blanco ? "#000" : "#fff", fontFamily: SANS, fontWeight: 700, fontSize: 52, letterSpacing: "-0.01em" }}>
-            {blanco ? "Siguiendo ✓" : "Seguir"}
-          </div>
-        </div>
-      </div>
+      <BotonSeguir t={t} t0={s} />
       <Kicker t={t} t0={EV.prueba - 0.7} texto="PRÓXIMO VÍDEO · PARTE 2" />
       <Arriba>
         <Titular t={t} t0={s + 0.05} fin={EV.prueba - 0.75} texto="*sígueme*" size={110} />
@@ -517,30 +490,6 @@ const Cta: React.FC<P> = ({ t, s, e }) => {
 
 // ------------------------------------------------------------------ composición
 const PIEZAS: Record<string, React.FC<P>> = { hook: Hook, lee: Lee, decide: Decide, protege: Protege, ejecuta: Ejecuta, emocion: Emocion, codigo: Codigo, cta: Cta };
-const FUNDE = 0.16;
-const CLAVES: Record<string, string> = {};
-for (const w of ["futuro", "aburrido", "útil", "mercado", "reglas", "entra", "protege", "perder", "milisegundos", "miedo", "avaricia", "magia", "código", "prueba"]) CLAVES[w] = "#ffffff";
-const CORTES = datos.escenas.map((x) => x.s);
+const CLAVES = claves(["futuro", "aburrido", "útil", "mercado", "reglas", "entra", "protege", "perder", "milisegundos", "miedo", "avaricia", "magia", "código", "prueba"]);
 
-export const Explica: React.FC = () => {
-  const t = useCurrentFrame() / datos.fps;
-  return (
-    <AbsoluteFill style={{ background: "radial-gradient(ellipse 90% 70% at 50% 45%, #0b0b0c, #000)" }}>
-      <Audio src={staticFile("gen/explica_mezcla.wav")} />
-      {datos.escenas
-        .filter((p) => t >= p.s - FUNDE && t < p.e + FUNDE)
-        .map((p) => {
-          const Pieza = PIEZAS[p.id];
-          const entra = p.s <= 0.01 ? 1 : lerp(t, p.s - FUNDE, p.s + FUNDE, 0, 1, io);
-          const sale = p.e >= datos.duracion - 0.01 ? 0 : lerp(t, p.e - FUNDE, p.e + FUNDE, 0, 1, io);
-          return (
-            <AbsoluteFill key={p.id} style={{ opacity: entra * (1 - sale), transform: `translateY(${(1 - entra) * 40 - sale * 40}px)` }}>
-              <Pieza t={t} s={p.s} e={p.e} />
-            </AbsoluteFill>
-          );
-        })}
-      <Subtitulos t={t} palabras={datos.palabras} cortes={CORTES} claves={CLAVES} duracion={datos.duracion} y={() => 0.765} estilo="premium" dinamico />
-      <Progreso t={t} duracion={datos.duracion} />
-    </AbsoluteFill>
-  );
-};
+export const Explica: React.FC = () => <Montaje t={useCurrentFrame() / datos.fps} datos={datos} audio="gen/explica_mezcla.wav" piezas={PIEZAS} claves={CLAVES} />;

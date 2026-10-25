@@ -178,5 +178,19 @@ python scripts/explica.py <ruta-a-ffmpeg>
 npx remotion render Explica out/explica.mp4 --video-bitrate=12M --audio-codec=aac
 ```
 
+### Parte 2: "Cómo se prueba un bot antes de arriesgar un euro"
+
+Mismo pipeline y mismo lenguaje visual (`src/Prueba/Prueba.tsx`): backtest vela a vela, costes reales, datos fuera de muestra,
+prueba de estrés con las operaciones barajadas, demo frente al backtest y el dinero real poco a poco. El guion está en
+`scripts/guion_prueba.py` (y en `video/guiones/como_se_prueba_un_bot.md`); la locución va en `input/prueba_voz.mp3`
+(o `scripts/voz_elevenlabs.py --video prueba`). `scripts/locucion.py` reúne la parte común de los dos videos: voz, alineado
+con Whisper, música, SFX y mezcla.
+
+```bash
+cd video
+PAUSA_MAX=0.6 PAUSA_UMBRAL=42 python scripts/prueba.py <ruta-a-ffmpeg>
+npx remotion render Prueba out/prueba.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
 `scripts/sonido.py` reúne la síntesis de música y SFX y la mezcla con ducking y -14 LUFS que
 usan ambos pipelines.
