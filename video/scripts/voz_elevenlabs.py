@@ -1,6 +1,9 @@
 """Voz en off del guion con ElevenLabs: voz femenina española con tono de asistente virtual -> input/explica_voz.mp3
 
-Uso:  ELEVENLABS_API_KEY=... python scripts/voz_elevenlabs.py [--voz VOICE_ID|sarah|matilda|…] [--modelo eleven_multilingual_v2]
+Uso:  ELEVENLABS_API_KEY=... python scripts/voz_elevenlabs.py [--voz VOICE_ID|matilda|sarah|…] [--modelo eleven_v3]
+
+Por defecto: voz Matilda con el modelo eleven_v3 y la indicación de acento castellano en cada párrafo (medido:
+distingue c/z de s como en España; con eleven_multilingual_v2 las voces predeterminadas sesean).
 Después: python scripts/explica.py <ffmpeg>  (detecta el mp3 y resincroniza subtítulos, animaciones y mezcla)
 
 Sin --voz (ni ELEVENLABS_VOICE_ID) busca en la biblioteca de voces compartidas una voz femenina en español de
@@ -69,9 +72,10 @@ def busca_voz():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--voz", default=os.environ.get("ELEVENLABS_VOICE_ID"))
-    ap.add_argument("--modelo", default="eleven_multilingual_v2")
+    ap.add_argument("--voz", default=os.environ.get("ELEVENLABS_VOICE_ID") or "matilda")
+    ap.add_argument("--modelo", default="eleven_v3")
     ap.add_argument("--velocidad", type=float, default=1.08)
+    ap.add_argument("--acento", default="con acento castellano de España, tono cálido y cercano de asistente")
     args = ap.parse_args()
     if not CLAVE:
         sys.exit("Falta ELEVENLABS_API_KEY en el entorno")
@@ -83,11 +87,17 @@ def main():
             # Clave sin permiso para la biblioteca (o plan gratuito): voz predeterminada cálida y tranquila
             print(f"sin acceso a la biblioteca de voces ({e.code}); uso la voz predeterminada Sarah")
             voz = PREDETERMINADAS["sarah"]
-    texto = "\n\n".join(" ".join(frases) for _, frases in GUION)
+    # El modelo v3 acepta indicaciones entre corchetes (no se leen): se repite en cada párrafo para que el
+    # acento castellano (distinción de c/z y s) no se diluya a lo largo de la locución
+    etiqueta = f"[{args.acento}] " if args.modelo == "eleven_v3" and args.acento else ""
+    texto = "\n\n".join(etiqueta + " ".join(frases) for _, frases in GUION)
+    # v3 solo admite estabilidad 0 (creativa), 0,5 (natural) o 1 (robusta)
+    ajustes = ({"stability": 0.5, "similarity_boost": 0.8, "use_speaker_boost": True, "speed": args.velocidad} if args.modelo == "eleven_v3"
+               else {"stability": 0.55, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True, "speed": args.velocidad})
     audio = pide("POST", f"/text-to-speech/{voz}?output_format=mp3_44100_128", {
         "text": texto,
         "model_id": args.modelo,
-        "voice_settings": {"stability": 0.55, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True, "speed": args.velocidad},
+        "voice_settings": ajustes,
     }, binario=True)
     destino = RAIZ / "input/explica_voz.mp3"
     destino.parent.mkdir(exist_ok=True)
