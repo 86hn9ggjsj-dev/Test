@@ -19,7 +19,7 @@ from scipy.signal import resample_poly
 
 from guion_explica import GUION, TITULO
 from montaje import escenas_desde, musica_energetica, poner
-from sonido import SR, campana, mezclar, soplo, toque
+from sonido import SR, campana, mezclar, silencios, soplo, toque
 
 FF = sys.argv[1]
 RAIZ = Path(__file__).resolve().parent.parent
@@ -54,8 +54,27 @@ def recorta(x, umbral=0.012):
 
 externa = next((p for p in (RAIZ / "input/explica_voz.mp3", RAIZ / "input/explica_voz.wav") if p.exists()), None)
 bruta = GEN / "explica_voz_bruta.wav"
+MAX_PAUSA = 0.24  # ningún silencio de la locución pasa de aquí (las respiraciones se conservan)
 if externa:
     subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(externa), "-ac", "1", "-ar", str(SR), str(bruta)], check=True)
+    x, _ = sf.read(bruta)
+    trozos, prev = [], 0
+    for a, b in silencios(x, umbral_rel=32, minimo=MAX_PAUSA):
+        ia, ib = int(a * SR), int(b * SR)
+        # Se conserva el principio y el final del silencio (cola de la frase y respiración previa) y se quita el centro
+        if a < 0.05:
+            prev = max(ib - int(0.12 * SR), 0)
+            continue
+        cola, ataque = int(0.12 * SR), int((MAX_PAUSA - 0.12) * SR)
+        trozos.append(x[prev: ia + cola])
+        prev = max(ib - ataque, ia + cola)
+    trozos.append(x[prev:])
+    fade = int(0.008 * SR)
+    for tz in trozos:
+        if len(tz) > 2 * fade:
+            tz[:fade] *= np.linspace(0, 1, fade)
+            tz[-fade:] *= np.linspace(1, 0, fade)
+    sf.write(bruta, np.concatenate(trozos), SR)
 else:
     from kokoro import KPipeline
 
@@ -69,11 +88,12 @@ else:
             trozos.append(np.zeros(int((PAUSA_ESCENA if fin_escena else PAUSA_FRASE) * SR)))
     sf.write(bruta, np.concatenate([np.zeros(int(0.12 * SR))] + trozos), SR)
 
-# Tratamiento para una voz dulce: calidez en medios-graves, presencia suave, sin aspereza en agudos
+# Tratamiento: la voz local se calienta y suaviza; una locución de estudio (ElevenLabs) solo se limpia y se comprime poco
 voz_wav = GEN / "explica_voz.wav"
-subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(bruta), "-af",
-                "highpass=f=90,equalizer=f=260:t=q:w=1:g=1.5,equalizer=f=3200:t=q:w=1.2:g=1.2,"
-                "equalizer=f=7500:t=q:w=1.5:g=-2,acompressor=threshold=-20dB:ratio=2.2:attack=10:release=140:makeup=2",
+FILTRO_LOCAL = ("highpass=f=90,equalizer=f=260:t=q:w=1:g=1.5,equalizer=f=3200:t=q:w=1.2:g=1.2,"
+                "equalizer=f=7500:t=q:w=1.5:g=-2,acompressor=threshold=-20dB:ratio=2.2:attack=10:release=140:makeup=2")
+FILTRO_ESTUDIO = "highpass=f=70,acompressor=threshold=-18dB:ratio=1.8:attack=12:release=160:makeup=1.5"
+subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(bruta), "-af", FILTRO_ESTUDIO if externa else FILTRO_LOCAL,
                 "-ar", str(SR), "-c:a", "pcm_f32le", str(voz_wav)], check=True)
 voz, _ = sf.read(voz_wav)
 dur = round(len(voz) / SR + 0.6, 3)

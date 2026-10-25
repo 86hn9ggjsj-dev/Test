@@ -1,6 +1,6 @@
 """Voz en off del guion con ElevenLabs: voz femenina española con tono de asistente virtual -> input/explica_voz.mp3
 
-Uso:  ELEVENLABS_API_KEY=... python scripts/voz_elevenlabs.py [--voz VOICE_ID] [--modelo eleven_multilingual_v2]
+Uso:  ELEVENLABS_API_KEY=... python scripts/voz_elevenlabs.py [--voz VOICE_ID|sarah|matilda|…] [--modelo eleven_multilingual_v2]
 Después: python scripts/explica.py <ffmpeg>  (detecta el mp3 y resincroniza subtítulos, animaciones y mezcla)
 
 Sin --voz (ni ELEVENLABS_VOICE_ID) busca en la biblioteca de voces compartidas una voz femenina en español de
@@ -13,6 +13,7 @@ import json
 import os
 import ssl
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -27,6 +28,9 @@ CTX = ssl.create_default_context(cafile=os.environ.get("SSL_CERT_FILE") or None)
 # Palabras que delatan una voz de España y un timbre suave en la ficha de la voz
 ESPANA = ("spain", "spanish (spain)", "castilian", "peninsular", "españa", "european spanish", "madrid")
 SUAVE = ("soft", "calm", "warm", "gentle", "sweet", "soothing", "suave", "dulce", "cálida", "tranquila", "natural")
+# Voces predeterminadas de ElevenLabs (las únicas que el plan gratuito permite usar por API)
+PREDETERMINADAS = {"sarah": "EXAVITQu4vr4xnSDxMaL", "matilda": "XrExE9yKIg1WjnnlVkGX", "jessica": "cgSgspJ2msm6clMCkdW9",
+                   "alice": "Xb7hH8MSUJpSbSDYk0k2", "lily": "pFZP5JQG7iQjIQuC4Bku", "laura": "FGY2WhTYpPnrIDTdsKH5"}
 ASISTENTE = ("assistant", "asistente", "conversational", "friendly", "clear", "helpful", "cercana", "amable", "clara")
 
 
@@ -34,8 +38,12 @@ def pide(metodo, ruta, cuerpo=None, binario=False):
     datos = json.dumps(cuerpo).encode() if cuerpo is not None else None
     req = urllib.request.Request(f"{API}{ruta}", data=datos, method=metodo,
                                  headers={"xi-api-key": CLAVE, "Content-Type": "application/json", "Accept": "*/*"})
-    with urllib.request.urlopen(req, context=CTX, timeout=120) as r:
-        contenido = r.read()
+    try:
+        with urllib.request.urlopen(req, context=CTX, timeout=120) as r:
+            contenido = r.read()
+    except urllib.error.HTTPError as e:
+        print(f"ElevenLabs {e.code} en {ruta.split('?')[0]}: {e.read().decode(errors='replace')[:300]}", file=sys.stderr)
+        raise
     return contenido if binario else json.loads(contenido)
 
 
@@ -63,16 +71,23 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--voz", default=os.environ.get("ELEVENLABS_VOICE_ID"))
     ap.add_argument("--modelo", default="eleven_multilingual_v2")
+    ap.add_argument("--velocidad", type=float, default=1.08)
     args = ap.parse_args()
     if not CLAVE:
         sys.exit("Falta ELEVENLABS_API_KEY en el entorno")
-    voz = args.voz or busca_voz()
+    voz = PREDETERMINADAS.get((args.voz or "").lower(), args.voz)
+    if not voz:
+        try:
+            voz = busca_voz()
+        except urllib.error.HTTPError as e:
+            # Clave sin permiso para la biblioteca (o plan gratuito): voz predeterminada cálida y tranquila
+            print(f"sin acceso a la biblioteca de voces ({e.code}); uso la voz predeterminada Sarah")
+            voz = PREDETERMINADAS["sarah"]
     texto = "\n\n".join(" ".join(frases) for _, frases in GUION)
-    audio = pide("POST", f"/text-to-speech/{voz}?output_format=mp3_44100_192", {
+    audio = pide("POST", f"/text-to-speech/{voz}?output_format=mp3_44100_128", {
         "text": texto,
         "model_id": args.modelo,
-        "language_code": "es",
-        "voice_settings": {"stability": 0.55, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True, "speed": 1.0},
+        "voice_settings": {"stability": 0.55, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True, "speed": args.velocidad},
     }, binario=True)
     destino = RAIZ / "input/explica_voz.mp3"
     destino.parent.mkdir(exist_ok=True)

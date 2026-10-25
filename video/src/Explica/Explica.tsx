@@ -81,10 +81,10 @@ const Hook: React.FC<P> = ({ t, s, e }) => {
         <Teclea t={t} t0={EV.aburrido + 0.45} texto="MISMAS REGLAS · SIEMPRE" size={24} o={0.7} />
       </div>
       <Arriba>
-        <Titular t={t} t0={s + 0.1} fin={EV.aburrido - 0.25} texto="no adivina el *futuro*" size={84} />
+        <Titular t={t} t0={s + 0.1} fin={en("hace", s) - 0.05} texto="no adivina el *futuro*" size={84} />
       </Arriba>
       <Arriba>
-        <Titular t={t} t0={EV.aburrido - 0.2} fin={EV.util - 0.6} texto="hace algo *aburrido*" size={84} />
+        <Titular t={t} t0={en("hace", s)} fin={EV.util - 0.6} texto="hace algo *aburrido*" size={84} />
       </Arriba>
       <Arriba>
         <Titular t={t} t0={EV.util - 0.55} texto="y por eso es *útil*" size={84} />
