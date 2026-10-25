@@ -60,13 +60,15 @@ def recorta(x, umbral=0.012):
 externa = next((p for p in (RAIZ / "input/explica_voz.mp3", RAIZ / "input/explica_voz.wav") if p.exists()), None)
 bruta = GEN / "explica_voz_bruta.wav"
 # Ningún silencio de la locución pasa de aquí (las respiraciones se conservan). Con una locución con gestos
-# ([short pause], suspiros…) conviene subirlo para respetar las pausas buscadas: PAUSA_MAX=0.45
+# ([short pause], suspiros…) conviene respetar las pausas buscadas
+# y las respiraciones: PAUSA_MAX=0.6 PAUSA_UMBRAL=42 (solo se recorta el silencio real, no las respiraciones)
 MAX_PAUSA = float(os.environ.get("PAUSA_MAX", 0.24))
+UMBRAL_PAUSA = float(os.environ.get("PAUSA_UMBRAL", 32))
 if externa:
     subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(externa), "-ac", "1", "-ar", str(SR), str(bruta)], check=True)
     x, _ = sf.read(bruta)
     trozos, prev = [], 0
-    for a, b in silencios(x, umbral_rel=32, minimo=MAX_PAUSA):
+    for a, b in silencios(x, umbral_rel=UMBRAL_PAUSA, minimo=MAX_PAUSA):
         ia, ib = int(a * SR), int(b * SR)
         # Se conserva el principio y el final del silencio (cola de la frase y respiración previa) y se quita el centro
         if a < 0.05:
