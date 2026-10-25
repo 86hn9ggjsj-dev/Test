@@ -192,5 +192,17 @@ PAUSA_MAX=0.6 PAUSA_UMBRAL=42 python scripts/prueba.py <ruta-a-ffmpeg>
 npx remotion render Prueba out/prueba.mp4 --video-bitrate=12M --audio-codec=aac
 ```
 
+### Parte 3: "Los tres errores que hacen que un backtest mienta"
+
+`src/Errores/Errores.tsx`: mirar el futuro, sesgo de supervivencia, suerte entre mil versiones, la señal de alarma de una curva
+demasiado perfecta y el cierre. Guion en `scripts/guion_errores.py` (y `video/guiones/tres_errores_backtest.md`); locución en
+`input/errores_voz.mp3` (o `scripts/voz_elevenlabs.py --video errores`).
+
+```bash
+cd video
+PAUSA_MAX=0.6 PAUSA_UMBRAL=42 python scripts/errores.py <ruta-a-ffmpeg>
+npx remotion render Errores out/errores.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
 `scripts/sonido.py` reúne la síntesis de música y SFX y la mezcla con ducking y -14 LUFS que
 usan ambos pipelines.

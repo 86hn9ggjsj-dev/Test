@@ -1,5 +1,6 @@
 import { Composition } from "remotion";
 import { Bot, BOT_FPS, BOT_FRAMES } from "./Bot/Bot";
+import { Errores, ERRORES_FPS, ERRORES_FRAMES } from "./Errores/Errores";
 import { BotMG } from "./Bot/BotMG";
 import { Explica, EXPLICA_FPS, EXPLICA_FRAMES } from "./Explica/Explica";
 import { Intro } from "./Intro";
@@ -56,6 +57,14 @@ export const RemotionRoot: React.FC = () => {
         component={Prueba}
         durationInFrames={PRUEBA_FRAMES}
         fps={PRUEBA_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Errores"
+        component={Errores}
+        durationInFrames={ERRORES_FRAMES}
+        fps={ERRORES_FPS}
         width={ANCHO}
         height={ALTO}
       />

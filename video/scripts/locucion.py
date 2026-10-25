@@ -40,6 +40,7 @@ FILTRO_LOCAL = ("highpass=f=90,equalizer=f=260:t=q:w=1:g=1.5,equalizer=f=3200:t=
 FILTRO_ESTUDIO = "highpass=f=70,acompressor=threshold=-18dB:ratio=1.8:attack=12:release=160:makeup=1.5"
 
 norm = lambda w: re.sub(r"[^\wáéíóúñü%]", "", w.lower())  # noqa: E731
+NUMEROS = {"1": "uno", "2": "dos", "3": "tres", "4": "cuatro", "5": "cinco", "6": "seis", "7": "siete", "8": "ocho", "9": "nueve", "10": "diez"}
 
 
 def escribir_guion(md, titulo, intro, guion, gestos, pantallas=None):
@@ -129,6 +130,12 @@ def alinear(voz_wav, guion):
         # Una palabra del guion que Whisper parte en dos ("sobreoptimizado" -> "sobre optimizado")
         elif op == "replace" and i2 - i1 == 1 and "".join(b[j1:j2]) == a[i1]:
             tiempos[i1] = (oidas[j1]["s"], oidas[j2 - 1]["e"])
+        # Mismo número de palabras con erratas de Whisper ("bactest", "provar") o cifras ("1" por "uno")
+        elif op == "replace" and i2 - i1 == j2 - j1:
+            for k in range(i2 - i1):
+                x, y = a[i1 + k], b[j1 + k]
+                if NUMEROS.get(y) == x or difflib.SequenceMatcher(None, x, y).ratio() >= 0.75:
+                    tiempos[i1 + k] = (oidas[j1 + k]["s"], oidas[j1 + k]["e"])
     # Palabras no reconocidas: se reparten entre sus vecinas
     conocidas = [i for i, x in enumerate(tiempos) if x]
     for i in range(len(tokens)):

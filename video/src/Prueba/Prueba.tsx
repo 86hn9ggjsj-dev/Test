@@ -7,23 +7,13 @@ import { salida } from "../Premium/ui";
 import { ANCHO, ruido } from "../Viral/util";
 import { Arriba, dos, Etiqueta, euros, L, mono, muelle, Reticula, Teclea, Titular } from "../Bot/piezas";
 import { caja, clave, Escena, orbita, polvo, proyector, Trazo, V3 } from "../Bot/tres";
-import { BotonSeguir, claves, cuando, Kicker, Montaje, P, paseo } from "../Explica/Montaje";
+import { Abajo, BotonSeguir, claves, cuando, escala, Kicker, Montaje, P, paseo, pct } from "../Explica/Montaje";
 
 export const PRUEBA_FPS = datos.fps;
 export const PRUEBA_FRAMES = Math.round(datos.duracion * datos.fps);
 
 const EV = datos.eventos;
 const en = cuando(datos);
-const pct = (v: number) => `${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v))} %`;
-const escala = (v: number[], y0: number, y1: number) => {
-  const lo = Math.min(...v);
-  const hi = Math.max(...v);
-  return v.map((x) => y0 + ((x - lo) / (hi - lo)) * (y1 - y0));
-};
-const Abajo: React.FC<{ o?: number; top?: number; children: React.ReactNode }> = ({ o = 1, top = 1255, children }) => (
-  <div style={{ position: "absolute", top, left: 0, width: ANCHO, display: "flex", justifyContent: "center", gap: 18, alignItems: "baseline", opacity: o }}>{children}</div>
-);
-
 // ------------------------------------------------------------------ 1. Hook: una curva perfecta del pasado no demuestra nada
 const EQ: V3[] = paseo(36, 5, 0.05).map((r, i): V3 => {
   const u = i / 35;

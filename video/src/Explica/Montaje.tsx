@@ -28,6 +28,18 @@ export const Kicker: React.FC<{ t: number; t0: number; texto: string }> = ({ t, 
   </div>
 );
 
+export const pct = (v: number) => `${v >= 0 ? "+" : "−"}${Math.abs(Math.round(v))} %`;
+// Reescala una serie al rango [y0, y1]
+export const escala = (v: number[], y0: number, y1: number) => {
+  const lo = Math.min(...v);
+  const hi = Math.max(...v);
+  return v.map((x) => y0 + ((x - lo) / (hi - lo)) * (y1 - y0));
+};
+// Cifra grande en la franja inferior, por encima de los subtítulos
+export const Abajo: React.FC<{ o?: number; top?: number; children: React.ReactNode }> = ({ o = 1, top = 1255, children }) => (
+  <div style={{ position: "absolute", top, left: 0, width: ANCHO, display: "flex", justifyContent: "center", gap: 18, alignItems: "baseline", opacity: o }}>{children}</div>
+);
+
 // Botón "Seguir" que se pulsa solo y pasa a "Siguiendo ✓"
 export const BotonSeguir: React.FC<{ t: number; t0: number }> = ({ t, t0 }) => {
   const boton = muelle(t, t0 + 0.05, 200, 16);
