@@ -166,8 +166,10 @@ Todo generado aquí: guion (`video/guiones/que_hace_un_bot.md`), voz en off con 
 palabra con Whisper alineados al guion, música, SFX, mezcla a -14 LUFS y 8 pantallas de motion graphics
 (`src/Explica/Explica.tsx`). Para usar otra voz (grabada o de ElevenLabs) con el mismo guion, deja el archivo en
 `input/explica_voz.mp3` y vuelve a ejecutar el script: todo se resincroniza solo. Con ElevenLabs, ese archivo lo genera
-`scripts/voz_elevenlabs.py` (necesita `ELEVENLABS_API_KEY`; sin `--voz` elige de la biblioteca de voces compartidas una voz
-femenina española con tono de asistente: cercana, amable y clara).
+`scripts/voz_elevenlabs.py` (necesita `ELEVENLABS_API_KEY`; por defecto voz George con Eleven v3, acento castellano y los
+gestos del guion). Las voces de la biblioteca (p. ej. Bruno Torres) no se pueden usar por API en el plan gratuito: genera la
+locución en la web de ElevenLabs con el texto «Versión con gestos» de `guiones/que_hace_un_bot.md`, descarga el mp3 en
+`input/explica_voz.mp3` y, para conservar sus pausas y respiraciones, ejecuta el script con `PAUSA_MAX=0.6 PAUSA_UMBRAL=42`.
 
 ```bash
 cd video
