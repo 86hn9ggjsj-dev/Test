@@ -2,8 +2,9 @@
 
 Uso:  ELEVENLABS_API_KEY=... python scripts/voz_elevenlabs.py [--voz VOICE_ID|matilda|sarah|…] [--modelo eleven_v3]
 
-Por defecto: voz Matilda con el modelo eleven_v3 y la indicación de acento castellano en cada párrafo (medido:
-distingue c/z de s como en España; con eleven_multilingual_v2 las voces predeterminadas sesean).
+Por defecto: voz George (masculina, suave y cálida) con el modelo eleven_v3 y la indicación de acento castellano
+en cada párrafo. Medido con palabras de c/z frente a s, distinguen como en España George y Matilda (voz femenina);
+con eleven_multilingual_v2 o sin la indicación, las voces predeterminadas sesean.
 Después: python scripts/explica.py <ffmpeg>  (detecta el mp3 y resincroniza subtítulos, animaciones y mezcla)
 
 Sin --voz (ni ELEVENLABS_VOICE_ID) busca en la biblioteca de voces compartidas una voz femenina en español de
@@ -33,7 +34,9 @@ ESPANA = ("spain", "spanish (spain)", "castilian", "peninsular", "españa", "eur
 SUAVE = ("soft", "calm", "warm", "gentle", "sweet", "soothing", "suave", "dulce", "cálida", "tranquila", "natural")
 # Voces predeterminadas de ElevenLabs (las únicas que el plan gratuito permite usar por API)
 PREDETERMINADAS = {"sarah": "EXAVITQu4vr4xnSDxMaL", "matilda": "XrExE9yKIg1WjnnlVkGX", "jessica": "cgSgspJ2msm6clMCkdW9",
-                   "alice": "Xb7hH8MSUJpSbSDYk0k2", "lily": "pFZP5JQG7iQjIQuC4Bku", "laura": "FGY2WhTYpPnrIDTdsKH5"}
+                   "alice": "Xb7hH8MSUJpSbSDYk0k2", "lily": "pFZP5JQG7iQjIQuC4Bku", "laura": "FGY2WhTYpPnrIDTdsKH5",
+                   "george": "JBFqnCBsd6RMkjVDRZzb", "daniel": "onwK4e9ZLuTAKqWW03F9", "eric": "cjVigY5qzO86Huf0OWal",
+                   "will": "bIHbv24MWmeRgasZH58o", "brian": "nPczCjzI2devNBz1zQrb", "river": "SAz9YHcvj6GT2YYXdXww"}
 ASISTENTE = ("assistant", "asistente", "conversational", "friendly", "clear", "helpful", "cercana", "amable", "clara")
 
 
@@ -72,10 +75,10 @@ def busca_voz():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--voz", default=os.environ.get("ELEVENLABS_VOICE_ID") or "matilda")
+    ap.add_argument("--voz", default=os.environ.get("ELEVENLABS_VOICE_ID") or "george")
     ap.add_argument("--modelo", default="eleven_v3")
     ap.add_argument("--velocidad", type=float, default=1.08)
-    ap.add_argument("--acento", default="con acento castellano de España, tono cálido y cercano de asistente")
+    ap.add_argument("--acento", default="con acento castellano de España, voz masculina suave, cálida y cercana")
     args = ap.parse_args()
     if not CLAVE:
         sys.exit("Falta ELEVENLABS_API_KEY en el entorno")
