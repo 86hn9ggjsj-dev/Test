@@ -23,7 +23,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from guion_explica import GUION
+from guion_explica import GESTOS, GUION
 
 API = "https://api.elevenlabs.io/v1"
 RAIZ = Path(__file__).resolve().parent.parent
@@ -79,6 +79,7 @@ def main():
     ap.add_argument("--voz", default=os.environ.get("ELEVENLABS_VOICE_ID") or "george")
     ap.add_argument("--modelo", default="eleven_v3")
     ap.add_argument("--velocidad", type=float, default=1.08)
+    ap.add_argument("--sin-gestos", action="store_true", help="con eleven_v3, guion sin gestos entre corchetes")
     ap.add_argument("--forzar", action="store_true", help="genera aunque no haya cambios (gasta créditos)")
     ap.add_argument("--acento", default="con acento castellano de España, voz masculina suave, cálida y cercana")
     args = ap.parse_args()
@@ -94,8 +95,11 @@ def main():
             voz = PREDETERMINADAS["sarah"]
     # El modelo v3 acepta indicaciones entre corchetes (no se leen): se repite en cada párrafo para que el
     # acento castellano (distinción de c/z y s) no se diluya a lo largo de la locución
-    etiqueta = f"[{args.acento}] " if args.modelo == "eleven_v3" and args.acento else ""
-    texto = "\n\n".join(etiqueta + " ".join(frases) for _, frases in GUION)
+    v3 = args.modelo == "eleven_v3"
+    etiqueta = f"[{args.acento}] " if v3 and args.acento else ""
+    # Con v3, cada párrafo lleva sus gestos (risas, suspiros, pausas, susurros); v2 leería las etiquetas
+    parrafo = (lambda id_, frases: GESTOS[id_]) if v3 and not args.sin_gestos else (lambda id_, frases: " ".join(frases))
+    texto = "\n\n".join(etiqueta + parrafo(id_, frases) for id_, frases in GUION)
     # v3 solo admite estabilidad 0 (creativa), 0,5 (natural) o 1 (robusta)
     ajustes = ({"stability": 0.5, "similarity_boost": 0.8, "use_speaker_boost": True, "speed": args.velocidad} if args.modelo == "eleven_v3"
                else {"stability": 0.55, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True, "speed": args.velocidad})

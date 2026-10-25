@@ -8,6 +8,7 @@ Salida: public/gen/explica_mezcla.wav, src/gen/explica.json, guiones/que_hace_un
 """
 import difflib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -17,7 +18,7 @@ import numpy as np
 import soundfile as sf
 from scipy.signal import resample_poly
 
-from guion_explica import GUION, TITULO
+from guion_explica import GESTOS, GUION, TITULO
 from montaje import escenas_desde, musica_energetica, poner
 from sonido import SR, campana, mezclar, silencios, soplo, toque
 
@@ -36,9 +37,13 @@ PAUSA_ESCENA = 0.14
 
 (RAIZ / "guiones").mkdir(exist_ok=True)
 with open(RAIZ / "guiones/que_hace_un_bot.md", "w") as f:
-    f.write(f"# {TITULO}\n\nGuion de voz en off (~46 s, 1080x1920). Cada bloque es una pantalla de motion graphics.\n\n")
+    f.write(f"# {TITULO}\n\nGuion de voz en off (~50 s, 1080x1920). Cada bloque es una pantalla de motion graphics.\n\n")
     for id_, frases in GUION:
         f.write(f"**{id_}**  \n{' '.join(frases)}\n\n")
+    f.write("## Versión con gestos (ElevenLabs, modelo Eleven v3)\n\nLas etiquetas entre corchetes no se leen: "
+            "marcan entonación, risas, suspiros, susurros y pausas. Pegar con una línea en blanco entre párrafos.\n\n")
+    for id_, _ in GUION:
+        f.write(f"{GESTOS[id_]}\n\n")
 
 
 # ---------------------------------------------------------------- voz
@@ -54,7 +59,9 @@ def recorta(x, umbral=0.012):
 
 externa = next((p for p in (RAIZ / "input/explica_voz.mp3", RAIZ / "input/explica_voz.wav") if p.exists()), None)
 bruta = GEN / "explica_voz_bruta.wav"
-MAX_PAUSA = 0.24  # ningún silencio de la locución pasa de aquí (las respiraciones se conservan)
+# Ningún silencio de la locución pasa de aquí (las respiraciones se conservan). Con una locución con gestos
+# ([short pause], suspiros…) conviene subirlo para respetar las pausas buscadas: PAUSA_MAX=0.45
+MAX_PAUSA = float(os.environ.get("PAUSA_MAX", 0.24))
 if externa:
     subprocess.run([FF, "-y", "-loglevel", "error", "-i", str(externa), "-ac", "1", "-ar", str(SR), str(bruta)], check=True)
     x, _ = sf.read(bruta)
