@@ -248,15 +248,19 @@ const Protege: React.FC<P> = ({ t, s, e }) => {
     const x = x0 + ((x1 - x0) * r) / 17;
     tr.push({ t: "l", a: [x, yStop, 0], b: [Math.min(x + 0.25, x1), 0, 0], w: 1, o: 0.35, luz: t >= EV.calculados ? listo : 0 });
   }
-  // Tamaño de la posición: un bloque que se ajusta a su medida
-  const tam = muelle(t, EV.tamano - 0.1, 160, 13);
-  if (tam > 0) {
-    for (const [a, b] of caja([x1 - 0.7, 0.04, -0.22], [x1 - 0.7 + 0.45 * tam, 0.04 + 0.5 * tam, 0.22])) tr.push({ t: "l", a, b, w: 1.6, o: 0.95 });
+  // Tamaño de la posición: igual que el stop, una línea que sube desde la entrada con muelle y deja su zona rayada
+  const sube = muelle(t, EV.tamano - 0.15, 130, 14);
+  const yTam = 0.42 * sube;
+  if (sube > 0) tr.push({ t: "p", pts: [[x0, yTam, 0], [x1, yTam, 0]], w: 1.6, o: 0.85, dash: "8 9" });
+  const rayasT = Math.round(18 * L(t, EV.tamano, EV.tamano + 0.6, 0, 1, salida));
+  for (let r = 0; r < rayasT; r++) {
+    const x = x0 + ((x1 - x0) * r) / 17;
+    tr.push({ t: "l", a: [x, yTam, 0], b: [Math.min(x + 0.18, x1), 0, 0], w: 1, o: 0.3, luz: t >= EV.calculados ? listo : 0 });
   }
   const pr = proyector(cam);
   const zona = pr([(x0 + x1) / 2, yStop / 2, 0]);
   const stop = pr([x1, yStop, 0]);
-  const bloque = pr([x1 - 0.48, 0.72, 0]);
+  const tamano = pr([x1, yTam, 0]);
   const ok = t >= EV.calculados ? " ✓" : "";
   return (
     <>
@@ -267,7 +271,7 @@ const Protege: React.FC<P> = ({ t, s, e }) => {
       <Etiqueta t={t} t0={EV.stop - 0.05} x={Math.min(stop.x, 1030)} y={stop.y + 30} size={26} o={0.85} alinea="der">
         {`STOP${ok}`}
       </Etiqueta>
-      <Etiqueta t={t} t0={EV.tamano} x={bloque.x} y={bloque.y} size={26} o={0.85} alinea="centro">
+      <Etiqueta t={t} t0={EV.tamano - 0.05} x={Math.min(tamano.x, 1030)} y={tamano.y - 30} size={26} o={0.85} alinea="der">
         {`TAMAÑO${ok}`}
       </Etiqueta>
       <Kicker t={t} t0={s + 0.05} texto="PASO 03 / 05" />

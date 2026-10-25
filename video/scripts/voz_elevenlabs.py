@@ -13,6 +13,7 @@ El guion se envía entero en una sola petición (un párrafo por pantalla) para 
 los ajustes priorizan un tono estable y natural, con algo de calidez, sin dramatizar.
 """
 import argparse
+import hashlib
 import json
 import os
 import ssl
@@ -78,6 +79,7 @@ def main():
     ap.add_argument("--voz", default=os.environ.get("ELEVENLABS_VOICE_ID") or "george")
     ap.add_argument("--modelo", default="eleven_v3")
     ap.add_argument("--velocidad", type=float, default=1.08)
+    ap.add_argument("--forzar", action="store_true", help="genera aunque no haya cambios (gasta créditos)")
     ap.add_argument("--acento", default="con acento castellano de España, voz masculina suave, cálida y cercana")
     args = ap.parse_args()
     if not CLAVE:
@@ -97,14 +99,18 @@ def main():
     # v3 solo admite estabilidad 0 (creativa), 0,5 (natural) o 1 (robusta)
     ajustes = ({"stability": 0.5, "similarity_boost": 0.8, "use_speaker_boost": True, "speed": args.velocidad} if args.modelo == "eleven_v3"
                else {"stability": 0.55, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True, "speed": args.velocidad})
-    audio = pide("POST", f"/text-to-speech/{voz}?output_format=mp3_44100_128", {
-        "text": texto,
-        "model_id": args.modelo,
-        "voice_settings": ajustes,
-    }, binario=True)
+    peticion = {"text": texto, "model_id": args.modelo, "voice_settings": ajustes}
+    # Para no gastar créditos: si ya existe una locución de este mismo guion, voz y ajustes, se reutiliza
     destino = RAIZ / "input/explica_voz.mp3"
+    firma_ruta = destino.with_suffix(".firma")
+    firma = hashlib.sha256(json.dumps({"voz": voz, **peticion}, sort_keys=True).encode()).hexdigest()
+    if destino.exists() and firma_ruta.exists() and firma_ruta.read_text() == firma and not args.forzar:
+        print(f"sin cambios en guion, voz ni ajustes: reutilizo {destino} (0 créditos)")
+        return
+    audio = pide("POST", f"/text-to-speech/{voz}?output_format=mp3_44100_128", peticion, binario=True)
     destino.parent.mkdir(exist_ok=True)
     destino.write_bytes(audio)
+    firma_ruta.write_text(firma)
     print(f"voz guardada en {destino} ({len(audio) // 1024} KB) con la voz {voz}")
 
 
