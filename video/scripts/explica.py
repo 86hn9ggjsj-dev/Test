@@ -1,7 +1,7 @@
 """Video "Qué hace de verdad un bot de trading": guion, voz, música, SFX, mezcla y timeline. Todo desde cero.
 
 Uso: python scripts/explica.py <ffmpeg>
-Voz: si existe input/explica_voz.(mp3|wav) (p. ej. grabada o de ElevenLabs con este mismo guion) se usa esa;
+Voz: si existe input/explica_voz.(mp3|wav) (grabada, o generada con scripts/voz_elevenlabs.py) se usa esa;
 si no, se sintetiza con Kokoro (voz femenina española ef_dora, fonemas castellanos). En ambos casos los tiempos por palabra salen de Whisper,
 alineados contra el guion para que los subtítulos muestren el texto exacto.
 Salida: public/gen/explica_mezcla.wav, src/gen/explica.json, guiones/que_hace_un_bot.md
@@ -17,6 +17,7 @@ import numpy as np
 import soundfile as sf
 from scipy.signal import resample_poly
 
+from guion_explica import GUION, TITULO
 from montaje import escenas_desde, musica_energetica, poner
 from sonido import SR, campana, mezclar, soplo, toque
 
@@ -27,18 +28,6 @@ GEN_SRC = RAIZ / "src/gen"
 GEN.mkdir(parents=True, exist_ok=True)
 GEN_SRC.mkdir(parents=True, exist_ok=True)
 
-# ---------------------------------------------------------------- guion
-TITULO = "Qué hace de verdad un bot de trading"
-GUION = [
-    ("hook", ["Un bot de trading no adivina el futuro.", "Hace algo mucho más aburrido.", "Y por eso es tan útil."]),
-    ("lee", ["Primero: lee el mercado.", "Cada segundo recibe el precio, el volumen y el spread.", "Miles de datos que tú no podrías seguir."]),
-    ("decide", ["Segundo: decide con reglas.", "Si el precio rompe este nivel y el volumen acompaña, entra.", "Si no, espera."]),
-    ("protege", ["Tercero: se protege.", "Antes de abrir, ya sabe cuánto puede perder.", "El stop y el tamaño de la posición están calculados."]),
-    ("ejecuta", ["Cuarto: ejecuta.", "En milisegundos.", "A las tres de la mañana, o en plena noticia."]),
-    ("emocion", ["Y lo más importante: no siente miedo ni avaricia.", "Hace lo que se le ha programado.", "Ni más, ni menos."]),
-    ("codigo", ["Un bot no es magia.", "Es disciplina convertida en código."]),
-    ("cta", ["Sígueme, y en el próximo vídeo te enseño cómo se prueba un bot antes de arriesgar un solo euro."]),
-]
 # Voz: femenina, española y cálida; un poco más pausada que una locución comercial
 VOZ = "ef_dora"
 VELOCIDAD = 1.04
