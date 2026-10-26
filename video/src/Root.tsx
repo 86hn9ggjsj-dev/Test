@@ -2,6 +2,7 @@ import { Composition } from "remotion";
 import { Bot, BOT_FPS, BOT_FRAMES } from "./Bot/Bot";
 import { Cifras, CIFRAS_FPS, CIFRAS_FRAMES } from "./Cifras/Cifras";
 import { Errores, ERRORES_FPS, ERRORES_FRAMES } from "./Errores/Errores";
+import { Estafa, ESTAFA_FPS, ESTAFA_FRAMES } from "./Estafa/Estafa";
 import { BotMG } from "./Bot/BotMG";
 import { Explica, EXPLICA_FPS, EXPLICA_FRAMES } from "./Explica/Explica";
 import { Intro } from "./Intro";
@@ -74,6 +75,14 @@ export const RemotionRoot: React.FC = () => {
         component={Cifras}
         durationInFrames={CIFRAS_FRAMES}
         fps={CIFRAS_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Estafa"
+        component={Estafa}
+        durationInFrames={ESTAFA_FRAMES}
+        fps={ESTAFA_FPS}
         width={ANCHO}
         height={ALTO}
       />
