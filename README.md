@@ -204,5 +204,17 @@ PAUSA_MAX=0.6 PAUSA_UMBRAL=42 python scripts/errores.py <ruta-a-ffmpeg>
 npx remotion render Errores out/errores.mp4 --video-bitrate=12M --audio-codec=aac
 ```
 
+### Partes 4 y 5: las tres cifras y cómo detectar un bot estafa
+
+Desde la parte 4 el cierre es promo del bot (`src/Explica/Promo.tsx`: ficha con la cuenta auditada en el link de la bio,
+Seguir, Mensaje y un privado que se escribe solo). Parte 4: `src/Cifras/Cifras.tsx`, `scripts/cifras.py`, locución en
+`input/cifras_voz.mp3`. Parte 5: guion en `scripts/guion_estafa.py` y `scripts/estafa.py` (locución en `input/estafa_voz.mp3`).
+
+```bash
+cd video
+PAUSA_MAX=0.6 PAUSA_UMBRAL=42 python scripts/cifras.py <ruta-a-ffmpeg>
+npx remotion render Cifras out/cifras.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
 `scripts/sonido.py` reúne la síntesis de música y SFX y la mezcla con ducking y -14 LUFS que
 usan ambos pipelines.

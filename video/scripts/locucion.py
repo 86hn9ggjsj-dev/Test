@@ -40,7 +40,8 @@ FILTRO_LOCAL = ("highpass=f=90,equalizer=f=260:t=q:w=1:g=1.5,equalizer=f=3200:t=
 FILTRO_ESTUDIO = "highpass=f=70,acompressor=threshold=-18dB:ratio=1.8:attack=12:release=160:makeup=1.5"
 
 norm = lambda w: re.sub(r"[^\wáéíóúñü%]", "", w.lower())  # noqa: E731
-NUMEROS = {"1": "uno", "2": "dos", "3": "tres", "4": "cuatro", "5": "cinco", "6": "seis", "7": "siete", "8": "ocho", "9": "nueve", "10": "diez"}
+NUMEROS = {"1": "uno", "2": "dos", "3": "tres", "4": "cuatro", "5": "cinco", "6": "seis", "7": "siete", "8": "ocho", "9": "nueve", "10": "diez",
+           "20": "veinte", "30": "treinta", "100": "cien", "1000": "mil"}
 
 
 def escribir_guion(md, titulo, intro, guion, gestos, pantallas=None):
