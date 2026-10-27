@@ -21,7 +21,7 @@ El novato hace lo contrario: corta las ganancias rápido y deja correr las pérd
 Regla: no entres si no puedes ganar al menos el doble de lo que arriesgas.
 
 **cta**  
-Mi bot opera así, y tienes su cuenta auditada en la bio. Sígueme para más consejos.
+Y si no quieres operar a mano, tienes la cuenta auditada de mi bot en la bio. Sígueme para más consejos.
 
 ## Versión con gestos (ElevenLabs, modelo Eleven v3)
 
@@ -39,7 +39,7 @@ Arriesgas 100 euros para ganar 200. [short pause] Fallas 6 veces: menos 600. Aci
 
 Regla: no entres si no puedes ganar al menos el doble de lo que arriesgas.
 
-[warmly] Mi bot opera así, y tienes su cuenta auditada en la bio. Sígueme para más consejos.
+[warmly] Y si no quieres operar a mano, tienes la cuenta auditada de mi bot en la bio. [short pause] Sígueme para más consejos.
 
 ## Pantallas
 

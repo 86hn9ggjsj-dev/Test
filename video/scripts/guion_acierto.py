@@ -8,7 +8,7 @@ GUION = [
     ("resultado", ["Has fallado más que acertado, y vas 200 euros arriba."]),
     ("error", ["El novato hace lo contrario: corta las ganancias rápido y deja correr las pérdidas."]),
     ("regla", ["Regla: no entres si no puedes ganar al menos el doble de lo que arriesgas."]),
-    ("cta", ["Mi bot opera así, y tienes su cuenta auditada en la bio.", "Sígueme para más consejos."]),
+    ("cta", ["Y si no quieres operar a mano, tienes la cuenta auditada de mi bot en la bio.", "Sígueme para más consejos."]),
 ]
 
 GESTOS = {
@@ -18,7 +18,7 @@ GESTOS = {
     "resultado": "[short pause] Has fallado más que acertado... y vas 200 euros arriba.",
     "error": "[exhales] El novato hace lo contrario: corta las ganancias rápido y deja correr las pérdidas.",
     "regla": "Regla: no entres si no puedes ganar al menos el doble de lo que arriesgas.",
-    "cta": "[warmly] Mi bot opera así, y tienes su cuenta auditada en la bio. Sígueme para más consejos.",
+    "cta": "[warmly] Y si no quieres operar a mano, tienes la cuenta auditada de mi bot en la bio. [short pause] Sígueme para más consejos.",
 }
 
 PANTALLAS = [
