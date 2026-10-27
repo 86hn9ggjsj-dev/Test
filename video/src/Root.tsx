@@ -1,6 +1,7 @@
 import { Composition } from "remotion";
 import { Acierto, ACIERTO_FPS, ACIERTO_FRAMES } from "./Acierto/Acierto";
 import { Bot, BOT_FPS, BOT_FRAMES } from "./Bot/Bot";
+import { Cincuenta, CINCUENTA_FPS, CINCUENTA_FRAMES } from "./Cincuenta/Cincuenta";
 import { Cifras, CIFRAS_FPS, CIFRAS_FRAMES } from "./Cifras/Cifras";
 import { Errores, ERRORES_FPS, ERRORES_FRAMES } from "./Errores/Errores";
 import { Estafa, ESTAFA_FPS, ESTAFA_FRAMES } from "./Estafa/Estafa";
@@ -101,6 +102,14 @@ export const RemotionRoot: React.FC = () => {
         component={Stop}
         durationInFrames={STOP_FRAMES}
         fps={STOP_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Cincuenta"
+        component={Cincuenta}
+        durationInFrames={CINCUENTA_FRAMES}
+        fps={CINCUENTA_FPS}
         width={ANCHO}
         height={ALTO}
       />
