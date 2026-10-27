@@ -9,6 +9,7 @@ import { Explica, EXPLICA_FPS, EXPLICA_FRAMES } from "./Explica/Explica";
 import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
 import { Reto, RETO_FPS, RETO_FRAMES } from "./Reto/Reto";
+import { Stop, STOP_FPS, STOP_FRAMES } from "./Stop/Stop";
 import { DURACION_FRAMES, Viral } from "./Viral/Viral";
 import { ALTO, ANCHO, FPS } from "./Viral/util";
 
@@ -92,6 +93,14 @@ export const RemotionRoot: React.FC = () => {
         component={Acierto}
         durationInFrames={ACIERTO_FRAMES}
         fps={ACIERTO_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Stop"
+        component={Stop}
+        durationInFrames={STOP_FRAMES}
+        fps={STOP_FPS}
         width={ANCHO}
         height={ALTO}
       />
