@@ -1,13 +1,12 @@
-// Reel de alcance "Pierdes un 50 %" (~26 s) en estilo claro: formas planas, verde = ganas, rojo = pierdes, cifras
-// enormes y una idea por pantalla; el gancho ya está en el primer fotograma y el final corta en seco para que se repita.
-// Tiempos en src/gen/cincuenta.json (scripts/cincuenta.py).
+// Reel de alcance "Pierdes un 50 %" (~25 s): cifras gigantes en el centro desde el primer fotograma, una sola idea
+// y final en seco para que se repita. Sin promo hablada. Tiempos en src/gen/cincuenta.json (scripts/cincuenta.py).
 import { useCurrentFrame } from "remotion";
 import datos from "../gen/cincuenta.json";
 import { salida } from "../Premium/ui";
-import { ANCHO, SANS } from "../Viral/util";
+import { ANCHO } from "../Viral/util";
 import { Arriba, L, mono, muelle, Titular } from "../Bot/piezas";
+import { caja, Escena, orbita, polvo, proyector, Trazo } from "../Bot/tres";
 import { claves, cuando, Montaje, P } from "../Explica/Montaje";
-import { Bloque, Cifra, Marca, ROJO, VERDE } from "../Claro/claro";
 
 export const CINCUENTA_FPS = datos.fps;
 export const CINCUENTA_FRAMES = Math.round(datos.duracion * datos.fps);
@@ -15,22 +14,37 @@ export const CINCUENTA_FRAMES = Math.round(datos.duracion * datos.fps);
 const EV = datos.eventos;
 const en = cuando(datos);
 
-const BX = 140; // barra de la cuenta: 800 px de ancho
-const BW = 800;
+// Cifra gigante en el centro, con su pie
+const Gigante: React.FC<{ t: number; t0: number; fin?: number; texto: string; pie?: string; top?: number; size?: number; tacha?: number }> = ({ t, t0, fin, texto, pie, top = 760, size = 230, tacha }) => {
+  const g = muelle(t, t0, 210, 14);
+  const fuera = fin === undefined ? 0 : L(t, fin - 0.2, fin, 0, 1);
+  if (g <= 0.001 || fuera >= 1) return null;
+  const raya = tacha === undefined ? 0 : L(t, tacha, tacha + 0.3, 0, 1, salida);
+  return (
+    <div style={{ position: "absolute", top, left: 0, width: ANCHO, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: Math.min(g * 1.5, 1) * (1 - fuera) * (1 - 0.55 * raya) }}>
+      <div style={{ position: "relative", ...mono(size), letterSpacing: "-0.03em", transform: `scale(${0.75 + 0.25 * Math.min(g, 1.1)})` }}>
+        {texto}
+        <div style={{ position: "absolute", left: -20, top: "52%", height: 10, width: `calc(${raya * 100}% + ${raya * 40}px)`, background: "#fff" }} />
+      </div>
+      {pie && <span style={mono(30, 0.6)}>{pie}</span>}
+    </div>
+  );
+};
 
-// ------------------------------------------------------------------ 1. Hook: −50 % y la cuenta partida por la mitad
-const Hook: React.FC<P> = ({ t, s }) => {
+// ------------------------------------------------------------------ 1. Hook: −50 % gigante desde el primer fotograma
+const Hook: React.FC<P> = ({ t, s, e }) => {
   const tCuanto = en("cuánto", s);
-  const parte = L(t, 0.35, 1.1, 0, 1, salida);
-  const hueco = muelle(t, EV.recuperarte - 0.2, 200, 14);
+  const cam = orbita([0, -0.6, 0], L(t, s, e, 7.4, 6.8), L(t, s, e, -0.3, -0.1), 0.18, { apertura: 35, centroY: 960 });
+  const tr: Trazo[] = [...polvo(0.3)];
+  // La cuenta: una barra que se parte por la mitad
+  const parte = L(t, 0.15, 0.9, 0, 1, salida);
+  for (const [a, b] of caja([-1.0, -1.45, -0.12], [0, -1.25, 0.12])) tr.push({ t: "l", a, b, w: 1.6, o: 1 });
+  const cae = parte * parte * 0.35;
+  for (const [a, b] of caja([0.05 + 0.15 * parte, -1.45 - cae, -0.12], [1.05 + 0.15 * parte, -1.25 - cae, 0.12])) tr.push({ t: "l", a, b, w: 1.4, o: 0.9 * (1 - parte), dash: "5 7" });
   return (
     <>
-      <Cifra t={t} t0={-0.45} texto="−50 %" color={ROJO} top={500} />
-      <Bloque x={BX} y={860} w={BW / 2} h={120} color="#fff" texto={parte > 0.5 ? "500 €" : ""} size={48} />
-      <Bloque x={BX + BW / 2} y={860 + 260 * parte * parte} w={BW / 2} h={120} color={parte > 0.05 ? ROJO : "#fff"} o={1 - parte} giro={12 * parte} />
-      {parte <= 0.5 && <div style={{ position: "absolute", left: BX, top: 860, width: BW, height: 120, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, fontWeight: 800, fontSize: 48, color: "#000" }}>1.000 €</div>}
-      <Bloque x={BX + BW / 2 + 8} y={860} w={BW / 2 - 8} h={120} color={VERDE} contorno texto="¿?" o={Math.min(hueco * 1.5, 1)} size={52} />
-      <div style={{ position: "absolute", top: 1010, left: 0, width: ANCHO, textAlign: "center", ...mono(30, 0.6) }}>TU CUENTA</div>
+      <Escena cam={cam} trazos={tr} />
+      <Gigante t={t} t0={-0.4} texto="−50 %" pie="DE TU CUENTA" />
       <Arriba>
         <Titular t={t} t0={-0.35} fin={tCuanto - 0.05} texto="pierdes la *mitad*" size={100} />
       </Arriba>
@@ -41,18 +55,14 @@ const Hook: React.FC<P> = ({ t, s }) => {
   );
 };
 
-// ------------------------------------------------------------------ 2. Respuesta: +50 % no; +100 % sí
-const Respuesta: React.FC<P> = ({ t, s }) => {
-  const crece = L(t, EV.cien - 0.05, EV.cien + 0.5, 0, 1, salida);
+// ------------------------------------------------------------------ 2. Respuesta: no es un 50 %, es un 100 %
+const Respuesta: React.FC<P> = ({ t, s, e }) => {
+  const cam = orbita([0, 0, 0], 9, L(t, s, e, -0.2, 0.2), 0.2, { apertura: 40 });
   return (
     <>
-      <Cifra t={t} t0={s + 0.05} fin={EV.cien - 0.15} texto="+50 %" top={500} tacha={EV.no + 0.35} />
-      <Marca t={t} t0={EV.no + 0.5} ok={false} x={540} y={800} />
-      <Cifra t={t} t0={EV.cien - 0.1} texto="+100 %" color={VERDE} top={500} size={200} />
-      <Marca t={t} t0={EV.cien + 0.1} ok x={540} y={800} />
-      <Bloque x={BX} y={920} w={BW / 2} h={120} color="#fff" texto="500 €" size={48} />
-      <Bloque x={BX + BW / 2 + 8} y={920} w={(BW / 2 - 8) * crece} h={120} color={VERDE} texto={crece > 0.6 ? "+500 €" : ""} size={48} o={crece > 0 ? 1 : 0} />
-      <div style={{ position: "absolute", top: 1070, left: 0, width: ANCHO, textAlign: "center", ...mono(36, 0.85), opacity: L(t, EV.cien + 0.3, EV.cien + 0.6, 0, 1, salida) }}>500 € × 2 = 1.000 €</div>
+      <Escena cam={cam} trazos={polvo(0.35)} />
+      <Gigante t={t} t0={s + 0.05} fin={EV.cien - 0.15} texto="+50 %" tacha={EV.no + 0.3} />
+      <Gigante t={t} t0={EV.cien - 0.1} texto="+100 %" size={250} pie="PARA VOLVER A DONDE ESTABAS" />
       <Arriba>
         <Titular t={t} t0={s + 0.1} fin={EV.cien - 0.3} texto="no es un *50 %*" size={100} />
       </Arriba>
@@ -63,30 +73,37 @@ const Respuesta: React.FC<P> = ({ t, s }) => {
   );
 };
 
-// ------------------------------------------------------------------ 3. Ejemplo: 10 billetes de 100 €, se van 5 y hay que duplicar
-const Ejemplo: React.FC<P> = ({ t, s }) => {
-  const dup = L(t, EV.duplicarse - 0.15, EV.duplicarse + 0.35, 0, 1, salida);
+// ------------------------------------------------------------------ 3. Ejemplo: 1.000 € → 500 € → hay que duplicar
+const Ejemplo: React.FC<P> = ({ t, s, e }) => {
+  const cam = orbita([0, 0, 0], L(t, s, e, 7.6, 7.0), L(t, s, e, 0.3, 0.1), L(t, s, e, 0.2, 0.28), { apertura: 35, centroY: 980 });
+  const tr: Trazo[] = [...polvo(0.3)];
+  const dup = L(t, EV.duplicarse - 0.2, EV.duplicarse + 0.4, 0, 1, salida);
+  for (let k = 0; k < 10; k++) {
+    const col = k % 5;
+    const fila = Math.floor(k / 5);
+    const x = -0.84 + col * 0.42;
+    const y = 0.15 - fila * 0.45;
+    const g = muelle(t, s + 0.1 + k * 0.04, 200, 15);
+    if (g <= 0) continue;
+    const pierde = fila === 1;
+    const cae = pierde ? L(t, EV.quedan - 0.2 + col * 0.06, EV.quedan + 0.5 + col * 0.06, 0, 1, (u) => u * u) : 0;
+    const yy = y - cae * 1.4;
+    const vuelve = pierde ? dup : 0;
+    const o = pierde ? Math.max((1 - cae) * 0.9, 0.5 * vuelve) : 1;
+    const yFinal = pierde && vuelve > 0 ? y : yy;
+    for (const [a, b] of caja([x - 0.15, yFinal - 0.15, -0.15], [x + 0.15, yFinal + 0.15, 0.15])) {
+      tr.push({ t: "l", a, b, w: 1.4, o: o * Math.min(g * 1.5, 1), dash: pierde && vuelve > 0 ? "5 7" : undefined, luz: !pierde && dup > 0 ? 0.3 * dup : 0 });
+    }
+  }
+  const pr = proyector(cam);
+  const centro = pr([0, -0.1, 0.18]);
   const saldo = t < EV.quedan ? "1.000 €" : "500 €";
   return (
     <>
-      {Array.from({ length: 10 }, (_, k) => {
-        const col = k % 5;
-        const fila = Math.floor(k / 5);
-        const x = 100 + col * 180;
-        const y = 600 + fila * 130;
-        const g = muelle(t, s + 0.05 + k * 0.05, 230, 15);
-        const pierde = fila === 1;
-        const cae = pierde ? L(t, EV.quedan - 0.15 + col * 0.06, EV.quedan + 0.55 + col * 0.06, 0, 1, (u) => u * u) : 0;
-        return (
-          <div key={k}>
-            <Bloque x={x} y={y + 500 * cae + (1 - Math.min(g, 1)) * 40} w={160} h={100} color={cae > 0 ? ROJO : "#fff"} texto="100 €" size={38} o={Math.min(g * 1.5, 1) * (1 - cae)} giro={cae * (col - 2) * 8} />
-            {pierde && <Bloque x={x} y={y} w={160} h={100} color={VERDE} contorno texto="+100" size={34} o={dup} />}
-          </div>
-        );
-      })}
-      <div style={{ position: "absolute", top: 900, left: 0, width: ANCHO, display: "flex", justifyContent: "center", gap: 30, alignItems: "baseline" }}>
-        <span style={{ ...mono(110), color: t < EV.quedan ? "#fff" : ROJO }}>{saldo}</span>
-        <span style={{ ...mono(110), color: VERDE, opacity: dup, transform: `scale(${0.6 + 0.4 * dup})`, display: "inline-block" }}>×2</span>
+      <Escena cam={cam} trazos={tr} />
+      <div style={{ position: "absolute", left: centro.x, top: centro.y + 260, transform: "translateX(-50%)", display: "flex", gap: 24, alignItems: "baseline" }}>
+        <span style={mono(72)}>{saldo}</span>
+        <span style={{ ...mono(72), opacity: dup }}>×2</span>
       </div>
       <Arriba>
         <Titular t={t} t0={s + 0.1} fin={EV.duplicarse - 0.35} texto="1.000 € → *500 €*" size={100} />
@@ -99,22 +116,22 @@ const Ejemplo: React.FC<P> = ({ t, s }) => {
 };
 
 // ------------------------------------------------------------------ 4. Escala: −90 % pide +900 %
-const BASE = 1000;
-const Escala: React.FC<P> = ({ t, s }) => {
-  const baja = muelle(t, EV.noventa - 0.15, 170, 14);
-  const sube = L(t, EV.novecientos - 0.45, EV.novecientos + 0.7, 0, 1, salida);
-  const alto = 2700 * sube;
+const Escala: React.FC<P> = ({ t, s, e }) => {
+  const sube = L(t, EV.novecientos - 0.5, EV.novecientos + 0.6, 0, 1, salida);
+  const cam = orbita([0, -0.25 + 2.0 * sube, 0], L(t, s, e, 7.6, 8.6), L(t, s, e, -0.3, -0.08), 0.12, { apertura: 35, centroY: 960 });
+  const tr: Trazo[] = [...polvo(0.3)];
+  tr.push({ t: "l", a: [-1.3, 0, 0], b: [1.3, 0, 0], w: 1.4, o: 0.6, dash: "6 8" });
+  const baja = muelle(t, EV.noventa - 0.15, 150, 14);
+  if (baja > 0) for (const [a, b] of caja([-0.75, -0.9 * Math.min(baja, 1.05), -0.18], [-0.35, 0, 0.18])) tr.push({ t: "l", a, b, w: 1.5, o: 0.7 });
+  if (sube > 0) for (const [a, b] of caja([0.35, 0, -0.18], [0.75, 4.5 * sube, 0.18])) tr.push({ t: "l", a, b, w: 1.8, o: 1, luz: 0.4 });
+  const pr = proyector(cam);
+  const qb = pr([-0.55, -0.9, 0.18]);
+  const qs = pr([0.55, 4.5 * sube, 0]);
   return (
     <>
-      <div style={{ position: "absolute", top: BASE, left: 160, width: 760, height: 4, background: "rgba(255,255,255,0.5)" }} />
-      <Bloque x={200} y={BASE + 4} w={240} h={270 * Math.min(baja, 1.05)} color={ROJO} o={baja > 0 ? 1 : 0} />
-      <div style={{ position: "absolute", left: 160, top: BASE - 90, width: 320, textAlign: "center", ...mono(70), color: ROJO, opacity: Math.min(baja * 1.5, 1) }}>−90 %</div>
-      {/* La barra verde se corta bajo el titular: sigue subiendo fuera de cuadro (flecha) */}
-      <Bloque x={560} y={Math.max(BASE - alto, 450)} w={320} h={Math.min(alto, BASE - 450)} color={VERDE} o={sube > 0 ? 1 : 0} />
-      <div style={{ position: "absolute", left: 560, top: Math.max(BASE - alto + 20, 466), width: 320, display: "flex", flexDirection: "column", alignItems: "center", opacity: sube > 0.03 ? 1 : 0 }}>
-        <span style={{ ...mono(56), color: "#000", opacity: alto > BASE - 450 ? 1 : 0 }}>↑</span>
-        <span style={{ ...mono(66), color: alto > 140 ? "#000" : VERDE }}>+900 %</span>
-      </div>
+      <Escena cam={cam} trazos={tr} />
+      <div style={{ position: "absolute", left: qb.x, top: qb.y + 20, transform: "translateX(-50%)", opacity: Math.min(baja * 1.5, 1), ...mono(64, 0.8) }}>−90 %</div>
+      <div style={{ position: "absolute", left: qs.x, top: Math.max(qs.y - 90, 520), transform: "translateX(-50%)", opacity: sube > 0.05 ? 1 : 0, ...mono(80) }}>+900 %</div>
       <Arriba>
         <Titular t={t} t0={s + 0.1} fin={EV.novecientos - 0.35} texto="si pierdes un *90 %*" size={96} />
       </Arriba>
@@ -126,22 +143,18 @@ const Escala: React.FC<P> = ({ t, s }) => {
 };
 
 // ------------------------------------------------------------------ 5. Lección: no perder mucho (final en seco)
-const Leccion: React.FC<P> = ({ t, s }) => {
+const Leccion: React.FC<P> = ({ t, s, e }) => {
   const tEs = en("es", EV.primero + 1);
-  const raya = L(t, tEs - 0.15, tEs + 0.25, 0, 1, salida);
-  const subraya = L(t, EV.perder, EV.perder + 0.5, 0, 1, salida);
-  const g = muelle(t, s + 0.1, 200, 15);
+  const cam = orbita([0, 0, 0], 9, L(t, s, e, 0.2, -0.2), 0.2, { apertura: 40 });
   return (
     <>
-      <div style={{ position: "absolute", top: 640, left: 0, width: ANCHO, display: "flex", justifyContent: "center", opacity: Math.min(g * 1.5, 1) * (1 - 0.6 * raya) }}>
-        <div style={{ position: "relative", fontFamily: SANS, fontWeight: 800, fontSize: 110, color: "#fff", letterSpacing: "-0.03em" }}>
-          ganar mucho
-          <div style={{ position: "absolute", left: -20, top: "52%", height: 14, borderRadius: 7, width: `calc(${raya * 100}% + ${raya * 40}px)`, background: ROJO }} />
+      <Escena cam={cam} trazos={polvo(0.35)} />
+      <div style={{ position: "absolute", top: 760, left: 0, width: ANCHO, display: "flex", flexDirection: "column", alignItems: "center", gap: 30 }}>
+        <div style={{ opacity: tEs > t ? 1 : 0.35 }}>
+          <Titular t={t} t0={s + 0.15} texto="ganar *mucho*" size={110} />
         </div>
-      </div>
-      <div style={{ position: "absolute", top: 880, left: 0, width: ANCHO, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-        <Titular t={t} t0={EV.perder - 0.35} texto="no perder *mucho*" size={124} />
-        <div style={{ height: 14, borderRadius: 7, width: 700 * subraya, background: VERDE }} />
+        <div style={{ height: 6, width: 520 * L(t, tEs - 0.2, tEs + 0.2, 0, 1, salida), background: "#fff", marginTop: -100, marginBottom: 60 }} />
+        <Titular t={t} t0={EV.perder - 0.3} texto="no perder *mucho*" size={120} />
       </div>
       <Arriba>
         <Titular t={t} t0={s + 0.1} texto="lo *primero*" size={96} />
