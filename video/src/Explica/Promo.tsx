@@ -31,7 +31,8 @@ const boton = (activo: boolean, ancho: number): React.CSSProperties => ({
   fontSize: 36,
 });
 
-export const Promo: React.FC<{ t: number; t0: number; tAuditada: number; tLink: number; tSigue: number; tEscribe: number; tInfo: number }> = ({
+// tEscribe y tInfo son opcionales: sin ellos (el guion no pide escribir) no se pulsa Mensaje ni sale el privado
+export const Promo: React.FC<{ t: number; t0: number; tAuditada: number; tLink: number; tSigue: number; tEscribe?: number; tInfo?: number }> = ({
   t,
   t0,
   tAuditada,
@@ -45,10 +46,10 @@ export const Promo: React.FC<{ t: number; t0: number; tAuditada: number; tLink: 
   const link = muelle(t, tLink - 0.05, 220, 13);
   const pulso = t >= tLink ? 0.5 + 0.5 * Math.cos((t - tLink) * 7) : 0;
   const sigue = t >= tSigue;
-  const pulsa = muelle(t, tEscribe - 0.05, 260, 15);
-  const burbuja = muelle(t, tEscribe + 0.25, 200, 16);
+  const pulsa = tEscribe === undefined ? 0 : muelle(t, tEscribe - 0.05, 260, 15);
+  const burbuja = tEscribe === undefined ? 0 : muelle(t, tEscribe + 0.25, 200, 16);
   const texto = "Hola, quiero más info";
-  const letras = Math.round(L(t, tEscribe + 0.35, tInfo + 0.2, 0, texto.length, (u) => u));
+  const letras = tEscribe === undefined ? 0 : Math.round(L(t, tEscribe + 0.35, Math.max(tInfo ?? tEscribe + 1.2, tEscribe + 0.5) + 0.2, 0, texto.length, (u) => u));
   const sube = t >= tLink ? -10 * Math.abs(Math.sin((t - tLink) * 5)) : 0;
   return (
     <>

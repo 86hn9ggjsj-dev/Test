@@ -42,6 +42,7 @@ FILTRO_ESTUDIO = "highpass=f=70,acompressor=threshold=-18dB:ratio=1.8:attack=12:
 norm = lambda w: re.sub(r"[^\wáéíóúñü%]", "", w.lower())  # noqa: E731
 NUMEROS = {"1": "uno", "2": "dos", "3": "tres", "4": "cuatro", "5": "cinco", "6": "seis", "7": "siete", "8": "ocho", "9": "nueve", "10": "diez",
            "20": "veinte", "30": "treinta", "100": "cien", "1000": "mil"}
+NUMEROS_INV = {v: k for k, v in NUMEROS.items()}
 
 
 def escribir_guion(md, titulo, intro, guion, gestos, pantallas=None):
@@ -135,7 +136,7 @@ def alinear(voz_wav, guion):
         elif op == "replace" and i2 - i1 == j2 - j1:
             for k in range(i2 - i1):
                 x, y = a[i1 + k], b[j1 + k]
-                if NUMEROS.get(y) == x or difflib.SequenceMatcher(None, x, y).ratio() >= 0.75:
+                if x in (NUMEROS.get(y), NUMEROS_INV.get(y)) or difflib.SequenceMatcher(None, x, y).ratio() >= 0.75:
                     tiempos[i1 + k] = (oidas[j1 + k]["s"], oidas[j1 + k]["e"])
     # Palabras no reconocidas: se reparten entre sus vecinas
     conocidas = [i for i, x in enumerate(tiempos) if x]
