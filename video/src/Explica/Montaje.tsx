@@ -5,8 +5,8 @@ import { AbsoluteFill, Audio, staticFile } from "remotion";
 import { Progreso, salida } from "../Premium/ui";
 import { Palabra, Subtitulos } from "../Viral/Subtitulos";
 import { ANCHO, lerp, ruido, SANS } from "../Viral/util";
-import { L, muelle, Teclea } from "../Bot/piezas";
-import { io } from "../Bot/tres";
+import { Arriba, L, mono, muelle, Teclea, Titular } from "../Bot/piezas";
+import { Escena, io, orbita, polvo } from "../Bot/tres";
 
 export type Datos = { fps: number; duracion: number; palabras: Palabra[]; escenas: { id: string; s: number; e: number }[] };
 export type P = { t: number; s: number; e: number };
@@ -57,6 +57,21 @@ export const BotonSeguir: React.FC<{ t: number; t0: number }> = ({ t, t0 }) => {
     </div>
   );
 };
+
+// Cierre de los reels de alcance: «sígueme» con el botón que se pulsa y la cuenta auditada del bot en la bio
+export const CtaSeguir: React.FC<P & { lema: string }> = ({ t, s, e, lema }) => (
+  <>
+    <Escena cam={orbita([0, 0, 0], 9, L(t, s, e, -0.3, 0.2), 0.2, { apertura: 40 })} trazos={polvo(0.35)} />
+    <BotonSeguir t={t} t0={s} />
+    <div style={{ position: "absolute", top: 660, left: 0, width: ANCHO, display: "flex", justifyContent: "center", opacity: L(t, s + 0.6, s + 0.9, 0, 1, salida) }}>
+      <span style={{ ...mono(30, 0.85), padding: "12px 24px", borderRadius: 999, border: "1.5px solid rgba(255,255,255,0.5)" }}>↗ CUENTA AUDITADA DEL BOT EN LA BIO</span>
+    </div>
+    <Kicker t={t} t0={s + 0.05} texto={lema} />
+    <Arriba>
+      <Titular t={t} t0={s + 0.05} texto="*sígueme*" size={110} />
+    </Arriba>
+  </>
+);
 
 const FUNDE = 0.16;
 

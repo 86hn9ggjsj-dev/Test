@@ -1,6 +1,7 @@
 import { Composition } from "remotion";
 import { Acierto, ACIERTO_FPS, ACIERTO_FRAMES } from "./Acierto/Acierto";
 import { Bot, BOT_FPS, BOT_FRAMES } from "./Bot/Bot";
+import { Cazastop, CAZASTOP_FPS, CAZASTOP_FRAMES } from "./Cazastop/Cazastop";
 import { Cincuenta, CINCUENTA_FPS, CINCUENTA_FRAMES } from "./Cincuenta/Cincuenta";
 import { Cifras, CIFRAS_FPS, CIFRAS_FRAMES } from "./Cifras/Cifras";
 import { Errores, ERRORES_FPS, ERRORES_FRAMES } from "./Errores/Errores";
@@ -110,6 +111,14 @@ export const RemotionRoot: React.FC = () => {
         component={Cincuenta}
         durationInFrames={CINCUENTA_FRAMES}
         fps={CINCUENTA_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Cazastop"
+        component={Cazastop}
+        durationInFrames={CAZASTOP_FRAMES}
+        fps={CAZASTOP_FPS}
         width={ANCHO}
         height={ALTO}
       />
