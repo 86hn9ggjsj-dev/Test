@@ -8,6 +8,7 @@ import { Errores, ERRORES_FPS, ERRORES_FRAMES } from "./Errores/Errores";
 import { Estafa, ESTAFA_FPS, ESTAFA_FRAMES } from "./Estafa/Estafa";
 import { BotMG } from "./Bot/BotMG";
 import { Explica, EXPLICA_FPS, EXPLICA_FRAMES } from "./Explica/Explica";
+import { Ganapierde, GANAPIERDE_FPS, GANAPIERDE_FRAMES } from "./Ganapierde/Ganapierde";
 import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
 import { Reto, RETO_FPS, RETO_FRAMES } from "./Reto/Reto";
@@ -119,6 +120,14 @@ export const RemotionRoot: React.FC = () => {
         component={Cazastop}
         durationInFrames={CAZASTOP_FRAMES}
         fps={CAZASTOP_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Ganapierde"
+        component={Ganapierde}
+        durationInFrames={GANAPIERDE_FRAMES}
+        fps={GANAPIERDE_FPS}
         width={ANCHO}
         height={ALTO}
       />

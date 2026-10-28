@@ -6,30 +6,13 @@ import { salida } from "../Premium/ui";
 import { ANCHO } from "../Viral/util";
 import { Arriba, L, mono, muelle, Titular } from "../Bot/piezas";
 import { caja, Escena, orbita, polvo, proyector, Trazo } from "../Bot/tres";
-import { claves, cuando, Montaje, P } from "../Explica/Montaje";
+import { claves, cuando, Gigante, Montaje, P } from "../Explica/Montaje";
 
 export const CINCUENTA_FPS = datos.fps;
 export const CINCUENTA_FRAMES = Math.round(datos.duracion * datos.fps);
 
 const EV = datos.eventos;
 const en = cuando(datos);
-
-// Cifra gigante en el centro, con su pie
-const Gigante: React.FC<{ t: number; t0: number; fin?: number; texto: string; pie?: string; top?: number; size?: number; tacha?: number }> = ({ t, t0, fin, texto, pie, top = 760, size = 230, tacha }) => {
-  const g = muelle(t, t0, 210, 14);
-  const fuera = fin === undefined ? 0 : L(t, fin - 0.2, fin, 0, 1);
-  if (g <= 0.001 || fuera >= 1) return null;
-  const raya = tacha === undefined ? 0 : L(t, tacha, tacha + 0.3, 0, 1, salida);
-  return (
-    <div style={{ position: "absolute", top, left: 0, width: ANCHO, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: Math.min(g * 1.5, 1) * (1 - fuera) * (1 - 0.55 * raya) }}>
-      <div style={{ position: "relative", ...mono(size), letterSpacing: "-0.03em", transform: `scale(${0.75 + 0.25 * Math.min(g, 1.1)})` }}>
-        {texto}
-        <div style={{ position: "absolute", left: -20, top: "52%", height: 10, width: `calc(${raya * 100}% + ${raya * 40}px)`, background: "#fff" }} />
-      </div>
-      {pie && <span style={mono(30, 0.6)}>{pie}</span>}
-    </div>
-  );
-};
 
 // ------------------------------------------------------------------ 1. Hook: −50 % gigante desde el primer fotograma
 const Hook: React.FC<P> = ({ t, s, e }) => {

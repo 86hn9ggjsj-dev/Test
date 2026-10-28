@@ -58,6 +58,23 @@ export const BotonSeguir: React.FC<{ t: number; t0: number }> = ({ t, t0 }) => {
   );
 };
 
+// Cifra gigante en el centro, con su pie
+export const Gigante: React.FC<{ t: number; t0: number; fin?: number; texto: string; pie?: string; top?: number; size?: number; tacha?: number }> = ({ t, t0, fin, texto, pie, top = 760, size = 230, tacha }) => {
+  const g = muelle(t, t0, 210, 14);
+  const fuera = fin === undefined ? 0 : L(t, fin - 0.2, fin, 0, 1);
+  if (g <= 0.001 || fuera >= 1) return null;
+  const raya = tacha === undefined ? 0 : L(t, tacha, tacha + 0.3, 0, 1, salida);
+  return (
+    <div style={{ position: "absolute", top, left: 0, width: ANCHO, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: Math.min(g * 1.5, 1) * (1 - fuera) * (1 - 0.55 * raya) }}>
+      <div style={{ position: "relative", ...mono(size), letterSpacing: "-0.03em", transform: `scale(${0.75 + 0.25 * Math.min(g, 1.1)})` }}>
+        {texto}
+        <div style={{ position: "absolute", left: -20, top: "52%", height: 10, width: `calc(${raya * 100}% + ${raya * 40}px)`, background: "#fff" }} />
+      </div>
+      {pie && <span style={mono(30, 0.6)}>{pie}</span>}
+    </div>
+  );
+};
+
 // Cierre de los reels de alcance: «sígueme» con el botón que se pulsa y la cuenta auditada del bot en la bio
 export const CtaSeguir: React.FC<P & { lema: string }> = ({ t, s, e, lema }) => (
   <>
