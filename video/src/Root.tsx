@@ -13,6 +13,7 @@ import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
 import { Reto, RETO_FPS, RETO_FRAMES } from "./Reto/Reto";
 import { Stop, STOP_FPS, STOP_FRAMES } from "./Stop/Stop";
+import { Unodiario, UNODIARIO_FPS, UNODIARIO_FRAMES } from "./Unodiario/Unodiario";
 import { DURACION_FRAMES, Viral } from "./Viral/Viral";
 import { ALTO, ANCHO, FPS } from "./Viral/util";
 
@@ -128,6 +129,14 @@ export const RemotionRoot: React.FC = () => {
         component={Ganapierde}
         durationInFrames={GANAPIERDE_FRAMES}
         fps={GANAPIERDE_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Unodiario"
+        component={Unodiario}
+        durationInFrames={UNODIARIO_FRAMES}
+        fps={UNODIARIO_FPS}
         width={ANCHO}
         height={ALTO}
       />
