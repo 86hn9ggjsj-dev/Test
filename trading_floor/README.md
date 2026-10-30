@@ -27,6 +27,16 @@ La primera vez instala lo necesario solo (hace falta Python 3). La oficina se ab
 http://127.0.0.1:8050. Con `--telegram` avisa de cada operación al móvil usando el bot de
 Telegram de Jarvis, si lo tienes configurado.
 
+### Que no se abra al encender el PC
+
+El programa no se pone solo en el inicio de Windows. Si alguna vez se configuró para arrancar al encender el
+ordenador y ya no lo quieres, haz doble clic en **`quitar_del_inicio.bat`** (en la carpeta del proyecto). Busca el
+Trading Floor y Jarvis en los tres sitios donde Windows arranca programas (la carpeta de inicio, el registro y las
+tareas programadas), te enseña lo que encuentra y pregunta antes de tocar nada. No borra nada: aparta los accesos
+directos a la carpeta `inicio_quitado`, apunta allí lo que quita del registro y solo desactiva las tareas, así que se
+puede deshacer. Si dice que necesita permisos, clic derecho en el archivo → «Ejecutar como administrador». A mano: en
+el Administrador de tareas (Ctrl + Mayús + Esc), pestaña «Aplicaciones de arranque», clic derecho → «Deshabilitar».
+
 ### Abrirla en el móvil
 
 Con el programa abierto en el ordenador y el móvil en el **mismo WiFi**:
