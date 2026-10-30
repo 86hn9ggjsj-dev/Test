@@ -1,12 +1,13 @@
-// Reel de alcance "¿Cuántos años tardas en duplicar tu dinero?" (~20 s): la regla del 72. Reloj de años con ×2, el 72
-// que cae de golpe, dos líneas de tiempo (10 % → 7 años, 2 % → 36) y un billete de 100 € que la inflación deja en 50 €.
+// Reel de alcance "La regla del 72" (~40 s): reloj de años con ×2, el 72 que cae de golpe, dos líneas de tiempo
+// (10 % → 7 años, 2 % → 36), las dos columnas de esos 36 años (×2 frente a ×30,9) y un billete de 100 € que la inflación
+// deja en 50 €.
 // Tiempos en src/gen/regla72.json (scripts/regla72.py).
 import { useCurrentFrame } from "remotion";
 import datos from "../gen/regla72.json";
 import { salida } from "../Premium/ui";
 import { ANCHO, ruido } from "../Viral/util";
 import { Arriba, Etiqueta, L, mono, muelle, Titular } from "../Bot/piezas";
-import { circulo, Escena, orbita, polvo, proyector, Trazo, V3 } from "../Bot/tres";
+import { caja, circulo, Escena, orbita, polvo, proyector, Trazo, V3 } from "../Bot/tres";
 import { Abajo, claves, CtaSeguir, Destello, Gigante, golpe, Kicker, Montaje, P, sacude } from "../Explica/Montaje";
 
 export const REGLA72_FPS = datos.fps;
@@ -31,6 +32,7 @@ const Hook: React.FC<P> = ({ t, s, e }) => {
     <>
       <Escena cam={cam} trazos={tr} />
       <Gigante t={t} t0={-0.45} texto="×2" top={520} size={150} />
+      <Kicker t={t} t0={EV.quinientos - 0.3} texto="UNA CUENTA DE HACE MÁS DE 500 AÑOS" />
       <div style={{ position: "absolute", top: 1240, left: 0, width: ANCHO, display: "flex", justifyContent: "center", opacity: L(t, EV.segundos - 0.3, EV.segundos, 0, 1, salida) }}>
         <span style={mono(40)}>UNA CUENTA DE 3 SEGUNDOS</span>
       </div>
@@ -114,7 +116,56 @@ const Ejemplo: React.FC<P> = ({ t, s, e }) => {
   );
 };
 
-// ------------------------------------------------------------------ 4. Giro: con un 3 % de inflación, 100 € parados valen 50 € en 24 años
+// ------------------------------------------------------------------ 4. Compuesto: en esos mismos 36 años, al 10 % es ×30,9
+const coma = (v: number) => v.toFixed(1).replace(".", ",");
+const Compuesto: React.FC<P> = ({ t, s, e }) => {
+  const anios = L(t, EV.mismos - 0.2, EV.treinta - 0.1, 0, 36, (u) => u);
+  const v10 = Math.pow(1.1, anios);
+  const v2 = Math.pow(1.02, anios);
+  const alto = (v: number) => 0.06 + (1.8 * (v - 1)) / 29.9;
+  const cam = orbita([0, L(t, s, e, -0.45, -0.15), 0], L(t, s, e, 6.6, 7.6), L(t, s, e, 0.3, 0.1) + sacude(t, EV.treinta - 0.1), L(t, s, e, 0.1, 0.16), { apertura: 35, centroY: 960 });
+  const tr: Trazo[] = [...polvo(0.3)];
+  const BASE = -1.0;
+  tr.push({ t: "l", a: [-1.0, BASE, 0], b: [1.0, BASE, 0], w: 1.4, o: 0.6 });
+  const g = muelle(t, s + 0.1, 160, 15);
+  const col = (x: number, v: number, luz: number) => {
+    for (const [a, b] of caja([x - 0.2, BASE, -0.2], [x + 0.2, BASE + alto(v) * Math.min(g, 1.05), 0.2])) tr.push({ t: "l", a, b, w: 1.8, o: 1, luz });
+  };
+  col(-0.45, v2, 0.15);
+  col(0.45, v10, 0.25 + 0.5 * golpe(t, EV.treinta - 0.1));
+  // Un anillo cada vez que se duplica
+  for (const d of [2, 4, 8, 16]) {
+    if (v10 < d) break;
+    const y = BASE + alto(d);
+    tr.push({ t: "p", pts: [[0.2, y, 0.25], [0.7, y, 0.25], [0.7, y, -0.25], [0.2, y, -0.25], [0.2, y, 0.25]], w: 1, o: 0.6, dash: "4 5" });
+  }
+  const pr = proyector(cam);
+  const q2 = pr([-0.45, BASE + alto(v2), 0.2]);
+  const q10 = pr([0.45, BASE + alto(v10), 0.2]);
+  const b2 = pr([-0.45, BASE, 0.2]);
+  const b10 = pr([0.45, BASE, 0.2]);
+  const k = golpe(t, EV.treinta - 0.1);
+  const o = Math.min(g * 1.5, 1);
+  return (
+    <>
+      <Escena cam={cam} trazos={tr} />
+      <div style={{ position: "absolute", left: q2.x, top: q2.y - 70, transform: "translateX(-50%)", opacity: o, ...mono(56) }}>{`×${coma(v2)}`}</div>
+      <div style={{ position: "absolute", left: q10.x, top: q10.y - 84, transform: `translateX(-50%) scale(${1 + 0.3 * k})`, opacity: o, ...mono(72) }}>{`×${coma(v10)}`}</div>
+      <div style={{ position: "absolute", left: b2.x, top: b2.y + 22, transform: "translateX(-50%)", opacity: o, ...mono(30, 0.8) }}>AL 2 %</div>
+      <div style={{ position: "absolute", left: b10.x, top: b10.y + 22, transform: "translateX(-50%)", opacity: o, ...mono(30, 0.8) }}>AL 10 %</div>
+      <Kicker t={t} t0={s + 0.05} texto={`AÑO ${Math.floor(anios)} DE 36`} />
+      <Destello t={t} t0={EV.treinta - 0.1} o={0.25} />
+      <Arriba>
+        <Titular t={t} t0={s + 0.1} fin={EV.multiplica - 0.35} texto="los mismos *36 años*" size={96} />
+      </Arriba>
+      <Arriba>
+        <Titular t={t} t0={EV.multiplica - 0.3} texto="*más de ×30*" size={120} />
+      </Arriba>
+    </>
+  );
+};
+
+// ------------------------------------------------------------------ 5. Giro: con un 3 % de inflación, 100 € parados valen 50 € en 24 años
 const Giro: React.FC<P> = ({ t, s, e }) => {
   const cam = orbita([0, 0.1, 0], L(t, s, e, 6.8, 6.3), L(t, s, e, 0.28, 0.05) + sacude(t, EV.mitad), L(t, s, e, 0.12, 0.18), { apertura: 35, centroY: 900 });
   const anios = L(t, EV.inflacion, EV.veinticuatro + 0.2, 0, 24, (u) => u);
@@ -147,20 +198,23 @@ const Giro: React.FC<P> = ({ t, s, e }) => {
       <Kicker t={t} t0={s + 0.05} texto="TU DINERO PARADO" />
       <Destello t={t} t0={EV.mitad - 0.05} o={0.15} />
       <Arriba>
-        <Titular t={t} t0={s + 0.1} fin={EV.mitad - 0.35} texto="inflación del *3 %*" size={100} />
+        <Titular t={t} t0={s + 0.1} fin={EV.inflacion - 0.5} texto="y al *revés*" size={110} />
       </Arriba>
       <Arriba>
-        <Titular t={t} t0={EV.mitad - 0.3} texto="pierde la *mitad*" size={104} />
+        <Titular t={t} t0={EV.inflacion - 0.45} fin={EV.mitad - 0.35} texto="inflación del *3 %*" size={100} />
+      </Arriba>
+      <Arriba>
+        <Titular t={t} t0={EV.mitad - 0.3} texto="vale la *mitad*" size={104} />
       </Arriba>
     </>
   );
 };
 
-// ------------------------------------------------------------------ 5. CTA
+// ------------------------------------------------------------------ 6. CTA
 const Cta: React.FC<P> = (p) => <CtaSeguir {...p} lema="GUÁRDALO · MÁS CUENTAS QUE NADIE TE HACE" />;
 
 // ------------------------------------------------------------------ composición
-export const PIEZAS: Record<string, React.FC<P>> = { hook: Hook, regla: Regla, ejemplo: Ejemplo, giro: Giro, cta: Cta };
-export const CLAVES = claves(["duplicar", "72", "10%", "7", "2%", "36", "inflación", "mitad", "24", "guárdalo", "sígueme"]);
+export const PIEZAS: Record<string, React.FC<P>> = { hook: Hook, regla: Regla, ejemplo: Ejemplo, compuesto: Compuesto, giro: Giro, cta: Cta };
+export const CLAVES = claves(["500", "duplicas", "segundos", "72", "10%", "7", "2%", "36", "duplica", "30", "revés", "inflación", "mitad", "24", "guárdalo", "sígueme"]);
 
 export const Regla72: React.FC = () => <Montaje t={useCurrentFrame() / datos.fps} datos={datos} audio="gen/regla72_mezcla.wav" piezas={PIEZAS} claves={CLAVES} />;

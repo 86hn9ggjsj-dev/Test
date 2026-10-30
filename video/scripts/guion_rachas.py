@@ -1,24 +1,29 @@
-"""Reel de alcance (~20 s): con una estrategia que gana el 55 %, ¿cuántas pérdidas seguidas vas a ver?
-Mediana de la peor racha en 1.000 operaciones con p = 0,55: 8 (simulado); 0,9^8 = 0,43; 0,99^8 = 0,92."""
+"""Reel de alcance (~40 s): con una estrategia que gana el 55 %, vas a ver 8 pérdidas seguidas.
+Mediana de la peor racha en 1.000 operaciones con p = 0,55: 8 (P(racha >= 8) = 0,6); 0,9^8 = 0,43; 0,99^8 = 0,92."""
 
-TITULO = "Tu estrategia gana el 55 %: ¿cuántas pérdidas seguidas vas a ver?"
+TITULO = "Tu estrategia gana y aun así vas a perder 8 veces seguidas"
 GUION = [
-    ("hook", ["Tu estrategia gana el 55% de las veces.", "¿Cuántas pérdidas seguidas vas a ver?"]),
-    ("respuesta", ["Más de las que crees: en 1.000 operaciones, lo normal es encadenar 8."]),
-    ("giro", ["Si arriesgas un 10% en cada una, esa racha te deja con menos de la mitad.", "Con un 1%, pierdes solo un 8%."]),
+    ("hook", ["Tu estrategia gana dinero.", "Y aun así vas a perder 8 veces seguidas.", "No es mala suerte. Son matemáticas."]),
+    ("respuesta", ["Si aciertas el 55%, fallas el 45.", "Y en mil operaciones, lo normal es que en algún momento encadenes 8 pérdidas.",
+                   "Justo ahí es donde mucha gente abandona una estrategia que funcionaba."]),
+    ("giro", ["La racha no la puedes evitar. Lo que eliges es cuánto te cuesta.", "Arriesgando un 10% por operación, tras 8 pérdidas te queda el 43% de la cuenta.",
+              "Arriesgando un 1%, te queda el 92."]),
+    ("cierre", ["Misma estrategia. Misma racha. Una cuenta hundida y otra que ni se entera."]),
     ("cta", ["Sígueme para más cuentas que nadie te hace."]),
 ]
 
 GESTOS = {
-    "hook": "[inhales] Tu estrategia gana el 55% de las veces. [short pause] ¿Cuántas pérdidas seguidas vas a ver?",
-    "respuesta": "Más de las que crees: en 1.000 operaciones... lo normal es encadenar 8.",
-    "giro": "[exhales] Si arriesgas un 10% en cada una, esa racha te deja con menos de la mitad. [short pause] Con un 1%... pierdes solo un 8%.",
+    "hook": "[serious] Tu estrategia gana dinero. [short pause] Y aun así vas a perder 8 veces seguidas. No es mala suerte. Son matemáticas.",
+    "respuesta": "[inhales] Si aciertas el 55%, fallas el 45. Y en mil operaciones, lo normal es que en algún momento encadenes 8 pérdidas. [short pause] Justo ahí es donde mucha gente abandona una estrategia que funcionaba.",
+    "giro": "La racha no la puedes evitar. Lo que eliges es cuánto te cuesta. Arriesgando un 10% por operación, tras 8 pérdidas te queda el 43% de la cuenta. [short pause] Arriesgando un 1%, te queda el 92.",
+    "cierre": "[exhales] Misma estrategia. Misma racha. Una cuenta hundida y otra que ni se entera.",
     "cta": "[warmly] Sígueme para más cuentas que nadie te hace.",
 }
 
 PANTALLAS = [
-    ("hook", "gana el *55 %*", "«55 %» gigante y una tira de operaciones ✓/✕ que pasa rápido desde el primer fotograma"),
-    ("respuesta", "*8* seguidas", "la tira se para en ocho ✕ seguidas, marcadas con un corchete"),
-    ("giro", "10 % → *−57 %* · 1 % → *−8 %*", "dos cuentas a la vez: la del 10 % se hunde por debajo de la mitad, la del 1 % apenas baja"),
+    ("hook", "*8* seguidas", "cinta de operaciones ✓ / ✕ pasando sin parar; el 8 cae de golpe"),
+    ("respuesta", "en *mil* operaciones", "la cinta se acelera hasta 1.000 y frena en seco en 8 ✕ seguidas"),
+    ("giro", "un *10 %* / un *1 %*", "dos cuentas encajan la misma racha: una baja al 43 %, la otra al 92 %"),
+    ("cierre", "una *hundida*, otra *intacta*", "la cuenta del 10 % se hunde; la del 1 % sigue en pie"),
     ("cta", "*sígueme*", "botón Seguir que se pulsa; «cuenta auditada del bot en la bio»"),
 ]

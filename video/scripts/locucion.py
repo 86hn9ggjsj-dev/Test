@@ -33,6 +33,8 @@ PAUSA_ESCENA = 0.14
 # y las respiraciones: PAUSA_MAX=0.6 PAUSA_UMBRAL=42 (solo se recorta el silencio real, no las respiraciones)
 MAX_PAUSA = float(os.environ.get("PAUSA_MAX", "0.24"))
 UMBRAL_PAUSA = float(os.environ.get("PAUSA_UMBRAL", "32"))
+# Acelera la locución externa sin cambiar el tono (ATEMPO=1.05 deja un reel de 42 s en 40)
+ATEMPO = float(os.environ.get("ATEMPO", "1"))
 
 # Tratamiento: la voz local se calienta y suaviza; una locución de estudio (ElevenLabs) solo se limpia y se comprime poco
 FILTRO_LOCAL = ("highpass=f=90,equalizer=f=260:t=q:w=1:g=1.5,equalizer=f=3200:t=q:w=1.2:g=1.2,"
@@ -74,7 +76,8 @@ def recorta(x, umbral=0.012):
 
 def voz_externa(ff, fuente, bruta):
     """Locución externa: a 48 kHz mono y con los silencios largos acortados."""
-    subprocess.run([ff, "-y", "-loglevel", "error", "-i", str(fuente), "-ac", "1", "-ar", str(SR), str(bruta)], check=True)
+    tempo = ["-af", f"atempo={ATEMPO}"] if ATEMPO != 1 else []
+    subprocess.run([ff, "-y", "-loglevel", "error", "-i", str(fuente), *tempo, "-ac", "1", "-ar", str(SR), str(bruta)], check=True)
     x, _ = sf.read(bruta)
     trozos, prev = [], 0
     for a, b in silencios(x, umbral_rel=UMBRAL_PAUSA, minimo=MAX_PAUSA):

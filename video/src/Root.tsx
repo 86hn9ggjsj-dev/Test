@@ -11,6 +11,7 @@ import { Explica, EXPLICA_FPS, EXPLICA_FRAMES } from "./Explica/Explica";
 import { Ganapierde, GANAPIERDE_FPS, GANAPIERDE_FRAMES } from "./Ganapierde/Ganapierde";
 import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
+import { MEDIA_FPS, MEDIA_FRAMES, MediaReel } from "./Media/Media";
 import { Nueve, NUEVE_FPS, NUEVE_FRAMES } from "./Nueve/Nueve";
 import { Rachas, RACHAS_FPS, RACHAS_FRAMES } from "./Rachas/Rachas";
 import { Regla72, REGLA72_FPS, REGLA72_FRAMES } from "./Regla72/Regla72";
@@ -164,6 +165,14 @@ export const RemotionRoot: React.FC = () => {
         component={Rachas}
         durationInFrames={RACHAS_FRAMES}
         fps={RACHAS_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Media"
+        component={MediaReel}
+        durationInFrames={MEDIA_FRAMES}
+        fps={MEDIA_FPS}
         width={ANCHO}
         height={ALTO}
       />

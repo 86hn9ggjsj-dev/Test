@@ -1,15 +1,18 @@
-# Tu estrategia gana el 55 %: ¿cuántas pérdidas seguidas vas a ver?
+# Tu estrategia gana y aun así vas a perder 8 veces seguidas
 
-Reel de alcance (~20 s, 1080x1920): pregunta que choca, cuenta sencilla, giro y CTA de seguir. La promo del bot va en la descripción y en un comentario fijado.
+Reel de alcance (~40 s, 1080x1920): pregunta que choca, cuenta sencilla, giro y CTA de seguir. La promo del bot va en la descripción y en un comentario fijado.
 
 **hook**  
-Tu estrategia gana el 55% de las veces. ¿Cuántas pérdidas seguidas vas a ver?
+Tu estrategia gana dinero. Y aun así vas a perder 8 veces seguidas. No es mala suerte. Son matemáticas.
 
 **respuesta**  
-Más de las que crees: en 1.000 operaciones, lo normal es encadenar 8.
+Si aciertas el 55%, fallas el 45. Y en mil operaciones, lo normal es que en algún momento encadenes 8 pérdidas. Justo ahí es donde mucha gente abandona una estrategia que funcionaba.
 
 **giro**  
-Si arriesgas un 10% en cada una, esa racha te deja con menos de la mitad. Con un 1%, pierdes solo un 8%.
+La racha no la puedes evitar. Lo que eliges es cuánto te cuesta. Arriesgando un 10% por operación, tras 8 pérdidas te queda el 43% de la cuenta. Arriesgando un 1%, te queda el 92.
+
+**cierre**  
+Misma estrategia. Misma racha. Una cuenta hundida y otra que ni se entera.
 
 **cta**  
 Sígueme para más cuentas que nadie te hace.
@@ -18,11 +21,13 @@ Sígueme para más cuentas que nadie te hace.
 
 Las etiquetas entre corchetes no se leen: marcan respiraciones, pausas y tono. Las palabras son las mismas que arriba, así el vídeo se sincroniza solo. Pegar con una línea en blanco entre párrafos.
 
-[inhales] Tu estrategia gana el 55% de las veces. [short pause] ¿Cuántas pérdidas seguidas vas a ver?
+[serious] Tu estrategia gana dinero. [short pause] Y aun así vas a perder 8 veces seguidas. No es mala suerte. Son matemáticas.
 
-Más de las que crees: en 1.000 operaciones... lo normal es encadenar 8.
+[inhales] Si aciertas el 55%, fallas el 45. Y en mil operaciones, lo normal es que en algún momento encadenes 8 pérdidas. [short pause] Justo ahí es donde mucha gente abandona una estrategia que funcionaba.
 
-[exhales] Si arriesgas un 10% en cada una, esa racha te deja con menos de la mitad. [short pause] Con un 1%... pierdes solo un 8%.
+La racha no la puedes evitar. Lo que eliges es cuánto te cuesta. Arriesgando un 10% por operación, tras 8 pérdidas te queda el 43% de la cuenta. [short pause] Arriesgando un 1%, te queda el 92.
+
+[exhales] Misma estrategia. Misma racha. Una cuenta hundida y otra que ni se entera.
 
 [warmly] Sígueme para más cuentas que nadie te hace.
 
@@ -30,7 +35,8 @@ Más de las que crees: en 1.000 operaciones... lo normal es encadenar 8.
 
 | Bloque | Titular | Motivo |
 |---|---|---|
-| hook | gana el *55 %* | «55 %» gigante y una tira de operaciones ✓/✕ que pasa rápido desde el primer fotograma |
-| respuesta | *8* seguidas | la tira se para en ocho ✕ seguidas, marcadas con un corchete |
-| giro | 10 % → *−57 %* · 1 % → *−8 %* | dos cuentas a la vez: la del 10 % se hunde por debajo de la mitad, la del 1 % apenas baja |
+| hook | *8* seguidas | cinta de operaciones ✓ / ✕ pasando sin parar; el 8 cae de golpe |
+| respuesta | en *mil* operaciones | la cinta se acelera hasta 1.000 y frena en seco en 8 ✕ seguidas |
+| giro | un *10 %* / un *1 %* | dos cuentas encajan la misma racha: una baja al 43 %, la otra al 92 % |
+| cierre | una *hundida*, otra *intacta* | la cuenta del 10 % se hunde; la del 1 % sigue en pie |
 | cta | *sígueme* | botón Seguir que se pulsa; «cuenta auditada del bot en la bio» |

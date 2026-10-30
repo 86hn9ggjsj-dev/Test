@@ -9,10 +9,11 @@ from guion_regla72 import GESTOS, GUION, PANTALLAS, TITULO
 
 NOMBRE = "regla72"
 EVENTOS = {
-    "duplicar": "duplicar", "segundos": "segundos",
-    "divide": "Divide", "setentaydos": "72", "ano": ("año", "regla"),
-    "diez": ("10%", "ejemplo"), "siete": "7", "dos": ("2%", "ejemplo"), "deposito": "depósito", "treintayseis": "36",
-    "inflacion": "inflación", "parado": "parado", "mitad": "mitad", "veinticuatro": "24",
+    "quinientos": "500", "duplicas": "duplicas", "segundos": "segundos",
+    "regla": ("regla", "regla"), "setentaydos": ("72", "regla"), "ano": ("año", "regla"),
+    "diez": ("10%", "ejemplo"), "siete": "7", "doble": "doble", "deposito": "depósito", "dos": ("2%", "ejemplo"), "treintayseis": ("36", "ejemplo"),
+    "fijate": "fíjate", "mismos": "mismos", "duplica": "duplica", "multiplica": "multiplica", "treinta": "30",
+    "reves": "revés", "inflacion": "inflación", "veinticuatro": "24", "mitad": "mitad",
     "guardalo": "Guárdalo", "sigueme": "sígueme",
 }
 
@@ -20,8 +21,8 @@ if __name__ == "__main__":
     from locucion import escribir_guion, generar
 
     escribir_guion("reel_regla_72", TITULO,
-                   "Reel de alcance (~20 s, 1080x1920): pregunta que choca, cuenta sencilla, giro y CTA de seguir. La promo del bot va en la descripción y en un comentario fijado.",
+                   "Reel de alcance (~40 s, 1080x1920): pregunta que choca, cuenta sencilla, giro y CTA de seguir. La promo del bot va en la descripción y en un comentario fijado.",
                    GUION, GESTOS, PANTALLAS)
-    generar(sys.argv[1], NOMBRE, TITULO, GUION, eventos=EVENTOS, toques=("segundos", "diez", "dos", "inflacion"), campanas=("siete", "guardalo"),
-            golpes=("setentaydos", "treintayseis", "mitad"),
-            intensidad={"hook": (1, 1, 1, 0), "regla": (1, 1, 1, 1), "ejemplo": (1, 1, 1, 1), "giro": (1, 1, 1, 1), "cta": (1, 1, 1, 1)})
+    generar(sys.argv[1], NOMBRE, TITULO, GUION, eventos=EVENTOS, toques=("segundos", "diez", "dos", "fijate", "reves", "inflacion"), campanas=("siete", "guardalo"),
+            golpes=("setentaydos", "treintayseis", "treinta", "mitad"),
+            intensidad={"hook": (1, 1, 1, 0), "regla": (1, 1, 1, 1), "ejemplo": (1, 1, 1, 1), "compuesto": (1, 1, 1, 1), "giro": (1, 0, 1, 1), "cta": (1, 1, 1, 1)})
