@@ -1,5 +1,6 @@
 import { interpolate } from "remotion";
-import { C, entra, escena, FUENTE, lerp, palabra, pop, ruido, sale, suave } from "./util";
+import { escena, palabra } from "./tiempos";
+import { C, entra, FUENTE, lerp, pop, ruido, sale, suave } from "./util";
 
 // Momentos clave de la historia (segundos en el timeline de salida)
 export const K = {

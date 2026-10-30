@@ -216,5 +216,12 @@ PAUSA_MAX=0.6 PAUSA_UMBRAL=42 python scripts/cifras.py <ruta-a-ffmpeg>
 npx remotion render Cifras out/cifras.mp4 --video-bitrate=12M --audio-codec=aac
 ```
 
+### Reels de alcance del día (gancho, cuenta, giro y CTA)
+
+Los reels cortos se registran en `src/RaizReels.tsx` y se renderizan con su propia entrada, que no necesita los tiempos de
+los videos anteriores: `npx remotion render src/reels.ts <Id> out/<id>.mp4`. Antes de tener la locución,
+`python scripts/estimar.py <video>` genera tiempos estimados para ir montando las pantallas; al llegar el MP3 a
+`input/<video>_voz.mp3`, `PAUSA_MAX=0.5 PAUSA_UMBRAL=42 python scripts/<video>.py <ffmpeg>` los sustituye por los reales.
+
 `scripts/sonido.py` reúne la síntesis de música y SFX y la mezcla con ducking y -14 LUFS que
 usan ambos pipelines.

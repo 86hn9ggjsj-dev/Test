@@ -75,6 +75,15 @@ export const Gigante: React.FC<{ t: number; t0: number; fin?: number; texto: str
   );
 };
 
+// Golpe de impacto para las cifras clave: decae en ~0,4 s. Úsalo para sacudir la cámara o escalar un número
+export const golpe = (t: number, t0: number) => (t < t0 ? 0 : Math.exp(-(t - t0) * 7));
+export const sacude = (t: number, t0: number, a = 0.035) => a * golpe(t, t0) * Math.sin((t - t0) * 48);
+// Destello blanco breve sobre toda la pantalla
+export const Destello: React.FC<{ t: number; t0: number; o?: number }> = ({ t, t0, o = 0.22 }) => {
+  const k = golpe(t, t0);
+  return k > 0.01 ? <AbsoluteFill style={{ background: "#fff", opacity: o * k, pointerEvents: "none" }} /> : null;
+};
+
 // Cierre de los reels de alcance: «sígueme» con el botón que se pulsa y la cuenta auditada del bot en la bio
 export const CtaSeguir: React.FC<P & { lema: string }> = ({ t, s, e, lema }) => (
   <>

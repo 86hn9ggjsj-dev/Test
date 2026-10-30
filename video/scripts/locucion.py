@@ -17,7 +17,7 @@ import soundfile as sf
 from scipy.signal import resample_poly
 
 from montaje import escenas_desde, musica_energetica, poner
-from sonido import SR, campana, mezclar, silencios, soplo, toque
+from sonido import SR, campana, kick, mezclar, silencios, soplo, toque
 
 RAIZ = Path(__file__).resolve().parent.parent
 GEN = RAIZ / "public/gen"
@@ -156,9 +156,10 @@ def alinear(voz_wav, guion):
             for i, ((w, id_), (s, e)) in enumerate(zip(tokens, tiempos))]
 
 
-def generar(ff, nombre, titulo, guion, eventos, toques, campanas, intensidad):
+def generar(ff, nombre, titulo, guion, eventos, toques, campanas, intensidad, golpes=()):
     """eventos: nombre -> palabra o (palabra, escena) cuyo inicio marca una animación.
-    toques / campanas: eventos que llevan ese SFX. intensidad: escena -> (pad, kick, hats, bajo)."""
+    toques / campanas / golpes: eventos que llevan ese SFX (golpes: un bombo seco para las cifras clave).
+    intensidad: escena -> (pad, kick, hats, bajo)."""
     GEN.mkdir(parents=True, exist_ok=True)
     GEN_SRC.mkdir(parents=True, exist_ok=True)
     externa = next((p for p in (RAIZ / f"input/{nombre}_voz.mp3", RAIZ / f"input/{nombre}_voz.wav") if p.exists()), None)
@@ -197,6 +198,8 @@ def generar(ff, nombre, titulo, guion, eventos, toques, campanas, intensidad):
         poner(sfx, toque(), ev[k], 0.6)
     for k in campanas:
         poner(sfx, campana(), ev[k], 0.8)
+    for k in golpes:
+        poner(sfx, kick(), ev[k] - 0.02, 1.0)
     musica = musica_energetica(n, escenas, intensidad)
     mezclar(voz, musica, sfx, dur, GEN / f"{nombre}_mezcla.wav", ff, duck=-17, nivel_musica=0.5, nivel_sfx=0.3)
 

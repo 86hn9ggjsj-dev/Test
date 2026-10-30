@@ -1,10 +1,8 @@
 import { continueRender, delayRender, Easing, interpolate, spring, staticFile } from "remotion";
-import timeline from "../gen/timeline.json";
 
 export const FPS = 60;
 export const ANCHO = 1080;
 export const ALTO = 1920;
-export const TL = timeline;
 
 // Zonas seguras 9:16 (UI de TikTok/Reels)
 export const SAFE = { arriba: 0.12 * ALTO, abajo: 0.2 * ALTO, lados: 0.13 * ANCHO };
@@ -40,17 +38,6 @@ Promise.all(
       .then((f) => document.fonts.add(f)),
   ),
 ).then(() => continueRender(cargando));
-
-export const palabra = (i: number, hook = false) => {
-  const p = TL.palabras.find((w) => w.i === i && w.hook === hook);
-  if (!p) throw new Error(`palabra ${i}`);
-  return p;
-};
-export const escena = (id: string) => {
-  const e = TL.escenas.find((x) => x.id === id);
-  if (!e) throw new Error(`escena ${id}`);
-  return e;
-};
 
 export const suave = Easing.bezier(0.45, 0, 0.55, 1);
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;

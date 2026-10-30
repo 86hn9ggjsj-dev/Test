@@ -6,20 +6,18 @@ import {
   ANCHO,
   C,
   entra,
-  escena,
   FPS,
   FUENTE,
   golpeZoom,
   lerp,
-  palabra,
   pop,
   SAFE,
   sale,
   suave,
   temblor,
   texto,
-  TL,
 } from "./util";
+import { escena, palabra, TL } from "./tiempos";
 
 type Transicion = "whip" | "zoom" | "flash" | "corte";
 const ENTRADA_DE: Record<string, Transicion> = {

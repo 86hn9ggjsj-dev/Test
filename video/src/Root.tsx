@@ -11,6 +11,9 @@ import { Explica, EXPLICA_FPS, EXPLICA_FRAMES } from "./Explica/Explica";
 import { Ganapierde, GANAPIERDE_FPS, GANAPIERDE_FRAMES } from "./Ganapierde/Ganapierde";
 import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
+import { Nueve, NUEVE_FPS, NUEVE_FRAMES } from "./Nueve/Nueve";
+import { Rachas, RACHAS_FPS, RACHAS_FRAMES } from "./Rachas/Rachas";
+import { Regla72, REGLA72_FPS, REGLA72_FRAMES } from "./Regla72/Regla72";
 import { Reto, RETO_FPS, RETO_FRAMES } from "./Reto/Reto";
 import { Stop, STOP_FPS, STOP_FRAMES } from "./Stop/Stop";
 import { Unodiario, UNODIARIO_FPS, UNODIARIO_FRAMES } from "./Unodiario/Unodiario";
@@ -137,6 +140,30 @@ export const RemotionRoot: React.FC = () => {
         component={Unodiario}
         durationInFrames={UNODIARIO_FRAMES}
         fps={UNODIARIO_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Nueve"
+        component={Nueve}
+        durationInFrames={NUEVE_FRAMES}
+        fps={NUEVE_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Regla72"
+        component={Regla72}
+        durationInFrames={REGLA72_FRAMES}
+        fps={REGLA72_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Rachas"
+        component={Rachas}
+        durationInFrames={RACHAS_FRAMES}
+        fps={RACHAS_FPS}
         width={ANCHO}
         height={ALTO}
       />
