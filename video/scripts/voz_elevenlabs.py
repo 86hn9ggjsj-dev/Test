@@ -75,7 +75,7 @@ def busca_voz():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--video", default="explica", choices=("explica", "prueba", "errores", "cifras", "estafa", "newton", "perdidas", "tortugas", "acierto", "unoporciento", "stop", "apalancamiento", "cincuenta", "cazastop", "venganza", "tamano", "ganapierde", "nueve", "broker", "unodiario"), help="guion a locutar (scripts/guion_<video>.py)")
+    ap.add_argument("--video", default="explica", choices=("explica", "prueba", "errores", "cifras", "estafa", "newton", "perdidas", "tortugas", "acierto", "unoporciento", "stop", "apalancamiento", "cincuenta", "cazastop", "venganza", "tamano", "ganapierde", "nueve", "broker", "unodiario", "rachas", "regla72"), help="guion a locutar (scripts/guion_<video>.py)")
     ap.add_argument("--voz", default=os.environ.get("ELEVENLABS_VOICE_ID") or "george")
     ap.add_argument("--modelo", default="eleven_v3")
     ap.add_argument("--velocidad", type=float, default=1.08)
