@@ -11,7 +11,10 @@ import { Explica, EXPLICA_FPS, EXPLICA_FRAMES } from "./Explica/Explica";
 import { Ganapierde, GANAPIERDE_FPS, GANAPIERDE_FRAMES } from "./Ganapierde/Ganapierde";
 import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
+import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
 import { MEDIA_FPS, MEDIA_FRAMES, MediaReel } from "./Media/Media";
+import { Miedo, MIEDO_FPS, MIEDO_FRAMES } from "./Miedo/Miedo";
+import { Promediar, PROMEDIAR_FPS, PROMEDIAR_FRAMES } from "./Promediar/Promediar";
 import { Nueve, NUEVE_FPS, NUEVE_FRAMES } from "./Nueve/Nueve";
 import { Rachas, RACHAS_FPS, RACHAS_FRAMES } from "./Rachas/Rachas";
 import { Regla72, REGLA72_FPS, REGLA72_FRAMES } from "./Regla72/Regla72";
@@ -173,6 +176,30 @@ export const RemotionRoot: React.FC = () => {
         component={MediaReel}
         durationInFrames={MEDIA_FRAMES}
         fps={MEDIA_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Ahorro"
+        component={Ahorro}
+        durationInFrames={AHORRO_FRAMES}
+        fps={AHORRO_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Promediar"
+        component={Promediar}
+        durationInFrames={PROMEDIAR_FRAMES}
+        fps={PROMEDIAR_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Miedo"
+        component={Miedo}
+        durationInFrames={MIEDO_FRAMES}
+        fps={MIEDO_FPS}
         width={ANCHO}
         height={ALTO}
       />
