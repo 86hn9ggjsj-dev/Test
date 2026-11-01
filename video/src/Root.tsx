@@ -12,6 +12,9 @@ import { Ganapierde, GANAPIERDE_FPS, GANAPIERDE_FRAMES } from "./Ganapierde/Gana
 import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
+import { Costes, COSTES_FPS, COSTES_FRAMES } from "./Costes/Costes";
+import { Doblar, DOBLAR_FPS, DOBLAR_FRAMES } from "./Doblar/Doblar";
+import { Moneda, MONEDA_FPS, MONEDA_FRAMES } from "./Moneda/Moneda";
 import { MEDIA_FPS, MEDIA_FRAMES, MediaReel } from "./Media/Media";
 import { Miedo, MIEDO_FPS, MIEDO_FRAMES } from "./Miedo/Miedo";
 import { Promediar, PROMEDIAR_FPS, PROMEDIAR_FRAMES } from "./Promediar/Promediar";
@@ -176,6 +179,30 @@ export const RemotionRoot: React.FC = () => {
         component={MediaReel}
         durationInFrames={MEDIA_FRAMES}
         fps={MEDIA_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Costes"
+        component={Costes}
+        durationInFrames={COSTES_FRAMES}
+        fps={COSTES_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Doblar"
+        component={Doblar}
+        durationInFrames={DOBLAR_FRAMES}
+        fps={DOBLAR_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Moneda"
+        component={Moneda}
+        durationInFrames={MONEDA_FRAMES}
+        fps={MONEDA_FPS}
         width={ANCHO}
         height={ALTO}
       />
