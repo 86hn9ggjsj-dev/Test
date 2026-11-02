@@ -2,6 +2,9 @@
 // los tiempos (src/gen/*.json) de los videos anteriores, que dependen de sus locuciones originales.
 import { Composition } from "remotion";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
+import { Recuperar, RECUPERAR_FPS, RECUPERAR_FRAMES } from "./Recuperar/Recuperar";
+import { Vivir, VIVIR_FPS, VIVIR_FRAMES } from "./Vivir/Vivir";
+import { Instagram, INSTAGRAM_FPS, INSTAGRAM_FRAMES } from "./Instagram/Instagram";
 import { Costes, COSTES_FPS, COSTES_FRAMES } from "./Costes/Costes";
 import { Doblar, DOBLAR_FPS, DOBLAR_FRAMES } from "./Doblar/Doblar";
 import { Moneda, MONEDA_FPS, MONEDA_FRAMES } from "./Moneda/Moneda";
@@ -15,6 +18,9 @@ import { ALTO, ANCHO } from "./Viral/util";
 
 export const RaizReels: React.FC = () => (
   <>
+    <Composition id="Recuperar" component={Recuperar} durationInFrames={RECUPERAR_FRAMES} fps={RECUPERAR_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Vivir" component={Vivir} durationInFrames={VIVIR_FRAMES} fps={VIVIR_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Instagram" component={Instagram} durationInFrames={INSTAGRAM_FRAMES} fps={INSTAGRAM_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Costes" component={Costes} durationInFrames={COSTES_FRAMES} fps={COSTES_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Doblar" component={Doblar} durationInFrames={DOBLAR_FRAMES} fps={DOBLAR_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Moneda" component={Moneda} durationInFrames={MONEDA_FRAMES} fps={MONEDA_FPS} width={ANCHO} height={ALTO} />

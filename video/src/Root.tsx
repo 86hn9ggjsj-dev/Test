@@ -12,6 +12,9 @@ import { Ganapierde, GANAPIERDE_FPS, GANAPIERDE_FRAMES } from "./Ganapierde/Gana
 import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
+import { Recuperar, RECUPERAR_FPS, RECUPERAR_FRAMES } from "./Recuperar/Recuperar";
+import { Vivir, VIVIR_FPS, VIVIR_FRAMES } from "./Vivir/Vivir";
+import { Instagram, INSTAGRAM_FPS, INSTAGRAM_FRAMES } from "./Instagram/Instagram";
 import { Costes, COSTES_FPS, COSTES_FRAMES } from "./Costes/Costes";
 import { Doblar, DOBLAR_FPS, DOBLAR_FRAMES } from "./Doblar/Doblar";
 import { Moneda, MONEDA_FPS, MONEDA_FRAMES } from "./Moneda/Moneda";
@@ -179,6 +182,30 @@ export const RemotionRoot: React.FC = () => {
         component={MediaReel}
         durationInFrames={MEDIA_FRAMES}
         fps={MEDIA_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Recuperar"
+        component={Recuperar}
+        durationInFrames={RECUPERAR_FRAMES}
+        fps={RECUPERAR_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Vivir"
+        component={Vivir}
+        durationInFrames={VIVIR_FRAMES}
+        fps={VIVIR_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Instagram"
+        component={Instagram}
+        durationInFrames={INSTAGRAM_FRAMES}
+        fps={INSTAGRAM_FPS}
         width={ANCHO}
         height={ALTO}
       />
