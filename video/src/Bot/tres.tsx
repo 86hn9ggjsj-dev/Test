@@ -93,10 +93,11 @@ export const clave = (t: number, puntos: [number, number][], easing = io) =>
 
 // ------------------------------------------------------------------ dibujo
 // o: opacidad · w: grosor en px · luz: halo extra (0-1) · prog: fracción dibujada de una polilínea
+// color: color del trazo (blanco por defecto) · relleno / oRelleno: color y opacidad del relleno de una polilínea cerrada
 export type Trazo =
-  | { t: "l"; a: V3; b: V3; w?: number; o?: number; dash?: string; luz?: number }
-  | { t: "p"; pts: V3[]; w?: number; o?: number; dash?: string; prog?: number; luz?: number; relleno?: string }
-  | { t: "e"; c: V3; r: number; o?: number; tipo?: "nodo" | "punto" | "aro"; luz?: number; w?: number };
+  | { t: "l"; a: V3; b: V3; w?: number; o?: number; dash?: string; luz?: number; color?: string }
+  | { t: "p"; pts: V3[]; w?: number; o?: number; dash?: string; prog?: number; luz?: number; relleno?: string; oRelleno?: number; color?: string }
+  | { t: "e"; c: V3; r: number; o?: number; tipo?: "nodo" | "punto" | "aro"; luz?: number; w?: number; color?: string };
 
 const DESENFOQUES = [0, 1.4, 3, 5.5, 9, 14];
 
@@ -132,7 +133,7 @@ export const Escena: React.FC<{ cam: Camara; trazos: Trazo[]; encima?: (pr: (p: 
     if (tr.t === "l") {
       const a = pr(tr.a);
       const b = pr(tr.b);
-      nodo = <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#fff" strokeOpacity={o} strokeWidth={tr.w ?? 1.4} strokeDasharray={tr.dash} strokeLinecap="round" />;
+      nodo = <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={tr.color ?? "#fff"} strokeOpacity={o} strokeWidth={tr.w ?? 1.4} strokeDasharray={tr.dash} strokeLinecap="round" />;
     } else if (tr.t === "p") {
       const pts = recorta(tr.pts, tr.prog ?? 1);
       if (pts.length < 2) continue;
@@ -141,7 +142,7 @@ export const Escena: React.FC<{ cam: Camara; trazos: Trazo[]; encima?: (pr: (p: 
         return `${j ? "L" : "M"}${q.x.toFixed(1)},${q.y.toFixed(1)}`;
       });
       nodo = (
-        <path key={i} d={d.join("")} fill={tr.relleno ?? "none"} stroke="#fff" strokeOpacity={o} fillOpacity={tr.relleno ? o : undefined} strokeWidth={tr.w ?? 1.4} strokeDasharray={tr.dash} strokeLinejoin="round" strokeLinecap="round" />
+        <path key={i} d={d.join("")} fill={tr.relleno ?? "none"} stroke={tr.color ?? "#fff"} strokeOpacity={tr.w === 0 ? 0 : o} fillOpacity={tr.relleno ? (tr.oRelleno ?? o) : undefined} strokeWidth={tr.w ?? 1.4} strokeDasharray={tr.dash} strokeLinejoin="round" strokeLinecap="round" />
       );
     } else {
       const c = pr(tr.c);
@@ -149,11 +150,11 @@ export const Escena: React.FC<{ cam: Camara; trazos: Trazo[]; encima?: (pr: (p: 
       const tipo = tr.tipo ?? "punto";
       nodo =
         tipo === "nodo" ? (
-          <circle key={i} cx={c.x} cy={c.y} r={r} fill="rgba(140,140,140,0.5)" stroke="#fff" strokeWidth={tr.w ?? 1.3} opacity={o} />
+          <circle key={i} cx={c.x} cy={c.y} r={r} fill="rgba(140,140,140,0.5)" stroke={tr.color ?? "#fff"} strokeWidth={tr.w ?? 1.3} opacity={o} />
         ) : tipo === "aro" ? (
-          <circle key={i} cx={c.x} cy={c.y} r={r} fill="none" stroke="#fff" strokeWidth={tr.w ?? 1.5} opacity={o} />
+          <circle key={i} cx={c.x} cy={c.y} r={r} fill="none" stroke={tr.color ?? "#fff"} strokeWidth={tr.w ?? 1.5} opacity={o} />
         ) : (
-          <circle key={i} cx={c.x} cy={c.y} r={r} fill="#fff" opacity={o} />
+          <circle key={i} cx={c.x} cy={c.y} r={r} fill={tr.color ?? "#fff"} opacity={o} />
         );
     }
     capas[capa].push(nodo);

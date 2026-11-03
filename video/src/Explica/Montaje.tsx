@@ -131,23 +131,49 @@ export const PreguntaComentarios: React.FC<P & { lineas: string[]; pie?: string;
 
 const FUNDE = 0.16;
 
-export const Montaje: React.FC<{ t: number; datos: Datos; audio: string; piezas: Record<string, React.FC<P>>; claves: Record<string, string> }> = ({ t, datos, audio, piezas, claves }) => {
+// Transiciones entre pantallas: «fundido» (la de siempre) o «variada», que alterna barridos laterales y zooms con desenfoque
+const paso = (tipo: string, entra: number, sale: number): React.CSSProperties => {
+  const blur = (1 - entra + sale) * 16;
+  if (tipo === "barrido" || tipo === "barrido-inv") {
+    const dir = tipo === "barrido" ? 1 : -1;
+    return { opacity: Math.min(entra * 2, 1) * (1 - sale), transform: `translateX(${dir * ((1 - entra) * 260 - sale * 260)}px) skewX(${dir * (1 - entra + sale) * -4}deg)`, filter: blur > 0.3 ? `blur(${blur}px)` : undefined };
+  }
+  if (tipo === "zoom") return { opacity: entra * (1 - sale), transform: `scale(${1.25 - 0.25 * entra - 0.12 * sale})`, filter: blur > 0.3 ? `blur(${blur}px)` : undefined };
+  return { opacity: entra * (1 - sale), transform: `translateY(${(1 - entra) * 40 - sale * 40}px)` };
+};
+const TIPOS = ["barrido", "zoom", "barrido-inv", "zoom"];
+
+export const Montaje: React.FC<{
+  t: number;
+  datos: Datos;
+  audio: string;
+  piezas: Record<string, React.FC<P>>;
+  claves: Record<string, string>;
+  fondo?: string;
+  transicion?: "fundido" | "variada";
+  vineta?: boolean;
+}> = ({ t, datos, audio, piezas, claves, fondo = "radial-gradient(ellipse 90% 70% at 50% 45%, #0b0b0c, #000)", transicion = "fundido", vineta = false }) => {
   const cortes = useMemo(() => datos.escenas.map((x) => x.s), [datos]);
+  const funde = transicion === "variada" ? 0.2 : FUNDE;
   return (
-    <AbsoluteFill style={{ background: "radial-gradient(ellipse 90% 70% at 50% 45%, #0b0b0c, #000)" }}>
+    <AbsoluteFill style={{ background: fondo }}>
       <Audio src={staticFile(audio)} />
       {datos.escenas
-        .filter((p) => t >= p.s - FUNDE && t < p.e + FUNDE)
+        .filter((p) => t >= p.s - funde && t < p.e + funde)
         .map((p) => {
+          const j = datos.escenas.indexOf(p);
           const Pieza = piezas[p.id];
-          const entra = p.s <= 0.01 ? 1 : lerp(t, p.s - FUNDE, p.s + FUNDE, 0, 1, io);
-          const sale = p.e >= datos.duracion - 0.01 ? 0 : lerp(t, p.e - FUNDE, p.e + FUNDE, 0, 1, io);
+          const entra = p.s <= 0.01 ? 1 : lerp(t, p.s - funde, p.s + funde, 0, 1, io);
+          const sale = p.e >= datos.duracion - 0.01 ? 0 : lerp(t, p.e - funde, p.e + funde, 0, 1, io);
+          // La pantalla que sale usa la transición de la que entra, para que el corte se lea como un solo movimiento
+          const tipo = transicion === "variada" ? (entra < 1 ? TIPOS[(j - 1 + TIPOS.length) % TIPOS.length] : TIPOS[j % TIPOS.length]) : "fundido";
           return (
-            <AbsoluteFill key={p.id} style={{ opacity: entra * (1 - sale), transform: `translateY(${(1 - entra) * 40 - sale * 40}px)` }}>
+            <AbsoluteFill key={p.id} style={paso(tipo, entra, sale)}>
               <Pieza t={t} s={p.s} e={p.e} />
             </AbsoluteFill>
           );
         })}
+      {vineta && <AbsoluteFill style={{ background: "radial-gradient(ellipse 75% 60% at 50% 45%, transparent 55%, rgba(0,0,0,0.6))", pointerEvents: "none" }} />}
       <Subtitulos t={t} palabras={datos.palabras} cortes={cortes} claves={claves} duracion={datos.duracion} y={() => 0.765} estilo="premium" dinamico />
       <Progreso t={t} duracion={datos.duracion} />
     </AbsoluteFill>
@@ -155,8 +181,9 @@ export const Montaje: React.FC<{ t: number; datos: Datos; audio: string; piezas:
 };
 
 // Palabras clave de los subtítulos (en blanco, serif cursiva)
-export const claves = (palabras: string[]) => {
+export const claves = (palabras: (string | [string, string])[]) => {
   const c: Record<string, string> = {};
-  for (const w of palabras) c[w] = "#ffffff";
+  for (const w of palabras) if (typeof w === "string") c[w] = "#ffffff";
+  else c[w[0]] = w[1];
   return c;
 };

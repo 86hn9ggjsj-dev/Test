@@ -7,7 +7,8 @@ import datos from "../gen/aguanta.json";
 import { salida } from "../Premium/ui";
 import { ANCHO } from "../Viral/util";
 import { Arriba, Etiqueta, L, mono, muelle, Titular } from "../Bot/piezas";
-import { caja, Escena, orbita, polvo, proyector, Trazo } from "../Bot/tres";
+import { Escena, orbita, polvo, proyector, Trazo } from "../Bot/tres";
+import { cristal, fondoTinte, ORO, ROJO, suelo, VERDE } from "../Bot/kit";
 import { claves, CtaSeguir, Destello, golpe, Kicker, Montaje, P, PreguntaComentarios, sacude } from "../Explica/Montaje";
 
 export const AGUANTA_FPS = datos.fps;
@@ -18,15 +19,16 @@ const BASE = -0.8;
 const H = 1.3;
 const MITAD = BASE + H / 2;
 
-const columna = (tr: Trazo[], x: number, h: number, ancho: number, luz = 0.2) => {
-  for (const [a, b] of caja([x - ancho, BASE, -ancho], [x + ancho, BASE + h, ancho])) tr.push({ t: "l", a, b, w: 1.8, o: 1, luz });
-};
-const lineaMitad = (tr: Trazo[], x0 = -1.0, x1 = 1.0) => tr.push({ t: "l", a: [x0, MITAD, 0], b: [x1, MITAD, 0], w: 1.4, o: 0.8, dash: "6 6" });
+// Columna de cristal: verde mientras está por encima de la mitad, roja al llegar
+const columna = (tr: Trazo[], x: number, h: number, ancho: number, luz = 0.2, color?: string) =>
+  cristal(tr, [x - ancho, BASE, -ancho], [x + ancho, BASE + h, ancho], color ?? (BASE + h > MITAD + 0.01 ? VERDE : ROJO), 1, luz, 0.14);
+const lineaMitad = (tr: Trazo[], x0 = -1.0, x1 = 1.0) => tr.push({ t: "l", a: [x0, MITAD, 0], b: [x1, MITAD, 0], w: 2, o: 0.9, dash: "8 6", color: ORO, luz: 0.4 });
 
 // ------------------------------------------------------------------ 1. Hook: una cuenta que baja pérdida a pérdida hasta la mitad
 const Hook: React.FC<P> = ({ t, s, e }) => {
   const cam = orbita([0, -0.15, 0], L(t, s, e, 6.2, 5.8), L(t, s, e, -0.35, 0.05) + sacude(t, EV.cosa - 0.1, 0.02), L(t, s, e, 0.14, 0.2), { apertura: 35, centroY: 980 });
-  const tr: Trazo[] = [...polvo(0.3)];
+  const tr: Trazo[] = [...polvo(0.25)];
+  suelo(tr, t, BASE, 0.2, ROJO);
   const n = Math.floor(L(t, 0.3, EV.cosa - 0.2, 0, 7, (u) => u));
   const g = muelle(t, -0.6, 160, 15);
   columna(tr, 0, H * Math.pow(0.9, n) * Math.min(g, 1.05), 0.35, 0.2 + 0.5 * golpe(t, EV.cosa - 0.2));
@@ -37,11 +39,11 @@ const Hook: React.FC<P> = ({ t, s, e }) => {
     <>
       <Escena cam={cam} trazos={tr} />
       <Etiqueta t={t} t0={0} x={Math.min(q.x, 1040)} y={q.y - 26} size={24} o={0.75} alinea="der">
-        LA MITAD
+        <span style={{ color: ORO }}>LA MITAD</span>
       </Etiqueta>
       <div style={{ position: "absolute", top: 450, left: 0, width: ANCHO, display: "flex", justifyContent: "center", gap: 10 }}>
         {Array.from({ length: 7 }, (_, i) => (
-          <span key={i} style={{ ...mono(52), opacity: i < n ? 1 : 0.15 }}>
+          <span key={i} style={{ ...mono(52), color: ROJO, opacity: i < n ? 1 : 0.15 }}>
             ✕
           </span>
         ))}
@@ -89,7 +91,8 @@ const COLS = [
 ];
 const Cuenta: React.FC<P> = ({ t, s, e }) => {
   const cam = orbita([0, -0.15, 0], L(t, s, e, 6.6, 6.2), L(t, s, e, -0.25, 0.1) + sacude(t, EV.sesentaynueve - 0.05), L(t, s, e, 0.14, 0.2), { apertura: 35, centroY: 980 });
-  const tr: Trazo[] = [...polvo(0.3)];
+  const tr: Trazo[] = [...polvo(0.25)];
+  suelo(tr, t, BASE, 0.18, "#fff", 0.4);
   const tramos = [
     [EV.diez, EV.mitad2],
     [EV.cinco, EV.catorce],
@@ -113,7 +116,7 @@ const Cuenta: React.FC<P> = ({ t, s, e }) => {
         const act = t >= tramos[i][0] - 0.2;
         return (
           <div key={i}>
-            <div style={{ position: "absolute", left: top.x, top: top.y - 70, transform: `translateX(-50%) scale(${1 + 0.3 * k[i]})`, opacity: act ? 1 : 0.3, ...mono(52) }}>{`${ns[i]} ✕`}</div>
+            <div style={{ position: "absolute", left: top.x, top: top.y - 70, transform: `translateX(-50%) scale(${1 + 0.3 * k[i]})`, opacity: act ? 1 : 0.3, ...mono(52), color: ns[i] === c.n ? ROJO : "#fff" }}>{`${ns[i]} ✕`}</div>
             <div style={{ position: "absolute", left: bajo.x, top: bajo.y + 22, transform: "translateX(-50%)", opacity: act ? 1 : 0.4, ...mono(32) }}>{c.txt}</div>
           </div>
         );
@@ -144,12 +147,12 @@ const Giro: React.FC<P> = ({ t, s, e }) => {
     <>
       <Escena cam={cam} trazos={polvo(0.35)} />
       <div style={{ position: "absolute", top: 500, left: 0, width: ANCHO, display: "flex", flexDirection: "column", alignItems: "center", gap: 14, opacity: siete * (1 - 0.75 * fuera) }}>
-        <span style={mono(80)}>✕✕✕✕✕✕✕</span>
+        <span style={{ ...mono(80), color: ROJO }}>✕✕✕✕✕✕✕</span>
         <span style={mono(28, 0.75)}>LE PASA A CUALQUIERA</span>
       </div>
       <div style={{ position: "absolute", top: 760, left: 140, width: 800, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 4, opacity: 1 - 0.75 * fuera }}>
         {Array.from({ length: n69 }, (_, i) => (
-          <span key={i} style={mono(30, 0.55)}>
+          <span key={i} style={{ ...mono(30, 0.7), color: VERDE }}>
             ✕
           </span>
         ))}
@@ -157,7 +160,7 @@ const Giro: React.FC<P> = ({ t, s, e }) => {
       <div style={{ position: "absolute", top: 1010, left: 0, width: ANCHO, display: "flex", justifyContent: "center", opacity: L(t, EV.nadie, EV.nadie + 0.3, 0, 1) * (1 - 0.75 * fuera), ...mono(28, 0.75) }}>CASI A NADIE</div>
       <div style={{ position: "absolute", top: 1180, left: 0, width: ANCHO, display: "flex", flexDirection: "column", alignItems: "center", gap: 10, opacity: L(t, EV.ganas - 0.3, EV.ganas, 0, 1, salida) }}>
         <span style={mono(34, 0.75)}>ESTRATEGIA → CUÁNTO GANAS</span>
-        <span style={{ ...mono(40), opacity: L(t, EV.vivo - 1.0, EV.vivo - 0.6, 0.2, 1), display: "inline-block", transform: `scale(${1 + 0.15 * k})` }}>RIESGO → SI SIGUES VIVO</span>
+        <span style={{ ...mono(40), color: ORO, opacity: L(t, EV.vivo - 1.0, EV.vivo - 0.6, 0.2, 1), display: "inline-block", transform: `scale(${1 + 0.15 * k})` }}>RIESGO → SI SIGUES VIVO</span>
       </div>
       <Destello t={t} t0={EV.vivo - 0.05} o={0.12} />
       <Arriba>
@@ -175,6 +178,8 @@ const Pregunta: React.FC<P> = (p) => <PreguntaComentarios {...p} lineas={["¿cu�
 
 // ------------------------------------------------------------------ composición
 export const PIEZAS: Record<string, React.FC<P>> = { hook: Hook, riesgo: Riesgo, sigueme: Sigueme, cuenta: Cuenta, giro: Giro, pregunta: Pregunta };
-export const CLAVES = claves(["mitad", "cosa", "arriesgas", "sígueme", "10%", "7", "5%", "14", "1%", "69", "cualquiera", "nadie", "ganas", "vivo", "comentarios"]);
+export const CLAVES = claves([["mitad", ORO], "cosa", "arriesgas", "sígueme", ["10%", ROJO], ["7", ROJO], "5%", "14", ["1%", VERDE], ["69", VERDE], "cualquiera", "nadie", "ganas", ["vivo", ORO], "comentarios"]);
 
-export const Aguanta: React.FC = () => <Montaje t={useCurrentFrame() / datos.fps} datos={datos} audio="gen/aguanta_mezcla.wav" piezas={PIEZAS} claves={CLAVES} />;
+export const Aguanta: React.FC = () => (
+  <Montaje t={useCurrentFrame() / datos.fps} datos={datos} audio="gen/aguanta_mezcla.wav" piezas={PIEZAS} claves={CLAVES} fondo={fondoTinte("#3a0c14")} transicion="variada" vineta />
+);
