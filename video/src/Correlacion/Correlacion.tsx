@@ -1,14 +1,14 @@
-// Reel de alcance "¿Abres cinco operaciones para repartir el riesgo?" (~38 s), con color: cinco cubos de cristal de un
+// Reel de alcance "¿Abres cinco operaciones para repartir el riesgo?" (~38 s), en blanco y negro: cinco cubos de cristal de un
 // 1 % sobre una cuadrícula, tres gráficos de velas (euro, libra y australiano contra el dólar) casi calcados, el «sígueme»
-// a mitad, el dólar que se dispara y las tres que se ponen rojas a la vez, los cinco cubos que se funden en uno rojo de un
-// 5 %, velas calcadas frente a curvas de colores que van cada una a lo suyo y la pregunta final.
+// a mitad, el dólar que se dispara y las tres que caen a la vez, los cinco cubos que se funden en uno de un
+// 5 %, velas calcadas frente a curvas que van cada una a lo suyo y la pregunta final.
 // Tiempos en src/gen/correlacion.json (scripts/correlacion.py).
 import { useCurrentFrame } from "remotion";
 import datos from "../gen/correlacion.json";
 import { salida } from "../Premium/ui";
 import { Arriba, Etiqueta, L, mono, muelle, Titular } from "../Bot/piezas";
 import { Escena, orbita, polvo, proyector, Trazo, V3 } from "../Bot/tres";
-import { AZUL, cristal, fondoTinte, ORO, ROJO, suelo, velas, VERDE } from "../Bot/kit";
+import { cristal, suelo, velas } from "../Bot/kit";
 import { claves, CtaSeguir, Destello, golpe, Kicker, Montaje, P, paseo, PreguntaComentarios, sacude } from "../Explica/Montaje";
 
 export const CORRELACION_FPS = datos.fps;
@@ -25,7 +25,8 @@ const PARES = [0, 1, 2].map((k) => {
 });
 const NOMBRES = ["EUR/USD", "GBP/USD", "AUD/USD"];
 const LIBRES = [0, 1, 2].map((k) => paseo(40, 40 + k * 9, 0.55, (k - 1) * 0.04));
-const COLORES_LIBRES = [VERDE, AZUL, ORO];
+// Sin color, las tres curvas libres se distinguen por el trazo
+const TRAZOS_LIBRES = [undefined, "10 6", "3 5"];
 
 // Serie escalada a una banda vertical; «caida» hunde las últimas 9 velas
 const escala = (v: number[], y0: number, alto: number, caida = 0) => {
@@ -38,7 +39,7 @@ const graficos = (t: number, tr: Trazo[], pr: (p: V3) => { x: number; y: number 
     {PARES.map((v, k) => {
       const y0 = 0.32 - k * 0.42;
       const prog = L(t, t0s[k] - 0.2, t0s[k] + 0.8, 0, 1, salida);
-      if (prog > 0) velas(tr, escala(v, y0, 0.28, caida), -0.85, 0.85, Math.max(2, Math.round(N * prog)), 0.032);
+      if (prog > 0) velas(tr, escala(v, y0, 0.28, caida), -0.85, 0.85, Math.max(2, Math.round(N * prog)), 0.032, 1, 0.02, true);
       const q = pr([-0.85, y0 + 0.36, 0]);
       return (
         <div key={k} style={{ position: "absolute", left: q.x, top: q.y - 22, opacity: Math.min(prog * 2, 1), ...mono(28, 0.9) }}>
@@ -55,7 +56,7 @@ const cincoCubos = (tr: Trazo[], t: number, junta: number, aparece = -0.6) => {
     if (g <= 0) continue;
     const x = (-0.64 + k * 0.32) * (1 - junta);
     const r = 0.1 * Math.min(g, 1.1);
-    cristal(tr, [x - r, -0.3 - r, -r], [x + r, -0.3 + r, r], AZUL, 1 - 0.7 * junta, 0.3, 0.16);
+    cristal(tr, [x - r, -0.3 - r, -r], [x + r, -0.3 + r, r], "#fff", 1 - 0.7 * junta, 0.3, 0.1);
   }
 };
 
@@ -63,7 +64,7 @@ const cincoCubos = (tr: Trazo[], t: number, junta: number, aparece = -0.6) => {
 const Hook: React.FC<P> = ({ t, s, e }) => {
   const cam = orbita([0, -0.3, 0], L(t, s, e, 5.6, 5.2), L(t, s, e, -0.35, 0.05) + sacude(t, EV.cuidado - 0.05, 0.02), L(t, s, e, 0.18, 0.24), { apertura: 35, centroY: 1000 });
   const tr: Trazo[] = [...polvo(0.25)];
-  suelo(tr, t, -0.42, 0.25, AZUL);
+  suelo(tr, t, -0.42, 0.22);
   cincoCubos(tr, t, 0);
   const pr = proyector(cam);
   return (
@@ -72,7 +73,7 @@ const Hook: React.FC<P> = ({ t, s, e }) => {
       {Array.from({ length: 5 }, (_, k) => {
         const q = pr([-0.64 + k * 0.32, -0.15, 0]);
         return (
-          <div key={k} style={{ position: "absolute", left: q.x, top: q.y - 46, transform: "translateX(-50%)", opacity: L(t, -0.3 + k * 0.1, k * 0.1, 0, 1), ...mono(32), color: AZUL }}>
+          <div key={k} style={{ position: "absolute", left: q.x, top: q.y - 46, transform: "translateX(-50%)", opacity: L(t, -0.3 + k * 0.1, k * 0.1, 0, 1), ...mono(32) }}>
             1 %
           </div>
         );
@@ -97,7 +98,7 @@ const Pares: React.FC<P> = ({ t, s, e }) => {
     <>
       <Escena cam={cam} trazos={tr} />
       {html}
-      <div style={{ position: "absolute", top: 1290, left: 0, width: 1080, display: "flex", justifyContent: "center", opacity: L(t, EV.uno - 0.2, EV.uno + 0.1, 0, 1), ...mono(40), color: AZUL }}>1 % EN CADA UNA</div>
+      <div style={{ position: "absolute", top: 1290, left: 0, width: 1080, display: "flex", justifyContent: "center", opacity: L(t, EV.uno - 0.2, EV.uno + 0.1, 0, 1), ...mono(40) }}>1 % EN CADA UNA</div>
       <Arriba>
         <Titular t={t} t0={s + 0.1} texto="*3* pares, *1 %* cada uno" size={84} />
       </Arriba>
@@ -120,8 +121,8 @@ const Dolar: React.FC<P> = ({ t, s, e }) => {
       <Escena cam={cam} trazos={tr} />
       {html}
       <div style={{ position: "absolute", top: 1290, left: 0, width: 1080, display: "flex", justifyContent: "center", gap: 18, opacity: L(t, EV.dispara - 0.3, EV.dispara, 0, 1) }}>
-        <span style={{ ...mono(50), color: VERDE }}>USD ↑</span>
-        <span style={{ ...mono(50), color: ROJO }}>LOS TRES ↓</span>
+        <span style={mono(50)}>USD ↑</span>
+        <span style={mono(50, 0.75)}>LOS TRES ↓</span>
       </div>
       <Destello t={t} t0={EV.caen - 0.05} o={0.18} />
       <Arriba>
@@ -138,18 +139,18 @@ const Dolar: React.FC<P> = ({ t, s, e }) => {
 const Giro: React.FC<P> = ({ t, s, e }) => {
   const cam = orbita([0, -0.3, 0], L(t, s, e, 5.6, 5.1), L(t, s, e, -0.35, 0.1) + sacude(t, EV.cincopct - 0.05), L(t, s, e, 0.18, 0.26), { apertura: 35, centroY: 980 });
   const tr: Trazo[] = [...polvo(0.25)];
-  suelo(tr, t, -0.42, 0.25, ROJO, 0.9);
+  suelo(tr, t, -0.42, 0.22, "#fff", 0.9);
   const junta = L(t, EV.sola - 0.6, EV.sola, 0, 1, salida);
   const k = golpe(t, EV.cincopct - 0.05);
   if (junta < 1) cincoCubos(tr, t, junta, s - 3);
   const lado = 0.2 * Math.cbrt(5) * Math.min(muelle(t, EV.sola - 0.15, 180, 13), 1.08);
-  if (junta >= 1 && lado > 0) cristal(tr, [-lado / 2, -0.4, -lado / 2], [lado / 2, -0.4 + lado, lado / 2], ROJO, 1, 0.5 + 0.5 * k, 0.22);
+  if (junta >= 1 && lado > 0) cristal(tr, [-lado / 2, -0.4, -lado / 2], [lado / 2, -0.4 + lado, lado / 2], "#fff", 1, 0.5 + 0.5 * k, 0.28);
   const pr = proyector(cam);
   const q = pr([0, 0.05, 0]);
   return (
     <>
       <Escena cam={cam} trazos={tr} />
-      <div style={{ position: "absolute", left: q.x, top: q.y - 120, transform: `translateX(-50%) scale(${1 + 0.25 * k})`, ...mono(84), color: junta < 1 ? AZUL : ROJO }}>{junta < 1 ? "5 × 1 %" : "1 × 5 %"}</div>
+      <div style={{ position: "absolute", left: q.x, top: q.y - 120, transform: `translateX(-50%) scale(${1 + 0.25 * k})`, ...mono(84) }}>{junta < 1 ? "5 × 1 %" : "1 × 5 %"}</div>
       <Destello t={t} t0={EV.cincopct - 0.05} o={0.18} />
       <Arriba>
         <Titular t={t} t0={s + 0.1} fin={EV.sola - 0.4} texto="no son *cinco*" size={116} />
@@ -167,11 +168,11 @@ const Leccion: React.FC<P> = ({ t, s, e }) => {
   const tr: Trazo[] = [...polvo(0.25)];
   const a = L(t, s + 0.1, s + 0.8, 0, 1, salida);
   const b = L(t, EV.igual - 1.2, EV.igual - 0.3, 0, 1, salida);
-  PARES.forEach((v, k) => velas(tr, escala(v, 0.3 - k * 0.38, 0.24), -0.92, -0.1, Math.max(2, Math.round(N * a)), 0.018, 1 - 0.45 * b));
+  PARES.forEach((v, k) => velas(tr, escala(v, 0.3 - k * 0.38, 0.24), -0.92, -0.1, Math.max(2, Math.round(N * a)), 0.018, 1 - 0.45 * b, 0.02, true));
   LIBRES.forEach((v, k) => {
     if (b <= 0) return;
     const ys = escala(v, 0.3 - k * 0.38, 0.24);
-    tr.push({ t: "p", pts: ys.map((y, i) => [0.1 + (0.82 * i) / (ys.length - 1), y, 0]), w: 2.4, o: 1, color: COLORES_LIBRES[k], luz: 0.6, prog: b });
+    tr.push({ t: "p", pts: ys.map((y, i) => [0.1 + (0.82 * i) / (ys.length - 1), y, 0]), w: 2.6, o: 1, dash: TRAZOS_LIBRES[k], luz: 0.6, prog: b });
   });
   const pr = proyector(cam);
   const qa = pr([-0.51, -0.66, 0]);
@@ -201,8 +202,8 @@ const Pregunta: React.FC<P> = (p) => <PreguntaComentarios {...p} lineas={["¿cu�
 
 // ------------------------------------------------------------------ composición
 export const PIEZAS: Record<string, React.FC<P>> = { hook: Hook, pares: Pares, sigueme: Sigueme, dolar: Dolar, giro: Giro, leccion: Leccion, pregunta: Pregunta };
-export const CLAVES = claves(["cinco", "Cuidado", ["1%", AZUL], "sígueme", "juntos", ["dólar", VERDE], ["dispara", VERDE], ["caen", ROJO], ["5%", ROJO], "Repartir", "igual", "abiertas"]);
+export const CLAVES = claves(["cinco", "Cuidado", "1%", "sígueme", "juntos", "dólar", "dispara", "caen", "5%", "Repartir", "igual", "abiertas"]);
 
 export const Correlacion: React.FC = () => (
-  <Montaje t={useCurrentFrame() / datos.fps} datos={datos} audio="gen/correlacion_mezcla.wav" piezas={PIEZAS} claves={CLAVES} fondo={fondoTinte("#0a2444")} transicion="variada" vineta />
+  <Montaje t={useCurrentFrame() / datos.fps} datos={datos} audio="gen/correlacion_mezcla.wav" piezas={PIEZAS} claves={CLAVES} transicion="variada" vineta />
 );

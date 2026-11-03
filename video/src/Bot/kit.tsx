@@ -31,32 +31,34 @@ export const suelo = (tr: Trazo[], t: number, y = -1, o = 0.35, color = "#fff", 
   }
 };
 
-// Vela japonesa: cuerpo de cristal entre apertura y cierre, mecha entre mínimo y máximo
-export const vela = (tr: Trazo[], x: number, abre: number, cierra: number, alto: number, bajo: number, ancho = 0.035, o = 1, luz = 0.3) => {
-  const color = cierra >= abre ? VERDE : ROJO;
+// Vela japonesa: cuerpo de cristal entre apertura y cierre, mecha entre mínimo y máximo.
+// En blanco y negro (mono) la alcista va rellena y la bajista hueca, como en los gráficos clásicos
+export const vela = (tr: Trazo[], x: number, abre: number, cierra: number, alto: number, bajo: number, ancho = 0.035, o = 1, luz = 0.3, mono = false) => {
+  const sube = cierra >= abre;
+  const color = mono ? "#fff" : sube ? VERDE : ROJO;
   tr.push({ t: "l", a: [x, bajo, 0], b: [x, alto, 0], w: 1.4, o, color });
   const y0 = Math.min(abre, cierra);
   const y1 = Math.max(abre, cierra, y0 + 0.008);
-  cristal(tr, [x - ancho / 2, y0, -ancho / 2], [x + ancho / 2, y1, ancho / 2], color, o, luz, 0.35);
+  cristal(tr, [x - ancho / 2, y0, -ancho / 2], [x + ancho / 2, y1, ancho / 2], color, o, mono && !sube ? 0 : luz, mono ? (sube ? 0.6 : 0.03) : 0.35);
 };
 
 // Velas a partir de una serie de cierres ya escalada a coordenadas del mundo
-export const velas = (tr: Trazo[], cierres: number[], x0: number, x1: number, hasta = cierres.length, ancho = 0.035, o = 1, mecha = 0.02) => {
+export const velas = (tr: Trazo[], cierres: number[], x0: number, x1: number, hasta = cierres.length, ancho = 0.035, o = 1, mecha = 0.02, mono = false) => {
   for (let i = 1; i < Math.min(hasta, cierres.length); i++) {
     const x = x0 + ((x1 - x0) * i) / (cierres.length - 1);
     const a = cierres[i - 1];
     const c = cierres[i];
-    vela(tr, x, a, c, Math.max(a, c) + mecha * (0.6 + ((i * 37) % 10) / 10), Math.min(a, c) - mecha * (0.6 + ((i * 53) % 10) / 10), ancho, o);
+    vela(tr, x, a, c, Math.max(a, c) + mecha * (0.6 + ((i * 37) % 10) / 10), Math.min(a, c) - mecha * (0.6 + ((i * 53) % 10) / 10), ancho, o, 0.3, mono);
   }
 };
 
-// Pila de fichas de casino: discos de colores con el canto marcado
-export const fichas = (tr: Trazo[], c: V3, n: number, r = 0.16, o = 1) => {
-  const colores = [ROJO, VERDE, ORO, AZUL];
+// Pila de fichas de casino: discos con el canto marcado (en blanco y negro, alternan llenas y huecas)
+export const fichas = (tr: Trazo[], c: V3, n: number, r = 0.16, o = 1, mono = false) => {
+  const colores = mono ? ["#fff"] : [ROJO, VERDE, ORO, AZUL];
   for (let i = 0; i < n; i++) {
     const y = c[1] + i * 0.045;
     const color = colores[i % colores.length];
-    tr.push({ t: "p", pts: circulo([c[0], y, c[2]], r, "y", 32), w: 1.6, o, color, relleno: color, oRelleno: 0.18 * o });
+    tr.push({ t: "p", pts: circulo([c[0], y, c[2]], r, "y", 32), w: 1.6, o, color, relleno: color, oRelleno: (mono ? (i % 2 ? 0.06 : 0.4) : 0.18) * o });
     tr.push({ t: "p", pts: circulo([c[0], y + 0.035, c[2]], r, "y", 32), w: 1, o: 0.7 * o, color });
     for (let k = 0; k < 8; k++) {
       const a = (k / 8) * Math.PI * 2;
