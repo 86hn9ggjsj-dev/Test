@@ -11,6 +11,7 @@ import { Explica, EXPLICA_FPS, EXPLICA_FRAMES } from "./Explica/Explica";
 import { Ganapierde, GANAPIERDE_FPS, GANAPIERDE_FRAMES } from "./Ganapierde/Ganapierde";
 import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
+import { Aguanta, AGUANTA_FPS, AGUANTA_FRAMES } from "./Aguanta/Aguanta";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
 import { Recuperar, RECUPERAR_FPS, RECUPERAR_FRAMES } from "./Recuperar/Recuperar";
 import { Vivir, VIVIR_FPS, VIVIR_FRAMES } from "./Vivir/Vivir";
@@ -182,6 +183,14 @@ export const RemotionRoot: React.FC = () => {
         component={MediaReel}
         durationInFrames={MEDIA_FRAMES}
         fps={MEDIA_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Aguanta"
+        component={Aguanta}
+        durationInFrames={AGUANTA_FRAMES}
+        fps={AGUANTA_FPS}
         width={ANCHO}
         height={ALTO}
       />

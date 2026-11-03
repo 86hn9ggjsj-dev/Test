@@ -1,6 +1,7 @@
 // Raíz solo con los reels de alcance del día: se renderiza con `npx remotion render src/reels.ts <Id> …` y no necesita
 // los tiempos (src/gen/*.json) de los videos anteriores, que dependen de sus locuciones originales.
 import { Composition } from "remotion";
+import { Aguanta, AGUANTA_FPS, AGUANTA_FRAMES } from "./Aguanta/Aguanta";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
 import { Recuperar, RECUPERAR_FPS, RECUPERAR_FRAMES } from "./Recuperar/Recuperar";
 import { Vivir, VIVIR_FPS, VIVIR_FRAMES } from "./Vivir/Vivir";
@@ -18,6 +19,7 @@ import { ALTO, ANCHO } from "./Viral/util";
 
 export const RaizReels: React.FC = () => (
   <>
+    <Composition id="Aguanta" component={Aguanta} durationInFrames={AGUANTA_FRAMES} fps={AGUANTA_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Recuperar" component={Recuperar} durationInFrames={RECUPERAR_FRAMES} fps={RECUPERAR_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Vivir" component={Vivir} durationInFrames={VIVIR_FRAMES} fps={VIVIR_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Instagram" component={Instagram} durationInFrames={INSTAGRAM_FRAMES} fps={INSTAGRAM_FPS} width={ANCHO} height={ALTO} />

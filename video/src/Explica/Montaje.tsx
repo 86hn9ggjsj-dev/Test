@@ -100,13 +100,13 @@ export const CtaSeguir: React.FC<P & { lema: string }> = ({ t, s, e, lema }) => 
 );
 
 // Pregunta a mitad de vídeo para que comenten: bocadillo de comentario con los puntos de «escribiendo…»
-export const PreguntaComentarios: React.FC<P & { lineas: string[]; pie?: string; size?: number }> = ({ t, s, e, lineas, pie = "TE LEO EN COMENTARIOS", size = 92 }) => {
+export const PreguntaComentarios: React.FC<P & { lineas: string[]; pie?: string; size?: number; kicker?: string }> = ({ t, s, e, lineas, pie = "TE LEO EN COMENTARIOS", size = 92, kicker = "ANTES DE SEGUIR" }) => {
   const g = muelle(t, s + 0.1, 200, 14);
   const punto = (i: number) => 0.35 + 0.65 * Math.max(0, Math.sin((t - s) * 7 - i * 0.9));
   return (
     <>
       <Escena cam={orbita([0, 0, 0], 9, L(t, s, e, -0.3, 0.2), 0.2, { apertura: 40 })} trazos={polvo(0.35)} />
-      <Kicker t={t} t0={s + 0.05} texto="ANTES DE SEGUIR" />
+      <Kicker t={t} t0={s + 0.05} texto={kicker} />
       <div style={{ position: "absolute", top: 640, left: 0, width: ANCHO, display: "flex", justifyContent: "center", opacity: Math.min(Math.max(g, 0) * 1.5, 1), transform: `scale(${0.7 + 0.3 * Math.min(Math.max(g, 0), 1.1)})` }}>
         <svg width={420} height={250} viewBox="0 0 300 180">
           <path d="M40 10 H260 A30 30 0 0 1 290 40 V100 A30 30 0 0 1 260 130 H110 L70 168 L80 130 H40 A30 30 0 0 1 10 100 V40 A30 30 0 0 1 40 10 Z" fill="none" stroke="#fff" strokeWidth={3} />
