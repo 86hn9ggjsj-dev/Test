@@ -13,6 +13,8 @@ import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
 import { Aguanta, AGUANTA_FPS, AGUANTA_FRAMES } from "./Aguanta/Aguanta";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
+import { Casino, CASINO_FPS, CASINO_FRAMES } from "./Casino/Casino";
+import { Correlacion, CORRELACION_FPS, CORRELACION_FRAMES } from "./Correlacion/Correlacion";
 import { Recuperar, RECUPERAR_FPS, RECUPERAR_FRAMES } from "./Recuperar/Recuperar";
 import { Vivir, VIVIR_FPS, VIVIR_FRAMES } from "./Vivir/Vivir";
 import { Instagram, INSTAGRAM_FPS, INSTAGRAM_FRAMES } from "./Instagram/Instagram";
@@ -191,6 +193,22 @@ export const RemotionRoot: React.FC = () => {
         component={Aguanta}
         durationInFrames={AGUANTA_FRAMES}
         fps={AGUANTA_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Casino"
+        component={Casino}
+        durationInFrames={CASINO_FRAMES}
+        fps={CASINO_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Correlacion"
+        component={Correlacion}
+        durationInFrames={CORRELACION_FRAMES}
+        fps={CORRELACION_FPS}
         width={ANCHO}
         height={ALTO}
       />
