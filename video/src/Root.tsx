@@ -13,6 +13,9 @@ import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
 import { Aguanta, AGUANTA_FPS, AGUANTA_FRAMES } from "./Aguanta/Aguanta";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
+import { Cerebro, CEREBRO_FPS, CEREBRO_FRAMES } from "./Cerebro/Cerebro";
+import { DopaminaReel, DOPAMINA_FPS, DOPAMINA_FRAMES } from "./Dopamina/Dopamina";
+import { Redondos, REDONDOS_FPS, REDONDOS_FRAMES } from "./Redondos/Redondos";
 import { Casino, CASINO_FPS, CASINO_FRAMES } from "./Casino/Casino";
 import { Correlacion, CORRELACION_FPS, CORRELACION_FRAMES } from "./Correlacion/Correlacion";
 import { Recuperar, RECUPERAR_FPS, RECUPERAR_FRAMES } from "./Recuperar/Recuperar";
@@ -193,6 +196,30 @@ export const RemotionRoot: React.FC = () => {
         component={Aguanta}
         durationInFrames={AGUANTA_FRAMES}
         fps={AGUANTA_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Cerebro"
+        component={Cerebro}
+        durationInFrames={CEREBRO_FRAMES}
+        fps={CEREBRO_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Dopamina"
+        component={DopaminaReel}
+        durationInFrames={DOPAMINA_FRAMES}
+        fps={DOPAMINA_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Redondos"
+        component={Redondos}
+        durationInFrames={REDONDOS_FRAMES}
+        fps={REDONDOS_FPS}
         width={ANCHO}
         height={ALTO}
       />
