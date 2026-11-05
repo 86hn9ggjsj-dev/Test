@@ -30,3 +30,6 @@ de en medio y la pregunta final de cada vídeo.
 | 4 nov | Aversión a la pérdida (cerebro) | cerrar rápido lo que gana |
 | 4 nov | Tragaperras y gráfico de un minuto (dopamina) | recompensa variable |
 | 4 nov | Números redondos (redondos) | órdenes amontonadas, Osler |
+| 5 nov | Sube por la escalera y baja en ascensor (ascensor) | caída de 2020, −34 % en 33 días |
+| 5 nov | El stop no siempre protege (franco) | franco suizo, 15-1-2015 |
+| 5 nov | Criterio de Kelly y Thorp (kelly) | apostar de más arruina con ventaja |
