@@ -13,6 +13,8 @@ import { Intro } from "./Intro";
 import { Prueba, PRUEBA_FPS, PRUEBA_FRAMES } from "./Prueba/Prueba";
 import { Aguanta, AGUANTA_FPS, AGUANTA_FRAMES } from "./Aguanta/Aguanta";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
+import { Franco, FRANCO_FPS, FRANCO_FRAMES } from "./Franco/Franco";
+import { KellyReel, KELLY_FPS, KELLY_FRAMES } from "./Kelly/Kelly";
 import { Ascensor, ASCENSOR_FPS, ASCENSOR_FRAMES } from "./Ascensor/Ascensor";
 import { Cerebro, CEREBRO_FPS, CEREBRO_FRAMES } from "./Cerebro/Cerebro";
 import { DopaminaReel, DOPAMINA_FPS, DOPAMINA_FRAMES } from "./Dopamina/Dopamina";
@@ -197,6 +199,22 @@ export const RemotionRoot: React.FC = () => {
         component={Aguanta}
         durationInFrames={AGUANTA_FRAMES}
         fps={AGUANTA_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Franco"
+        component={Franco}
+        durationInFrames={FRANCO_FRAMES}
+        fps={FRANCO_FPS}
+        width={ANCHO}
+        height={ALTO}
+      />
+      <Composition
+        id="Kelly"
+        component={KellyReel}
+        durationInFrames={KELLY_FRAMES}
+        fps={KELLY_FPS}
         width={ANCHO}
         height={ALTO}
       />

@@ -3,6 +3,8 @@
 import { Composition } from "remotion";
 import { Aguanta, AGUANTA_FPS, AGUANTA_FRAMES } from "./Aguanta/Aguanta";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
+import { Franco, FRANCO_FPS, FRANCO_FRAMES } from "./Franco/Franco";
+import { KellyReel, KELLY_FPS, KELLY_FRAMES } from "./Kelly/Kelly";
 import { Ascensor, ASCENSOR_FPS, ASCENSOR_FRAMES } from "./Ascensor/Ascensor";
 import { Cerebro, CEREBRO_FPS, CEREBRO_FRAMES } from "./Cerebro/Cerebro";
 import { DopaminaReel, DOPAMINA_FPS, DOPAMINA_FRAMES } from "./Dopamina/Dopamina";
@@ -26,6 +28,8 @@ import { ALTO, ANCHO } from "./Viral/util";
 export const RaizReels: React.FC = () => (
   <>
     <Composition id="Aguanta" component={Aguanta} durationInFrames={AGUANTA_FRAMES} fps={AGUANTA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Franco" component={Franco} durationInFrames={FRANCO_FRAMES} fps={FRANCO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Kelly" component={KellyReel} durationInFrames={KELLY_FRAMES} fps={KELLY_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Ascensor" component={Ascensor} durationInFrames={ASCENSOR_FRAMES} fps={ASCENSOR_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Cerebro" component={Cerebro} durationInFrames={CEREBRO_FRAMES} fps={CEREBRO_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Dopamina" component={DopaminaReel} durationInFrames={DOPAMINA_FRAMES} fps={DOPAMINA_FPS} width={ANCHO} height={ALTO} />
