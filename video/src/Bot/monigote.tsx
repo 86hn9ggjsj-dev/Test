@@ -28,6 +28,13 @@ export const POSES: Record<string, Pose> = {
   inclinado: { torso: 20, cabeza: 10, bI: [75, 20], bD: [80, 15], pI: [88, -88], pD: [84, -84], cara: 0.2 },
   hundido: { torso: 52, cabeza: 30, bI: [95, 15], bD: [90, 20], pI: [88, -88], pD: [84, -84], cara: -1 },
   cabezaManos: { torso: 30, cabeza: 25, bI: [150, 150], bD: [145, 150], pI: [88, -88], pD: [84, -84], cara: -1 },
+  relajado: { torso: -18, cabeza: -8, bI: [165, 150], bD: [160, 150], pI: [88, -88], pD: [84, -84], cara: 1 },
+};
+
+// Paso de andar: piernas y brazos alternos (vista de lado, mirando hacia +x)
+export const andando = (t: number, vel = 7): Pose => {
+  const f = Math.sin(t * vel);
+  return { torso: 4, cabeza: -2, bI: [-28 * f, 20], bD: [28 * f, 20], pI: [26 * f, -10 - 18 * Math.max(0, -f)], pD: [-26 * f, -10 - 18 * Math.max(0, f)], cara: 0.3 };
 };
 
 const mezclaN = (a: number, b: number, u: number) => a + (b - a) * u;
@@ -72,9 +79,14 @@ export const monigote = (tr: Trazo[], cadera: V3, pose: Pose, vista: "frente" | 
     const sx = vista === "frente" ? lado : 1;
     return [base[0] + ax[0] * Math.sin(rad(ang)) * largo * s * sx, base[1] - Math.cos(rad(ang)) * largo * s, base[2] + prof[2] * 0];
   };
+  // Vida: respira, cabecea y balancea un poco los brazos aunque esté quieto
+  const resp = Math.sin(t * 2.6);
+  const balanceo = 3 * Math.sin(t * 2.1);
+  pose = { ...pose, cabeza: pose.cabeza + 3 * Math.sin(t * 1.9 + 1), bI: [pose.bI[0] + balanceo, pose.bI[1]], bD: [pose.bD[0] - balanceo, pose.bD[1]] };
   const inc = rad(pose.torso);
   const arriba: V3 = [Math.sin(inc), Math.cos(inc), 0];
-  const cuello: V3 = [cadera[0] + arriba[0] * TORSO * s, cadera[1] + arriba[1] * TORSO * s, cadera[2]];
+  const largoTorso = TORSO * (1 + 0.015 * resp);
+  const cuello: V3 = [cadera[0] + arriba[0] * largoTorso * s, cadera[1] + arriba[1] * largoTorso * s, cadera[2]];
   const encogido = (pose.hombros ?? 0) * 0.05 * s;
   const hombro: V3 = [cuello[0] - arriba[0] * 0.03 * s, cuello[1] - arriba[1] * 0.03 * s + encogido, cuello[2]];
   const incC = inc + rad(pose.cabeza);
@@ -102,15 +114,27 @@ export const monigote = (tr: Trazo[], cadera: V3, pose: Pose, vista: "frente" | 
   // Cabeza con su cara
   tr.push({ t: "p", pts: circulo(cabeza, R_CABEZA * s, "z", 28), w: lw, o, relleno: "#000", oRelleno: 0.85 * o, luz: 0.15 });
   const c = pose.cara;
+  const parpadea = (t + cadera[0] * 7) % 3.1 < 0.12;
   if (vista === "frente") {
-    for (const d of [-1, 1]) tr.push({ t: "e", c: [cabeza[0] + d * 0.032 * s, cabeza[1] + 0.02 * s, cabeza[2] + 0.01], r: 0.011 * s, tipo: "punto", o });
+    for (const d of [-1, 1]) {
+      const ojo: V3 = [cabeza[0] + d * 0.032 * s, cabeza[1] + 0.02 * s, cabeza[2] + 0.01];
+      if (parpadea) tr.push({ t: "l", a: [ojo[0] - 0.012 * s, ojo[1], ojo[2]], b: [ojo[0] + 0.012 * s, ojo[1], ojo[2]], w: 2, o });
+      else tr.push({ t: "e", c: ojo, r: 0.011 * s, tipo: "punto", o });
+      // Cejas: caídas hacia fuera si está hundido, arriba si está contento
+      if (Math.abs(c) > 0.3) {
+        const y = ojo[1] + 0.03 * s + (c > 0 ? 0.008 * s : 0);
+        const dy = c < 0 ? 0.012 * s : -0.004 * s;
+        tr.push({ t: "l", a: [ojo[0] - d * 0.016 * s, y + dy, ojo[2]], b: [ojo[0] + d * 0.016 * s, y - dy * 0.3, ojo[2]], w: 2, o });
+      }
+    }
     const boca: V3[] = Array.from({ length: 9 }, (_, i) => {
       const x = -0.04 + (0.08 * i) / 8;
       return [cabeza[0] + x * s, cabeza[1] - 0.035 * s - c * 0.02 * s * (1 - (x / 0.04) ** 2), cabeza[2] + 0.01];
     });
     tr.push({ t: "p", pts: boca, w: 2, o });
   } else {
-    tr.push({ t: "e", c: [cabeza[0] + 0.045 * s, cabeza[1] + 0.02 * s, cabeza[2] + 0.01], r: 0.011 * s, tipo: "punto", o });
+    if (parpadea) tr.push({ t: "l", a: [cabeza[0] + 0.035 * s, cabeza[1] + 0.02 * s, cabeza[2] + 0.01], b: [cabeza[0] + 0.058 * s, cabeza[1] + 0.02 * s, cabeza[2] + 0.01], w: 2, o });
+    else tr.push({ t: "e", c: [cabeza[0] + 0.045 * s, cabeza[1] + 0.02 * s, cabeza[2] + 0.01], r: 0.011 * s, tipo: "punto", o });
     tr.push({ t: "l", a: [cabeza[0] + 0.03 * s, cabeza[1] - 0.035 * s - c * 0.008 * s, cabeza[2] + 0.01], b: [cabeza[0] + 0.07 * s, cabeza[1] - 0.03 * s + c * 0.008 * s, cabeza[2] + 0.01], w: 2, o });
   }
   // Agobio: rayitas que tiemblan alrededor de la cabeza
@@ -124,6 +148,13 @@ export const monigote = (tr: Trazo[], cadera: V3, pose: Pose, vista: "frente" | 
     }
   }
   return cabeza;
+};
+
+// Corona de «genio» encima de la cabeza
+export const corona = (tr: Trazo[], cabeza: V3, s = 1, o = 1, luz = 0.5) => {
+  const y0 = cabeza[1] + R_CABEZA * s * 1.05;
+  const pts: V3[] = [[-0.08, 0], [-0.08, 0.07], [-0.04, 0.035], [0, 0.085], [0.04, 0.035], [0.08, 0.07], [0.08, 0], [-0.08, 0]].map(([x, y]) => [cabeza[0] + x * s, y0 + y * s, cabeza[2]]);
+  tr.push({ t: "p", pts, w: 2.4, o, luz, relleno: "#fff", oRelleno: 0.15 * o });
 };
 
 // Escritorio, silla y monitor (vista de lado: el monitor queda delante del stickman, hacia +x)
