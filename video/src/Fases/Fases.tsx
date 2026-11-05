@@ -334,4 +334,6 @@ const Pregunta: React.FC<P> = (p) => {
 export const PIEZAS: Record<string, React.FC<P>> = { hook: Hook, uno: Uno, dos: Dos, sigueme: Sigueme, tres: Tres, cuatro: Cuatro, pregunta: Pregunta };
 export const CLAVES = claves(["cuatro", "fases", "cuál", "tres", "genio", "pierdes", "manipulado", "Sígueme", "buena", "doblas", ["todo", ROJO], "perfecta", "controlar", "quedan", "fase", "etiqueta"]);
 
-export const Fases: React.FC = () => <Montaje t={useCurrentFrame() / datos.fps} datos={datos} audio="gen/fases_mezcla.wav" piezas={PIEZAS} claves={CLAVES} transicion="variada" vineta />;
+// El «todo» del gancho no va en rojo (solo el de «lo pierdes todo»): se marca con un carácter invisible para que no coincida
+const DATOS = { ...datos, palabras: datos.palabras.map((p) => (p.s < datos.escenas[1].s && p.w.toLowerCase().startsWith("todo") ? { ...p, w: p.w + "\u2060" } : p)) };
+export const Fases: React.FC = () => <Montaje t={useCurrentFrame() / datos.fps} datos={DATOS} audio="gen/fases_mezcla.wav" piezas={PIEZAS} claves={CLAVES} transicion="variada" vineta />;
