@@ -33,3 +33,4 @@ de en medio y la pregunta final de cada vídeo.
 | 5 nov | Sube por la escalera y baja en ascensor (ascensor) | caída de 2020, −34 % en 33 días |
 | 5 nov | El stop no siempre protege (franco) | franco suizo, 15-1-2015 |
 | 5 nov | Criterio de Kelly y Thorp (kelly) | apostar de más arruina con ventaja |
+| 6 nov | Tres frases antes de quemar la cuenta (frases) | excusas para no cortar una pérdida pequeña |

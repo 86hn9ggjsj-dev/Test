@@ -48,7 +48,7 @@ export type Estado = Cuerpo & { vy: number; vx: number };
 const CANALES = Object.keys(REPOSO) as (keyof Cuerpo)[];
 
 // Simula los muelles desde el principio (determinista: el mismo fotograma da siempre lo mismo)
-export const cuerpoEn = (t: number, claves: Clave[], inicio: Partial<Cuerpo> = {}, dt = 1 / 240): Estado => {
+export const cuerpoEn = (t: number, claves: Clave[], inicio: Partial<Cuerpo> = {}, desde = 0, dt = 1 / 240): Estado => {
   const metas: [number, Cuerpo][] = [];
   let acum: Cuerpo = { ...REPOSO, ...inicio };
   const x = { ...acum };
@@ -60,7 +60,7 @@ export const cuerpoEn = (t: number, claves: Clave[], inicio: Partial<Cuerpo> = {
   for (const k of CANALES) v[k] = 0;
   let meta: Cuerpo = { ...REPOSO, ...inicio };
   let i = 0;
-  for (let s = 0; s < t; s += dt) {
+  for (let s = desde; s < t; s += dt) {
     while (i < metas.length && metas[i][0] <= s) meta = metas[i++][1];
     for (const k of CANALES) {
       const [w, z] = MUELLES[k];
@@ -228,3 +228,10 @@ export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: 
     </svg>
   );
 };
+
+// Centro de la cabeza en píxeles (aproximado, sin la vida): para colgar bocadillos y signos encima
+export const cabezaPx = (c: Cuerpo, ox: number, oy: number, s: number): [number, number] => {
+  const alto = TORSO + CUELLO + R - c.agacha * 0.1;
+  return [ox + (c.x + Math.sin(c.incl) * alto) * s, oy - (c.y + Math.cos(c.incl) * alto) * s];
+};
+export const R_CABEZA = R;
