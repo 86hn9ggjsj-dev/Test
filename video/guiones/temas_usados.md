@@ -34,3 +34,5 @@ de en medio y la pregunta final de cada vídeo.
 | 5 nov | El stop no siempre protege (franco) | franco suizo, 15-1-2015 |
 | 5 nov | Criterio de Kelly y Thorp (kelly) | apostar de más arruina con ventaja |
 | 6 nov | Tres frases antes de quemar la cuenta (frases) | excusas para no cortar una pérdida pequeña |
+| 6 nov | Las 4 fases de todo trader (fases) | genio, manipulado, doblar, controlar la pérdida |
+| 6 nov | Test de 10 s: ¿trading o apuesta? (apostando) | saber la pérdida antes de entrar |

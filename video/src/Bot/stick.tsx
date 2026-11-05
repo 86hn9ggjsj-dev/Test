@@ -106,7 +106,8 @@ const curva = (a: P2, j: P2, b: P2): string => {
 };
 
 // Dibuja el stickman. (ox, oy): punto del suelo bajo x = 0, en píxeles; s: píxeles por unidad
-export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: number; o?: number }> = ({ c, ox, oy, s, t, o = 1 }) => {
+// perfil: 0 de frente; ±1 caminando hacia la derecha/izquierda (rodillas y pies hacia delante, codos hacia atrás)
+export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: number; o?: number; perfil?: number }> = ({ c, ox, oy, s, t, o = 1, perfil = 0 }) => {
   // Vida: respira, la cadera reparte el peso y parpadea de vez en cuando
   const resp = Math.sin(t * 2.4);
   const parpadeo = t % 2.9 > 2.78 ? 0.12 : 1;
@@ -129,11 +130,11 @@ export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: 
     return [hombro[0] + mx * cs + yy * sn, hombro[1] - mx * sn + yy * cs];
   };
   const brazos = ([[-1, c.mIx, c.mIy], [1, c.mDx, c.mDy]] as [number, number, number][]).map(([lado, mx, my]) => {
-    const [codo, fin] = ik(hombro, mano(mx, my), BRAZO[0], BRAZO[1], lado, 0.5);
+    const [codo, fin] = ik(hombro, mano(mx, my), BRAZO[0], BRAZO[1], perfil ? -perfil : lado, perfil ? 0.3 : 0.5);
     return { codo, fin, lado };
   });
   const piernas = ([[-1, c.pIx, c.pIy], [1, c.pDx, c.pDy]] as [number, number, number][]).map(([lado, px, py]) => {
-    const [rodilla, pie] = ik(cadera, [px, Math.max(0, py)], PIERNA[0], PIERNA[1], lado);
+    const [rodilla, pie] = ik(cadera, [px, Math.max(0, py)], PIERNA[0], PIERNA[1], perfil || lado);
     return { rodilla, pie, lado };
   });
   const w = 0.06 * s;
@@ -160,7 +161,7 @@ export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: 
           return (
             <g key={`p${lado}`}>
               <path d={curva(P(cadera), P(rodilla), P(pie))} />
-              <path d={`M${fx.toFixed(1)},${fy.toFixed(1)} L${(fx + lado * 0.085 * s).toFixed(1)},${(fy + 0.004 * s).toFixed(1)}`} />
+              <path d={`M${fx.toFixed(1)},${fy.toFixed(1)} L${(fx + (perfil || lado) * 0.085 * s).toFixed(1)},${(fy + 0.004 * s).toFixed(1)}`} />
             </g>
           );
         })}
