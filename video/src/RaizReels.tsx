@@ -4,6 +4,7 @@ import { Composition } from "remotion";
 import { Aguanta, AGUANTA_FPS, AGUANTA_FRAMES } from "./Aguanta/Aguanta";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
 import { Fases, FASES_FPS, FASES_FRAMES } from "./Fases/Fases";
+import { Clip, CLIP_FPS, CLIP_FRAMES } from "./Stickman/Clip";
 import { Frases, FRASES_FPS, FRASES_FRAMES } from "./Frases/Frases";
 import { Franco, FRANCO_FPS, FRANCO_FRAMES } from "./Franco/Franco";
 import { KellyReel, KELLY_FPS, KELLY_FRAMES } from "./Kelly/Kelly";
@@ -30,6 +31,7 @@ import { ALTO, ANCHO } from "./Viral/util";
 export const RaizReels: React.FC = () => (
   <>
     <Composition id="Aguanta" component={Aguanta} durationInFrames={AGUANTA_FRAMES} fps={AGUANTA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="StickmanClip" component={Clip} durationInFrames={CLIP_FRAMES} fps={CLIP_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Fases" component={Fases} durationInFrames={FASES_FRAMES} fps={FASES_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Frases" component={Frases} durationInFrames={FRASES_FRAMES} fps={FRASES_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Franco" component={Franco} durationInFrames={FRANCO_FRAMES} fps={FRANCO_FPS} width={ANCHO} height={ALTO} />
