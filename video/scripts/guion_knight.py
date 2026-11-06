@@ -8,22 +8,22 @@ más de 460); la acción cayó en torno a un 75 % en dos días y la empresa fue 
 
 TITULO = 'Un bot perdió casi 10 millones de dólares por minuto durante 45 minutos'
 GUION = [
-    ('hook', ['Este bot perdió casi diez millones de dólares por minuto.', 'Durante cuarenta y cinco minutos seguidos.']),
-    ('uno', ['Knight Capital, dos mil doce: una de las mayores empresas de trading de Estados Unidos actualiza su software...', 'y se olvida de un servidor.']),
-    ('dos', ['A las nueve y media abre el mercado y el bot se vuelve loco.', 'Más de cuatro millones de operaciones que nadie le había pedido.']),
+    ('hook', ['Este bot perdió casi diez millones de dólares por minuto.', 'Durante cuarenta y cinco minutos.']),
+    ('uno', ['Knight Capital, dos mil doce. Actualizan el software... y se olvidan de un servidor.']),
+    ('dos', ['Abre el mercado y el bot se vuelve loco: más de cuatro millones de operaciones que nadie le pidió.']),
     ('sigueme', ['Sígueme, porque esto le puede pasar a cualquier bot.']),
-    ('tres', ['Los ingenieros buscan el fallo en directo mientras el contador no para.', 'Cuando por fin lo apagan, han perdido más de cuatrocientos cuarenta millones. La empresa tiene que ser rescatada en días.']),
-    ('giro', ['Lo que le faltaba no era un bot más listo.', 'Era un límite de pérdidas y un botón de apagado.']),
+    ('tres', ['Cuando por fin lo apagan, han perdido más de cuatrocientos cuarenta millones.']),
+    ('giro', ['No le faltaba un bot más listo.', 'Le faltaba un límite de pérdidas y un botón de apagado.']),
     ('pregunta', ['¿Tú le dejarías tu dinero a un bot? Sí o no, en comentarios. Y pásaselo al que cree que los bots son magia.']),
 ]
 
 GESTOS = {
-    'hook': '[curious] Este bot perdió casi diez millones de dólares por minuto. [short pause] Durante cuarenta y cinco minutos seguidos.',
-    'uno': 'Knight Capital, dos mil doce: una de las mayores empresas de trading de Estados Unidos actualiza su software... [short pause] y se olvida de un servidor.',
-    'dos': 'A las nueve y media abre el mercado y el bot se vuelve loco. [short pause] Más de cuatro millones de operaciones que nadie le había pedido.',
+    'hook': '[curious] Este bot perdió casi diez millones de dólares por minuto. [short pause] Durante cuarenta y cinco minutos.',
+    'uno': 'Knight Capital, dos mil doce. Actualizan el software... [short pause] y se olvidan de un servidor.',
+    'dos': 'Abre el mercado y el bot se vuelve loco: [short pause] más de cuatro millones de operaciones que nadie le pidió.',
     'sigueme': '[warmly] Sígueme, porque esto le puede pasar a cualquier bot.',
-    'tres': '[inhales] Los ingenieros buscan el fallo en directo mientras el contador no para. Cuando por fin lo apagan, han perdido más de cuatrocientos cuarenta millones. [short pause] La empresa tiene que ser rescatada en días.',
-    'giro': '[serious] Lo que le faltaba no era un bot más listo. [short pause] Era un límite de pérdidas y un botón de apagado.',
+    'tres': '[inhales] Cuando por fin lo apagan, han perdido más de cuatrocientos cuarenta millones.',
+    'giro': '[serious] No le faltaba un bot más listo. [short pause] Le faltaba un límite de pérdidas y un botón de apagado.',
     'pregunta': '[curious] ¿Tú le dejarías tu dinero a un bot? Sí o no, en comentarios. Y pásaselo al que cree que los bots son magia.',
 }
 

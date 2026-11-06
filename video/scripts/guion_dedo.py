@@ -10,20 +10,20 @@ GUION = [
     ('hook', ['Un trader escribió un número en la casilla equivocada... y le costó más de doscientos millones de dólares.']),
     ('uno', ['Quería vender una acción a seiscientos diez mil yenes.', 'Vendió seiscientas diez mil acciones... a un yen.']),
     ('dos', ['Tokio, dos mil cinco. Intentaron cancelarla. El sistema no les dejó.']),
-    ('sigueme', ['Y eso no es lo más loco de esta historia. Sígueme, que viene ahora.']),
-    ('tres', ['Un chaval de veintisiete años lo vio desde su casa. Compró en pleno desplome...', 'y en minutos ganó más de quince millones de dólares.']),
-    ('giro', ['El mismo error y el mismo minuto: uno pierde doscientos millones y otro gana quince.', 'Uno pulsó sin mirar. El otro estaba mirando.']),
-    ('pregunta', ['¿Tú habrías comprado o te habría dado miedo? Dímelo, y etiqueta al que pulsa sin mirar.']),
+    ('sigueme', ['Y eso no es lo más loco. Sígueme, que viene ahora.']),
+    ('tres', ['Un chaval de veintisiete años lo vio desde su casa, compró en pleno desplome...', 'y ganó más de quince millones en minutos.']),
+    ('giro', ['Mismo error, mismo minuto: uno pulsó sin mirar. El otro estaba mirando.']),
+    ('pregunta', ['¿Tú habrías comprado o te habría dado miedo? Etiqueta al que pulsa sin mirar.']),
 ]
 
 GESTOS = {
     'hook': '[curious] Un trader escribió un número en la casilla equivocada... [short pause] y le costó más de doscientos millones de dólares.',
     'uno': 'Quería vender una acción a seiscientos diez mil yenes. [short pause] Vendió seiscientas diez mil acciones... [short pause] a un yen.',
     'dos': 'Tokio, dos mil cinco. Intentaron cancelarla. [short pause] El sistema no les dejó.',
-    'sigueme': '[mischievously] Y eso no es lo más loco de esta historia. [warmly] Sígueme, que viene ahora.',
-    'tres': '[inhales] Un chaval de veintisiete años lo vio desde su casa. Compró en pleno desplome... [short pause] y en minutos ganó más de quince millones de dólares.',
-    'giro': '[serious] El mismo error y el mismo minuto: uno pierde doscientos millones y otro gana quince. [short pause] Uno pulsó sin mirar. El otro estaba mirando.',
-    'pregunta': '[curious] ¿Tú habrías comprado o te habría dado miedo? Dímelo, y etiqueta al que pulsa sin mirar.',
+    'sigueme': '[mischievously] Y eso no es lo más loco. [warmly] Sígueme, que viene ahora.',
+    'tres': '[inhales] Un chaval de veintisiete años lo vio desde su casa, compró en pleno desplome... [short pause] y ganó más de quince millones en minutos.',
+    'giro': '[serious] Mismo error, mismo minuto: uno pulsó sin mirar. [short pause] El otro estaba mirando.',
+    'pregunta': '[curious] ¿Tú habrías comprado o te habría dado miedo? Etiqueta al que pulsa sin mirar.',
 }
 
 PANTALLAS = [
