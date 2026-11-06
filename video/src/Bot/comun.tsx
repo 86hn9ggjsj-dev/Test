@@ -3,8 +3,8 @@
 import React from "react";
 import { AbsoluteFill } from "remotion";
 import { L, mono, muelle } from "./piezas";
-import { Escena, orbita, polvo } from "./tres";
-import { cabezaPx, Clave, Cuerpo, cuerpoEn, R_CABEZA, Stick } from "./stick";
+import { Camara as Cam, Escena, orbita, polvo, proyector, V3 } from "./tres";
+import { cabezaPx, Clave, Cuerpo, cuerpoEn, Estado, R_CABEZA, Stick } from "./stick";
 import { PANT, Suelo, SUELO_Y } from "./plato";
 import { CtaSeguir, golpe, P, sacude } from "../Explica/Montaje";
 
@@ -12,11 +12,11 @@ export const OX = 330;
 export const ESC = 370;
 
 // Bocadillo de cómic encima de la cabeza, sin pisar la pantalla de la derecha
-export const Bocadillo: React.FC<{ t: number; t0: number; c: Cuerpo; ox?: number; s?: number; texto: string; fin?: number; limite?: number }> = ({ t, t0, c, ox = OX, s = ESC, texto, fin, limite = PANT.x0 - 12 }) => {
+export const Bocadillo: React.FC<{ t: number; t0: number; c: Cuerpo; ox?: number; oy?: number; s?: number; texto: string; fin?: number; limite?: number }> = ({ t, t0, c, ox = OX, oy = SUELO_Y, s = ESC, texto, fin, limite = PANT.x0 - 12 }) => {
   const g = muelle(t, t0, 260, 14);
   const fuera = fin === undefined ? 0 : L(t, fin - 0.2, fin, 0, 1);
   if (g <= 0.001 || fuera >= 1) return null;
-  const [hx, hy] = cabezaPx(c, ox, SUELO_Y, s);
+  const [hx, hy] = cabezaPx(c, ox, oy, s);
   const medio = (texto.length * 20.4 + 64) / 2;
   const x = Math.min(Math.max(hx, medio + 30), limite - medio);
   return (
@@ -37,10 +37,10 @@ export const FlashRojo: React.FC<{ t: number; t0: number; o?: number }> = ({ t, 
 };
 
 // Signo que salta junto a la cabeza («!» de susto, «?» de duda)
-export const Exclama: React.FC<{ t: number; t0: number; c: Cuerpo; ox?: number; s?: number; signo?: string; dura?: number }> = ({ t, t0, c, ox = OX, s = ESC, signo = "!", dura = 0.45 }) => {
+export const Exclama: React.FC<{ t: number; t0: number; c: Cuerpo; ox?: number; oy?: number; s?: number; signo?: string; dura?: number }> = ({ t, t0, c, ox = OX, oy = SUELO_Y, s = ESC, signo = "!", dura = 0.45 }) => {
   const g = t < t0 ? 0 : muelle(t, t0, 260, 12) * (1 - L(t, t0 + dura, t0 + dura + 0.2, 0, 1));
   if (g < 0.01) return null;
-  const [hx, hy] = cabezaPx(c, ox, SUELO_Y, s);
+  const [hx, hy] = cabezaPx(c, ox, oy, s);
   return <div style={{ position: "absolute", left: hx + R_CABEZA * s + 10, top: hy - R_CABEZA * s - 110, ...mono(120 * (s / ESC)), fontWeight: 700, transform: `scale(${g}) rotate(12deg)`, transformOrigin: "50% 100%" }}>{signo}</div>;
 };
 
@@ -74,3 +74,12 @@ export const SiguemeStick: React.FC<P & { lema: string }> = (p) => {
     </>
   );
 };
+
+// Stickman dentro de una escena 3D: el punto del suelo bajo sus pies se proyecta con la cámara y su escala sale de la
+// profundidad (k = unidades del mundo por unidad del stickman). Se dibuja de frente, como un recortable, encima de la escena.
+export type Ancla = { ox: number; oy: number; s: number };
+export const anclaje = (cam: Cam, pie: V3, k: number): Ancla => {
+  const g = proyector(cam)(pie);
+  return { ox: g.x, oy: g.y, s: g.k * k };
+};
+export const StickMundo: React.FC<{ a: Ancla; c: Estado; t: number; perfil?: number; o?: number }> = ({ a, c, t, perfil, o }) => <Stick c={c} ox={a.ox} oy={a.oy} s={a.s} t={t} perfil={perfil} o={o} />;
