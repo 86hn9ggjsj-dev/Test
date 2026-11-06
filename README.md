@@ -104,3 +104,126 @@ Para el modo voz: `pip install -r requirements-voz.txt`. En Linux puede que nece
 - Tus datos (memoria, alertas, estado de la vigilancia) se guardan en `~/.jarvis/`.
 - Jarvis nunca envía correos ni ejecuta comandos sin preguntarte antes.
 - Si el modelo principal rechaza una petición, la API reintenta automáticamente con un modelo alternativo.
+
+## Vídeos con Remotion
+
+En la carpeta `video/` hay un proyecto de [Remotion](https://www.remotion.dev/) para crear
+vídeos con React. Necesita **Node.js 18 o superior**.
+
+```bash
+cd video
+npm install        # solo la primera vez
+npm run dev        # abre Remotion Studio en el navegador
+npm run render     # genera out/intro.mp4
+```
+
+Las composiciones se registran en `video/src/Root.tsx`.
+
+### Video viral a partir de una voz en off
+
+La composición `Viral` (1080x1920, 60 fps) convierte `video/input/voz.mp3` en un video vertical
+con subtítulos karaoke, gráfico animado, motion graphics, música y efectos sintetizados.
+
+```bash
+cd video
+# 1. Transcripción por palabra (faster-whisper) -> input/palabras.json
+# 2. Audio: jump cuts, hook, música, SFX, ducking y -14 LUFS
+python scripts/audio.py <ruta-a-ffmpeg>
+# 3. Render
+npx remotion render Viral out/viral.mp4 --video-bitrate=10M --audio-codec=aac
+```
+
+### Editar un video grabado
+
+La composición `Reto` (1080x1920, 30 fps) edita un video a cámara: jump cuts, grading, subtítulos que esquivan la cara y las capturas, anotaciones sobre
+las capturas y la tabla, música, SFX y CTA final.
+
+```bash
+cd video
+# input/reto.mp4 (no se versiona) + input/reto_palabras.json (Whisper)
+python scripts/reto.py <ruta-a-ffmpeg>
+npx remotion render Reto out/reto.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
+### Video "3 ventajas de un bot"
+
+Las pantallas de motion graphics (`src/Bot/Pantallas.tsx`) usan un lenguaje monocromo de alambre 3D con motivos del propio mensaje:
+gráfico con retículas, reloj que va marcando operaciones, registro de órdenes, 100 curvas de capital, velas con SL/BE/TP,
+bloques de capital ×10 y un chat para el CTA; cámara en movimiento, profundidad de campo, cifras en JetBrains Mono y titulares en sans con la palabra clave en serif cursiva. Se dibujan con un motor 3D mínimo en SVG
+(`src/Bot/tres.tsx`: proyección en perspectiva, órbita de cámara y desenfoque por capas de profundidad).
+
+```bash
+cd video
+python scripts/bot.py <ruta-a-ffmpeg>
+npx remotion render Bot out/bot_raw.mp4 --video-bitrate=12M --audio-codec=aac
+# Versión 100 % motion graphics (solo el audio, sin el video a cámara):
+npx remotion render BotMG out/botmg_raw.mp4 --video-bitrate=12M --audio-codec=aac
+# Acelerar a 1,1x (imagen y voz) para más ritmo:
+ffmpeg -i out/bot_raw.mp4 -filter_complex "[0:v]setpts=PTS/1.1[v];[0:a]atempo=1.1[a]" -map "[v]" -map "[a]" out/bot.mp4
+```
+
+### Video desde cero: "Qué hace de verdad un bot de trading"
+
+Todo generado aquí: guion (`video/guiones/que_hace_un_bot.md`), voz en off con Kokoro (voz femenina española `ef_dora`), tiempos por
+palabra con Whisper alineados al guion, música, SFX, mezcla a -14 LUFS y 8 pantallas de motion graphics
+(`src/Explica/Explica.tsx`). Para usar otra voz (grabada o de ElevenLabs) con el mismo guion, deja el archivo en
+`input/explica_voz.mp3` y vuelve a ejecutar el script: todo se resincroniza solo. Con ElevenLabs, ese archivo lo genera
+`scripts/voz_elevenlabs.py` (necesita `ELEVENLABS_API_KEY`; por defecto voz George con Eleven v3, acento castellano y los
+gestos del guion). Las voces de la biblioteca (p. ej. Bruno Torres) no se pueden usar por API en el plan gratuito: genera la
+locución en la web de ElevenLabs con el texto «Versión con gestos» de `guiones/que_hace_un_bot.md`, descarga el mp3 en
+`input/explica_voz.mp3` y, para conservar sus pausas y respiraciones, ejecuta el script con `PAUSA_MAX=0.6 PAUSA_UMBRAL=42`.
+
+```bash
+cd video
+pip install kokoro faster-whisper soundfile scipy   # y espeak-ng en el sistema
+python scripts/explica.py <ruta-a-ffmpeg>
+npx remotion render Explica out/explica.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
+### Parte 2: "Cómo se prueba un bot antes de arriesgar un euro"
+
+Mismo pipeline y mismo lenguaje visual (`src/Prueba/Prueba.tsx`): backtest vela a vela, costes reales, datos fuera de muestra,
+prueba de estrés con las operaciones barajadas, demo frente al backtest y el dinero real poco a poco. El guion está en
+`scripts/guion_prueba.py` (y en `video/guiones/como_se_prueba_un_bot.md`); la locución va en `input/prueba_voz.mp3`
+(o `scripts/voz_elevenlabs.py --video prueba`). `scripts/locucion.py` reúne la parte común de los dos videos: voz, alineado
+con Whisper, música, SFX y mezcla.
+
+```bash
+cd video
+PAUSA_MAX=0.6 PAUSA_UMBRAL=42 python scripts/prueba.py <ruta-a-ffmpeg>
+npx remotion render Prueba out/prueba.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
+### Parte 3: "Los tres errores que hacen que un backtest mienta"
+
+`src/Errores/Errores.tsx`: mirar el futuro, sesgo de supervivencia, suerte entre mil versiones, la señal de alarma de una curva
+demasiado perfecta y el cierre. Guion en `scripts/guion_errores.py` (y `video/guiones/tres_errores_backtest.md`); locución en
+`input/errores_voz.mp3` (o `scripts/voz_elevenlabs.py --video errores`).
+
+```bash
+cd video
+PAUSA_MAX=0.6 PAUSA_UMBRAL=42 python scripts/errores.py <ruta-a-ffmpeg>
+npx remotion render Errores out/errores.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
+### Partes 4 y 5: las tres cifras y cómo detectar un bot estafa
+
+Desde la parte 4 el cierre es promo del bot (`src/Explica/Promo.tsx`: ficha con la cuenta auditada en el link de la bio,
+Seguir, Mensaje y un privado que se escribe solo). Parte 4: `src/Cifras/Cifras.tsx`, `scripts/cifras.py`, locución en
+`input/cifras_voz.mp3`. Parte 5: guion en `scripts/guion_estafa.py` y `scripts/estafa.py` (locución en `input/estafa_voz.mp3`).
+
+```bash
+cd video
+PAUSA_MAX=0.6 PAUSA_UMBRAL=42 python scripts/cifras.py <ruta-a-ffmpeg>
+npx remotion render Cifras out/cifras.mp4 --video-bitrate=12M --audio-codec=aac
+```
+
+### Reels de alcance del día (gancho, cuenta, giro y CTA)
+
+Los reels cortos se registran en `src/RaizReels.tsx` y se renderizan con su propia entrada, que no necesita los tiempos de
+los videos anteriores: `npx remotion render src/reels.ts <Id> out/<id>.mp4`. Antes de tener la locución,
+`python scripts/estimar.py <video>` genera tiempos estimados para ir montando las pantallas; al llegar el MP3 a
+`input/<video>_voz.mp3`, `PAUSA_MAX=0.5 PAUSA_UMBRAL=42 python scripts/<video>.py <ffmpeg>` los sustituye por los reales.
+
+`scripts/sonido.py` reúne la síntesis de música y SFX y la mezcla con ducking y -14 LUFS que
+usan ambos pipelines.
