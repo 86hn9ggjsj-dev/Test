@@ -2,28 +2,28 @@
 
 Datos: Barings, fundado en 1762 (233 años en 1995); Leeson, 28 años, operaba en Singapur; escondió pérdidas en la cuenta
 de errores 88888; el terremoto de Kobe (17-1-1995) hundió el Nikkei; pérdidas de 827 millones de libras; ING compró el
-banco por una libra; Leeson fue condenado a seis años y medio de cárcel en Singapur.
+banco por una libra; el primer error escondido fue de unas 20.000 libras; Leeson fue condenado a seis años y medio de cárcel en Singapur.
 """
 
-TITULO = "Un chaval de 28 años hundió un banco de 233 años"
+TITULO = 'Escondió sus pérdidas en la cuenta 88888 y hundió un banco de 233 años'
 GUION = [
-    ("hook", ["En mil novecientos noventa y cinco, un chaval de veintiocho años hundió un banco de doscientos treinta y tres años.", "Él solo."]),
-    ("uno", ["Nick Leeson operaba para Barings en Singapur.", "Cuando empezó a perder, no cerró: escondió las pérdidas en una cuenta secreta... la ocho, ocho, ocho, ocho, ocho."]),
-    ("dos", ["Y para recuperarlas, apostó más. Y más."]),
-    ("sigueme", ["Sígueme, que el final parece de película."]),
-    ("tres", ["Entonces, un terremoto en Kobe hundió la bolsa japonesa.", "La pérdida llegó a ochocientos veintisiete millones de libras."]),
-    ("giro", ["Barings acabó vendido por una libra, y Leeson, en la cárcel.", "No lo hundió una mala operación: lo hundió no aceptar la primera pérdida."]),
-    ("pregunta", ["¿Tú has escondido alguna pérdida? Mándaselo a quien nunca cierra en negativo."]),
+    ('hook', ['Escondió sus pérdidas en una cuenta llamada ocho, ocho, ocho, ocho, ocho... y hundió un banco de doscientos treinta y tres años.']),
+    ('uno', ['Nick Leeson, veintiocho años, el trader estrella de Barings en Singapur.', 'Todo empezó con un error de veinte mil libras que no quiso enseñar.']),
+    ('dos', ['Cada vez que perdía, lo escondía en la cuenta secreta y doblaba la apuesta.', 'Y en Londres creían que ganaba millones.']),
+    ('sigueme', ['Sígueme, que el final parece de película.']),
+    ('tres', ['Entonces, un terremoto en Kobe hundió la bolsa japonesa. Y él, en vez de cerrar, apostó todavía más.', 'La pérdida llegó a ochocientos veintisiete millones de libras.']),
+    ('giro', ['El banco de inversión más antiguo de Reino Unido se vendió por una libra.', 'Y todo empezó con una pérdida pequeña que no quiso aceptar.']),
+    ('pregunta', ['¿Qué habrías hecho tú con esa primera pérdida? Mándaselo al que nunca cierra en negativo.']),
 ]
 
 GESTOS = {
-    "hook": "[curious] En mil novecientos noventa y cinco, un chaval de veintiocho años hundió un banco de doscientos treinta y tres años. [short pause] Él solo.",
-    "uno": "Nick Leeson operaba para Barings en Singapur. Cuando empezó a perder, no cerró: escondió las pérdidas en una cuenta secreta... [whispers] la ocho, ocho, ocho, ocho, ocho.",
-    "dos": "Y para recuperarlas, apostó más. [short pause] Y más.",
-    "sigueme": "[warmly] Sígueme, que el final parece de película.",
-    "tres": "[inhales] Entonces, un terremoto en Kobe hundió la bolsa japonesa. [short pause] La pérdida llegó a ochocientos veintisiete millones de libras.",
-    "giro": "[serious] Barings acabó vendido por una libra, y Leeson, en la cárcel. [short pause] No lo hundió una mala operación: lo hundió no aceptar la primera pérdida.",
-    "pregunta": "[curious] ¿Tú has escondido alguna pérdida? Mándaselo a quien nunca cierra en negativo.",
+    'hook': '[whispers] Escondió sus pérdidas en una cuenta llamada ocho, ocho, ocho, ocho, ocho... [short pause] [curious] y hundió un banco de doscientos treinta y tres años.',
+    'uno': 'Nick Leeson, veintiocho años, el trader estrella de Barings en Singapur. [short pause] Todo empezó con un error de veinte mil libras que no quiso enseñar.',
+    'dos': 'Cada vez que perdía, lo escondía en la cuenta secreta y doblaba la apuesta. [short pause] Y en Londres creían que ganaba millones.',
+    'sigueme': '[warmly] Sígueme, que el final parece de película.',
+    'tres': '[inhales] Entonces, un terremoto en Kobe hundió la bolsa japonesa. Y él, en vez de cerrar, apostó todavía más. [short pause] La pérdida llegó a ochocientos veintisiete millones de libras.',
+    'giro': '[serious] El banco de inversión más antiguo de Reino Unido se vendió por una libra. [short pause] Y todo empezó con una pérdida pequeña que no quiso aceptar.',
+    'pregunta': '[curious] ¿Qué habrías hecho tú con esa primera pérdida? Mándaselo al que nunca cierra en negativo.',
 }
 
 PANTALLAS = [

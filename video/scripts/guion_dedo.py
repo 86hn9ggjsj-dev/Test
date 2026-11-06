@@ -5,25 +5,25 @@ Datos: orden de vender 610.000 acciones a 1 yen en vez de 1 acción a 610.000 ye
 200 millones de dólares); Takashi Kotegawa, 27 años, ganó unos 2.000 millones de yenes (más de 15 millones de dólares).
 """
 
-TITULO = "Quería vender una acción a 610.000 yenes y vendió 610.000 acciones a un yen"
+TITULO = 'Escribió un número en la casilla equivocada y le costó 200 millones'
 GUION = [
-    ("hook", ["Un trader quería vender una acción a seiscientos diez mil yenes...", "y vendió seiscientas diez mil acciones a un yen."]),
-    ("uno", ["Pasó de verdad: Tokio, diciembre de dos mil cinco.", "La orden era más de cuarenta veces más grande que la empresa entera."]),
-    ("dos", ["Intentaron cancelarla. El sistema no les dejó."]),
-    ("sigueme", ["Sígueme, que lo mejor viene ahora."]),
-    ("tres", ["Mientras el banco perdía más de doscientos millones de dólares, un chaval de veintisiete años compró desde su casa en pleno desplome...", "y ganó más de quince millones en minutos."]),
-    ("giro", ["La misma pantalla y el mismo minuto: uno pierde una fortuna por un error de dedo y otro se hace rico porque estaba preparado.", "En trading, el error más caro no suele ser el del mercado. Es el tuyo."]),
-    ("pregunta", ["¿Tú has metido alguna vez una orden mal? Cuéntamelo, y etiqueta al que siempre pulsa sin mirar."]),
+    ('hook', ['Un trader escribió un número en la casilla equivocada... y le costó más de doscientos millones de dólares.']),
+    ('uno', ['Quería vender una acción a seiscientos diez mil yenes.', 'Vendió seiscientas diez mil acciones... a un yen.']),
+    ('dos', ['Tokio, dos mil cinco. Intentaron cancelarla. El sistema no les dejó.']),
+    ('sigueme', ['Y eso no es lo más loco de esta historia. Sígueme, que viene ahora.']),
+    ('tres', ['Un chaval de veintisiete años lo vio desde su casa. Compró en pleno desplome...', 'y en minutos ganó más de quince millones de dólares.']),
+    ('giro', ['El mismo error y el mismo minuto: uno pierde doscientos millones y otro gana quince.', 'Uno pulsó sin mirar. El otro estaba mirando.']),
+    ('pregunta', ['¿Tú habrías comprado o te habría dado miedo? Dímelo, y etiqueta al que pulsa sin mirar.']),
 ]
 
 GESTOS = {
-    "hook": "[curious] Un trader quería vender una acción a seiscientos diez mil yenes... [short pause] y vendió seiscientas diez mil acciones a un yen.",
-    "uno": "Pasó de verdad: Tokio, diciembre de dos mil cinco. [short pause] La orden era más de cuarenta veces más grande que la empresa entera.",
-    "dos": "Intentaron cancelarla. [short pause] El sistema no les dejó.",
-    "sigueme": "[warmly] Sígueme, que lo mejor viene ahora.",
-    "tres": "[inhales] Mientras el banco perdía más de doscientos millones de dólares, un chaval de veintisiete años compró desde su casa en pleno desplome... [short pause] y ganó más de quince millones en minutos.",
-    "giro": "[serious] La misma pantalla y el mismo minuto: uno pierde una fortuna por un error de dedo y otro se hace rico porque estaba preparado. [short pause] En trading, el error más caro no suele ser el del mercado. Es el tuyo.",
-    "pregunta": "[curious] ¿Tú has metido alguna vez una orden mal? Cuéntamelo, y etiqueta al que siempre pulsa sin mirar.",
+    'hook': '[curious] Un trader escribió un número en la casilla equivocada... [short pause] y le costó más de doscientos millones de dólares.',
+    'uno': 'Quería vender una acción a seiscientos diez mil yenes. [short pause] Vendió seiscientas diez mil acciones... [short pause] a un yen.',
+    'dos': 'Tokio, dos mil cinco. Intentaron cancelarla. [short pause] El sistema no les dejó.',
+    'sigueme': '[mischievously] Y eso no es lo más loco de esta historia. [warmly] Sígueme, que viene ahora.',
+    'tres': '[inhales] Un chaval de veintisiete años lo vio desde su casa. Compró en pleno desplome... [short pause] y en minutos ganó más de quince millones de dólares.',
+    'giro': '[serious] El mismo error y el mismo minuto: uno pierde doscientos millones y otro gana quince. [short pause] Uno pulsó sin mirar. El otro estaba mirando.',
+    'pregunta': '[curious] ¿Tú habrías comprado o te habría dado miedo? Dímelo, y etiqueta al que pulsa sin mirar.',
 }
 
 PANTALLAS = [
