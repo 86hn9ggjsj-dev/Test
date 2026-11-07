@@ -82,4 +82,4 @@ export const anclaje = (cam: Cam, pie: V3, k: number): Ancla => {
   const g = proyector(cam)(pie);
   return { ox: g.x, oy: g.y, s: g.k * k };
 };
-export const StickMundo: React.FC<{ a: Ancla; c: Estado; t: number; perfil?: number; o?: number }> = ({ a, c, t, perfil, o }) => <Stick c={c} ox={a.ox} oy={a.oy} s={a.s} t={t} perfil={perfil} o={o} />;
+export const StickMundo: React.FC<{ a: Ancla; c: Estado; t: number; perfil?: number; o?: number; gorra?: boolean }> = ({ a, c, t, perfil, o, gorra }) => <Stick c={c} ox={a.ox} oy={a.oy} s={a.s} t={t} perfil={perfil} o={o} gorra={gorra} />;

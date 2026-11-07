@@ -36,3 +36,4 @@ de en medio y la pregunta final de cada vídeo.
 | 6 nov | Tres frases antes de quemar la cuenta (frases) | excusas para no cortar una pérdida pequeña |
 | 6 nov | Las 4 fases de todo trader (fases) | genio, manipulado, doblar, controlar la pérdida |
 | 6 nov | Test de 10 s: ¿trading o apuesta? (apostando) | saber la pérdida antes de entrar |
+| 7 nov | Error de dedo de Mizuho con J-Com (dedo) | 610.000 acciones a 1 ¥; el chaval que gana 15 M |

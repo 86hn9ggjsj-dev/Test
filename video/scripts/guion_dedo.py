@@ -7,11 +7,11 @@ Datos: orden de vender 610.000 acciones a 1 yen en vez de 1 acción a 610.000 ye
 
 TITULO = 'Escribió un número en la casilla equivocada y le costó 200 millones'
 GUION = [
-    ('hook', ['Un trader escribió un número en la casilla equivocada... y le costó más de doscientos millones de dólares.']),
-    ('uno', ['Quería vender una acción a seiscientos diez mil yenes.', 'Vendió seiscientas diez mil acciones... a un yen.']),
-    ('dos', ['Tokio, dos mil cinco. Intentaron cancelarla. El sistema no les dejó.']),
+    ('hook', ['Un trader escribió un número en la casilla equivocada... y le costó más de 200 millones de dólares.']),
+    ('uno', ['Quería vender una acción a 610.000 yenes.', 'Vendió 610.000 acciones... a un yen.']),
+    ('dos', ['Tokio, 2005. Intentaron cancelarla. El sistema no les dejó.']),
     ('sigueme', ['Y eso no es lo más loco. Sígueme, que viene ahora.']),
-    ('tres', ['Un chaval de veintisiete años lo vio desde su casa, compró en pleno desplome...', 'y ganó más de quince millones en minutos.']),
+    ('tres', ['Un chaval de 27 años lo vio desde su casa, compró en pleno desplome...', 'y ganó más de 15 millones en minutos.']),
     ('giro', ['Mismo error, mismo minuto: uno pulsó sin mirar. El otro estaba mirando.']),
     ('pregunta', ['¿Tú habrías comprado o te habría dado miedo? Etiqueta al que pulsa sin mirar.']),
 ]

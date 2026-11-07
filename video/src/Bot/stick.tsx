@@ -107,7 +107,8 @@ const curva = (a: P2, j: P2, b: P2): string => {
 
 // Dibuja el stickman. (ox, oy): punto del suelo bajo x = 0, en píxeles; s: píxeles por unidad
 // perfil: 0 de frente; ±1 caminando hacia la derecha/izquierda (rodillas y pies hacia delante, codos hacia atrás)
-export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: number; o?: number; perfil?: number }> = ({ c, ox, oy, s, t, o = 1, perfil = 0 }) => {
+// gorra: dibuja una gorra con visera hacia donde mira (para distinguir personajes)
+export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: number; o?: number; perfil?: number; gorra?: boolean }> = ({ c, ox, oy, s, t, o = 1, perfil = 0, gorra = false }) => {
   // Vida: respira, la cadera reparte el peso y parpadea de vez en cuando
   const resp = Math.sin(t * 2.4);
   const parpadeo = t % 2.9 > 2.78 ? 0.12 : 1;
@@ -201,6 +202,12 @@ export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: 
             <path d={`M${-0.052 * u},${0.072 * u} Q0,${(0.072 + c.boca * 0.06) * u} ${0.052 * u},${0.072 * u}`} stroke="#000" strokeWidth={0.019 * u} fill="none" strokeLinecap="round" />
           )}
         </g>
+        {gorra && (
+          <g>
+            <path d={`M${(-0.86 * R * u).toFixed(1)},${(-0.5 * R * u).toFixed(1)} A${(1.05 * R * u).toFixed(1)} ${(1.05 * R * u).toFixed(1)} 0 0 1 ${(0.86 * R * u).toFixed(1)},${(-0.5 * R * u).toFixed(1)} Z`} fill="#000" stroke="#fff" strokeWidth={0.03 * u} strokeLinejoin="round" />
+            <path d={`M${(0.4 * R * u * (c.mira < -0.2 ? -1 : 1)).toFixed(1)},${(-0.52 * R * u).toFixed(1)} L${(1.5 * R * u * (c.mira < -0.2 ? -1 : 1)).toFixed(1)},${(-0.44 * R * u).toFixed(1)}`} stroke="#fff" strokeWidth={0.075 * u} strokeLinecap="round" />
+          </g>
+        )}
       </g>
       {/* Agobio: rayas que tiemblan y una gota de sudor que resbala */}
       {c.agobio > 0.05 && (

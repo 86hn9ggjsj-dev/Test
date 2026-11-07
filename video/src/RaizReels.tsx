@@ -4,6 +4,7 @@ import { Composition } from "remotion";
 import { Aguanta, AGUANTA_FPS, AGUANTA_FRAMES } from "./Aguanta/Aguanta";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
 import { Fases, FASES_FPS, FASES_FRAMES } from "./Fases/Fases";
+import { Dedo, DEDO_FPS, DEDO_FRAMES } from "./Dedo/Dedo";
 import { Apostando, APOSTANDO_FPS, APOSTANDO_FRAMES } from "./Apostando/Apostando";
 import { Clip, CLIP_FPS, CLIP_FRAMES } from "./Stickman/Clip";
 import { Frases, FRASES_FPS, FRASES_FRAMES } from "./Frases/Frases";
@@ -34,6 +35,7 @@ export const RaizReels: React.FC = () => (
     <Composition id="Aguanta" component={Aguanta} durationInFrames={AGUANTA_FRAMES} fps={AGUANTA_FPS} width={ANCHO} height={ALTO} />
     <Composition id="StickmanClip" component={Clip} durationInFrames={CLIP_FRAMES} fps={CLIP_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Apostando" component={Apostando} durationInFrames={APOSTANDO_FRAMES} fps={APOSTANDO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Dedo" component={Dedo} durationInFrames={DEDO_FRAMES} fps={DEDO_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Fases" component={Fases} durationInFrames={FASES_FRAMES} fps={FASES_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Frases" component={Frases} durationInFrames={FRASES_FRAMES} fps={FRASES_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Franco" component={Franco} durationInFrames={FRANCO_FRAMES} fps={FRANCO_FPS} width={ANCHO} height={ALTO} />
