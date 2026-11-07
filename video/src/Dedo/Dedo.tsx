@@ -264,7 +264,7 @@ const Sigueme: React.FC<P> = (p) => {
   // Mientras dice «y eso no es lo más loco», tres puntos suspensivos que laten encima
   return (
     <>
-      {t >= T_SIG - 0.2 ? <CtaSeguir t={t} s={T_SIG} e={e} lema="" sinTitulo /> : <Escena cam={orbita([0, 0, 0], 9, L(t, s, e, -0.3, 0.2), 0.2, { apertura: 40 })} trazos={polvo(0.35)} />}
+      {t >= T_SIG - 0.2 ? <CtaSeguir t={t} s={T_SIG} e={e} lema="" sinLema /> : <Escena cam={orbita([0, 0, 0], 9, L(t, s, e, -0.3, 0.2), 0.2, { apertura: 40 })} trazos={polvo(0.35)} />}
       {antes > 0.01 && (
         <div style={{ position: "absolute", top: 520, left: 0, width: ANCHO, display: "flex", justifyContent: "center", gap: 34, opacity: antes }}>
           {[0, 1, 2].map((i) => (

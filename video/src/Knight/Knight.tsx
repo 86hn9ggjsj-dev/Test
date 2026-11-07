@@ -187,7 +187,7 @@ const Dos: React.FC<P> = ({ t, s, e }) => {
 };
 
 // ------------------------------------------------------------------ 4. Sígueme: el bot señala el botón
-const Sigueme: React.FC<P> = (p) => <SiguemeStick {...p} lema="" sinTitulo robot extra={[[EV.cualquier - 0.1, { ...ENCOGE, mira: 0 }]]} />;
+const Sigueme: React.FC<P> = (p) => <SiguemeStick {...p} lema="" sinLema robot extra={[[EV.cualquier - 0.1, { ...ENCOGE, mira: 0 }]]} />;
 
 // ------------------------------------------------------------------ 5. Tres: el ingeniero tira del enchufe; el bot se apaga y la cifra se congela
 const s3 = inicio("tres");

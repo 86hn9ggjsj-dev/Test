@@ -85,20 +85,19 @@ export const Destello: React.FC<{ t: number; t0: number; o?: number }> = ({ t, t
 };
 
 // Cierre de los reels de alcance: «sígueme» con el botón que se pulsa y la cuenta auditada del bot en la bio
-// sinTitulo: sin el «sígueme» grande ni el lema de arriba (cuando el vídeo solo lleva subtítulos abajo)
-export const CtaSeguir: React.FC<P & { lema: string; sinTitulo?: boolean }> = ({ t, s, e, lema, sinTitulo = false }) => (
+// El «sígueme» grande va siempre (es la única rotulación de arriba que se mantiene en los vídeos con solo subtítulos);
+// sinLema quita el lema pequeño de encima
+export const CtaSeguir: React.FC<P & { lema: string; sinLema?: boolean }> = ({ t, s, e, lema, sinLema = false }) => (
   <>
     <Escena cam={orbita([0, 0, 0], 9, L(t, s, e, -0.3, 0.2), 0.2, { apertura: 40 })} trazos={polvo(0.35)} />
     <BotonSeguir t={t} t0={s} />
     <div style={{ position: "absolute", top: 660, left: 0, width: ANCHO, display: "flex", justifyContent: "center", opacity: L(t, s + 0.6, s + 0.9, 0, 1, salida) }}>
       <span style={{ ...mono(30, 0.85), padding: "12px 24px", borderRadius: 999, border: "1.5px solid rgba(255,255,255,0.5)" }}>↗ CUENTA AUDITADA DEL BOT EN LA BIO</span>
     </div>
-    {!sinTitulo && <Kicker t={t} t0={s + 0.05} texto={lema} />}
-    {!sinTitulo && (
-      <Arriba>
-        <Titular t={t} t0={s + 0.05} texto="*sígueme*" size={110} />
-      </Arriba>
-    )}
+    {!sinLema && lema && <Kicker t={t} t0={s + 0.05} texto={lema} />}
+    <Arriba>
+      <Titular t={t} t0={s + 0.05} texto="*sígueme*" size={110} />
+    </Arriba>
   </>
 );
 

@@ -275,7 +275,7 @@ const Claqueta: React.FC<{ t: number; t0: number }> = ({ t, t0 }) => {
 };
 const Sigueme: React.FC<P> = (p) => (
   <>
-    <SiguemeStick {...p} lema="" sinTitulo />
+    <SiguemeStick {...p} lema="" sinLema />
     <Claqueta t={p.t} t0={EV.pelicula} />
   </>
 );

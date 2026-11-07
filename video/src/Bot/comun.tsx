@@ -63,7 +63,7 @@ const clavesSigue = (s: number): Clave[] => [
   [s + 0.74, { pIy: 0.28, pDy: 0.28 }],
   [s + 0.92, { pIy: 0, pDy: 0, y: 0.79 }],
 ];
-export const SiguemeStick: React.FC<P & { lema: string; sinTitulo?: boolean; robot?: boolean; extra?: Clave[] }> = (p) => {
+export const SiguemeStick: React.FC<P & { lema: string; sinLema?: boolean; robot?: boolean; extra?: Clave[] }> = (p) => {
   const { t, s, robot, extra = [] } = p;
   const c = cuerpoEn(t, [...clavesSigue(s), ...extra].sort((a, b) => a[0] - b[0]), {}, s - 0.3);
   return (
