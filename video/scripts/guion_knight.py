@@ -8,11 +8,11 @@ más de 460); la acción cayó en torno a un 75 % en dos días y la empresa fue 
 
 TITULO = 'Un bot perdió casi 10 millones de dólares por minuto durante 45 minutos'
 GUION = [
-    ('hook', ['Este bot perdió casi diez millones de dólares por minuto.', 'Durante cuarenta y cinco minutos.']),
-    ('uno', ['Knight Capital, dos mil doce. Actualizan el software... y se olvidan de un servidor.']),
-    ('dos', ['Abre el mercado y el bot se vuelve loco: más de cuatro millones de operaciones que nadie le pidió.']),
+    ('hook', ['Este bot perdió casi 10 millones de dólares por minuto.', 'Durante 45 minutos.']),
+    ('uno', ['Knight Capital, 2012. Actualizan el software... y se olvidan de un servidor.']),
+    ('dos', ['Abre el mercado y el bot se vuelve loco: más de 4 millones de operaciones que nadie le pidió.']),
     ('sigueme', ['Sígueme, porque esto le puede pasar a cualquier bot.']),
-    ('tres', ['Cuando por fin lo apagan, han perdido más de cuatrocientos cuarenta millones.']),
+    ('tres', ['Cuando por fin lo apagan, han perdido más de 440 millones.']),
     ('giro', ['No le faltaba un bot más listo.', 'Le faltaba un límite de pérdidas y un botón de apagado.']),
     ('pregunta', ['¿Tú le dejarías tu dinero a un bot? Sí o no, en comentarios. Y pásaselo al que cree que los bots son magia.']),
 ]

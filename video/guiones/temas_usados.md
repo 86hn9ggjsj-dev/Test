@@ -37,3 +37,5 @@ de en medio y la pregunta final de cada vídeo.
 | 6 nov | Las 4 fases de todo trader (fases) | genio, manipulado, doblar, controlar la pérdida |
 | 6 nov | Test de 10 s: ¿trading o apuesta? (apostando) | saber la pérdida antes de entrar |
 | 7 nov | Error de dedo de Mizuho con J-Com (dedo) | 610.000 acciones a 1 ¥; el chaval que gana 15 M |
+| 7 nov | Nick Leeson y la cuenta 88888 (leeson) | esconder la primera pérdida hunde un banco |
+| 7 nov | Knight Capital, 440 M en 45 min (knight) | un bot sin límite ni botón de apagado |

@@ -63,14 +63,14 @@ const clavesSigue = (s: number): Clave[] => [
   [s + 0.74, { pIy: 0.28, pDy: 0.28 }],
   [s + 0.92, { pIy: 0, pDy: 0, y: 0.79 }],
 ];
-export const SiguemeStick: React.FC<P & { lema: string }> = (p) => {
-  const { t, s } = p;
-  const c = cuerpoEn(t, clavesSigue(s), {}, s - 0.3);
+export const SiguemeStick: React.FC<P & { lema: string; sinTitulo?: boolean; robot?: boolean; extra?: Clave[] }> = (p) => {
+  const { t, s, robot, extra = [] } = p;
+  const c = cuerpoEn(t, [...clavesSigue(s), ...extra].sort((a, b) => a[0] - b[0]), {}, s - 0.3);
   return (
     <>
       <CtaSeguir {...p} />
       <Suelo />
-      <Stick c={c} ox={250} oy={SUELO_Y} s={330} t={t} />
+      <Stick c={c} ox={250} oy={SUELO_Y} s={330} t={t} robot={robot} />
     </>
   );
 };
@@ -82,4 +82,6 @@ export const anclaje = (cam: Cam, pie: V3, k: number): Ancla => {
   const g = proyector(cam)(pie);
   return { ox: g.x, oy: g.y, s: g.k * k };
 };
-export const StickMundo: React.FC<{ a: Ancla; c: Estado; t: number; perfil?: number; o?: number; gorra?: boolean }> = ({ a, c, t, perfil, o, gorra }) => <Stick c={c} ox={a.ox} oy={a.oy} s={a.s} t={t} perfil={perfil} o={o} gorra={gorra} />;
+export const StickMundo: React.FC<{ a: Ancla; c: Estado; t: number; perfil?: number; o?: number; gorra?: boolean; robot?: boolean; ojosColor?: string }> = ({ a, c, t, perfil, o, gorra, robot, ojosColor }) => (
+  <Stick c={c} ox={a.ox} oy={a.oy} s={a.s} t={t} perfil={perfil} o={o} gorra={gorra} robot={robot} ojosColor={ojosColor} />
+);

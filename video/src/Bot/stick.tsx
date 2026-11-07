@@ -108,7 +108,8 @@ const curva = (a: P2, j: P2, b: P2): string => {
 // Dibuja el stickman. (ox, oy): punto del suelo bajo x = 0, en píxeles; s: píxeles por unidad
 // perfil: 0 de frente; ±1 caminando hacia la derecha/izquierda (rodillas y pies hacia delante, codos hacia atrás)
 // gorra: dibuja una gorra con visera hacia donde mira (para distinguir personajes)
-export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: number; o?: number; perfil?: number; gorra?: boolean }> = ({ c, ox, oy, s, t, o = 1, perfil = 0, gorra = false }) => {
+// robot: cabeza cuadrada con antena y ojos LED (ojosColor los pinta, p. ej. en rojo cuando falla)
+export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: number; o?: number; perfil?: number; gorra?: boolean; robot?: boolean; ojosColor?: string }> = ({ c, ox, oy, s, t, o = 1, perfil = 0, gorra = false, robot = false, ojosColor = "#000" }) => {
   // Vida: respira, la cadera reparte el peso y parpadea de vez en cuando
   const resp = Math.sin(t * 2.4);
   const parpadeo = t % 2.9 > 2.78 ? 0.12 : 1;
@@ -176,8 +177,25 @@ export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: 
       ))}
       {/* Cabeza maciza; la cara se gira con el cuello y baja cuando agacha la cabeza */}
       <g transform={`translate(${hx.toFixed(1)},${hy.toFixed(1)}) rotate(${giro.toFixed(2)})`}>
-        <circle r={R * u} fill="#fff" />
-        <g transform={`translate(${(c.mira * 0.035 * u).toFixed(1)},${cara.toFixed(1)})`}>
+        {robot ? (
+          <g>
+            <line x1={0} y1={-R * u * 0.9} x2={0} y2={-R * u * 1.45} stroke="#fff" strokeWidth={0.022 * u} />
+            <circle cx={0} cy={-R * u * 1.5} r={0.032 * u} fill={ojosColor === "#000" ? "#fff" : ojosColor} />
+            <rect x={-R * u * 1.02} y={-R * u * 0.92} width={R * u * 2.04} height={R * u * 1.84} rx={R * u * 0.38} fill="#fff" />
+            <g transform={`translate(${(c.mira * 0.03 * u).toFixed(1)},${cara.toFixed(1)})`}>
+              {[-1, 1].map((d) => (
+                <rect key={d} x={d * 0.068 * u - 0.03 * u} y={-0.05 * u * Math.max(0.15, ojoY)} width={0.06 * u} height={0.065 * u * Math.max(0.15, ojoY)} rx={0.01 * u} fill={ojosColor} />
+              ))}
+              <rect x={-0.065 * u} y={0.055 * u} width={0.13 * u} height={(0.035 + 0.04 * c.abre) * u} rx={0.008 * u} fill={c.abre > 0.12 ? "#000" : "none"} stroke="#000" strokeWidth={0.014 * u} />
+              {[-1, 0, 1].map((k) => (
+                <line key={k} x1={k * 0.032 * u} y1={0.055 * u} x2={k * 0.032 * u} y2={(0.09 + 0.04 * c.abre) * u} stroke={c.abre > 0.12 ? "#fff" : "#000"} strokeWidth={0.01 * u} />
+              ))}
+            </g>
+          </g>
+        ) : (
+          <circle r={R * u} fill="#fff" />
+        )}
+        {!robot && <g transform={`translate(${(c.mira * 0.035 * u).toFixed(1)},${cara.toFixed(1)})`}>
           {[-1, 1].map((d) => {
             const ex = d * 0.068 * u;
             const by = -0.088 * u;
@@ -201,7 +219,7 @@ export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: 
           ) : (
             <path d={`M${-0.052 * u},${0.072 * u} Q0,${(0.072 + c.boca * 0.06) * u} ${0.052 * u},${0.072 * u}`} stroke="#000" strokeWidth={0.019 * u} fill="none" strokeLinecap="round" />
           )}
-        </g>
+        </g>}
         {gorra && (
           <g>
             <path d={`M${(-0.86 * R * u).toFixed(1)},${(-0.5 * R * u).toFixed(1)} A${(1.05 * R * u).toFixed(1)} ${(1.05 * R * u).toFixed(1)} 0 0 1 ${(0.86 * R * u).toFixed(1)},${(-0.5 * R * u).toFixed(1)} Z`} fill="#000" stroke="#fff" strokeWidth={0.03 * u} strokeLinejoin="round" />

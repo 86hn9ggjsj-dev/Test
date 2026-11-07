@@ -7,12 +7,12 @@ banco por una libra; el primer error escondido fue de unas 20.000 libras; Leeson
 
 TITULO = 'Escondió sus pérdidas en la cuenta 88888 y hundió un banco de 233 años'
 GUION = [
-    ('hook', ['Escondió sus pérdidas en una cuenta llamada ocho, ocho, ocho, ocho, ocho... y hundió un banco de doscientos treinta y tres años.']),
-    ('uno', ['Nick Leeson, veintiocho años, trader estrella de Barings en Singapur.', 'Cada vez que perdía, lo escondía ahí y doblaba la apuesta.']),
+    ('hook', ['Escondió sus pérdidas en una cuenta llamada 88888... y hundió un banco de 233 años.']),
+    ('uno', ['Nick Leeson, 28 años, trader estrella de Barings en Singapur.', 'Cada vez que perdía, lo escondía ahí y doblaba la apuesta.']),
     ('dos', ['En Londres creían que ganaba millones.']),
     ('sigueme', ['Sígueme, que el final parece de película.']),
-    ('tres', ['Un terremoto en Kobe hunde la bolsa japonesa. Y él, en vez de cerrar, apuesta todavía más.', 'Pérdida: ochocientos veintisiete millones de libras.']),
-    ('giro', ['El banco se vendió por una libra.', 'Y todo empezó con un error de veinte mil que no quiso aceptar.']),
+    ('tres', ['Un terremoto en Kobe hunde la bolsa japonesa. Y él, en vez de cerrar, apuesta todavía más.', 'Pérdida: 827 millones de libras.']),
+    ('giro', ['El banco se vendió por una libra.', 'Y todo empezó con un error de 20.000 que no quiso aceptar.']),
     ('pregunta', ['¿Qué habrías hecho tú con esa primera pérdida? Mándaselo al que nunca cierra en negativo.']),
 ]
 
