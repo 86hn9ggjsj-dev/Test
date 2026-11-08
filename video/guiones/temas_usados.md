@@ -45,3 +45,4 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 7 nov | Error de dedo de Mizuho con J-Com (dedo) | 610.000 acciones a 1 ¥; el chaval que gana 15 M |
 | 7 nov | Nick Leeson y la cuenta 88888 (leeson) | esconder la primera pérdida hunde un banco |
 | 7 nov | Knight Capital, 440 M en 45 min (knight) | un bot sin límite ni botón de apagado |
+| 8 nov | El dato de empleo del primer viernes a las 14:30 (nfp) | calendario económico y deslizamiento |

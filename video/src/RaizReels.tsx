@@ -5,6 +5,7 @@ import { Aguanta, AGUANTA_FPS, AGUANTA_FRAMES } from "./Aguanta/Aguanta";
 import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
 import { Fases, FASES_FPS, FASES_FRAMES } from "./Fases/Fases";
 import { Dedo, DEDO_FPS, DEDO_FRAMES } from "./Dedo/Dedo";
+import { Nfp, NFP_FPS, NFP_FRAMES } from "./Nfp/Nfp";
 import { Leeson, LEESON_FPS, LEESON_FRAMES } from "./Leeson/Leeson";
 import { Knight, KNIGHT_FPS, KNIGHT_FRAMES } from "./Knight/Knight";
 import { Apostando, APOSTANDO_FPS, APOSTANDO_FRAMES } from "./Apostando/Apostando";
@@ -37,6 +38,7 @@ export const RaizReels: React.FC = () => (
     <Composition id="Aguanta" component={Aguanta} durationInFrames={AGUANTA_FRAMES} fps={AGUANTA_FPS} width={ANCHO} height={ALTO} />
     <Composition id="StickmanClip" component={Clip} durationInFrames={CLIP_FRAMES} fps={CLIP_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Apostando" component={Apostando} durationInFrames={APOSTANDO_FRAMES} fps={APOSTANDO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Nfp" component={Nfp} durationInFrames={NFP_FRAMES} fps={NFP_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Leeson" component={Leeson} durationInFrames={LEESON_FRAMES} fps={LEESON_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Knight" component={Knight} durationInFrames={KNIGHT_FRAMES} fps={KNIGHT_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Dedo" component={Dedo} durationInFrames={DEDO_FRAMES} fps={DEDO_FPS} width={ANCHO} height={ALTO} />
