@@ -1,12 +1,12 @@
-12:00 · El triple del miércoles (swap)
+12:00 · El viernes de las 14:30
 
-[curious] Hay un día de la semana en el que tu bróker te cobra el triple... [short pause] por dormir.
-Cada noche que dejas una operación abierta con apalancamiento, pagas un interés: [short pause] el swap.
-[serious] Y en forex, el miércoles a las once de la noche te lo cobran por tres noches de golpe.
-[warmly] Sígueme, que ahora viene lo que casi nadie calcula.
-[inhales] Una operación que aguantas semanas puede ir ganando en el gráfico... [short pause] y perdiendo en la cuenta.
-[serious] Antes de dejar algo abierto, mira el swap. [short pause] A veces te pagan, a veces te cobran... y el miércoles, por tres.
-[curious] ¿Sabías lo del miércoles? Mándaselo al que deja operaciones abiertas meses hasta que vuelvan.
+[curious] Hay un viernes al mes en el que, a las dos y media... [short pause] el mercado se vuelve loco.
+Es el dato de empleo de Estados Unidos. [short pause] Sale normalmente el primer viernes de cada mes.
+[inhales] Y en segundos, el dólar, el oro y los índices pegan saltos de un lado a otro.
+[warmly] Sígueme, que ahora viene lo que le pasa a tu orden.
+[serious] Con tanto movimiento, tu orden puede ejecutarse bastante más lejos de donde la pusiste.
+Por eso, antes de abrir nada, mira el calendario económico. [short pause] Esa hora sale marcada en rojo.
+[curious] ¿Te ha pillado alguna vez un dato con una operación abierta? Etiqueta al que opera sin mirar el calendario.
 
 
 18:00 (prueba) · Te saltó el stop y el precio nunca llegó
