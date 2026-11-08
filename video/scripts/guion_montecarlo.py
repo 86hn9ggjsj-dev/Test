@@ -6,23 +6,23 @@ perdieron fortunas apostando al rojo; cada tirada sigue siendo 18/37 (casi un 50
 
 TITULO = "Montecarlo, 1913: sale negro 26 veces seguidas"
 GUION = [
-    ("hook", ["Agosto de 1913, casino de Montecarlo: sale negro...", "26 veces seguidas."]),
-    ("uno", ["A partir de la décima, la gente empieza a apostar fortunas al rojo.", "«Ya toca», pensaban."]),
-    ("dos", ["Pero la ruleta no tiene memoria: cada tirada seguía siendo casi un 50 %."]),
-    ("sigueme", ["Sígueme, que esto lo haces tú con los gráficos."]),
-    ("tres", ["Cinco velas rojas seguidas, y piensas: ya toca rebote. Y compras."]),
-    ("giro", ["El mercado no te debe nada: que haya caído mucho no significa que vaya a subir.", "«Ya toca» no es una señal. Es la frase que arruinó a medio casino."]),
-    ("pregunta", ["¿Has comprado alguna vez porque «ya tocaba»? Etiqueta al que siempre dice que ya toca."]),
+    ('hook', ['Agosto de 1913, casino de Montecarlo: sale negro...', '26 veces seguidas.']),
+    ('uno', ['A partir de la décima, la gente empieza a apostar fortunas al rojo.', '«Ya toca», pensaban.']),
+    ('dos', ['Pero la ruleta no tiene memoria: cada tirada seguía siendo casi un 50 %.']),
+    ('sigueme', ['Sígueme, que esto lo haces tú con los gráficos.']),
+    ('tres', ['Cinco velas rojas seguidas, y piensas: ya toca rebote. Y compras.']),
+    ('giro', ['El mercado no te debe nada.', '«Ya toca» no es una señal: es la frase que arruinó a medio casino.']),
+    ('pregunta', ['¿Has comprado alguna vez porque «ya tocaba»? Etiqueta al que siempre dice que ya toca.']),
 ]
 
 GESTOS = {
-    "hook": "[curious] Agosto de mil novecientos trece, casino de Montecarlo: sale negro... [short pause] veintiséis veces seguidas.",
-    "uno": "A partir de la décima, la gente empieza a apostar fortunas al rojo. [short pause] [whispers] «Ya toca», pensaban.",
-    "dos": "[serious] Pero la ruleta no tiene memoria: cada tirada seguía siendo casi un cincuenta por ciento.",
-    "sigueme": "[warmly] Sígueme, que esto lo haces tú con los gráficos.",
-    "tres": "[inhales] Cinco velas rojas seguidas, y piensas: ya toca rebote. [short pause] Y compras.",
-    "giro": "[serious] El mercado no te debe nada: que haya caído mucho no significa que vaya a subir. [short pause] «Ya toca» no es una señal. Es la frase que arruinó a medio casino.",
-    "pregunta": "[curious] ¿Has comprado alguna vez porque «ya tocaba»? Etiqueta al que siempre dice que ya toca.",
+    'hook': '[curious] Agosto de mil novecientos trece, casino de Montecarlo: sale negro... [short pause] veintiséis veces seguidas.',
+    'uno': 'A partir de la décima, la gente empieza a apostar fortunas al rojo. [short pause] [whispers] «Ya toca», pensaban.',
+    'dos': '[serious] Pero la ruleta no tiene memoria: cada tirada seguía siendo casi un cincuenta por ciento.',
+    'sigueme': '[warmly] Sígueme, que esto lo haces tú con los gráficos.',
+    'tres': '[inhales] Cinco velas rojas seguidas, y piensas: ya toca rebote. [short pause] Y compras.',
+    'giro': '[serious] El mercado no te debe nada. [short pause] «Ya toca» no es una señal: es la frase que arruinó a medio casino.',
+    'pregunta': '[curious] ¿Has comprado alguna vez porque «ya tocaba»? Etiqueta al que siempre dice que ya toca.',
 }
 
 PANTALLAS = [

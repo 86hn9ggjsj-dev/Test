@@ -7,23 +7,23 @@ menos de cuatro meses; la Reserva Federal de Nueva York organizó un rescate de 
 
 TITULO = "Tenían dos premios Nobel y perdieron 4.600 millones en cuatro meses"
 GUION = [
-    ("hook", ["Tenían dos premios Nobel...", "y perdieron 4.600 millones de dólares en menos de cuatro meses."]),
-    ("uno", ["Long-Term Capital Management, 1998. Sus modelos decían que una pérdida así era casi imposible."]),
-    ("dos", ["Y para ganar más, se apalancaron: por cada dólar suyo, movían unos 25 prestados."]),
-    ("sigueme", ["Sígueme, que el final es aún más loco."]),
-    ("tres", ["Rusia deja de pagar su deuda, el mercado hace lo «imposible»...", "y en semanas el fondo está al borde de la quiebra."]),
-    ("giro", ["Tuvo que intervenir la Reserva Federal: 14 bancos pusieron más de 3.600 millones para que no arrastrara a todo Wall Street.", "Ser muy listo no te salva del apalancamiento."]),
-    ("pregunta", ["¿Con cuánto apalancamiento operas tú? Mándaselo al que dice que con equis cien se gana más rápido."]),
+    ('hook', ['Tenían dos premios Nobel...', 'y perdieron 4.600 millones de dólares en menos de cuatro meses.']),
+    ('uno', ['Long-Term Capital, 1998. Sus modelos decían que algo así era casi imposible.']),
+    ('dos', ['Y para ganar más, por cada dólar suyo movían unos 25 prestados.']),
+    ('sigueme', ['Sígueme, que el final es aún más loco.']),
+    ('tres', ['Rusia deja de pagar su deuda, pasa lo «imposible»...', 'y en semanas el fondo está al borde de la quiebra.']),
+    ('giro', ['La Reserva Federal tuvo que organizar un rescate con 14 bancos para que no arrastrara a Wall Street.', 'Ser muy listo no te salva del apalancamiento.']),
+    ('pregunta', ['¿Con cuánto apalancamiento operas tú? Mándaselo al que dice que con equis cien se gana más rápido.']),
 ]
 
 GESTOS = {
-    "hook": "[curious] Tenían dos premios Nobel... [short pause] y perdieron cuatro mil seiscientos millones de dólares en menos de cuatro meses.",
-    "uno": "Long-Term Capital Management, mil novecientos noventa y ocho. [short pause] Sus modelos decían que una pérdida así era casi imposible.",
-    "dos": "Y para ganar más, se apalancaron: [short pause] por cada dólar suyo, movían unos veinticinco prestados.",
-    "sigueme": "[warmly] Sígueme, que el final es aún más loco.",
-    "tres": "[inhales] Rusia deja de pagar su deuda, el mercado hace lo «imposible»... [short pause] y en semanas el fondo está al borde de la quiebra.",
-    "giro": "[serious] Tuvo que intervenir la Reserva Federal: catorce bancos pusieron más de tres mil seiscientos millones para que no arrastrara a todo Wall Street. [short pause] Ser muy listo no te salva del apalancamiento.",
-    "pregunta": "[curious] ¿Con cuánto apalancamiento operas tú? Mándaselo al que dice que con equis cien se gana más rápido.",
+    'hook': '[curious] Tenían dos premios Nobel... [short pause] y perdieron cuatro mil seiscientos millones de dólares en menos de cuatro meses.',
+    'uno': 'Long-Term Capital, mil novecientos noventa y ocho. [short pause] Sus modelos decían que algo así era casi imposible.',
+    'dos': 'Y para ganar más, por cada dólar suyo movían unos veinticinco prestados.',
+    'sigueme': '[warmly] Sígueme, que el final es aún más loco.',
+    'tres': '[inhales] Rusia deja de pagar su deuda, pasa lo «imposible»... [short pause] y en semanas el fondo está al borde de la quiebra.',
+    'giro': '[serious] La Reserva Federal tuvo que organizar un rescate con catorce bancos para que no arrastrara a Wall Street. [short pause] Ser muy listo no te salva del apalancamiento.',
+    'pregunta': '[curious] ¿Con cuánto apalancamiento operas tú? Mándaselo al que dice que con equis cien se gana más rápido.',
 }
 
 PANTALLAS = [
