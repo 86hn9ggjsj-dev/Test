@@ -6,6 +6,9 @@ de en medio y la pregunta final de cada vídeo.
 Formato desde el 7 nov: solo subtítulos abajo (sin titulares arriba); las cifras van dentro de la animación. La única
 excepción es el CTA de en medio: el «sígueme» grande con el botón Seguir y la cuenta auditada siempre se ve.
 
+Los guiones NO hablan del bot ni hacen afirmaciones sobre él (lo lleva el usuario): la promo va solo en el comentario
+fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio» del CTA de en medio.
+
 | Fecha | Tema | Idea clave |
 |---|---|---|
 | oct | Explica / prueba / errores / cifras / estafa | primeros vídeos del bot |
