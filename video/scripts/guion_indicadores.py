@@ -1,36 +1,36 @@
-"""Reel de alcance (~34 s): tus indicadores dicen lo mismo porque todos salen del precio (y llegan tarde).
+"""Reel de alcance (~36 s) con historia: Marcos (personaje ficticio, el stickman con gorra) y sus nueve indicadores.
 
-Datos: RSI, MACD, medias móviles y bandas de Bollinger se calculan a partir del precio (cierres, medias y desviaciones del
-precio), así que están muy correlacionados; las medias móviles son retrasadas por construcción.
+Consejo: casi todos los indicadores salen del precio (RSI, MACD, medias, Bollinger) y llegan tarde; quédate con el precio
+y, como mucho, un indicador que mida otra cosa, como el volumen.
 """
 
-TITULO = "Tienes cinco indicadores y los cinco te dicen lo mismo"
+TITULO = 'Marcos tenía nueve indicadores y no sabía cuándo entrar'
 GUION = [
-    ("hook", ["Tienes cinco indicadores en el gráfico...", "y los cinco te están diciendo lo mismo."]),
-    ("uno", ["El RSI, el MACD, las medias móviles, las bandas de Bollinger: todos se calculan con el mismo dato, el precio."]),
-    ("dos", ["Por eso, cuando uno dice compra, los demás suelen decir lo mismo.", "No son cinco opiniones: es una repetida cinco veces."]),
-    ("sigueme", ["Sígueme, que esto te va a limpiar el gráfico."]),
-    ("tres", ["Y además llegan tarde: una media móvil se mueve después del precio, nunca antes."]),
-    ("giro", ["Más indicadores no es más información.", "Es más ruido... y más excusas para entrar."]),
-    ("pregunta", ["¿Cuántos indicadores tienes ahora mismo en el gráfico? Etiqueta al que tiene la pantalla como un árbol de Navidad."]),
+    ('hook', ['Marcos tenía nueve indicadores en el gráfico...', 'y aun así no sabía cuándo entrar.']),
+    ('uno', ['Cada vez que perdía, añadía uno más: RSI, MACD, medias, Bollinger...', 'La pantalla parecía un árbol de Navidad.']),
+    ('dos', ['Lo que no sabía es que casi todos se calculan con lo mismo: el precio.', 'Eran nueve formas de decir lo mismo... y tarde.']),
+    ('sigueme', ['Sígueme, que ahora viene lo que lo cambió todo.']),
+    ('tres', ['Un día lo quitó todo y dejó solo el precio.', 'Por primera vez vio dónde rebotaba y dónde se rompía.']),
+    ('giro', ['Mi consejo: el precio y, como mucho, un indicador que mida otra cosa, como el volumen.', 'Menos líneas, decisiones más claras.']),
+    ('pregunta', ['¿Cuántos indicadores tienes tú ahora mismo? Etiqueta a tu Marcos.']),
 ]
 
 GESTOS = {
-    "hook": "[curious] Tienes cinco indicadores en el gráfico... [short pause] y los cinco te están diciendo lo mismo.",
-    "uno": "El RSI, el MACD, las medias móviles, las bandas de Bollinger: [short pause] todos se calculan con el mismo dato, el precio.",
-    "dos": "[inhales] Por eso, cuando uno dice compra, los demás suelen decir lo mismo. [short pause] No son cinco opiniones: es una repetida cinco veces.",
-    "sigueme": "[warmly] Sígueme, que esto te va a limpiar el gráfico.",
-    "tres": "[serious] Y además llegan tarde: una media móvil se mueve después del precio, nunca antes.",
-    "giro": "Más indicadores no es más información. [short pause] [mischievously] Es más ruido... y más excusas para entrar.",
-    "pregunta": "[curious] ¿Cuántos indicadores tienes ahora mismo en el gráfico? Etiqueta al que tiene la pantalla como un árbol de Navidad.",
+    'hook': '[curious] Marcos tenía nueve indicadores en el gráfico... [short pause] y aun así no sabía cuándo entrar.',
+    'uno': 'Cada vez que perdía, añadía uno más: RSI, MACD, medias, Bollinger... [short pause] [chuckles] La pantalla parecía un árbol de Navidad.',
+    'dos': '[inhales] Lo que no sabía es que casi todos se calculan con lo mismo: el precio. [short pause] Eran nueve formas de decir lo mismo... y tarde.',
+    'sigueme': '[warmly] Sígueme, que ahora viene lo que lo cambió todo.',
+    'tres': 'Un día lo quitó todo y dejó solo el precio. [short pause] Por primera vez vio dónde rebotaba... y dónde se rompía.',
+    'giro': '[serious] Mi consejo: el precio y, como mucho, un indicador que mida otra cosa, como el volumen. [short pause] Menos líneas, decisiones más claras.',
+    'pregunta': '[curious] ¿Cuántos indicadores tienes tú ahora mismo? [mischievously] Etiqueta a tu Marcos.',
 }
 
 PANTALLAS = [
-    ("hook", "", "gráfico 3D cargado de líneas y paneles; cinco luces COMPRA que se encienden a la vez"),
-    ("uno", "", "de la línea del precio salen cinco cables hacia RSI, MACD, MEDIAS y BOLLINGER: todos nacen del mismo sitio"),
-    ("dos", "", "cinco stickmen-indicador dicen «COMPRA» con la misma voz; se funden en uno ×5"),
-    ("sigueme", "", "«sígueme» grande, botón Seguir y cuenta auditada"),
-    ("tres", "", "el precio gira y la media móvil lo sigue con retraso; reloj con el desfase"),
-    ("giro", "", "el gráfico se limpia de golpe y queda solo el precio; las líneas caen como confeti"),
-    ("pregunta", "", "pantalla llena de luces de colores tipo árbol de Navidad y bocadillo de comentarios"),
+    ('hook', "", 'Marcos (stickman con gorra) frente a un monitor 3D cubierto de líneas de colores; mira a un lado y a otro, perdido'),
+    ('uno', "", 'cada pérdida (vela roja) hace aparecer un indicador nuevo con su nombre; la pantalla se llena de luces como un árbol de Navidad'),
+    ('dos', "", 'de la línea del precio salen nueve cables hacia los indicadores; todos encienden «COMPRA» a la vez y tarde, con un reloj de retraso'),
+    ('sigueme', "", '«sígueme» grande, botón Seguir y cuenta auditada; Marcos señala'),
+    ('tres', "", 'las líneas caen como confeti y queda el precio limpio; se marcan solos el soporte (rebota) y la ruptura'),
+    ('giro', "", 'precio + barras de volumen debajo; balanza «MENOS LÍNEAS = DECISIONES MÁS CLARAS»'),
+    ('pregunta', "", 'contador de indicadores y bocadillo de comentarios con «@marcos»'),
 ]
