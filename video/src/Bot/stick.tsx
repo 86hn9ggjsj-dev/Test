@@ -109,7 +109,8 @@ const curva = (a: P2, j: P2, b: P2): string => {
 // perfil: 0 de frente; ±1 caminando hacia la derecha/izquierda (rodillas y pies hacia delante, codos hacia atrás)
 // gorra: dibuja una gorra con visera hacia donde mira (para distinguir personajes)
 // robot: cabeza cuadrada con antena y ojos LED (ojosColor los pinta, p. ej. en rojo cuando falla)
-export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: number; o?: number; perfil?: number; gorra?: boolean; robot?: boolean; ojosColor?: string }> = ({ c, ox, oy, s, t, o = 1, perfil = 0, gorra = false, robot = false, ojosColor = "#000" }) => {
+// coleta: personaje femenino (coleta que se balancea y pestañas); sombrero: sombrero de ala de los años 20
+export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: number; o?: number; perfil?: number; gorra?: boolean; robot?: boolean; ojosColor?: string; coleta?: boolean; sombrero?: boolean }> = ({ c, ox, oy, s, t, o = 1, perfil = 0, gorra = false, robot = false, ojosColor = "#000", coleta = false, sombrero = false }) => {
   // Vida: respira, la cadera reparte el peso y parpadea de vez en cuando
   const resp = Math.sin(t * 2.4);
   const parpadeo = t % 2.9 > 2.78 ? 0.12 : 1;
@@ -177,6 +178,12 @@ export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: 
       ))}
       {/* Cabeza maciza; la cara se gira con el cuello y baja cuando agacha la cabeza */}
       <g transform={`translate(${hx.toFixed(1)},${hy.toFixed(1)}) rotate(${giro.toFixed(2)})`}>
+        {coleta && !robot && (
+          <g transform={`rotate(${(8 * Math.sin(t * 3.1) - c.vx * 4).toFixed(2)} ${(0.62 * R * u * (c.mira < -0.2 ? 1 : -1)).toFixed(1)} ${(-0.55 * R * u).toFixed(1)})`}>
+            <path d={`M${(0.55 * R * u * (c.mira < -0.2 ? 1 : -1)).toFixed(1)},${(-0.7 * R * u).toFixed(1)} q${(0.9 * R * u * (c.mira < -0.2 ? 1 : -1)).toFixed(1)},${(-0.15 * R * u).toFixed(1)} ${(0.85 * R * u * (c.mira < -0.2 ? 1 : -1)).toFixed(1)},${(0.95 * R * u).toFixed(1)} q${(-0.45 * R * u * (c.mira < -0.2 ? 1 : -1)).toFixed(1)},${(-0.35 * R * u).toFixed(1)} ${(-0.6 * R * u * (c.mira < -0.2 ? 1 : -1)).toFixed(1)},${(-0.75 * R * u).toFixed(1)} Z`} fill="#fff" stroke="#000" strokeWidth={0.012 * u} />
+            <circle cx={0.62 * R * u * (c.mira < -0.2 ? 1 : -1)} cy={-0.55 * R * u} r={0.035 * u} fill="#000" stroke="#fff" strokeWidth={0.01 * u} />
+          </g>
+        )}
         {robot ? (
           <g>
             <line x1={0} y1={-R * u * 0.9} x2={0} y2={-R * u * 1.45} stroke="#fff" strokeWidth={0.022 * u} />
@@ -201,6 +208,7 @@ export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: 
             const by = -0.088 * u;
             return (
               <g key={d}>
+                {coleta && <line x1={ex + c.mira * 0.012 * u + d * 0.02 * u} y1={-0.045 * u} x2={ex + c.mira * 0.012 * u + d * 0.045 * u} y2={-0.065 * u} stroke="#000" strokeWidth={0.012 * u} strokeLinecap="round" />}
                 <ellipse cx={ex + c.mira * 0.012 * u} cy={-0.018 * u} rx={0.026 * u * lim(c.ojos, 0.85, 1.3)} ry={0.034 * u * Math.max(0.1, ojoY)} fill="#000" />
                 <path
                   d={`M${(ex - d * 0.036 * u).toFixed(1)},${(by - sube(true) * u).toFixed(1)} L${(ex + d * 0.036 * u).toFixed(1)},${(by - sube(false) * u).toFixed(1)}`}
@@ -220,6 +228,13 @@ export const Stick: React.FC<{ c: Estado; ox: number; oy: number; s: number; t: 
             <path d={`M${-0.052 * u},${0.072 * u} Q0,${(0.072 + c.boca * 0.06) * u} ${0.052 * u},${0.072 * u}`} stroke="#000" strokeWidth={0.019 * u} fill="none" strokeLinecap="round" />
           )}
         </g>}
+        {sombrero && (
+          <g>
+            <path d={`M${(-0.72 * R * u).toFixed(1)},${(-0.62 * R * u).toFixed(1)} L${(-0.62 * R * u).toFixed(1)},${(-1.32 * R * u).toFixed(1)} Q0,${(-1.2 * R * u).toFixed(1)} ${(0.62 * R * u).toFixed(1)},${(-1.32 * R * u).toFixed(1)} L${(0.72 * R * u).toFixed(1)},${(-0.62 * R * u).toFixed(1)} Z`} fill="#000" stroke="#fff" strokeWidth={0.03 * u} strokeLinejoin="round" />
+            <line x1={-0.68 * R * u} y1={-0.8 * R * u} x2={0.68 * R * u} y2={-0.8 * R * u} stroke="#fff" strokeWidth={0.05 * u} />
+            <ellipse cx={0} cy={-0.6 * R * u} rx={1.35 * R * u} ry={0.16 * R * u} fill="#000" stroke="#fff" strokeWidth={0.03 * u} />
+          </g>
+        )}
         {gorra && (
           <g>
             <path d={`M${(-0.86 * R * u).toFixed(1)},${(-0.5 * R * u).toFixed(1)} A${(1.05 * R * u).toFixed(1)} ${(1.05 * R * u).toFixed(1)} 0 0 1 ${(0.86 * R * u).toFixed(1)},${(-0.5 * R * u).toFixed(1)} Z`} fill="#000" stroke="#fff" strokeWidth={0.03 * u} strokeLinejoin="round" />

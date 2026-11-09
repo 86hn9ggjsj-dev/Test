@@ -48,3 +48,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 8 nov | El dato de empleo del primer viernes a las 14:30 (nfp) | calendario económico y deslizamiento |
 | 8 nov | Te saltó el stop y el precio no llegó (spread) | bid/ask y spread que se dispara |
 | 8 nov | Compras y buscas por qué va a subir (confirmacion) | sesgo de confirmación e invalidación |
+| 9 nov | Marcos y sus nueve indicadores (indicadores) | todos salen del precio; precio + volumen |
+| 9 nov | Jesse Livermore 1929-1934 (livermore) | reglas leídas antes de operar |
+| 9 nov | Lucía y la vela verde (fomo) | FOMO: plan de ayer, esperar retroceso o dejarla ir |

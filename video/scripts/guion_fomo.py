@@ -7,7 +7,7 @@ ayer, hoy no es tu operación; si te interesa, espera a que retroceda; si no ret
 TITULO = 'Lucía vio una acción subir un 20 % y entró justo arriba'
 GUION = [
     ('hook', ['Lucía vio una acción subir un 20 % en una mañana...', 'y no pudo aguantarse.']),
-    ('uno', ['Entró justo arriba del todo.', 'A los diez minutos ya perdía un 5 %.']),
+    ('uno', ['Entró justo arriba del todo.', 'A los 10 minutos ya perdía un 5 %.']),
     ('dos', ['Eso tiene nombre: FOMO, miedo a quedarte fuera.', 'Ver subir algo sin ti duele como perder, aunque no hayas perdido nada.']),
     ('sigueme', ['Sígueme, que te doy la regla que la habría salvado.']),
     ('tres', ['Si no estaba en tu plan de ayer, hoy no es tu operación.', 'Y si te interesa, espera a que retroceda. Si no retrocede, déjala ir.']),
