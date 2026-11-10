@@ -6,6 +6,10 @@ de en medio y la pregunta final de cada vídeo.
 OBLIGATORIO en todos los guiones: CTA de seguimiento a mitad del guion (bloque `sigueme`, «Sígueme, que…»), justo en
 el momento de suspense, antes del giro. Nunca al principio ni solo al final.
 
+OBLIGATORIO desde el 11 nov: estructura 5-30-10 (ver formato_v2.md). 5 s de gancho (afirmación que incomode o promesa
+con prueba), ~30 s para UNA sola idea (con el «sígueme» a mitad) y los últimos ~10 s de conversión: «comenta BOT y te
+paso por privado la cuenta auditada de mi bot», sin afirmaciones sobre el bot.
+
 Formato desde el 7 nov: solo subtítulos abajo (sin titulares arriba); las cifras van dentro de la animación. La única
 excepción es el CTA de en medio: el «sígueme» grande con el botón Seguir y la cuenta auditada siempre se ve.
 

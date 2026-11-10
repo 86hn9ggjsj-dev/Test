@@ -45,15 +45,30 @@ rojo), pero con decorados reales en vez de cajas abstractas:
 - Píldora arriba con el lugar o el dato («EN EL METRO», «VEZ Nº 120») cuando cambia la escena.
 - Nada importante cortado por los bordes (revisar los fotogramas sueltos antes de renderizar).
 
-## Guion (85–98 palabras → 30–33 s con la voz al 1,12)
+## Guion: regla 5-30-10 (desde el 11 nov; referencia que pasó el usuario el 10 nov)
 
-1. **Gancho (≤ 14 palabras)**: resultado o conflicto primero, en presente o pasado inmediato, con cifra. Nunca empezar
-   por fecha, lugar o un nombre desconocido. Dos datos que chocan: «En demo hizo un 300 %. Con dinero real duró 11 días».
-2. **Frases cortas** (≤ 12 palabras), una imagen por frase. Una sola idea por vídeo.
-3. **«Sígueme» (≤ 8 palabras)** pegado al momento de suspense: «Sígueme, que ahora viene lo que duele».
-4. **Giro / lo que pasó.**
-5. **La regla en una línea**, concreta y con número si se puede (para guardar y enviar).
-6. **Cierre (≤ 14 palabras)**: pregunta que se contesta con una palabra + «etiqueta / mándaselo a…».
+El vídeo se piensa como una línea de tiempo en tres partes (~115–130 palabras → 40–45 s con la voz al 1,12):
+
+**0–5 s · Gancho (≤ 14 palabras).** Una afirmación que incomode o una promesa con prueba (cifra, caso real, resultado).
+Nada de «Hola», «hoy te voy a enseñar», fechas, lugares o nombres desconocidos al principio: si no engancha en 5 s, deslizan.
+- Afirmación que incomoda: «Si miras el gráfico más de 10 veces al día, estás regalando dinero».
+- Promesa con prueba: «Este hombre perdió 20.000 millones en 2 días. Y lo que le hundió te puede pasar con 500 €».
+- Dos datos que chocan: «En demo hizo un 300 %. Con dinero real duró 11 días».
+
+**5–35 s · Una sola idea (≈ 30 s).** Desarrollar UNA idea alrededor de la promesa del gancho (no el sistema completo ni
+la solución perfecta): historia → **«sígueme» a mitad (obligatorio)** en el momento de suspense → giro → la regla en una
+línea, concreta y con número (para guardar y enviar). Frases cortas (≤ 12 palabras), una imagen por frase.
+
+**Últimos ~10 s · Conversión.** Aquí solo llega la gente más interesada: se la lleva al sistema de conversión orgánica
+(palabra clave en comentarios → mensaje directo). Plantilla, igual que el comentario fijado:
+«Si quieres ver [lo que conecta con la idea del vídeo], comenta BOT y te paso por privado la cuenta auditada de mi bot.»
+Sin cifras ni promesas sobre el bot. Visual: caja de comentario que escribe «BOT», se envía, llega el mensaje directo y
+la tarjeta «CUENTA AUDITADA ✓». La pregunta + «etiqueta / mándaselo» pasa a ser opcional y, si va, al final de la parte
+de 30 s (una línea).
+
+Recursos visuales de la referencia que encajan con nuestro estilo: un fotograma 0 raro o en plena acción (interrumpe el
+scroll), «pruebas» que entran como tarjetas (cifras, titulares, recortes), números grandes en fichas cuando se enumera
+y cambio de escenario cada 5–8 s.
 
 ## Serie y personajes
 
