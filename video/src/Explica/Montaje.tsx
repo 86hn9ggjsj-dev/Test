@@ -148,7 +148,7 @@ const TIPOS = ["barrido", "zoom", "barrido-inv", "zoom"];
 
 // Gancho escrito: el titular del vídeo en grande desde el primer fotograma (sin fundido: quien hace scroll decide en
 // menos de un segundo, muchas veces sin sonido). Las palabras entre * van en serif cursiva y con el color de acento.
-export type GanchoT = { lineas: string[]; hasta: number; color?: string; top?: number; size?: number };
+export type GanchoT = { lineas: string[]; hasta: number; color?: string; colores?: string[]; top?: number; size?: number };
 export const Gancho: React.FC<{ t: number; g: GanchoT }> = ({ t, g }) => {
   const fuera = lerp(t, g.hasta - 0.22, g.hasta, 0, 1, io);
   if (fuera >= 1) return null;
@@ -163,7 +163,7 @@ export const Gancho: React.FC<{ t: number; g: GanchoT }> = ({ t, g }) => {
           {linea.split(" ").map((w, i) => {
             const clave = w.startsWith("*");
             return (
-              <span key={i} style={{ fontFamily: clave ? SERIF : SANS, fontStyle: clave ? "italic" : "normal", fontWeight: clave ? 400 : 800, fontSize: clave ? size * 1.32 : size, letterSpacing: clave ? "0" : "-0.02em", lineHeight: 1, color: clave ? (g.color ?? "#fff") : "#fff", textShadow: "0 0 2px rgba(0,0,0,0.9), 0 4px 18px rgba(0,0,0,0.85), 0 10px 50px rgba(0,0,0,0.7)" }}>
+              <span key={i} style={{ fontFamily: clave ? SERIF : SANS, fontStyle: clave ? "italic" : "normal", fontWeight: clave ? 400 : 800, fontSize: clave ? size * 1.32 : size, letterSpacing: clave ? "0" : "-0.02em", lineHeight: 1, color: clave ? (g.colores?.[k] ?? g.color ?? "#fff") : "#fff", textShadow: "0 0 2px rgba(0,0,0,0.9), 0 4px 18px rgba(0,0,0,0.85), 0 10px 50px rgba(0,0,0,0.7)" }}>
                 {w.replace(/\*/g, "").replace(/_/g, " ")}
               </span>
             );

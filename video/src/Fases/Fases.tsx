@@ -11,8 +11,8 @@ import { Arriba, L, mono, muelle, Titular } from "../Bot/piezas";
 import { circulo, Escena, orbita, polvo, proyector, Trazo, V3 } from "../Bot/tres";
 import { cristal, ROJO, suelo, velas, VERDE } from "../Bot/kit";
 import { escritorio, monitor } from "../Bot/monigote";
-import { cabezaPx, Clave, cuerpoEn, Estado, R_CABEZA } from "../Bot/stick";
-import { Ancla, anclaje, BRAZOS_ARRIBA, ENCOGE, Exclama, SiguemeStick, StickMundo } from "../Bot/comun";
+import { Clave, cuerpoEn, Estado } from "../Bot/stick";
+import { Ancla, anclaje, BRAZOS_ARRIBA, Corona, ENCOGE, Exclama, SiguemeStick, StickMundo } from "../Bot/comun";
 import { claves, Destello, golpe, Kicker, Montaje, P, paseo, PreguntaComentarios, sacude } from "../Explica/Montaje";
 
 export const FASES_FPS = datos.fps;
@@ -100,25 +100,6 @@ const UNO: Clave[] = [
   [EV.tres - 0.35, { ojos: 1.2, cejas: 0.7, boca: 1, abre: 0.6, ...BRAZOS_ARRIBA, mira: 0.8 }],
   [EV.genio - 0.2, { mIx: -0.13, mIy: -0.42, mDx: 0.13, mDy: -0.42, ojos: 0.8, boca: 1, abre: 0, cejas: 0.5, cabeza: 0.1, incl: -0.05, mira: 0 }],
 ];
-const Corona: React.FC<{ c: Estado; a: Ancla; g: number; brillo: number }> = ({ c, a, g, brillo }) => {
-  if (g <= 0.01) return null;
-  const [hx, hy] = cabezaPx(c, a.ox, a.oy, a.s);
-  const r = R_CABEZA * a.s;
-  const w = r * 1.55 * Math.min(g, 1.1);
-  const h = r * 0.95 * Math.min(g, 1.1);
-  const y0 = hy - r * 0.82 - 30 * (1 - Math.min(g, 1));
-  const ang = (-(c.incl + c.cabeza) * 180) / Math.PI;
-  return (
-    <svg width={1080} height={1920} style={{ position: "absolute", inset: 0, filter: brillo > 0.05 ? `drop-shadow(0 0 ${18 * brillo}px rgba(255,255,255,0.8))` : undefined }}>
-      <g transform={`rotate(${ang.toFixed(2)} ${hx} ${hy})`}>
-        <path d={`M${hx - w / 2},${y0} L${hx - w / 2},${y0 - h} L${hx - w / 4},${y0 - h * 0.55} L${hx},${y0 - h * 1.1} L${hx + w / 4},${y0 - h * 0.55} L${hx + w / 2},${y0 - h} L${hx + w / 2},${y0} Z`} fill="#000" stroke="#fff" strokeWidth={4} strokeLinejoin="round" />
-        {[-0.5, 0, 0.5].map((f) => (
-          <circle key={f} cx={hx + f * w} cy={y0 - h * (f === 0 ? 1.1 : 1) - 8} r={6} fill="#fff" />
-        ))}
-      </g>
-    </svg>
-  );
-};
 const Uno: React.FC<P> = ({ t, s, e }) => {
   const cam = orbita([0, -0.25, 0], L(t, s, e, 5.4, 5.0) - 0.3 * golpe(t, EV.genio - 0.05), L(t, s, e, -0.2, 0.15) + sacude(t, EV.genio - 0.05, 0.02), 0.08, { apertura: 35, centroY: 940 });
   const tr: Trazo[] = [...polvo(0.25)];

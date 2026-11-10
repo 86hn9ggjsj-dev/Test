@@ -85,3 +85,24 @@ export const anclaje = (cam: Cam, pie: V3, k: number): Ancla => {
 export const StickMundo: React.FC<{ a: Ancla; c: Estado; t: number; perfil?: number; o?: number; gorra?: boolean; robot?: boolean; ojosColor?: string; coleta?: boolean; sombrero?: boolean }> = ({ a, c, t, perfil, o, gorra, robot, ojosColor, coleta, sombrero }) => (
   <Stick c={c} ox={a.ox} oy={a.oy} s={a.s} t={t} perfil={perfil} o={o} gorra={gorra} robot={robot} ojosColor={ojosColor} coleta={coleta} sombrero={sombrero} />
 );
+
+// Corona que cae sobre la cabeza (g: muelle de entrada; brillo: halo blanco)
+export const Corona: React.FC<{ c: Estado; a: Ancla; g: number; brillo: number }> = ({ c, a, g, brillo }) => {
+  if (g <= 0.01) return null;
+  const [hx, hy] = cabezaPx(c, a.ox, a.oy, a.s);
+  const r = R_CABEZA * a.s;
+  const w = r * 1.55 * Math.min(g, 1.1);
+  const h = r * 0.95 * Math.min(g, 1.1);
+  const y0 = hy - r * 0.82 - 30 * (1 - Math.min(g, 1));
+  const ang = (-(c.incl + c.cabeza) * 180) / Math.PI;
+  return (
+    <svg width={1080} height={1920} style={{ position: "absolute", inset: 0, filter: brillo > 0.05 ? `drop-shadow(0 0 ${18 * brillo}px rgba(255,255,255,0.8))` : undefined }}>
+      <g transform={`rotate(${ang.toFixed(2)} ${hx} ${hy})`}>
+        <path d={`M${hx - w / 2},${y0} L${hx - w / 2},${y0 - h} L${hx - w / 4},${y0 - h * 0.55} L${hx},${y0 - h * 1.1} L${hx + w / 4},${y0 - h * 0.55} L${hx + w / 2},${y0 - h} L${hx + w / 2},${y0} Z`} fill="#000" stroke="#fff" strokeWidth={4} strokeLinejoin="round" />
+        {[-0.5, 0, 0.5].map((f) => (
+          <circle key={f} cx={hx + f * w} cy={y0 - h * (f === 0 ? 1.1 : 1) - 8} r={6} fill="#fff" />
+        ))}
+      </g>
+    </svg>
+  );
+};

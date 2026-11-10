@@ -3,6 +3,7 @@
 Todo se genera por síntesis (sin samples externos) a 48 kHz mono.
 """
 import json
+import os
 import subprocess
 
 import numpy as np
@@ -190,6 +191,8 @@ def mezclar(voz_ed, musica, sfx_pista, dur, destino, ff, duck=-18, nivel_musica=
                     f"loudnorm=I=-14:TP=-1:LRA=11:measured_I={m['input_i']}:measured_TP={m['input_tp']}:"
                     f"measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true",
                     "-ar", str(SR), "-c:a", "pcm_s16le", str(destino)], check=True)
+    # La mezcla previa en coma flotante solo sirve para medir: se borra (si no, el bundle de Remotion la copia y llena el disco)
+    os.remove(pre)
 
 
 # ---------------------------------------------------------------- SFX suaves (estilo premium)

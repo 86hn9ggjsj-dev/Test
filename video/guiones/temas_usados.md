@@ -51,3 +51,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 9 nov | Marcos y sus nueve indicadores (indicadores) | todos salen del precio; precio + volumen |
 | 9 nov | Jesse Livermore 1929-1934 (livermore) | reglas leídas antes de operar |
 | 9 nov | Lucía y la vela verde (fomo) | FOMO: plan de ayer, esperar retroceso o dejarla ir |
+| 10 nov | En demo +300 %, en real 11 días (demo) | pasar a real con 20 € para aprender a perder; subir cuando no cambie el pulso |
+| 10 nov | Bill Hwang y Archegos, 20.000 M en 2 días (archegos) | muy concentrado y muy apalancado: basta un error |
+| 10 nov | Marcos miró el gráfico 143 veces (veces) | stop, objetivo y alerta antes de entrar; cerrar la aplicación |

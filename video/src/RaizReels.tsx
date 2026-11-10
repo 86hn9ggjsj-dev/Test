@@ -9,6 +9,9 @@ import { Nfp, NFP_FPS, NFP_FRAMES } from "./Nfp/Nfp";
 import { Indicadores, INDICADORES_FPS, INDICADORES_FRAMES } from "./Indicadores/Indicadores";
 import { Livermore, LIVERMORE_FPS, LIVERMORE_FRAMES } from "./Livermore/Livermore";
 import { Fomo, FOMO_FPS, FOMO_FRAMES } from "./Fomo/Fomo";
+import { Demo, DEMO_FPS, DEMO_FRAMES } from "./Demo/Demo";
+import { Archegos, ARCHEGOS_FPS, ARCHEGOS_FRAMES } from "./Archegos/Archegos";
+import { Veces, VECES_FPS, VECES_FRAMES } from "./Veces/Veces";
 import { Spread, SPREAD_FPS, SPREAD_FRAMES } from "./Spread/Spread";
 import { Confirmacion, CONFIRMACION_FPS, CONFIRMACION_FRAMES } from "./Confirmacion/Confirmacion";
 import { Leeson, LEESON_FPS, LEESON_FRAMES } from "./Leeson/Leeson";
@@ -46,6 +49,9 @@ export const RaizReels: React.FC = () => (
     <Composition id="Indicadores" component={Indicadores} durationInFrames={INDICADORES_FRAMES} fps={INDICADORES_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Livermore" component={Livermore} durationInFrames={LIVERMORE_FRAMES} fps={LIVERMORE_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Fomo" component={Fomo} durationInFrames={FOMO_FRAMES} fps={FOMO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Demo" component={Demo} durationInFrames={DEMO_FRAMES} fps={DEMO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Archegos" component={Archegos} durationInFrames={ARCHEGOS_FRAMES} fps={ARCHEGOS_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Veces" component={Veces} durationInFrames={VECES_FRAMES} fps={VECES_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Spread" component={Spread} durationInFrames={SPREAD_FRAMES} fps={SPREAD_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Confirmacion" component={Confirmacion} durationInFrames={CONFIRMACION_FRAMES} fps={CONFIRMACION_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Nfp" component={Nfp} durationInFrames={NFP_FRAMES} fps={NFP_FPS} width={ANCHO} height={ALTO} />
