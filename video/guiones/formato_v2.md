@@ -28,6 +28,23 @@ píldora «cuenta auditada del bot en la bio» en el CTA). Los guiones NO hablan
 - Con el zoom, nada importante a menos de ~90 px de los bordes laterales; personajes hacia el centro.
 - Voz: `ATEMPO=1.12 PAUSA_MAX=0.22 PAUSA_UMBRAL=40`.
 
+## Escenarios que se entienden (desde el 10 nov, petición del usuario: «currate más los escenarios»)
+
+Cada escena tiene que leerse en 1 segundo, sin sonido y en el móvil. Mismo estilo (alambre blanco, toques de verde y
+rojo), pero con decorados reales en vez de cajas abstractas:
+
+- **Un lugar reconocible por escena** con sus objetos típicos: metro (pasillo, bancos, asas, barras, ventanas, luces
+  del túnel), baño (váter con cisterna y cadena, papel, lavabo, espejo, puerta «WC»), cena (mesa con mantel, platos,
+  copas, vela, ventana con ciudad, lámpara, sillas)… Piezas reutilizables en `src/Bot/decorados.tsx`; añadir ahí las
+  nuevas (oficina, dormitorio, calle, banco, bolsa, casino…).
+- **Personajes haciendo algo concreto** con un objeto en la mano (móvil, billete, botón) y, si ayuda, un bocadillo
+  corto («¿EN SERIO?»).
+- **Gráficos con velas grandes** dentro de una pantalla y rótulos en el propio gráfico («CERRÓ AQUÍ», «OBJETIVO ✓»),
+  nunca una línea fina sola.
+- **Decorado nítido**: `apertura` baja (6–8) en escenas con decorado; el desenfoque fuerte solo para el polvo.
+- Píldora arriba con el lugar o el dato («EN EL METRO», «VEZ Nº 120») cuando cambia la escena.
+- Nada importante cortado por los bordes (revisar los fotogramas sueltos antes de renderizar).
+
 ## Guion (85–98 palabras → 30–33 s con la voz al 1,12)
 
 1. **Gancho (≤ 14 palabras)**: resultado o conflicto primero, en presente o pasado inmediato, con cifra. Nunca empezar

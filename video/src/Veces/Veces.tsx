@@ -8,10 +8,12 @@ import { AbsoluteFill, useCurrentFrame } from "remotion";
 import datos from "../gen/veces.json";
 import { ANCHO } from "../Viral/util";
 import { L, mono, muelle } from "../Bot/piezas";
-import { caja, circulo, Escena, orbita, polvo, proyector, Trazo, V3 } from "../Bot/tres";
+import { Escena, orbita, polvo, proyector, Trazo } from "../Bot/tres";
 import { cristal, ROJO, suelo, velas, VERDE } from "../Bot/kit";
+import { BANO, bano, comedor, mesaCena, pantallaVelas, vagon, VAGON } from "../Bot/decorados";
+import { Reloj } from "../Bot/plato";
 import { Clave, cuerpoEn, Cuerpo, Estado } from "../Bot/stick";
-import { Ancla, anclaje, CHOQUE, Exclama, FlashRojo, MANOS_CABEZA, StickMundo } from "../Bot/comun";
+import { Ancla, anclaje, Bocadillo, CHOQUE, Exclama, FlashRojo, MANOS_CABEZA, StickMundo } from "../Bot/comun";
 import { CamaraTiembla, FlashVerde, PreguntaDos } from "../Bot/historia";
 import { claves, CtaSeguir, cuando, golpe, Montaje, P, sacude } from "../Explica/Montaje";
 
@@ -118,6 +120,7 @@ const Hook: React.FC<P> = ({ t, s, e }) => {
       <AbsoluteFill style={{ background: `radial-gradient(circle 360px at ${m.x}px ${m.y}px, rgba(255,255,255,0.10), transparent 70%)` }} />
       <StickMundo a={a} c={c} t={t} gorra />
       <Movil x={m.x} y={m.y} w={m.w} brillo={0.8} />
+      <Reloj x={705} y={935} r={58} t={t} vel={14} />
       <div style={{ position: "absolute", left: 640, top: 1020, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
         <span style={mono(30, 0.7)}>VECES HOY</span>
         <span style={{ ...mono(170), fontWeight: 700, color: ROJO, fontVariantNumeric: "tabular-nums", transform: `scale(${bote})`, transformOrigin: "0% 50%", textShadow: "0 0 40px rgba(255,77,94,0.45)" }}>{n}</span>
@@ -139,20 +142,14 @@ const Contador: React.FC<{ n: number }> = ({ n }) => (
   </div>
 );
 const Metro: React.FC<P> = ({ t, s }) => {
-  const cam = orbita([0.1, -0.2, 0], L(t, s, cBano, 4.6, 4.3), L(t, s, cBano, -0.25, -0.1), 0.06, { apertura: 38, centroY: 1000 });
-  const tr: Trazo[] = [...polvo(0.25)];
-  // Vagón: suelo, techo, ventanas con luces que pasan y la barra
-  for (const [a, b] of caja([-1.6, -1, -0.8], [1.8, 0.75, 0.9])) if (a[2] < 0 || b[2] < 0) tr.push({ t: "l", a, b, w: 2, o: 0.6 });
-  for (let k = 0; k < 4; k++) {
-    const x = -1.3 + k * 0.85;
-    tr.push({ t: "p", pts: [[x, -0.2, -0.79], [x + 0.6, -0.2, -0.79], [x + 0.6, 0.35, -0.79], [x, 0.35, -0.79], [x, -0.2, -0.79]], w: 2.2, o: 0.9, relleno: "#fff", oRelleno: 0.05 });
-    const luz = ((t * 3.5 + k * 0.37) % 1) * 0.6;
-    tr.push({ t: "l", a: [x + luz, -0.05, -0.8], b: [x + luz + 0.12, -0.05, -0.8], w: 3, o: 0.7, luz: 0.6 });
-  }
-  tr.push({ t: "l", a: [-0.55, -1, 0.3], b: [-0.55, 0.75, 0.3], w: 4, o: 1, luz: 0.3 });
-  const c = cuerpoEn(t, [[s, { ...MOVIL_MANOS, mIx: -0.2, mIy: 0.32, ojos: 1.2 }]], { ...MOVIL_MANOS }, s - 0.4);
-  const traq = 0.012 * Math.sin(t * 23);
-  const a = anclaje(cam, [-0.3 + traq, -1, 0.3], 0.5);
+  const traq = 0.006 * Math.sin(t * 31) + 0.004 * Math.sin(t * 17);
+  const cam = orbita([0.0, -0.32 + traq, -1.0], L(t, s, cBano, 3.7, 3.5), L(t, s, cBano, 0.09, 0.05), 0.06, { apertura: 6, centroY: 980 });
+  const tr: Trazo[] = [...polvo(0.1)];
+  vagon(tr, t);
+  // Barra a la que va agarrado
+  tr.push({ t: "l", a: [-0.21, -1, -0.92], b: [-0.21, VAGON.TECHO, -0.92], w: 3.4, o: 1, luz: 0.3 });
+  const c = cuerpoEn(t, [[s, { ...MOVIL_MANOS, mIx: -0.22, mIy: 0.3, ojos: 1.2 }]], { ...MOVIL_MANOS, mIx: -0.22, mIy: 0.3 }, s - 0.4);
+  const a = anclaje(cam, [-0.1 + traq, -1, -0.9], 0.5);
   const m = enManos(c, a);
   return (
     <>
@@ -164,51 +161,48 @@ const Metro: React.FC<P> = ({ t, s }) => {
   );
 };
 const Bano: React.FC<P> = ({ t }) => {
-  const cam = orbita([0.1, -0.35, 0], L(t, cBano, cCena, 4.2, 4.0), L(t, cBano, cCena, 0.2, 0.05), 0.12, { apertura: 38, centroY: 1020 });
-  const tr: Trazo[] = [...polvo(0.25)];
-  // Azulejos al fondo
-  for (let i = 0; i < 9; i++) tr.push({ t: "l", a: [-1.6 + i * 0.4, -1, -0.7], b: [-1.6 + i * 0.4, 1.0, -0.7], w: 1, o: 0.25 });
-  for (let j = 0; j < 6; j++) tr.push({ t: "l", a: [-1.6, -1 + j * 0.4, -0.7], b: [1.6, -1 + j * 0.4, -0.7], w: 1, o: 0.25 });
-  // Váter: cisterna, taza y asiento
-  cristal(tr, [-0.42, -0.35, -0.65], [0.12, 0.15, -0.45], "#fff", 1, 0.2, 0.06);
-  tr.push({ t: "p", pts: circulo([-0.15, -0.5, -0.15], 0.3, "y", 40), w: 2.6, o: 1, relleno: "#fff", oRelleno: 0.06 });
-  tr.push({ t: "l", a: [-0.38, -0.5, -0.15], b: [-0.3, -1, -0.15], w: 2.4, o: 0.8 });
-  tr.push({ t: "l", a: [0.08, -0.5, -0.15], b: [0.0, -1, -0.15], w: 2.4, o: 0.8 });
-  // Sentado en el váter con el móvil
-  const c = cuerpoEn(t, [[cBano, { ...MOVIL_MANOS, y: 0.4, agacha: 0.4, pIx: -0.3, pDx: 0.3, ojos: 1.1 }]], { ...MOVIL_MANOS, y: 0.4, pIx: -0.3, pDx: 0.3 }, cBano - 0.4);
-  const a = anclaje(cam, [-0.15, -1, -0.05], 0.55);
+  const cam = orbita([0.02, -0.5, -0.25], L(t, cBano, cCena, 3.5, 3.3), L(t, cBano, cCena, 0.14, 0.06), 0.1, { apertura: 6, centroY: 1000 });
+  const tr: Trazo[] = [...polvo(0.1)];
+  bano(tr, t);
+  // Sentado en el váter con el móvil (y los pantalones en los tobillos)
+  const sentado: Partial<Cuerpo> = { ...MOVIL_MANOS, y: 0.47, agacha: 0.35, pIx: -0.17, pDx: 0.17, ojos: 1.1 };
+  const c = cuerpoEn(t, [[cBano, sentado]], sentado, cBano - 0.4);
+  const a = anclaje(cam, [0, -1, BANO.ZC + 0.14], 0.48);
   const m = enManos(c, a);
+  const wc = proyector(cam)(BANO.WC);
   return (
     <>
       <Escena cam={cam} trazos={tr} />
+      <div style={{ position: "absolute", left: wc.x, top: wc.y, transform: "translate(-50%, -50%)", ...mono(40), fontWeight: 700, padding: "4px 14px", border: "3px solid #fff", borderRadius: 10 }}>WC</div>
       <StickMundo a={a} c={c} t={t} gorra />
+      <div style={{ position: "absolute", left: a.ox - 0.24 * a.s, top: a.oy - 0.11 * a.s, width: 0.48 * a.s, height: 0.08 * a.s, borderRadius: 0.04 * a.s, border: "4px solid #fff", background: "#000" }} />
       <Movil x={m.x} y={m.y} w={m.w} />
       <Arriba><Pildora t={t} t0={cBano - 0.05} size={52}>EN EL BAÑO</Pildora></Arriba>
     </>
   );
 };
 const Cena: React.FC<P> = ({ t, e }) => {
-  const cam = orbita([0.0, -0.35, 0], L(t, cCena, e, 5.0, 4.8), L(t, cCena, e, -0.06, 0.06), 0.14, { apertura: 38, centroY: 1020 });
-  const tr: Trazo[] = [...polvo(0.25)];
-  suelo(tr, t, -1.0, 0.14, "#fff", 0.2);
-  // Mesa con dos platos y una vela
-  cristal(tr, [-0.42, -0.5, -0.35], [0.42, -0.44, 0.35], "#fff", 0.9, 0.15, 0.06);
-  for (const x of [-0.34, 0.34]) tr.push({ t: "l", a: [x, -0.5, 0], b: [x, -1, 0], w: 2.4, o: 0.7 });
-  for (const x of [-0.22, 0.22]) tr.push({ t: "p", pts: circulo([x, -0.43, 0.05], 0.11, "y", 32), w: 2, o: 1 });
-  tr.push({ t: "l", a: [0, -0.43, -0.1], b: [0, -0.25, -0.1], w: 4, o: 1 });
-  tr.push({ t: "e", c: [0, -0.21, -0.1], r: 0.025, tipo: "punto", o: 1, luz: 1, color: "#ffd27a" });
-  const c = cuerpoEn(t, [[cCena, { ...MOVIL_MANOS, ojos: 1.15 }]], { ...MOVIL_MANOS }, cCena - 0.4);
-  const a = anclaje(cam, [-0.5, -1, 0.15], 0.46);
+  const cam = orbita([0.0, -0.42, -0.25], L(t, cCena, e, 3.6, 3.4), L(t, cCena, e, -0.04, 0.04), 0.12, { apertura: 6, centroY: 1000 });
+  const fondo: Trazo[] = [...polvo(0.1)];
+  comedor(fondo, t);
+  const mesa: Trazo[] = [];
+  mesaCena(mesa, t);
+  // Sentados detrás de la mesa: Marcos con el móvil y Lucía de brazos cruzados
+  const sm: Partial<Cuerpo> = { ...MOVIL_MANOS, y: 0.6, pIx: -0.15, pDx: 0.15, ojos: 1.15 };
+  const c = cuerpoEn(t, [[cCena, sm]], sm, cCena - 0.4);
+  const a = anclaje(cam, [-0.3, -1, -0.5], 0.46);
   const m = enManos(c, a);
-  // Lucía, de brazos cruzados
-  const cl = cuerpoEn(t, [[cCena, { mIx: 0.14, mIy: -0.24, mDx: -0.14, mDy: -0.24, boca: -0.8, cejas: -0.9, mira: -0.8, cabeza: -0.08 }]], { mira: -0.8 }, cCena - 0.4);
-  const al = anclaje(cam, [0.5, -1, 0.15], 0.44);
+  const sl: Partial<Cuerpo> = { y: 0.62, pIx: -0.15, pDx: 0.15, mIx: 0.14, mIy: -0.24, mDx: -0.14, mDy: -0.24, boca: -0.8, cejas: -0.9, mira: -0.8, cabeza: -0.08 };
+  const cl = cuerpoEn(t, [[cCena, sl], [EV.novia - 0.3, { cabeza: -0.14, cejas: -1, incl: -0.04 }]], sl, cCena - 0.4);
+  const al = anclaje(cam, [0.3, -1, -0.5], 0.44);
   return (
     <>
-      <Escena cam={cam} trazos={tr} />
+      <Escena cam={cam} trazos={fondo} />
       <StickMundo a={a} c={c} t={t} gorra />
-      <Movil x={m.x} y={m.y} w={m.w} />
       <StickMundo a={al} c={cl} t={t} coleta />
+      <Escena cam={cam} trazos={mesa} />
+      <Movil x={m.x} y={m.y} w={m.w} />
+      <Bocadillo t={t} t0={EV.novia - 0.4} c={cl} ox={al.ox} oy={al.oy} s={al.s} texto="¿EN SERIO?" limite={1020} />
       <Arriba><Pildora t={t} t0={cCena - 0.05} size={52}>CENANDO CON SU NOVIA</Pildora></Arriba>
     </>
   );
@@ -299,26 +293,31 @@ const Sigueme: React.FC<P> = (p) => (
 
 // ------------------------------------------------------------------ 5. Tres: diez minutos después llegó al objetivo. Sin él.
 const s3 = inicio("tres");
-const CAMINO: V3[] = [[0.0, -0.45, -0.3], [0.12, -0.5, -0.3], [0.24, -0.35, -0.3], [0.36, -0.38, -0.3], [0.48, -0.15, -0.3], [0.6, -0.2, -0.3], [0.72, 0.05, -0.3], [0.84, 0.0, -0.3], [0.98, 0.3, -0.3]];
+// Velas: la roja (donde cerró del susto) y luego la subida hasta el objetivo sin él
+const SERIE3 = [-0.05, 0.0, -0.07, 0.02, -0.03, -0.2, -0.14, -0.06, 0.06, 0.01, 0.15, 0.24, 0.19, 0.31, 0.4];
+const SALIO = 5;
+const OBJ = 0.37;
 const Tres: React.FC<P> = ({ t, s, e }) => {
-  const cam = orbita([0.42, -0.3, 0], L(t, s, e, 4.6, 4.3), L(t, s, e, -0.12, -0.02), 0.1, { apertura: 38, centroY: 1020 });
-  const tr: Trazo[] = [...polvo(0.25)];
-  suelo(tr, t, -1.0, 0.14, "#fff", 0.2);
-  // Línea de cierre (donde salió) y objetivo en verde
-  tr.push({ t: "l", a: [-0.05, -0.45, -0.31], b: [1.05, -0.45, -0.31], w: 2, o: 0.6, dash: "8 8" });
-  tr.push({ t: "l", a: [-0.05, 0.3, -0.31], b: [1.05, 0.3, -0.31], w: 2.6, o: 1, dash: "12 8", color: VERDE, luz: 0.4 });
-  const prog = L(t, EV.diez - 0.1, EV.objetivo, 0.05, 1, (u) => u);
-  tr.push({ t: "p", pts: CAMINO, w: 3.4, o: 1, luz: 0.4, prog, color: t > EV.objetivo - 0.1 ? VERDE : "#fff" });
+  const cam = orbita([0.35, 0.0, 0], L(t, s, e, 4.7, 4.4), L(t, s, e, -0.06, 0.04), 0.06, { apertura: 8, centroY: 900 });
+  const tr: Trazo[] = [...polvo(0.15)];
+  suelo(tr, t, -1.0, 0.12, "#fff", 0.2);
+  const llega = t > EV.objetivo - 0.1;
+  const hasta = t < EV.diez - 0.1 ? SALIO + 1 : Math.round(L(t, EV.diez - 0.1, EV.objetivo - 0.1, SALIO + 1, SERIE3.length, (u) => u));
+  const p = pantallaVelas(tr, [0.35, 0.08, -0.06], 1.3, 0.95, SERIE3, hasta, SALIO);
+  tr.push({ t: "l", a: [-0.24, OBJ, 0.0], b: [0.94, OBJ, 0.0], w: 2.8, o: 1, dash: "12 8", color: VERDE, luz: 0.3 + 0.7 * golpe(t, EV.objetivo - 0.1) });
+  const xs = p.x(SALIO);
+  tr.push({ t: "l", a: [xs, -0.33, 0.01], b: [xs, 0.5, 0.01], w: 2, o: 0.7, dash: "6 6" });
+  tr.push({ t: "e", c: [xs, SERIE3[SALIO], 0.04], r: 0.03, tipo: "nodo", o: 1, color: ROJO });
   const pr = proyector(cam);
-  const qo = pr([1.05, 0.3, -0.31]);
-  const qc = pr([1.05, -0.45, -0.31]);
+  const qo = pr([0.94, OBJ, 0]);
+  const qs = pr([xs, 0.5, 0]);
   const c = cuerpoEn(t, [[s, { mira: 0.8, cejas: 0.3 }], [EV.objetivo - 0.2, { ...MANOS_CABEZA, mira: 0.7 }], [EV.sin - 0.1, { agacha: 0.7, mira: 0, boca: -1, cejas: -1, mIx: -0.15, mIy: -0.52, mDx: 0.15, mDy: -0.52, agobio: 0.6 }]], { mira: 0.8 }, s - 0.4);
-  const a = anclaje(cam, [-0.02, -1, 0.5], 0.45);
+  const a = anclaje(cam, [-0.02, -1, 0.75], 0.45);
   return (
     <>
       <Escena cam={cam} trazos={tr} />
-      <div style={{ position: "absolute", left: Math.min(qo.x, 1000), top: qo.y, transform: "translate(-100%, -130%)", ...mono(34), fontWeight: 700, color: VERDE }}>{t > EV.objetivo - 0.1 ? "OBJETIVO ✓" : "OBJETIVO"}</div>
-      <div style={{ position: "absolute", left: Math.min(qc.x, 1000), top: qc.y, transform: "translate(-100%, 20%)", ...mono(26, 0.75) }}>AQUÍ CERRÓ</div>
+      <div style={{ position: "absolute", left: qs.x, top: qs.y, transform: "translate(-50%, -110%)", ...mono(30), fontWeight: 700, color: ROJO }}>CERRÓ AQUÍ</div>
+      <div style={{ position: "absolute", left: Math.min(qo.x, 1000), top: qo.y, transform: "translate(-100%, -125%)", ...mono(34), fontWeight: 700, color: VERDE, textShadow: llega ? "0 0 20px rgba(47,224,138,0.7)" : undefined }}>{llega ? "OBJETIVO ✓" : "OBJETIVO"}</div>
       <Arriba>
         <Pildora t={t} t0={EV.diez - 0.2} size={52}>⏱ +10 MIN</Pildora>
         <Pildora t={t} t0={EV.sin - 0.15} size={44} color={ROJO}>MARCOS: FUERA</Pildora>
@@ -350,7 +349,7 @@ const Giro: React.FC<P> = ({ t, s, e }) => {
   const tr: Trazo[] = [...polvo(0.25)];
   suelo(tr, t, -1.0, 0.14, "#fff", 0.2);
   // El mercado sigue a su ritmo al fondo
-  fondoGrafico(tr, t - s, 0.3);
+  fondoGrafico(tr, t - s, 0.14);
   // Mesa donde deja el móvil
   cristal(tr, [0.25, -0.55, -0.3], [1.0, -0.5, 0.3], "#fff", 0.9, 0.15, 0.06);
   for (const x of [0.35, 0.9]) tr.push({ t: "l", a: [x, -0.55, 0], b: [x, -1, 0], w: 2.4, o: 0.7 });
@@ -361,7 +360,7 @@ const Giro: React.FC<P> = ({ t, s, e }) => {
     [EV.cierras - 0.2, { mDx: 0.5, mDy: -0.25, mIx: -0.15, mIy: -0.52, mira: 0.6, agacha: 0.1 }],
     [EV.aplicacion + 0.3, { mIx: -0.1, mIy: 0.42, mDx: 0.1, mDy: 0.42, mira: -0.3, boca: 0.8, cejas: 0.2, agacha: 0, incl: -0.05, ojos: 0.85 }],
   ], { ...MOVIL_MANOS }, s - 0.4);
-  const a = anclaje(cam, [-0.35, -1, 0.5], 0.48);
+  const a = anclaje(cam, [-0.18, -1, 0.5], 0.48);
   const enMano = enManos(c, a);
   const pr = proyector(cam);
   const qm = pr([0.62, -0.47, 0]);
