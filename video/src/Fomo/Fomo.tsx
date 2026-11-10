@@ -4,7 +4,7 @@
 // ayer, esperar el retroceso o dejarla ir; los trenes que llegan cada día frente a una cuenta que se vacía; y la pregunta.
 // Tiempos en src/gen/fomo.json (scripts/fomo.py).
 import React from "react";
-import { useCurrentFrame } from "remotion";
+import { AbsoluteFill, useCurrentFrame } from "remotion";
 import datos from "../gen/fomo.json";
 import { ANCHO } from "../Viral/util";
 import { euros, L, mono, muelle } from "../Bot/piezas";
@@ -13,7 +13,7 @@ import { cristal, ROJO, suelo, VERDE } from "../Bot/kit";
 import { Clave, cuerpoEn, Estado, Stick } from "../Bot/stick";
 import { anclaje, BRAZOS_ARRIBA, CHOQUE, Exclama, FlashRojo, MANOS_CABEZA, SiguemeStick, StickMundo } from "../Bot/comun";
 import { CamaraTiembla, fr, PreguntaDos, Sello } from "../Bot/historia";
-import { claves, golpe, Montaje, P, sacude } from "../Explica/Montaje";
+import { claves, CtaSeguir, golpe, Montaje, P, sacude } from "../Explica/Montaje";
 
 export const FOMO_FPS = datos.fps;
 export const FOMO_FRAMES = Math.round(datos.duracion * datos.fps);
@@ -35,8 +35,9 @@ const HOOK: Clave[] = [
 ];
 const VELA_X = 0.35;
 const Hook: React.FC<P> = ({ t, s, e }) => {
-  const sube = L(t, 0, EV.manana + 0.3, 0.15, 1.2, (u) => 1 - Math.pow(1 - u, 2));
-  const cam = orbita([0.05, -0.3 + 0.3 * sube, 0], L(t, s, e, 4.4, 4.9), L(t, s, e, -0.2, 0.1), 0.12, { apertura: 38, centroY: 920 });
+  // Arranca ya «en la acción»: en el fotograma 0 la vela ya es alta y sigue subiendo
+  const sube = L(t, 0, EV.manana + 0.3, 0.3, 0.56, (u) => 1 - Math.pow(1 - u, 2));
+  const cam = orbita([-0.02, -0.45, 0], L(t, s, e, 4.1, 4.4), L(t, s, e, -0.2, 0.1), 0.12, { apertura: 38, centroY: 1030 });
   const tr: Trazo[] = [...polvo(0.3)];
   suelo(tr, t, -1.0, 0.14, "#fff", 0.6);
   // Velas pequeñas detrás y la grande que crece
@@ -49,14 +50,14 @@ const Hook: React.FC<P> = ({ t, s, e }) => {
   tr.push({ t: "l", a: [VELA_X, -1 + sube * 1.6, 0], b: [VELA_X, -1 + sube * 1.6 + 0.12, 0], w: 3, o: 1, color: VERDE });
   const pr = proyector(cam);
   const qv = pr([VELA_X, -1 + sube * 1.6 + 0.16, 0]);
-  const pct = Math.round(L(t, 0, EV.manana + 0.3, 0, 20));
+  const pct = Math.round(L(t, 0, EV.manana + 0.3, 9, 20));
   const base = cuerpoEn(t, HOOK, { mira: 0.8, boca: 0.3 });
   const c = t < EV.aguantarse - 0.4 ? saltitos(base, t, 0.06) : base;
-  const a = anclaje(cam, [-0.55, -1, 0.4], 0.55);
+  const a = anclaje(cam, [-0.42, -1, 0.4], 0.55);
   return (
     <>
       <Escena cam={cam} trazos={tr} />
-      <div style={{ position: "absolute", left: qv.x, top: qv.y, transform: "translate(-50%, -100%)", ...mono(72), fontWeight: 700, color: VERDE, textShadow: "0 0 24px rgba(47,224,138,0.6)" }}>{`+${pct} %`}</div>
+      <div style={{ position: "absolute", left: qv.x, top: qv.y, transform: "translate(-50%, -100%)", ...mono(84), fontWeight: 700, color: VERDE, textShadow: "0 0 24px rgba(47,224,138,0.6)" }}>{`+${pct} %`}</div>
       <StickMundo a={a} c={c} t={t} coleta />
       <Exclama t={t} t0={EV.aguantarse - 0.3} c={c} {...a} />
     </>
@@ -114,16 +115,16 @@ const DOS: Clave[] = [
   [EV.nada - 0.4, { mIx: -0.15, mIy: -0.52, mDx: 0.15, mDy: -0.52, boca: 0.2, cejas: 0.5, ojos: 1, mira: 0 }],
 ];
 const Dos: React.FC<P> = ({ t, s, e }) => {
-  const cam = orbita([0.2, -0.25, 0], L(t, s, e, 4.6, 4.2), L(t, s, e, 0.15, -0.12), 0.1, { apertura: 38, centroY: 900 });
+  const cam = orbita([0.0, -0.25, 0], L(t, s, e, 4.7, 4.4), L(t, s, e, 0.15, -0.12), 0.1, { apertura: 38, centroY: 900 });
   const tr: Trazo[] = [...polvo(0.25)];
   suelo(tr, t, -1.0, 0.14, "#fff", 0.2);
   // Cristal entre Lucía y la vela que sube
   tr.push({ t: "p", pts: [[0.0, -1, -0.6], [0.0, 0.55, -0.6], [0.0, 0.55, 0.6], [0.0, -1, 0.6], [0.0, -1, -0.6]], w: 2.4, o: 0.9, relleno: "#fff", oRelleno: 0.05, luz: 0.2 });
   for (let k = 0; k < 3; k++) tr.push({ t: "l", a: [0.001, 0.3 - k * 0.12, -0.45 + k * 0.1], b: [0.001, 0.15 - k * 0.12, -0.25 + k * 0.1], w: 1.4, o: 0.5 });
   const sube = L(t, s, EV.perder, 0.2, 1.3);
-  cristal(tr, [0.55 - 0.1, -1, -0.1], [0.55 + 0.1, -1 + sube * 1.3, 0.1], VERDE, 1, 0.3, 0.25);
+  cristal(tr, [0.45 - 0.1, -1, -0.1], [0.45 + 0.1, -1 + sube * 1.3, 0.1], VERDE, 1, 0.3, 0.25);
   const c = cuerpoEn(t, DOS, { mira: 0.9 }, s - 0.3);
-  const a = anclaje(cam, [-0.45, -1, 0.3], 0.55);
+  const a = anclaje(cam, [-0.4, -1, 0.3], 0.55);
   const pierdes = Math.round(L(t, EV.fuera, EV.perder + 0.4, 0, 1250));
   return (
     <>
@@ -147,7 +148,17 @@ const Dos: React.FC<P> = ({ t, s, e }) => {
 };
 
 // ------------------------------------------------------------------ 4. Sígueme (Lucía)
-const Sigueme: React.FC<P> = (p) => <SiguemeStick {...p} lema="" coleta />;
+// El «sígueme» no corta la historia: la escena del FOMO sigue viva debajo, atenuada, y el CTA va encima
+const eDos = datos.escenas.find((x) => x.id === "dos")!.e;
+const Sigueme: React.FC<P> = (p) => (
+  <>
+    <AbsoluteFill style={{ filter: "blur(9px)" }}>
+      <Dos t={p.t} s={s2} e={eDos} />
+    </AbsoluteFill>
+    <AbsoluteFill style={{ background: "rgba(0,0,0,0.6)" }} />
+    <CtaSeguir {...p} lema="" sinFondo />
+  </>
+);
 
 // ------------------------------------------------------------------ 5. Tres: no estaba en tu plan de ayer; espera el retroceso o déjala ir
 const s3 = inicio("tres");
@@ -157,7 +168,7 @@ const TRES: Clave[] = [
   [EV.dejala - 0.3, { mDx: 0.25, mDy: 0.55, boca: 0.6, ojos: 0.9, mira: 0.9 }],
 ];
 const Tres: React.FC<P> = ({ t, s, e }) => {
-  const cam = orbita([0.3, -0.3, 0], L(t, s, e, 4.5, 4.1), L(t, s, e, -0.1, 0.12), 0.1, { apertura: 38, centroY: 920 });
+  const cam = orbita([0.36, -0.3, 0], L(t, s, e, 5.6, 5.3), L(t, s, e, -0.1, 0.12), 0.1, { apertura: 38, centroY: 920 });
   const tr: Trazo[] = [...polvo(0.25)];
   suelo(tr, t, -1.0, 0.14, "#fff", 0.2);
   const zona = L(t, EV.retroceda - 0.6, EV.retroceda - 0.2, 0, 1);
@@ -270,4 +281,9 @@ const Pregunta: React.FC<P> = (p) => <PreguntaDos {...p} izq={{ texto: "NUNCA", 
 export const PIEZAS: Record<string, React.FC<P>> = { hook: Hook, uno: Uno, dos: Dos, sigueme: Sigueme, tres: Tres, giro: Giro, pregunta: Pregunta };
 export const CLAVES = claves(["lucía", ["20", VERDE], "aguantarse", "arriba", ["5", ROJO], "fomo", "fuera", "perder", "nada", "sígueme", "plan", "operación", ["retroceda", VERDE], "déjala", "días", "acaban", ["sí", ROJO], "última", "etiqueta"]);
 
-export const Fomo: React.FC = () => <Montaje t={useCurrentFrame() / datos.fps} datos={datos} audio="gen/fomo_mezcla.wav" piezas={PIEZAS} claves={CLAVES} transicion="variada" vineta />;
+// Formato nuevo: gancho escrito desde el fotograma 0, encuadre más lleno, empujes de cámara por frase, trazo más grueso,
+// subtítulos más grandes y final que enlaza con el principio
+const GANCHO = { lineas: ["Vio un *+20_%*", "y *no_se_aguantó*"], hasta: EV.manana + 0.25, color: VERDE };
+export const Fomo: React.FC = () => (
+  <Montaje t={useCurrentFrame() / datos.fps} datos={datos} audio="gen/fomo_mezcla.wav" piezas={PIEZAS} claves={CLAVES} transicion="variada" vineta gancho={GANCHO} zoom={1.1} empujes={0.05} tinta={1.3} bucle subs={{ y: 0.785, tamano: 108, ancho: 900 }} />
+);

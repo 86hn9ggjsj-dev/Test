@@ -4,9 +4,9 @@ import { useMemo } from "react";
 import { AbsoluteFill, Audio, staticFile } from "remotion";
 import { Progreso, salida } from "../Premium/ui";
 import { Palabra, Subtitulos } from "../Viral/Subtitulos";
-import { ANCHO, lerp, ruido, SANS } from "../Viral/util";
+import { ANCHO, lerp, ruido, SANS, SERIF } from "../Viral/util";
 import { Arriba, L, mono, muelle, Teclea, Titular } from "../Bot/piezas";
-import { Escena, io, orbita, polvo } from "../Bot/tres";
+import { Escena, io, orbita, polvo, Tinta } from "../Bot/tres";
 
 export type Datos = { fps: number; duracion: number; palabras: Palabra[]; escenas: { id: string; s: number; e: number }[] };
 export type P = { t: number; s: number; e: number };
@@ -87,9 +87,10 @@ export const Destello: React.FC<{ t: number; t0: number; o?: number }> = ({ t, t
 // Cierre de los reels de alcance: «sígueme» con el botón que se pulsa y la cuenta auditada del bot en la bio
 // El «sígueme» grande va siempre (es la única rotulación de arriba que se mantiene en los vídeos con solo subtítulos);
 // sinLema quita el lema pequeño de encima
-export const CtaSeguir: React.FC<P & { lema: string; sinLema?: boolean }> = ({ t, s, e, lema, sinLema = false }) => (
+// sinFondo: sin el polvo de fondo, para ponerlo encima de una escena que sigue viva (el «sígueme» no corta la historia)
+export const CtaSeguir: React.FC<P & { lema: string; sinLema?: boolean; sinFondo?: boolean }> = ({ t, s, e, lema, sinLema = false, sinFondo = false }) => (
   <>
-    <Escena cam={orbita([0, 0, 0], 9, L(t, s, e, -0.3, 0.2), 0.2, { apertura: 40 })} trazos={polvo(0.35)} />
+    {!sinFondo && <Escena cam={orbita([0, 0, 0], 9, L(t, s, e, -0.3, 0.2), 0.2, { apertura: 40 })} trazos={polvo(0.35)} />}
     <BotonSeguir t={t} t0={s} />
     <div style={{ position: "absolute", top: 660, left: 0, width: ANCHO, display: "flex", justifyContent: "center", opacity: L(t, s + 0.6, s + 0.9, 0, 1, salida) }}>
       <span style={{ ...mono(30, 0.85), padding: "12px 24px", borderRadius: 999, border: "1.5px solid rgba(255,255,255,0.5)" }}>↗ CUENTA AUDITADA DEL BOT EN LA BIO</span>
@@ -145,6 +146,34 @@ const paso = (tipo: string, entra: number, sale: number): React.CSSProperties =>
 };
 const TIPOS = ["barrido", "zoom", "barrido-inv", "zoom"];
 
+// Gancho escrito: el titular del vídeo en grande desde el primer fotograma (sin fundido: quien hace scroll decide en
+// menos de un segundo, muchas veces sin sonido). Las palabras entre * van en serif cursiva y con el color de acento.
+export type GanchoT = { lineas: string[]; hasta: number; color?: string; top?: number; size?: number };
+export const Gancho: React.FC<{ t: number; g: GanchoT }> = ({ t, g }) => {
+  const fuera = lerp(t, g.hasta - 0.22, g.hasta, 0, 1, io);
+  if (fuera >= 1) return null;
+  // Ancho de cada línea en «em»: la serif cursiva va a 1,32× pero es más estrecha
+  const largo = Math.max(...g.lineas.map((l) => l.split(" ").reduce((a, w) => a + w.replace(/\*/g, "").length * (w.startsWith("*") ? 0.6 : 0.56) + 0.24, -0.24)));
+  const size = Math.min(g.size ?? 128, 930 / largo);
+  const pop = 1 + 0.1 * Math.exp(-t * 14);
+  return (
+    <div style={{ position: "absolute", top: g.top ?? 235, left: 0, width: ANCHO, display: "flex", flexDirection: "column", alignItems: "center", gap: size * 0.08, opacity: 1 - fuera, transform: `translateY(${-fuera * 60}px) scale(${pop})`, transformOrigin: "50% 30%" }}>
+      {g.lineas.map((linea, k) => (
+        <div key={k} style={{ display: "flex", alignItems: "baseline", gap: size * 0.24, whiteSpace: "nowrap" }}>
+          {linea.split(" ").map((w, i) => {
+            const clave = w.startsWith("*");
+            return (
+              <span key={i} style={{ fontFamily: clave ? SERIF : SANS, fontStyle: clave ? "italic" : "normal", fontWeight: clave ? 400 : 800, fontSize: clave ? size * 1.32 : size, letterSpacing: clave ? "0" : "-0.02em", lineHeight: 1, color: clave ? (g.color ?? "#fff") : "#fff", textShadow: "0 0 2px rgba(0,0,0,0.9), 0 4px 18px rgba(0,0,0,0.85), 0 10px 50px rgba(0,0,0,0.7)" }}>
+                {w.replace(/\*/g, "").replace(/_/g, " ")}
+              </span>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export const Montaje: React.FC<{
   t: number;
   datos: Datos;
@@ -154,29 +183,66 @@ export const Montaje: React.FC<{
   fondo?: string;
   transicion?: "fundido" | "variada";
   vineta?: boolean;
-}> = ({ t, datos, audio, piezas, claves, fondo = "radial-gradient(ellipse 90% 70% at 50% 45%, #0b0b0c, #000)", transicion = "fundido", vineta = false }) => {
+  // ---- formato nuevo (todo opcional; sin estas opciones el vídeo sale como siempre)
+  gancho?: GanchoT; // titular escrito en grande desde el fotograma 0; mientras está, no hay subtítulos
+  zoom?: number; // escala base de las escenas, para llenar más el encuadre
+  empujes?: number; // acercamiento seco alterno en cada frase (p. ej. 0.06): cambia el plano cada 2-3 s
+  tinta?: number; // multiplica el grosor de los trazos 3D
+  bucle?: boolean; // los últimos fotogramas funden con el primero para que enlace al repetirse
+  subs?: { y?: number; tamano?: number; ancho?: number };
+}> = ({ t, datos, audio, piezas, claves, fondo = "radial-gradient(ellipse 90% 70% at 50% 45%, #0b0b0c, #000)", transicion = "fundido", vineta = false, gancho, zoom = 1, empujes = 0, tinta = 1, bucle = false, subs = {} }) => {
   const cortes = useMemo(() => datos.escenas.map((x) => x.s), [datos]);
+  // Comienzo de cada frase (tras punto, interrogación, dos puntos o puntos suspensivos, o al cambiar de escena)
+  const frases = useMemo(() => {
+    const ini = [0];
+    datos.palabras.forEach((p, i) => {
+      const ant = datos.palabras[i - 1];
+      if (ant && (/[.?!:…]$/.test(ant.w) || cortes.some((c) => c > ant.s && c <= p.s)) && p.s - ini[ini.length - 1] > 0.9) ini.push(p.s);
+    });
+    return ini;
+  }, [datos, cortes]);
   const funde = transicion === "variada" ? 0.2 : FUNDE;
+  let k = 0;
+  while (k + 1 < frases.length && frases[k + 1] <= t) k++;
+  const u = Math.min(1, Math.max(0, (t - frases[k]) / 0.12));
+  const mezcla = 1 - Math.pow(1 - u, 3);
+  const empuje = k === 0 ? 0 : (k % 2) * mezcla + ((k - 1) % 2) * (1 - mezcla);
+  const escala = zoom * (1 + empujes * empuje);
+  const lazo = bucle ? lerp(t, datos.duracion - 0.4, datos.duracion - 0.06, 0, 1, io) : 0;
+  const Primera = piezas[datos.escenas[0].id];
   return (
     <AbsoluteFill style={{ background: fondo }}>
       <Audio src={staticFile(audio)} />
-      {datos.escenas
-        .filter((p) => t >= p.s - funde && t < p.e + funde)
-        .map((p) => {
-          const j = datos.escenas.indexOf(p);
-          const Pieza = piezas[p.id];
-          const entra = p.s <= 0.01 ? 1 : lerp(t, p.s - funde, p.s + funde, 0, 1, io);
-          const sale = p.e >= datos.duracion - 0.01 ? 0 : lerp(t, p.e - funde, p.e + funde, 0, 1, io);
-          // La pantalla que sale usa la transición de la que entra, para que el corte se lea como un solo movimiento
-          const tipo = transicion === "variada" ? (entra < 1 ? TIPOS[(j - 1 + TIPOS.length) % TIPOS.length] : TIPOS[j % TIPOS.length]) : "fundido";
-          return (
-            <AbsoluteFill key={p.id} style={paso(tipo, entra, sale)}>
-              <Pieza t={t} s={p.s} e={p.e} />
+      <Tinta.Provider value={tinta}>
+        <AbsoluteFill style={{ transform: escala !== 1 ? `scale(${escala.toFixed(4)})` : undefined, transformOrigin: "50% 60%" }}>
+          {datos.escenas
+            .filter((p) => t >= p.s - funde && t < p.e + funde)
+            .map((p) => {
+              const j = datos.escenas.indexOf(p);
+              const Pieza = piezas[p.id];
+              const entra = p.s <= 0.01 ? 1 : lerp(t, p.s - funde, p.s + funde, 0, 1, io);
+              const sale = p.e >= datos.duracion - 0.01 ? 0 : lerp(t, p.e - funde, p.e + funde, 0, 1, io);
+              // La pantalla que sale usa la transición de la que entra, para que el corte se lea como un solo movimiento
+              const tipo = transicion === "variada" ? (entra < 1 ? TIPOS[(j - 1 + TIPOS.length) % TIPOS.length] : TIPOS[j % TIPOS.length]) : "fundido";
+              return (
+                <AbsoluteFill key={p.id} style={paso(tipo, entra, sale)}>
+                  <Pieza t={t} s={p.s} e={p.e} />
+                </AbsoluteFill>
+              );
+            })}
+        </AbsoluteFill>
+        {lazo > 0.001 && (
+          <AbsoluteFill style={{ opacity: lazo, background: fondo }}>
+            <AbsoluteFill style={{ transform: zoom !== 1 ? `scale(${zoom})` : undefined, transformOrigin: "50% 60%" }}>
+              <Primera t={0} s={datos.escenas[0].s} e={datos.escenas[0].e} />
             </AbsoluteFill>
-          );
-        })}
+            {gancho && <Gancho t={0.3} g={gancho} />}
+          </AbsoluteFill>
+        )}
+      </Tinta.Provider>
       {vineta && <AbsoluteFill style={{ background: "radial-gradient(ellipse 75% 60% at 50% 45%, transparent 55%, rgba(0,0,0,0.6))", pointerEvents: "none" }} />}
-      <Subtitulos t={t} palabras={datos.palabras} cortes={cortes} claves={claves} duracion={datos.duracion} y={() => 0.765} estilo="premium" dinamico />
+      {gancho && lazo < 0.5 && <Gancho t={t} g={gancho} />}
+      {(!gancho || t >= gancho.hasta - 0.1) && lazo < 0.5 && <Subtitulos t={t} palabras={datos.palabras} cortes={cortes} claves={claves} duracion={datos.duracion} y={() => subs.y ?? 0.765} estilo="premium" dinamico tamano={subs.tamano} ancho={subs.ancho} />}
       <Progreso t={t} duracion={datos.duracion} />
     </AbsoluteFill>
   );
