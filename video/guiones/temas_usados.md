@@ -3,6 +3,9 @@
 Antes de proponer guiones nuevos, comprobar esta lista. Variar también el formato del gancho, la frase del «sígueme»
 de en medio y la pregunta final de cada vídeo.
 
+OBLIGATORIO en todos los guiones: CTA de seguimiento a mitad del guion (bloque `sigueme`, «Sígueme, que…»), justo en
+el momento de suspense, antes del giro. Nunca al principio ni solo al final.
+
 Formato desde el 7 nov: solo subtítulos abajo (sin titulares arriba); las cifras van dentro de la animación. La única
 excepción es el CTA de en medio: el «sígueme» grande con el botón Seguir y la cuenta auditada siempre se ve.
 
