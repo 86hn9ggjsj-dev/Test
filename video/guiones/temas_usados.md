@@ -61,3 +61,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 10 nov | En demo +300 %, en real 11 días (demo) | pasar a real con 20 € para aprender a perder; subir cuando no cambie el pulso |
 | 10 nov | Bill Hwang y Archegos, 20.000 M en 2 días (archegos) | muy concentrado y muy apalancado: basta un error |
 | 10 nov | Marcos miró el gráfico 143 veces (veces) | stop, objetivo y alerta antes de entrar; cerrar la aplicación |
+| 11 nov | Tu peor operación es la de después de perder (venganza) | operar por venganza; 2 pérdidas seguidas y se acabó el día |
+| 11 nov | GameStop y Melvin Capital, −53 % en un mes (gamestop) | en corto la pérdida no tiene techo; stop obligatorio |
+| 11 nov | El diario de Lucía, 30 operaciones (diario) | apuntar hora, motivo y emoción; quitar lo que pierde |
