@@ -1,36 +1,54 @@
-# Operar por venganza: la pérdida que se convierte en tres
+# Tu peor operación es la que abres justo después de perder
 
-Reel de alcance (~22 s, 1080x1920): gancho, contexto y CTA de seguir. La promo del bot va en la descripción y en un comentario fijado.
+Reel 5-30-10 (~41 s, 1080x1920): gancho de 5 s, una sola idea con el «sígueme» a mitad y 10 s de conversión (comenta BOT → mensaje directo y cuenta auditada).
 
 **hook**  
-Si después de perder entras otra vez para recuperarlo, para.
+Tu peor operación es la que abres justo después de perder.
 
-**contexto**  
-Se llama operar por venganza. Entras sin plan, con más tamaño y con rabia. Y una pérdida se convierte en tres.
+**uno**  
+Marcos perdió 200 euros a las 10 de la mañana. Dos minutos después ya estaba dentro otra vez. Con el doble. Para recuperar.
 
-**regla**  
-Regla: dos pérdidas seguidas, y cierras la plataforma hasta mañana.
+**dos**  
+Volvió a perder. Y volvió a entrar.
 
-**cta**  
-Sígueme si quieres dejar de regalarle dinero al mercado.
+**sigueme**  
+Sígueme, que esto nos ha pasado a todos.
+
+**tres**  
+A las 11 había perdido 1.400 euros. Después de perder, tu cabeza no busca ganar: busca dejar de sentirse mal.
+
+**giro**  
+La solución: escríbelo antes de abrir la plataforma. 2 pérdidas seguidas y se acabó el día. Mañana el mercado sigue ahí.
+
+**cierre**  
+Si has llegado hasta aquí, es que te ha pasado. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.
 
 ## Versión con gestos (ElevenLabs, modelo Eleven v3)
 
 Las etiquetas entre corchetes no se leen: marcan respiraciones, pausas y tono. Las palabras son las mismas que arriba, así el vídeo se sincroniza solo. Pegar con una línea en blanco entre párrafos.
 
-[inhales] Si después de perder entras otra vez para recuperarlo... [short pause] para.
+[serious] Tu peor operación es la que abres justo después de perder.
 
-Se llama operar por venganza. [exhales] Entras sin plan, con más tamaño y con rabia. [short pause] Y una pérdida se convierte en tres.
+[curious] Marcos perdió doscientos euros a las diez de la mañana. Dos minutos después ya estaba dentro otra vez. [mischievously] Con el doble. Para recuperar.
 
-Regla: dos pérdidas seguidas... y cierras la plataforma hasta mañana.
+Volvió a perder. Y volvió a entrar.
 
-[warmly] Sígueme si quieres dejar de regalarle dinero al mercado.
+[warmly] Sígueme, que esto nos ha pasado a todos.
+
+[inhales] A las once había perdido mil cuatrocientos euros. [serious] Después de perder, tu cabeza no busca ganar: busca dejar de sentirse mal.
+
+La solución: escríbelo antes de abrir la plataforma. Dos pérdidas seguidas y se acabó el día. [short pause] Mañana el mercado sigue ahí.
+
+[warmly] Si has llegado hasta aquí, es que te ha pasado. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.
 
 ## Pantallas
 
 | Bloque | Titular | Motivo |
 |---|---|---|
-| hook | *para* | una pérdida en rojo y el cursor yendo directo a COMPRAR otra vez; STOP gigante |
-| contexto | una pérdida → *tres* | tres operaciones seguidas, cada una más grande (×1, ×2, ×3), todas en ✕ |
-| regla | 2 ✕ = *cerrar* | dos ✕ seguidas y la plataforma se apaga; «hasta mañana» |
-| cta | *sígueme* | botón Seguir que se pulsa; debajo, «cuenta auditada del bot en la bio» |
+| hook |  | fotograma 0 en plena acción: Marcos en su escritorio de casa (monitor, taza, ventana), aporreando COMPRAR con la cara roja; marcador −200 € → −1.400 € y reloj de pared |
+| uno |  | reloj de pared a las 10:00; vela roja −200 €; a las 10:02 el botón COMPRAR con «×2» y una nota adhesiva «RECUPERAR» |
+| dos |  | bucle rápido: pierde, entra, pierde, entra; el lote crece en cada vuelta (×2, ×4, ×8) |
+| sigueme |  | «sígueme» encima de la escena, que sigue viva y desenfocada |
+| tres |  | reloj a las 11:00 y −1.400 € en rojo; cerebro con un termómetro de «sentirse mal» y Marcos pulsando cualquier botón |
+| giro |  | dos cruces rojas = «HOY SE ACABÓ»; cierra el portátil, coge la chaqueta y sale a la calle; amanece: «MAÑANA SIGUE AHÍ» |
+| cierre |  | caja de comentario que escribe «BOT», se envía, llega el mensaje directo y la tarjeta «CUENTA AUDITADA ✓» |

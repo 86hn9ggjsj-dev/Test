@@ -228,3 +228,123 @@ export const pantallaVelas = (tr: Trazo[], c: V3, w: number, h: number, serie: n
   }
   return { x: (i: number) => x0 + ((x1 - x0) * i) / (serie.length - 1) };
 };
+
+// ------------------------------------------------------------------ despacho en casa: mesa con monitor, teclado, taza y flexo; ventana (día o
+// noche), reloj de pared con la hora y un cuadro. El monitor (DESPACHO.MON) recibe encima la pantalla 2D (PantallaPC).
+// Cámara de frente (p. ej. orbita([0.35,−0.42,−0.3], 3.4, −0.12, 0.1)).
+export const DESPACHO = { ZW: -0.75, MON: { c: [0.55, -0.25, -0.5] as V3, w: 0.8, h: 0.48 }, RELOJ: [0.2, 0.26, -0.75] as V3 };
+export const despachoCasa = (tr: Trazo[], t: number, op: { hora: number; dia?: number; flexo?: number; monitor?: boolean } = { hora: 10 }, o = 1) => {
+  const { ZW, MON, RELOJ } = DESPACHO;
+  const dia = op.dia ?? 1;
+  // Suelo de tarima y rodapié
+  for (let z = ZW; z <= 1.2; z += 0.2) tr.push({ t: "l", a: [-1.6, -1, z], b: [1.8, -1, z], w: 1, o: 0.14 * o });
+  tr.push({ t: "l", a: [-1.6, -1, ZW], b: [1.8, -1, ZW], w: 1.8, o: 0.6 * o });
+  tr.push({ t: "l", a: [-1.6, -0.94, ZW], b: [1.8, -0.94, ZW], w: 1.2, o: 0.35 * o });
+  // Ventana (arriba a la derecha) con sol (día) o luna y estrellas (noche)
+  const wx0 = 0.62;
+  const wx1 = 1.04;
+  const wy0 = 0.1;
+  const wy1 = 0.56;
+  tr.push({ t: "p", pts: rectXY(wx0, wy0, wx1, wy1, ZW), w: 2.4, o, relleno: "#fff", oRelleno: 0.03 + 0.05 * dia });
+  tr.push({ t: "l", a: [(wx0 + wx1) / 2, wy0, ZW], b: [(wx0 + wx1) / 2, wy1, ZW], w: 1.6, o: 0.8 * o });
+  tr.push({ t: "l", a: [wx0, (wy0 + wy1) / 2, ZW], b: [wx1, (wy0 + wy1) / 2, ZW], w: 1.6, o: 0.8 * o });
+  tr.push({ t: "l", a: [wx0 - 0.04, wy0, ZW + 0.03], b: [wx1 + 0.04, wy0, ZW + 0.03], w: 2.6, o: 0.9 * o });
+  if (dia > 0.01) {
+    const sol: V3 = [0.93, 0.44 - 0.2 * (1 - dia), ZW - 0.01];
+    tr.push({ t: "p", pts: circulo(sol, 0.045, "z", 24), w: 2, o: dia * o, relleno: "#fff", oRelleno: 0.4 * dia, luz: 0.8 });
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * Math.PI * 2 + t * 0.4;
+      tr.push({ t: "l", a: [sol[0] + Math.cos(a) * 0.065, sol[1] + Math.sin(a) * 0.065, sol[2]], b: [sol[0] + Math.cos(a) * 0.09, sol[1] + Math.sin(a) * 0.09, sol[2]], w: 1.6, o: dia * o });
+    }
+  }
+  if (dia < 0.99) {
+    tr.push({ t: "p", pts: circulo([0.72, 0.46, ZW - 0.01], 0.04, "z", 20), w: 1.8, o: (1 - dia) * o, relleno: "#fff", oRelleno: 0.6 * (1 - dia), luz: 0.6 });
+    for (let k = 0; k < 6; k++) tr.push({ t: "e", c: [0.68 + k * 0.065, 0.18 + 0.07 * ((k * 7) % 3), ZW - 0.01], r: 0.008, tipo: "punto", o: (1 - dia) * o, luz: 0.6 });
+  }
+  // Cuadro
+  tr.push({ t: "p", pts: rectXY(-0.32, 0.02, -0.02, 0.26, ZW), w: 1.8, o: 0.8 * o });
+  tr.push({ t: "p", pts: [[-0.29, 0.05, ZW], [-0.21, 0.18, ZW], [-0.15, 0.11, ZW], [-0.1, 0.2, ZW], [-0.05, 0.05, ZW]], w: 1.4, o: 0.7 * o });
+  // Reloj de pared con la hora
+  tr.push({ t: "p", pts: circulo(RELOJ, 0.12, "z", 40), w: 2.4, o, relleno: "#fff", oRelleno: 0.05, luz: 0.2 });
+  for (let k = 0; k < 12; k++) {
+    const a = (k / 12) * Math.PI * 2;
+    tr.push({ t: "l", a: [RELOJ[0] + Math.sin(a) * 0.1, RELOJ[1] + Math.cos(a) * 0.1, ZW + 0.002], b: [RELOJ[0] + Math.sin(a) * 0.115, RELOJ[1] + Math.cos(a) * 0.115, ZW + 0.002], w: k % 3 ? 1 : 2, o });
+  }
+  const am = (op.hora % 1) * Math.PI * 2;
+  const ah = ((op.hora % 12) / 12) * Math.PI * 2;
+  tr.push({ t: "l", a: [RELOJ[0], RELOJ[1], ZW + 0.004], b: [RELOJ[0] + Math.sin(ah) * 0.06, RELOJ[1] + Math.cos(ah) * 0.06, ZW + 0.004], w: 3.2, o });
+  tr.push({ t: "l", a: [RELOJ[0], RELOJ[1], ZW + 0.004], b: [RELOJ[0] + Math.sin(am) * 0.095, RELOJ[1] + Math.cos(am) * 0.095, ZW + 0.004], w: 2, o });
+  // Mesa
+  const y = -0.6;
+  cristal(tr, [0.0, y - 0.03, -0.64], [1.1, y, -0.1], "#fff", 0.9 * o, 0.15, 0.06);
+  for (const [x, z] of [[0.03, -0.13], [1.07, -0.13], [0.03, -0.61], [1.07, -0.61]] as [number, number][]) tr.push({ t: "l", a: [x, y - 0.03, z], b: [x, -1, z], w: 2.2, o: 0.8 * o });
+  cristal(tr, [0.8, -0.88, -0.6], [1.05, y - 0.03, -0.16], "#fff", 0.6 * o, 0.1, 0.03);
+  // Monitor con peana (la pantalla la pinta PantallaPC)
+  if (op.monitor !== false) {
+    const { c, w, h } = MON;
+    tr.push({ t: "p", pts: rrXY(c[0], c[1], w, h, 0.025, c[2]), w: 2.8, o, relleno: "#000", oRelleno: 0.9, luz: 0.25 });
+    tr.push({ t: "l", a: [c[0], c[1] - h / 2, c[2]], b: [c[0], y, c[2]], w: 3, o });
+    tr.push({ t: "p", pts: elipse([c[0], y + 0.002, c[2]], 0.1, 0.05, 20), w: 2, o });
+  }
+  // Teclado y ratón
+  tr.push({ t: "p", pts: [[0.33, y + 0.005, -0.32], [0.77, y + 0.005, -0.32], [0.77, y + 0.005, -0.21], [0.33, y + 0.005, -0.21], [0.33, y + 0.005, -0.32]], w: 1.8, o, relleno: "#fff", oRelleno: 0.08 });
+  for (let k = 1; k < 4; k++) tr.push({ t: "l", a: [0.35, y + 0.006, -0.32 + k * 0.027], b: [0.75, y + 0.006, -0.32 + k * 0.027], w: 0.8, o: 0.5 * o });
+  tr.push({ t: "p", pts: elipse([0.87, y + 0.005, -0.27], 0.025, 0.04, 14), w: 1.6, o });
+  // Taza
+  tr.push({ t: "p", pts: elipse([1.0, y + 0.1, -0.4], 0.04, 0.03, 16), w: 1.6, o });
+  tr.push({ t: "p", pts: elipse([1.0, y, -0.4], 0.04, 0.03, 16, 0, Math.PI), w: 1.6, o });
+  for (const s of [-1, 1]) tr.push({ t: "l", a: [1.0 + s * 0.04, y, -0.4], b: [1.0 + s * 0.04, y + 0.1, -0.4], w: 1.6, o });
+  tr.push({ t: "p", pts: circulo([0.955, y + 0.05, -0.4], 0.025, "z", 12, Math.PI / 2, Math.PI * 1.5), w: 1.6, o });
+  // Flexo
+  const fl = op.flexo ?? 1;
+  tr.push({ t: "p", pts: elipse([0.1, y + 0.003, -0.5], 0.06, 0.04, 16), w: 1.8, o });
+  tr.push({ t: "l", a: [0.1, y, -0.5], b: [0.04, y + 0.3, -0.5], w: 2.2, o });
+  tr.push({ t: "l", a: [0.04, y + 0.3, -0.5], b: [0.16, y + 0.36, -0.5], w: 2.2, o });
+  tr.push({ t: "p", pts: [[0.12, y + 0.4, -0.5], [0.22, y + 0.38, -0.5], [0.24, y + 0.28, -0.5], [0.13, y + 0.31, -0.5], [0.12, y + 0.4, -0.5]], w: 2, o, relleno: "#fff", oRelleno: 0.1 });
+  if (fl > 0.01) tr.push({ t: "e", c: [0.19, y + 0.29, -0.5], r: 0.025, tipo: "punto", o: fl * o, luz: 1, color: "#ffd27a" });
+};
+
+// ------------------------------------------------------------------ cruce de calles: la carretera se parte en dos con dos señales encima
+// (los rótulos los pone la escena en 2D sobre CRUCE.izq / CRUCE.der). Cámara de frente (p. ej. orbita([0,−0.35,−1.3], 3.6, 0, 0.12)).
+export const CRUCE = { izq: [-0.33, 0.03, -2.2] as V3, der: [0.33, -0.17, -2.2] as V3 };
+export const cruce = (tr: Trazo[], t: number, o = 1) => {
+  const y = -1;
+  // Bordes de la carretera y la «Y»
+  tr.push({ t: "p", pts: [[-0.65, y, 2], [-0.65, y, -1.6], [-2.8, y, -6]], w: 3, o, luz: 0.2 });
+  tr.push({ t: "p", pts: [[0.65, y, 2], [0.65, y, -1.6], [2.8, y, -6]], w: 3, o, luz: 0.2 });
+  tr.push({ t: "p", pts: [[-1.4, y, -6], [0, y, -2.6], [1.4, y, -6]], w: 3, o, luz: 0.2 });
+  // Marcas discontinuas del centro y de cada ramal
+  tr.push({ t: "l", a: [0, y, 2], b: [0, y, -1.8], w: 2.2, o: 0.8 * o, dash: "18 14" });
+  tr.push({ t: "l", a: [-0.35, y, -2.2], b: [-2.1, y, -6], w: 2, o: 0.7 * o, dash: "18 14" });
+  tr.push({ t: "l", a: [0.35, y, -2.2], b: [2.1, y, -6], w: 2, o: 0.7 * o, dash: "18 14" });
+  // Aceras
+  tr.push({ t: "p", pts: [[-0.9, y + 0.03, 2], [-0.9, y + 0.03, -1.4], [-3.2, y + 0.03, -6]], w: 1.4, o: 0.5 * o });
+  tr.push({ t: "p", pts: [[0.9, y + 0.03, 2], [0.9, y + 0.03, -1.4], [3.2, y + 0.03, -6]], w: 1.4, o: 0.5 * o });
+  // Farolas y árboles a los lados
+  for (const [x, z] of [[-1.05, 0.6], [1.05, 0.6], [-1.15, -0.9], [1.15, -0.9]] as [number, number][]) {
+    tr.push({ t: "l", a: [x, y, z], b: [x, 0.35, z], w: 2.2, o: 0.8 * o });
+    tr.push({ t: "l", a: [x, 0.35, z], b: [x - Math.sign(x) * 0.2, 0.35, z], w: 2.2, o: 0.8 * o });
+    tr.push({ t: "e", c: [x - Math.sign(x) * 0.2, 0.31, z], r: 0.03, tipo: "punto", o: 0.9 * o, luz: 0.8 });
+  }
+  for (const [x, z] of [[-1.5, -2.6], [1.5, -2.6], [-1.8, -3.8], [1.8, -3.8]] as [number, number][]) {
+    tr.push({ t: "l", a: [x, y, z], b: [x, -0.55, z], w: 2.2, o: 0.7 * o });
+    tr.push({ t: "p", pts: circulo([x, -0.35, z], 0.22, "z", 24), w: 1.8, o: 0.7 * o, relleno: "#fff", oRelleno: 0.04 });
+  }
+  // Edificios al fondo
+  for (let k = 0; k < 7; k++) {
+    const x = -2.4 + k * 0.8;
+    const h = 0.6 + 0.5 * ((k * 37) % 5) / 5;
+    tr.push({ t: "p", pts: rectXY(x - 0.3, y, x + 0.3, y + h + 0.6, -7), w: 1.4, o: 0.35 * o, relleno: "#fff", oRelleno: 0.02 });
+  }
+  // Poste y dos señales con flecha (izquierda y derecha)
+  tr.push({ t: "l", a: [0, y, -2.25], b: [0, 0.16, -2.25], w: 3, o, luz: 0.2 });
+  const flecha = (x0: number, x1: number, yc: number, z: number, dir: number): V3[] => {
+    const h = 0.09;
+    const punta = dir > 0 ? x1 + 0.08 : x0 - 0.08;
+    return dir > 0
+      ? [[x0, yc - h, z], [x1, yc - h, z], [punta, yc, z], [x1, yc + h, z], [x0, yc + h, z], [x0, yc - h, z]]
+      : [[x1, yc - h, z], [x0, yc - h, z], [punta, yc, z], [x0, yc + h, z], [x1, yc + h, z], [x1, yc - h, z]];
+  };
+  tr.push({ t: "p", pts: flecha(-0.62, -0.03, CRUCE.izq[1], -2.2, -1), w: 2.4, o, relleno: "#fff", oRelleno: 0.08 });
+  tr.push({ t: "p", pts: flecha(0.03, 0.62, CRUCE.der[1], -2.2, 1), w: 2.4, o, color: ROJO, relleno: ROJO, oRelleno: 0.12 + 0.06 * Math.sin(t * 6), luz: 0.4 });
+};
