@@ -141,7 +141,7 @@ const Dos: React.FC<P> = ({ t, s, e }) => {
   const compran = t > EV.comprar - 0.3;
   for (let f = 0; f < FILAS; f++)
     for (let k = 0; k < COLS; k++) {
-      const g = muelle(t, EV.reddit - 0.8 + f * 0.12 + k * 0.03, 200, 14);
+      const g = muelle(t, s - 0.15 + f * 0.1 + k * 0.025, 200, 14);
       if (g < 0.02) continue;
       const x = -1.05 + k * 0.35 + (f % 2) * 0.17;
       const z = 0.2 - f * 0.45;
@@ -162,7 +162,7 @@ const Dos: React.FC<P> = ({ t, s, e }) => {
       <Escena cam={cam} trazos={tr} />
       {t > corte2 - 0.2 && <Rotulo x={Math.min(qv.x + 20, 980)} y={Math.max(qv.y, 330)} ancla="translate(0, -50%)" size={70} color={VERDE} caja>{`${precio} $`}</Rotulo>}
       <Arriba>
-        <Pildora t={t} t0={EV.reddit - 0.5} size={38} fin={corte2}>MILES DE PEQUEÑOS INVERSORES</Pildora>
+        <Pildora t={t} t0={s + 0.1} size={38} fin={corte2}>MILES DE PEQUEÑOS INVERSORES</Pildora>
         <Pildora t={t} t0={EV.reddit - 0.2} size={38} color={VERDE} fin={corte2}>COMPRAR ↑</Pildora>
       </Arriba>
       <FlashVerde t={t} t0={EV["400"] - 0.05} o={0.18} />
