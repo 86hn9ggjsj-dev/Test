@@ -417,14 +417,13 @@ export const oficinaFondo = (tr: Trazo[], t: number, linea: (u: number) => numbe
 };
 
 // ------------------------------------------------------------------ casa con o sin tejado (para «la pérdida no tiene techo»)
-export const casa = (tr: Trazo[], x: number, z: number, techo: number, o = 1, color = "#fff") => {
-  const w = 0.62;
+export const casa = (tr: Trazo[], x: number, z: number, techo: number, o = 1, color = "#fff", w = 0.62) => {
   const h = 0.5;
   const y0 = -1;
   cristal(tr, [x - w / 2, y0, z - 0.25], [x + w / 2, y0 + h, z + 0.25], color, o, 0.2, 0.04);
   tr.push({ t: "p", pts: rectXY(x - 0.07, y0, x + 0.07, y0 + 0.24, z + 0.252), w: 2, o });
-  tr.push({ t: "p", pts: rectXY(x - 0.24, y0 + 0.28, x - 0.12, y0 + 0.4, z + 0.252), w: 1.8, o });
-  tr.push({ t: "p", pts: rectXY(x + 0.12, y0 + 0.28, x + 0.24, y0 + 0.4, z + 0.252), w: 1.8, o });
+  tr.push({ t: "p", pts: rectXY(x - w * 0.39, y0 + 0.28, x - w * 0.19, y0 + 0.4, z + 0.252), w: 1.8, o });
+  tr.push({ t: "p", pts: rectXY(x + w * 0.19, y0 + 0.28, x + w * 0.39, y0 + 0.4, z + 0.252), w: 1.8, o });
   if (techo > 0.01) {
     const yt = y0 + h;
     const cima = yt + 0.3 * techo;

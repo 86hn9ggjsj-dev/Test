@@ -65,14 +65,14 @@ const flecha = (tr: Trazo[], a: V3, b: V3, color: string, w = 4, luz = 0.5) => {
 };
 
 // ------------------------------------------------------------------ 1. Hook: el rascacielos del fondo en rojo (−53 %) frente a una tienda de videojuegos
-const TORRE: [number, number] = [-0.45, -0.3];
-const TIENDA: [number, number] = [0.62, 0.0];
+const TORRE: [number, number] = [-0.33, -0.3];
+const TIENDA: [number, number] = [0.43, 0.0];
 const Hook: React.FC<P> = ({ t, s, e }) => {
-  const mira = L(t, EV.mes, EV.videojuegos - 0.2, 0.0, 0.3);
-  const cam = orbita([mira, -0.3, -0.2], L(t, s, e, 4.4, 4.0), L(t, s, e, -0.14, 0.08) + sacude(t, EV.mitad - 0.05, 0.025), 0.1, { apertura: 6, centroY: 1080 });
+  const mira = L(t, EV.mes, EV.videojuegos - 0.2, 0.05, 0.2);
+  const cam = orbita([mira, -0.3, -0.2], L(t, s, e, 4.7, 4.3), L(t, s, e, -0.14, 0.08) + sacude(t, EV.mitad - 0.05, 0.025), 0.1, { apertura: 6, centroY: 1080 });
   const tr: Trazo[] = [...polvo(0.12)];
   suelo(tr, t, -1.0, 0.14, "#fff", 0.3);
-  rascacielos(tr, TORRE[0], TORRE[1], 0.62, 1.75, t, 1);
+  rascacielos(tr, TORRE[0], TORRE[1], 0.5, 1.75, t, 1);
   tiendaVideojuegos(tr, TIENDA[0], TIENDA[1], t, 0.5 + 0.5 * L(t, EV.videojuegos - 0.6, EV.videojuegos - 0.2, 0, 1));
   const pr = proyector(cam);
   const qc = pr(cartelTienda(TIENDA[0], TIENDA[1]));
@@ -100,14 +100,14 @@ const Hook: React.FC<P> = ({ t, s, e }) => {
 const s1 = inicio("uno");
 const bajada = (u: number) => 0.8 - 0.6 * u + 0.06 * Math.sin(u * 19);
 const Uno: React.FC<P> = ({ t, s, e }) => {
-  const cam = orbita([0, -0.3, -0.6], L(t, s, e, 3.9, 3.6), L(t, s, e, 0.1, -0.06), 0.1, { apertura: 6, centroY: 1000 });
+  const cam = orbita([0, -0.12, -0.6], L(t, s, e, 4.1, 3.8), L(t, s, e, 0.1, -0.06), 0.1, { apertura: 6, centroY: 1000 });
   const tr: Trazo[] = [...polvo(0.1)];
   oficinaFondo(tr, t, bajada);
   // Flecha que baja en la pantalla central
   const kf = L(t, EV.corto - 0.4, EV.corto + 0.2, 0, 1);
   if (kf > 0) flecha(tr, [0.1, 0.38, OFICINA.ZW + 0.02], [0.1, 0.38 - 0.3 * kf, OFICINA.ZW + 0.02], ROJO, 5);
   const c = cuerpoEn(t, [[s, { mira: 0.6, boca: 0.5, cejas: 0.3, mDx: 0.3, mDy: -0.2 }], [EV.caia - 0.4, { ...ENCOGE, boca: 0.8, mira: 0 }]], { mira: 0.6 }, s - 0.4);
-  const a = anclaje(cam, [-0.3, -1, 0.1], 0.46);
+  const a = anclaje(cam, [-0.42, -1, -0.3], 0.42);
   const pr = proyector(cam);
   const qp = pr([0.6, 0.48, OFICINA.ZW]);
   return (
@@ -184,16 +184,16 @@ const Sigueme: React.FC<P> = (p) => (
 // ------------------------------------------------------------------ 5. Tres: comprar tiene suelo · en corto no hay techo · 2.750 M y CERRADO
 const s3 = inicio("tres");
 const corte3 = EV["2750"] - 0.55;
-const CASAS: [number, number] = [-0.45, 0.45];
-const camCasas = (t: number, s: number, e: number) => orbita([0, -0.3, 0], L(t, s, e, 3.8, 3.5), L(t, s, e, -0.06, 0.06), 0.1, { apertura: 6, centroY: 1060 });
+const CASAS: [number, number] = [-0.4, 0.4];
+const camCasas = (t: number, s: number, e: number) => orbita([0, -0.3, 0], L(t, s, e, 5.2, 4.9), 0, 0.1, { apertura: 6, centroY: 1060 });
 const TresA: React.FC<P> = ({ t, s }) => {
   const cam = camCasas(t, s, corte3);
   const tr: Trazo[] = [...polvo(0.12)];
   suelo(tr, t, -1.0, 0.14, "#fff", 0.2);
   const izq = L(t, EV.compras - 0.4, EV.compras, 0, 1);
   const der = L(t, EV.vendes - 0.4, EV.vendes, 0, 1);
-  casa(tr, CASAS[0], 0, 1, 0.5 + 0.5 * izq, izq > 0.5 && t < EV.vendes - 0.3 ? VERDE : "#fff");
-  casa(tr, CASAS[1], 0, 0, 0.5 + 0.5 * der, der > 0.5 ? ROJO : "#fff");
+  casa(tr, CASAS[0], 0, 1, 0.5 + 0.5 * izq, izq > 0.5 && t < EV.vendes - 0.3 ? VERDE : "#fff", 0.5);
+  casa(tr, CASAS[1], 0, 0, 0.5 + 0.5 * der, der > 0.5 ? ROJO : "#fff", 0.5);
   // Comprar: la pérdida baja y se para en el suelo
   const baja = L(t, EV.compras, EV.pusiste, 0, 1, (u) => u * u);
   if (baja > 0) flecha(tr, [CASAS[0], -0.55, 0.3], [CASAS[0], -0.55 - 0.42 * baja, 0.3], ROJO, 5);
@@ -211,7 +211,7 @@ const TresA: React.FC<P> = ({ t, s }) => {
       <Rotulo x={qa.x} y={qa.y} size={40} o={0.4 + 0.6 * izq} caja>COMPRAS</Rotulo>
       <Rotulo x={qb.x} y={qb.y} size={40} o={0.4 + 0.6 * der} color={der > 0.5 ? ROJO : "#fff"} caja>EN CORTO</Rotulo>
       {baja >= 1 && <Rotulo x={q0.x} y={q0.y} ancla="translate(-50%, 30%)" size={28} color={VERDE}>SUELO: LO QUE PUSISTE</Rotulo>}
-      {subeF > 0.5 && <Rotulo x={q1.x} y={Math.max(q1.y - 520, 420)} size={64} color={ROJO}>SIN TECHO ∞</Rotulo>}
+      {subeF > 0.5 && <Rotulo x={Math.min(q1.x, 760)} y={Math.max(q1.y - 520, 430)} size={64} color={ROJO}>SIN TECHO ∞</Rotulo>}
       <FlashRojo t={t} t0={EV.techo - 0.05} o={0.14} />
     </>
   );
@@ -224,7 +224,7 @@ const TresB: React.FC<P> = ({ t, e }) => {
   // Maletín que entra en la torre
   const entra = L(t, EV["2750"] - 0.3, EV["2750"] + 0.6, 0, 1, (u) => 1 - Math.pow(1 - u, 2));
   const pr = proyector(cam);
-  const qt = pr([TORRE[0] + 0.3, -0.75, TORRE[1] + 0.2]);
+  const qt = pr([TORRE[0] + 0.3, -0.15, TORRE[1] + 0.2]);
   return (
     <>
       <CamaraTiembla t={t} t0={EV.cerraron - 0.1} a={0.02}>
@@ -250,23 +250,23 @@ const Tres: React.FC<P> = (p) => (p.t < corte3 ? <TresA {...p} /> : <TresB {...p
 // ------------------------------------------------------------------ 6. Giro: el stop como techo, puesto antes de entrar
 const sG = inicio("giro");
 const Giro: React.FC<P> = ({ t, s, e }) => {
-  const cam = orbita([0.2, -0.25, 0], L(t, s, e, 3.6, 3.3), L(t, s, e, 0.08, -0.04), 0.1, { apertura: 6, centroY: 1060 });
+  const cam = orbita([0.12, -0.25, 0], L(t, s, e, 4.0, 3.7), L(t, s, e, 0.04, -0.02), 0.1, { apertura: 6, centroY: 1060 });
   const tr: Trazo[] = [...polvo(0.12)];
   suelo(tr, t, -1.0, 0.14, "#fff", 0.2);
-  casa(tr, 0.2, 0, 0, 1, "#fff");
+  casa(tr, 0.25, 0, 0, 1, "#fff", 0.55);
   // El stop baja como un techo rojo (antes de entrar)
   const pone = L(t, EV.stop - 0.45, EV.stop + 0.05, 1.2, 0, (u) => 1 - Math.pow(1 - u, 3));
   const yStop = -0.28 + pone;
   if (t > EV.stop - 0.5) {
-    cristal(tr, [0.2 - 0.42, yStop, -0.3], [0.2 + 0.42, yStop + 0.06, 0.3], ROJO, 1, 0.6 + 0.4 * golpe(t, EV.entrar + 0.5), 0.35);
+    cristal(tr, [0.25 - 0.38, yStop, -0.3], [0.25 + 0.38, yStop + 0.06, 0.3], ROJO, 1, 0.6 + 0.4 * golpe(t, EV.entrar + 0.5), 0.35);
   }
   // Después entra: la flecha sube y se queda en el stop
   const subeF = L(t, EV.entrar - 0.2, EV.entrar + 0.5, 0, 1, (u) => u * u);
-  if (subeF > 0) flecha(tr, [0.2, -0.75, 0.3], [0.2, -0.75 + Math.min(0.42, 0.9 * subeF), 0.3], ROJO, 5, 0.8);
+  if (subeF > 0) flecha(tr, [0.25, -0.75, 0.3], [0.25, -0.75 + Math.min(0.42, 0.9 * subeF), 0.3], ROJO, 5, 0.8);
   const pr = proyector(cam);
-  const qs = pr([0.2, yStop + 0.03, 0.3]);
+  const qs = pr([0.25, yStop + 0.03, 0.3]);
   const c = cuerpoEn(t, [[s, { mira: 0.7, cejas: 0.3 }], [EV.stop - 0.2, { mDx: 0.45, mDy: 0.35, mira: 0.8, boca: 0.4 }], [EV.excepciones - 0.3, { ...BRAZOS_ARRIBA, boca: 0.8, abre: 0.3, mira: 0 }]], { mira: 0.7 }, s - 0.4);
-  const a = anclaje(cam, [-0.55, -1, 0.35], 0.42);
+  const a = anclaje(cam, [-0.22, -1, 0.1], 0.42);
   return (
     <>
       <Escena cam={cam} trazos={tr} />
