@@ -348,3 +348,89 @@ export const cruce = (tr: Trazo[], t: number, o = 1) => {
   tr.push({ t: "p", pts: flecha(-0.62, -0.03, CRUCE.izq[1], -2.2, -1), w: 2.4, o, relleno: "#fff", oRelleno: 0.08 });
   tr.push({ t: "p", pts: flecha(0.03, 0.62, CRUCE.der[1], -2.2, 1), w: 2.4, o, color: ROJO, relleno: ROJO, oRelleno: 0.12 + 0.06 * Math.sin(t * 6), luz: 0.4 });
 };
+
+// ------------------------------------------------------------------ rascacielos de cristal (sede de un fondo o un banco) con ventanas y antena
+// rojo: 0…1 tiñe las ventanas de rojo (pérdidas)
+export const rascacielos = (tr: Trazo[], x: number, z: number, w: number, h: number, t: number, rojo = 0, o = 1) => {
+  const y0 = -1;
+  const d = w * 0.6;
+  const color = rojo > 0.5 ? ROJO : "#fff";
+  cristal(tr, [x - w / 2, y0, z - d / 2], [x + w / 2, y0 + h, z + d / 2], color, o, 0.25, 0.05);
+  for (let yy = y0 + 0.12; yy < y0 + h - 0.05; yy += 0.11)
+    for (let xx = x - w / 2 + 0.06; xx < x + w / 2 - 0.04; xx += 0.09) {
+      const parpa = rojo > 0 && ((Math.floor(t * 6) + Math.round(xx * 37 + yy * 53)) % 5 === 0);
+      tr.push({ t: "l", a: [xx, yy, z + d / 2 + 0.002], b: [xx + 0.05, yy, z + d / 2 + 0.002], w: 2.4, o: (parpa ? 1 : 0.45) * o, color: parpa ? ROJO : color, luz: parpa ? 0.6 : 0 });
+    }
+  tr.push({ t: "l", a: [x, y0 + h, z], b: [x, y0 + h + 0.25, z], w: 2, o });
+  tr.push({ t: "e", c: [x, y0 + h + 0.26, z], r: 0.02, tipo: "punto", o, luz: 1, color: Math.floor(t * 2) % 2 ? ROJO : "#fff" });
+};
+
+// ------------------------------------------------------------------ tienda de videojuegos: fachada, toldo, escaparate con mandos y puerta.
+// TIENDA(x, z).cartel es el punto donde la escena pone el rótulo 2D.
+export const tiendaVideojuegos = (tr: Trazo[], x: number, z: number, t: number, o = 1) => {
+  const y0 = -1;
+  const w = 0.8;
+  const h = 0.62;
+  cristal(tr, [x - w / 2, y0, z - 0.2], [x + w / 2, y0 + h, z + 0.2], "#fff", o, 0.2, 0.04);
+  // Cartel y toldo de rayas
+  tr.push({ t: "p", pts: rectXY(x - w / 2 + 0.03, y0 + h - 0.15, x + w / 2 - 0.03, y0 + h - 0.02, z + 0.205), w: 2.4, o, relleno: "#fff", oRelleno: 0.12, luz: 0.3 + 0.2 * Math.sin(t * 5) });
+  const toldo: V3[] = [];
+  for (let k = 0; k <= 8; k++) toldo.push([x - w / 2 + (w * k) / 8, y0 + h - 0.17 - (k % 2) * 0.05, z + 0.3]);
+  tr.push({ t: "p", pts: toldo, w: 2, o });
+  tr.push({ t: "l", a: [x - w / 2, y0 + h - 0.17, z + 0.205], b: [x - w / 2, y0 + h - 0.17, z + 0.3], w: 1.6, o });
+  tr.push({ t: "l", a: [x + w / 2, y0 + h - 0.17, z + 0.205], b: [x + w / 2, y0 + h - 0.17, z + 0.3], w: 1.6, o });
+  // Escaparate con dos mandos y puerta
+  tr.push({ t: "p", pts: rectXY(x - w / 2 + 0.05, y0 + 0.12, x + 0.08, y0 + h - 0.25, z + 0.205), w: 2.2, o, relleno: "#fff", oRelleno: 0.05 });
+  for (const [cx, cy] of [[x - 0.2, y0 + 0.24], [x - 0.02, y0 + 0.3]] as [number, number][]) {
+    tr.push({ t: "p", pts: rrXY(cx, cy, 0.13, 0.065, 0.03, z + 0.21), w: 1.8, o, relleno: "#fff", oRelleno: 0.15 });
+    tr.push({ t: "l", a: [cx - 0.045, cy, z + 0.212], b: [cx - 0.02, cy, z + 0.212], w: 1.6, o });
+    tr.push({ t: "l", a: [cx - 0.0325, cy - 0.0125, z + 0.212], b: [cx - 0.0325, cy + 0.0125, z + 0.212], w: 1.6, o });
+    tr.push({ t: "e", c: [cx + 0.035, cy + 0.008, z + 0.212], r: 0.008, tipo: "punto", o });
+  }
+  tr.push({ t: "p", pts: rectXY(x + 0.16, y0, x + 0.34, y0 + h - 0.25, z + 0.205), w: 2.2, o });
+  tr.push({ t: "e", c: [x + 0.19, y0 + 0.18, z + 0.21], r: 0.01, tipo: "nodo", o });
+};
+export const cartelTienda = (x: number, z: number): V3 => [x, -1 + 0.62 - 0.085, z + 0.21];
+
+// ------------------------------------------------------------------ sala de operaciones de un fondo: pared de pantallas, mesa larga con monitores
+// Las pantallas grandes (OFICINA.pantallas) las rellena la escena en 2D si quiere. Cámara de frente (orbita([0,−0.3,−0.6], 3.6, 0, 0.1)).
+export const OFICINA = { ZW: -1.0, pantallas: [[-0.62, 0.25], [0, 0.25], [0.62, 0.25]] as [number, number][], PW: 0.56, PH: 0.36 };
+export const oficinaFondo = (tr: Trazo[], t: number, linea: (u: number) => number, o = 1, color = "#fff") => {
+  const { ZW, pantallas, PW, PH } = OFICINA;
+  for (let x = -1.8; x <= 1.81; x += 0.3) tr.push({ t: "l", a: [x, -1, ZW], b: [x, -1, 1.0], w: 1, o: 0.12 * o });
+  tr.push({ t: "l", a: [-1.8, -1, ZW], b: [1.8, -1, ZW], w: 1.8, o: 0.6 * o });
+  // Pared de pantallas con la misma gráfica
+  for (const [cx, cy] of pantallas) {
+    tr.push({ t: "p", pts: rectXY(cx - PW / 2, cy - PH / 2, cx + PW / 2, cy + PH / 2, ZW), w: 2.4, o, relleno: "#000", oRelleno: 0.85, luz: 0.2 });
+    const pts: V3[] = Array.from({ length: 24 }, (_, i) => [cx - PW / 2 + 0.04 + ((PW - 0.08) * i) / 23, cy - PH / 2 + 0.05 + (PH - 0.1) * linea(i / 23), ZW + 0.005]);
+    tr.push({ t: "p", pts, w: 2.6, o, color, luz: 0.4 });
+  }
+  // Mesa larga con tres monitores y sillas
+  cristal(tr, [-1.0, -0.62, -0.55], [1.0, -0.58, -0.15], "#fff", 0.9 * o, 0.15, 0.06);
+  for (const x of [-0.97, 0.97]) tr.push({ t: "l", a: [x, -0.62, -0.35], b: [x, -1, -0.35], w: 2.2, o: 0.8 * o });
+  for (const x of [-0.6, 0, 0.6]) {
+    tr.push({ t: "p", pts: rrXY(x, -0.42, 0.34, 0.22, 0.02, -0.48), w: 2.2, o, relleno: "#000", oRelleno: 0.85 });
+    tr.push({ t: "l", a: [x, -0.53, -0.48], b: [x, -0.58, -0.48], w: 2.4, o });
+    const pts: V3[] = Array.from({ length: 12 }, (_, i) => [x - 0.14 + (0.28 * i) / 11, -0.5 + 0.15 * linea(i / 11), -0.475]);
+    tr.push({ t: "p", pts, w: 1.8, o: 0.9 * o, color });
+  }
+};
+
+// ------------------------------------------------------------------ casa con o sin tejado (para «la pérdida no tiene techo»)
+export const casa = (tr: Trazo[], x: number, z: number, techo: number, o = 1, color = "#fff") => {
+  const w = 0.62;
+  const h = 0.5;
+  const y0 = -1;
+  cristal(tr, [x - w / 2, y0, z - 0.25], [x + w / 2, y0 + h, z + 0.25], color, o, 0.2, 0.04);
+  tr.push({ t: "p", pts: rectXY(x - 0.07, y0, x + 0.07, y0 + 0.24, z + 0.252), w: 2, o });
+  tr.push({ t: "p", pts: rectXY(x - 0.24, y0 + 0.28, x - 0.12, y0 + 0.4, z + 0.252), w: 1.8, o });
+  tr.push({ t: "p", pts: rectXY(x + 0.12, y0 + 0.28, x + 0.24, y0 + 0.4, z + 0.252), w: 1.8, o });
+  if (techo > 0.01) {
+    const yt = y0 + h;
+    const cima = yt + 0.3 * techo;
+    tr.push({ t: "p", pts: [[x - w / 2 - 0.05, yt, z + 0.27], [x, cima, z + 0.27], [x + w / 2 + 0.05, yt, z + 0.27], [x - w / 2 - 0.05, yt, z + 0.27]], w: 2.4, o, relleno: color, oRelleno: 0.12 * o, luz: 0.2 });
+    tr.push({ t: "l", a: [x, cima, z + 0.27], b: [x, cima, z - 0.27], w: 2, o: 0.8 * o });
+    tr.push({ t: "l", a: [x - w / 2 - 0.05, yt, z - 0.27], b: [x, cima, z - 0.27], w: 1.6, o: 0.6 * o });
+    tr.push({ t: "l", a: [x + w / 2 + 0.05, yt, z - 0.27], b: [x, cima, z - 0.27], w: 1.6, o: 0.6 * o });
+  }
+};

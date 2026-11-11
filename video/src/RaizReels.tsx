@@ -13,6 +13,8 @@ import { Demo, DEMO_FPS, DEMO_FRAMES } from "./Demo/Demo";
 import { Archegos, ARCHEGOS_FPS, ARCHEGOS_FRAMES } from "./Archegos/Archegos";
 import { Veces, VECES_FPS, VECES_FRAMES } from "./Veces/Veces";
 import { Venganza, VENGANZA_FPS, VENGANZA_FRAMES } from "./Venganza/Venganza";
+import { GameStop, GAMESTOP_FPS, GAMESTOP_FRAMES } from "./GameStop/GameStop";
+import { Diario, DIARIO_FPS, DIARIO_FRAMES } from "./Diario/Diario";
 import { Spread, SPREAD_FPS, SPREAD_FRAMES } from "./Spread/Spread";
 import { Confirmacion, CONFIRMACION_FPS, CONFIRMACION_FRAMES } from "./Confirmacion/Confirmacion";
 import { Leeson, LEESON_FPS, LEESON_FRAMES } from "./Leeson/Leeson";
@@ -54,6 +56,8 @@ export const RaizReels: React.FC = () => (
     <Composition id="Archegos" component={Archegos} durationInFrames={ARCHEGOS_FRAMES} fps={ARCHEGOS_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Veces" component={Veces} durationInFrames={VECES_FRAMES} fps={VECES_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Venganza" component={Venganza} durationInFrames={VENGANZA_FRAMES} fps={VENGANZA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="GameStop" component={GameStop} durationInFrames={GAMESTOP_FRAMES} fps={GAMESTOP_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Diario" component={Diario} durationInFrames={DIARIO_FRAMES} fps={DIARIO_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Spread" component={Spread} durationInFrames={SPREAD_FRAMES} fps={SPREAD_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Confirmacion" component={Confirmacion} durationInFrames={CONFIRMACION_FRAMES} fps={CONFIRMACION_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Nfp" component={Nfp} durationInFrames={NFP_FRAMES} fps={NFP_FPS} width={ANCHO} height={ALTO} />
