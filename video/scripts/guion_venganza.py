@@ -9,21 +9,21 @@ GANCHO = {'lineas': ['Tu peor operación', 'es la de *después_de_perder*'], 'co
 GUION = [
     ('hook', ['Tu peor operación es la que abres justo después de perder.']),
     ('uno', ['Marcos perdió 200 euros a las 10 de la mañana.', 'Dos minutos después ya estaba dentro otra vez. Con el doble. Para recuperar.']),
-    ('dos', ['Volvió a perder. Y volvió a entrar. Con más.']),
+    ('dos', ['Volvió a perder. Y volvió a entrar.']),
     ('sigueme', ['Sígueme, que esto nos ha pasado a todos.']),
-    ('tres', ['A las 11 había perdido 1.400 euros. En menos de una hora.', 'Después de perder, tu cabeza no busca ganar: busca dejar de sentirse mal. Y para eso, cualquier operación le vale.']),
-    ('giro', ['La regla: 2 pérdidas seguidas y se acabó el día. Cierras la plataforma. Mañana el mercado sigue ahí.', 'Mándaselo al que siempre quiere recuperarlo hoy.']),
-    ('cierre', ['¿Quieres ver cómo opera mi bot, con sus días buenos y sus días malos? Comenta BOT y te paso por privado la cuenta auditada.']),
+    ('tres', ['A las 11 había perdido 1.400 euros.', 'Después de perder, tu cabeza no busca ganar: busca dejar de sentirse mal.']),
+    ('giro', ['La solución: escríbelo antes de abrir la plataforma. 2 pérdidas seguidas y se acabó el día.', 'Mañana el mercado sigue ahí.']),
+    ('cierre', ['Si has llegado hasta aquí, es que te ha pasado.', 'Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.']),
 ]
 
 GESTOS = {
     'hook': '[serious] Tu peor operación es la que abres justo después de perder.',
     'uno': '[curious] Marcos perdió doscientos euros a las diez de la mañana. Dos minutos después ya estaba dentro otra vez. [mischievously] Con el doble. Para recuperar.',
-    'dos': 'Volvió a perder. Y volvió a entrar. Con más.',
+    'dos': 'Volvió a perder. Y volvió a entrar.',
     'sigueme': '[warmly] Sígueme, que esto nos ha pasado a todos.',
-    'tres': '[inhales] A las once había perdido mil cuatrocientos euros. [serious] En menos de una hora. Después de perder, tu cabeza no busca ganar: busca dejar de sentirse mal. Y para eso, cualquier operación le vale.',
-    'giro': 'La regla: dos pérdidas seguidas y se acabó el día. [short pause] Cierras la plataforma. Mañana el mercado sigue ahí. [mischievously] Mándaselo al que siempre quiere recuperarlo hoy.',
-    'cierre': '[warmly] ¿Quieres ver cómo opera mi bot, con sus días buenos y sus días malos? Comenta BOT y te paso por privado la cuenta auditada.',
+    'tres': '[inhales] A las once había perdido mil cuatrocientos euros. [serious] Después de perder, tu cabeza no busca ganar: busca dejar de sentirse mal.',
+    'giro': 'La solución: escríbelo antes de abrir la plataforma. Dos pérdidas seguidas y se acabó el día. [short pause] Mañana el mercado sigue ahí.',
+    'cierre': '[warmly] Si has llegado hasta aquí, es que te ha pasado. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.',
 }
 
 PANTALLAS = [

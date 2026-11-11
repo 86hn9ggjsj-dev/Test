@@ -4,26 +4,26 @@ Idea única: el diario de trading enseña qué operaciones sobran (las de la noc
 Regla: apunta tus próximas 30 operaciones: hora, motivo y emoción. Cierre de conversión: «comenta BOT» → cuenta auditada.
 """
 
-TITULO = 'Lucía dejó de perder dinero cambiando una sola cosa'
-GANCHO = {'lineas': ['Dejó de perder', 'con *una_sola_cosa*'], 'color': 'VERDE'}
+TITULO = 'Lucía dejó de perder 300 € al mes cambiando una sola cosa'
+GANCHO = {'lineas': ['Dejó de perder *300_€*', 'con *una_sola_cosa*'], 'color': 'VERDE'}
 GUION = [
-    ('hook', ['Lucía dejó de perder dinero cambiando una sola cosa. Y no era su estrategia.']),
-    ('uno', ['Durante un mes apuntó cada operación: la hora, el motivo y cómo se sentía.']),
-    ('dos', ['Al llegar a 30 operaciones, lo vio.']),
+    ('hook', ['Lucía dejó de perder 300 euros al mes cambiando una sola cosa.']),
+    ('uno', ['Y no era su estrategia.', 'Durante un mes apuntó cada operación: la hora, el motivo y cómo se sentía.']),
+    ('dos', ['Al llegar a 30, lo vio.']),
     ('sigueme', ['Sígueme, que esto escuece.']),
-    ('tres', ['Por la mañana, con su plan, ganaba.', 'Todo lo que perdía en el mes lo perdía de noche: después de las 10, cansada y por aburrimiento.', 'No le faltaba un indicador. Le sobraban las operaciones de la noche.']),
-    ('giro', ['La regla: apunta tus próximas 30 operaciones. Hora, motivo y emoción. Tus propios números te dirán qué quitar.', 'Etiqueta a quien opera en pijama.']),
-    ('cierre', ['¿Quieres ver los números reales de mi bot? Comenta BOT y te paso por privado la cuenta auditada.']),
+    ('tres', ['Por la mañana, con su plan, ganaba.', 'Todo lo que perdía, lo perdía de noche: después de las 10, cansada y por aburrimiento.', 'No le faltaba un indicador. Le sobraban las operaciones de la noche.']),
+    ('giro', ['Quitó la noche y dejó de perder.', 'La solución: apunta tus próximas 30 operaciones. Hora, motivo y emoción. Tus números te dirán qué quitar.']),
+    ('cierre', ['Si has llegado hasta el final, vas en serio.', 'Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.']),
 ]
 
 GESTOS = {
-    'hook': '[curious] Lucía dejó de perder dinero cambiando una sola cosa. [whispers] Y no era su estrategia.',
-    'uno': 'Durante un mes apuntó cada operación: la hora, el motivo y cómo se sentía.',
-    'dos': '[short pause] Al llegar a treinta operaciones, lo vio.',
+    'hook': '[curious] Lucía dejó de perder trescientos euros al mes cambiando una sola cosa.',
+    'uno': '[whispers] Y no era su estrategia. Durante un mes apuntó cada operación: la hora, el motivo y cómo se sentía.',
+    'dos': '[short pause] Al llegar a treinta, lo vio.',
     'sigueme': '[warmly] Sígueme, que esto escuece.',
-    'tres': 'Por la mañana, con su plan, ganaba. [serious] Todo lo que perdía en el mes lo perdía de noche: después de las diez, cansada y por aburrimiento. [short pause] No le faltaba un indicador. Le sobraban las operaciones de la noche.',
-    'giro': 'La regla: apunta tus próximas treinta operaciones. Hora, motivo y emoción. Tus propios números te dirán qué quitar. [mischievously] Etiqueta a quien opera en pijama.',
-    'cierre': '[warmly] ¿Quieres ver los números reales de mi bot? Comenta BOT y te paso por privado la cuenta auditada.',
+    'tres': 'Por la mañana, con su plan, ganaba. [serious] Todo lo que perdía, lo perdía de noche: después de las diez, cansada y por aburrimiento. [short pause] No le faltaba un indicador. Le sobraban las operaciones de la noche.',
+    'giro': 'Quitó la noche y dejó de perder. La solución: apunta tus próximas treinta operaciones. Hora, motivo y emoción. Tus números te dirán qué quitar.',
+    'cierre': '[warmly] Si has llegado hasta el final, vas en serio. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.',
 }
 
 PANTALLAS = [

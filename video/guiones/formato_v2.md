@@ -61,7 +61,9 @@ línea, concreta y con número (para guardar y enviar). Frases cortas (≤ 12 pa
 
 **Últimos ~10 s · Conversión.** Aquí solo llega la gente más interesada: se la lleva al sistema de conversión orgánica
 (palabra clave en comentarios → mensaje directo). Plantilla, igual que el comentario fijado:
-«Si quieres ver [lo que conecta con la idea del vídeo], comenta BOT y te paso por privado la cuenta auditada de mi bot.»
+«Si has llegado hasta aquí, [frase que reconoce que es de los interesados]. Comenta BOT y te explico por privado cómo lo
+hago yo, y te paso la cuenta auditada de mi bot.» (como en la referencia: palabra en comentarios → mensaje directo que
+explica cómo aplicarlo). ~28 palabras = 10 s. En la parte de 30 s no van «etiqueta / mándaselo»: solo la idea.
 Sin cifras ni promesas sobre el bot. Visual: caja de comentario que escribe «BOT», se envía, llega el mensaje directo y
 la tarjeta «CUENTA AUDITADA ✓». La pregunta + «etiqueta / mándaselo» pasa a ser opcional y, si va, al final de la parte
 de 30 s (una línea).
