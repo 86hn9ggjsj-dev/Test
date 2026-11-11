@@ -278,7 +278,7 @@ const Tres: React.FC<P> = (p) => {
         <Escena cam={cam} trazos={tr} />
         <PantallaPC cam={cam}>{(w, h) => <Operaciones w={w} h={h} filas={noche ? NOCHE : DIA} n={n} />}</PantallaPC>
         <StickMundo a={a} c={c} t={t} coleta />
-        {noche && <div style={{ position: "absolute", left: hx + R_CABEZA * a.s + 10, top: hy - R_CABEZA * a.s - 60 - 10 * Math.sin(t * 3), ...mono(54), fontWeight: 700, opacity: 0.8 }}>Zzz</div>}
+        {noche && <div style={{ position: "absolute", left: hx - 10, top: hy - R_CABEZA * a.s - 110 - 10 * Math.sin(t * 3), transform: "translateX(-100%)", ...mono(54), fontWeight: 700, opacity: 0.8 }}>Zzz</div>}
         <Arriba>
           {!noche && <Pildora t={t} t0={EV.manana - 0.3} size={42} color={VERDE}>POR LA MAÑANA · CON PLAN ✓</Pildora>}
           {noche && <Pildora t={t} t0={EV["10"] - 0.3} size={42} color={ROJO}>DESPUÉS DE LAS 22:00</Pildora>}

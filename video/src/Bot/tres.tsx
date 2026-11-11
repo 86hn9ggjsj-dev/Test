@@ -119,8 +119,33 @@ export const Escena: React.FC<{ cam: Camara; trazos: Trazo[]; encima?: (pr: (p: 
   const apertura = cam.apertura ?? 0;
   const capas: React.ReactNode[][] = DESENFOQUES.map(() => []);
   const halos: React.ReactNode[] = [];
+  // Plano cercano: lo que queda detrás o pegado a la cámara se recorta (si no, se proyecta a millones de píxeles y
+  // el navegador del render puede reventar)
+  const fw = unit(resta(cam.mira, cam.pos));
+  const prof = (p: V3) => dot(resta(p, cam.pos), fw);
+  const CERCA = 0.3;
+  const recortados: Trazo[] = [];
+  for (const tr of trazos) {
+    if (tr.t === "e") {
+      if (prof(tr.c) >= CERCA) recortados.push(tr);
+    } else if (tr.t === "l") {
+      const za = prof(tr.a);
+      const zb = prof(tr.b);
+      if (za < CERCA && zb < CERCA) continue;
+      if (za >= CERCA && zb >= CERCA) recortados.push(tr);
+      else {
+        const u = (CERCA - za) / (zb - za);
+        const corte = mezcla(tr.a, tr.b, u);
+        recortados.push(za < CERCA ? { ...tr, a: corte } : { ...tr, b: corte });
+      }
+    } else {
+      const pts = tr.pts.filter((q) => prof(q) >= CERCA);
+      if (pts.length === tr.pts.length) recortados.push(tr);
+      else if (pts.length >= 2) recortados.push({ ...tr, pts });
+    }
+  }
   // Más lejos primero: lo cercano se pinta encima
-  const lista = trazos
+  const lista = recortados
     .map((tr, i) => {
       const z = tr.t === "l" ? (pr(tr.a).z + pr(tr.b).z) / 2 : tr.t === "e" ? pr(tr.c).z : tr.pts.length ? pr(tr.pts[Math.floor(tr.pts.length / 2)]).z : 0;
       return { tr, i, z };
