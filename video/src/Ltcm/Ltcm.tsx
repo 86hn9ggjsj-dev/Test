@@ -138,7 +138,7 @@ const Uno: React.FC<P> = ({ t, s, e }) => {
           <polyline points={pts.map(([x, y]) => `${x},${y}`).join(" ")} fill="none" stroke={VERDE} strokeWidth={6} strokeLinejoin="round" strokeLinecap="round" />
           <circle cx={ult[0]} cy={ult[1]} r={13} fill={VERDE} style={{ filter: `drop-shadow(0 0 12px ${VERDE})` }} />
         </svg>
-        {t > EV["40"] - 0.2 && <div style={{ position: "absolute", left: ult[0], top: ult[1] - 40, transform: "translate(-90%, -100%)", fontFamily: SANS, fontWeight: 800, fontSize: 90, color: VERDE }}>+40 %</div>}
+        {t > EV["40"] - 0.2 && <div style={{ position: "absolute", left: ult[0] - 30, top: ult[1] + 30, transform: "translate(-100%, 0)", fontFamily: SANS, fontWeight: 800, fontSize: 96, color: VERDE, whiteSpace: "nowrap" }}>+40 %</div>}
       </>
     );
   }
@@ -157,7 +157,7 @@ const Uno: React.FC<P> = ({ t, s, e }) => {
           <span key={i} style={{ fontFamily: "monospace", fontSize: 46, color: i === 2 ? ROJO : "#fff", whiteSpace: "nowrap" }}>{f}</span>
         ))}
       </div>
-      <Ficha t={t} t0={EV.prestado - 0.35} texto="×25" color={ROJO} size={120} x={ANCHO / 2} y={1210} sub="CON DINERO PRESTADO" />
+      <Ficha t={t} t0={EV.prestado - 0.35} texto="×25" color={ROJO} size={110} x={ANCHO / 2} y={1300} sub="CON DINERO PRESTADO" />
     </>
   );
 };

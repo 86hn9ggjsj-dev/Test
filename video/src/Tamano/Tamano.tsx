@@ -118,7 +118,7 @@ const Uno: React.FC<P> = ({ t }) => {
 const s2 = inicio("dos");
 const Dos: React.FC<P> = ({ t, s }) => {
   const c = cuerpoEn(t, [[s, { mira: 0.6, boca: 0.6, cejas: 0.4, mDx: 0.25, mDy: 0.4 }], [EV["20"] - 0.3, { mira: 0, boca: 0.8, mDx: 0.32, mDy: 0.48, mIx: -0.15, mIy: -0.5 }], [EV.stop2 - 0.8, { mira: 0.8, mDx: 0.5, mDy: 0.1, boca: 0.4 }]], { mira: 0.6 }, s - 0.4);
-  const a = anclaje(camEscenario, [-0.55, -1, 0.3], 0.48);
+  const a = anclaje(camEscenario, [-0.36, -1, 0.3], 0.46);
   const gP = muelle(t, EV["20"] + 0.4, 220, 15);
   return (
     <>
@@ -126,8 +126,8 @@ const Dos: React.FC<P> = ({ t, s }) => {
       <Suelo />
       <StickMundo a={a} c={c} t={t} coleta />
       <Ficha t={t} t0={EV["20"] - 0.3} texto="20 €" color={VERDE} size={120} x={a.ox + 10} y={a.oy - 1.15 * a.s} sub="LO QUE ACEPTA PERDER" />
-      <Panel x={500} y={520} w={470} g={gP} titulo="EL STOP, DESPUÉS">
-        <Grafico w={426} h={330} stop={0.25} k={L(t, EV.stop2 - 0.5, EV.stop2, 0, 1)} />
+      <Panel x={540} y={520} w={440} g={gP} titulo="EL STOP, DESPUÉS">
+        <Grafico w={396} h={330} stop={0.25} k={L(t, EV.stop2 - 0.5, EV.stop2, 0, 1)} />
       </Panel>
     </>
   );
@@ -162,7 +162,7 @@ const Tres: React.FC<P> = ({ t }) => {
   return (
     <>
       <Foco x={ANCHO / 2} y={1230} w={900} h={130} o={0.08} />
-      <div style={{ position: "absolute", top: 420, left: 0, width: ANCHO, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: Math.min(g * 1.5, 1), transform: `scale(${0.9 + 0.1 * Math.min(g, 1)})` }}>
+      <div style={{ position: "absolute", top: 420, left: 0, width: ANCHO, color: "#fff", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: Math.min(g * 1.5, 1), transform: `scale(${0.9 + 0.1 * Math.min(g, 1)})` }}>
         <span style={{ fontFamily: SANS, fontWeight: 800, fontSize: 84, letterSpacing: "-0.02em" }}>TAMAÑO =</span>
         <span style={{ fontFamily: SANS, fontWeight: 700, fontSize: 52, opacity: L(t, EV.tamano + 0.6, EV.tamano + 1.0, 0, 1) }}>
           <span style={{ color: VERDE }}>RIESGO</span> ÷ <span style={{ color: ROJO }}>DISTANCIA AL STOP</span>

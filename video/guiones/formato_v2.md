@@ -85,3 +85,14 @@ y cambio de escenario cada 5–8 s.
 - % que pasa de los 3 primeros segundos y gráfico de retención (dónde cae).
 - Envíos y guardados por alcance (los envíos son lo que más empuja a no seguidores).
 - Comparar siempre v1 frente a v2 en reels de prueba.
+
+## Estilo limpio (desde el 12 nov, petición del usuario: «hay mucho ruido visual, mantenlo simple, limpio pero currado»)
+
+- **Un elemento principal por escena** (personaje + un objeto + una cifra como mucho). Mucho espacio negro.
+- **Un solo texto a la vez** además de los subtítulos (una ficha o un título pequeño, nunca píldora + ficha + rótulo).
+  Nada que repita lo que ya dicen los subtítulos.
+- **Escenario mínimo y bien hecho**: línea del suelo (`horizonte`), `escritorioLimpio` (mesa y monitor; ventana o reloj solo
+  si la escena los necesita), sin partículas (`polvo`), sin rejillas de suelo, sin objetos de relleno (tazas, cuadros, teclados).
+- **Luz**: `Foco` (charco de luz suave bajo el personaje u objeto) en vez de decorado.
+- Gráficos 2D grandes y limpios (pocas velas, una línea) y tipografía grande para las cifras.
+- Empujes de cámara suaves (`empujes={0.035}`), temblor y fogonazos solo en el momento clave.
