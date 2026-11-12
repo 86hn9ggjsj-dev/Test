@@ -71,3 +71,12 @@ export const Moneda: React.FC<{ t: number; t0: number; t1: number; a: [number, n
     <div style={{ position: "absolute", left: x, top: y, transform: `translate(-50%, -50%) scaleX(${Math.cos(u * 12)})`, width: size, height: size, borderRadius: size / 2, border: `4px solid ${color}`, background: "#000", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: SANS, fontWeight: 800, fontSize: size * 0.5, color, opacity: 1 - L(t, t1 - 0.1, t1, 0, 1) }}>{texto}</div>
   );
 };
+
+// Charco de luz en el suelo (foco suave sobre lo importante)
+export const Foco: React.FC<{ x: number; y: number; w?: number; h?: number; o?: number; color?: string }> = ({ x, y, w = 520, h = 120, o = 0.14, color = "255,255,255" }) => (
+  <div style={{ position: "absolute", left: x - w / 2, top: y - h / 2, width: w, height: h, borderRadius: "50%", background: `radial-gradient(ellipse at center, rgba(${color},${o}) 0%, rgba(${color},0) 70%)`, pointerEvents: "none" }} />
+);
+// Luz de fondo: un halo grande y tenue detrás de la escena
+export const Contraluz: React.FC<{ x?: number; y?: number; r?: number; o?: number; color?: string }> = ({ x = 540, y = 820, r = 620, o = 0.07, color = "255,255,255" }) => (
+  <div style={{ position: "absolute", left: x - r, top: y - r, width: r * 2, height: r * 2, borderRadius: "50%", background: `radial-gradient(circle, rgba(${color},${o}) 0%, rgba(${color},0) 65%)`, pointerEvents: "none" }} />
+);

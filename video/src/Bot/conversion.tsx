@@ -31,7 +31,7 @@ export const CierreComenta: React.FC<P & { tComenta: number; tPalabra: number; t
   const panel: React.CSSProperties = { color: "#fff", position: "absolute", left: 130, top: 330, width: 820, borderRadius: 40, border: "3px solid rgba(255,255,255,0.85)", background: "rgba(0,0,0,0.92)", padding: "34px 36px", boxSizing: "border-box" };
   return (
     <>
-      <Escena cam={orbita([0, 0, 0], 9, L(t, s, e, -0.3, 0.2), 0.2, { apertura: 40 })} trazos={polvo(0.35)} />
+      <Escena cam={orbita([0, 0, 0], 9, L(t, s, e, -0.3, 0.2), 0.2, { apertura: 40 })} trazos={polvo(0.12, 40)} />
       {f1 > 0.01 && (
         <div style={{ position: "absolute", top: 640, left: 140, width: 800, opacity: f1 }}>
           <div style={{ display: "flex", justifyContent: "flex-end", transform: `translateX(${-(1 - llena) * 800 + 60}px) scale(${0.6 + 0.4 * Math.min(marca, 1.1)})`, opacity: Math.min(marca * 1.5, 1), marginBottom: 26 }}>
@@ -60,7 +60,7 @@ export const CierreComenta: React.FC<P & { tComenta: number; tPalabra: number; t
               <span style={{ fontSize: 54, color: ROJO }}>♥</span>
             </div>
           )}
-          {[0.75, 0.55, 0.65].map((w, i) => (
+          {[0.7].map((w, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 22, marginBottom: 26, opacity: 0.55 }}>
               <Avatar r={30} o={0.7} />
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

@@ -456,3 +456,38 @@ export const bancoEdificio = (tr: Trazo[], x: number, z: number, g: number, o = 
   }
   tr.push({ t: "p", pts: [[x - w * 1.05, y0 + 0.4 * k, z + 0.08 * k], [x + w * 1.05, y0 + 0.4 * k, z + 0.08 * k], [x, y0 + 0.58 * k, z + 0.08 * k], [x - w * 1.05, y0 + 0.4 * k, z + 0.08 * k]], w: 2.4, o, relleno: "#fff", oRelleno: 0.08, luz: 0.3 });
 };
+
+// ------------------------------------------------------------------ ESTILO LIMPIO (desde el 12 nov): pocos elementos y bien hechos.
+// Línea del suelo y escritorio con monitor, sin objetos de relleno; ventana y reloj solo si la escena los necesita.
+export const horizonte = (tr: Trazo[], z = -0.75, o = 0.45) => {
+  tr.push({ t: "l", a: [-3, -1, z], b: [3, -1, z], w: 1.6, o });
+};
+export const escritorioLimpio = (tr: Trazo[], t: number, op: { ventana?: "dia" | "noche"; reloj?: number; monitor?: boolean } = {}) => {
+  const { ZW, MON, RELOJ } = DESPACHO;
+  horizonte(tr, ZW);
+  if (op.ventana) {
+    const [wx0, wx1, wy0, wy1] = [0.62, 1.04, 0.1, 0.56];
+    tr.push({ t: "p", pts: rectXY(wx0, wy0, wx1, wy1, ZW), w: 2.2, o: 0.9, relleno: "#fff", oRelleno: 0.03 });
+    tr.push({ t: "l", a: [(wx0 + wx1) / 2, wy0, ZW], b: [(wx0 + wx1) / 2, wy1, ZW], w: 1.4, o: 0.6 });
+    const astro: V3 = op.ventana === "dia" ? [0.93, 0.44, ZW - 0.01] : [0.73, 0.45, ZW - 0.01];
+    tr.push({ t: "p", pts: circulo(astro, 0.045, "z", 28), w: 2, o: 1, relleno: "#fff", oRelleno: op.ventana === "dia" ? 0.35 : 0.7, luz: 0.7 });
+  }
+  if (op.reloj !== undefined) {
+    tr.push({ t: "p", pts: circulo(RELOJ, 0.12, "z", 40), w: 2.2, o: 1, relleno: "#fff", oRelleno: 0.04 });
+    const am = (op.reloj % 1) * Math.PI * 2;
+    const ah = ((op.reloj % 12) / 12) * Math.PI * 2;
+    tr.push({ t: "l", a: [RELOJ[0], RELOJ[1], ZW + 0.004], b: [RELOJ[0] + Math.sin(ah) * 0.06, RELOJ[1] + Math.cos(ah) * 0.06, ZW + 0.004], w: 3, o: 1 });
+    tr.push({ t: "l", a: [RELOJ[0], RELOJ[1], ZW + 0.004], b: [RELOJ[0] + Math.sin(am) * 0.095, RELOJ[1] + Math.cos(am) * 0.095, ZW + 0.004], w: 2, o: 1 });
+  }
+  // Mesa: tablero fino y dos patas
+  const y = -0.6;
+  cristal(tr, [0.0, y - 0.025, -0.64], [1.1, y, -0.1], "#fff", 0.95, 0.15, 0.05);
+  for (const x of [0.04, 1.06]) tr.push({ t: "l", a: [x, y - 0.025, -0.37], b: [x, -1, -0.37], w: 2.4, o: 0.85 });
+  if (op.monitor !== false) {
+    const { c, w, h } = MON;
+    tr.push({ t: "p", pts: rrXY(c[0], c[1], w, h, 0.025, c[2]), w: 2.8, o: 1, relleno: "#000", oRelleno: 0.92, luz: 0.2 });
+    tr.push({ t: "l", a: [c[0], c[1] - h / 2, c[2]], b: [c[0], y, c[2]], w: 3, o: 1 });
+    tr.push({ t: "l", a: [c[0] - 0.1, y, c[2]], b: [c[0] + 0.1, y, c[2]], w: 3, o: 1 });
+  }
+  void t;
+};
