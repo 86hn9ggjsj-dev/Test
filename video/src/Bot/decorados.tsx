@@ -433,3 +433,26 @@ export const casa = (tr: Trazo[], x: number, z: number, techo: number, o = 1, co
     tr.push({ t: "l", a: [x + w / 2 + 0.05, yt, z - 0.27], b: [x, cima, z - 0.27], w: 1.6, o: 0.6 * o });
   }
 };
+
+// ------------------------------------------------------------------ pizarra en la pared (marco, bandeja y tiza). PIZARRA(c).texto: el centro donde la
+// escena escribe en 2D. Cámara de frente.
+export const pizarra = (tr: Trazo[], c: V3, w: number, h: number, o = 1) => {
+  tr.push({ t: "p", pts: rectXY(c[0] - w / 2, c[1] - h / 2, c[0] + w / 2, c[1] + h / 2, c[2]), w: 3, o, relleno: "#000", oRelleno: 0.9, luz: 0.2 });
+  tr.push({ t: "p", pts: rectXY(c[0] - w / 2 + 0.03, c[1] - h / 2 + 0.03, c[0] + w / 2 - 0.03, c[1] + h / 2 - 0.03, c[2] + 0.002), w: 1.2, o: 0.5 * o });
+  cristal(tr, [c[0] - w / 2, c[1] - h / 2 - 0.04, c[2]], [c[0] + w / 2, c[1] - h / 2, c[2] + 0.08], "#fff", 0.8 * o, 0.1, 0.05);
+  cristal(tr, [c[0] - w * 0.3, c[1] - h / 2, c[2] + 0.02], [c[0] - w * 0.3 + 0.08, c[1] - h / 2 + 0.02, c[2] + 0.05], "#fff", o, 0.3, 0.4);
+};
+
+// ------------------------------------------------------------------ edificio de banco (escalones, columnas y frontón)
+export const bancoEdificio = (tr: Trazo[], x: number, z: number, g: number, o = 1, escala = 1) => {
+  if (g <= 0.01) return;
+  const k = Math.min(g, 1.05) * escala;
+  const w = 0.26 * k;
+  const y0 = -1;
+  cristal(tr, [x - w, y0, z - 0.1 * k], [x + w, y0 + 0.05 * k, z + 0.1 * k], "#fff", 0.9 * o, 0.1, 0.05);
+  for (let c = 0; c < 4; c++) {
+    const cx = x - w * 0.75 + (c * w * 1.5) / 3;
+    tr.push({ t: "l", a: [cx, y0 + 0.05 * k, z + 0.06 * k], b: [cx, y0 + 0.4 * k, z + 0.06 * k], w: 2.2, o: 0.9 * o });
+  }
+  tr.push({ t: "p", pts: [[x - w * 1.05, y0 + 0.4 * k, z + 0.08 * k], [x + w * 1.05, y0 + 0.4 * k, z + 0.08 * k], [x, y0 + 0.58 * k, z + 0.08 * k], [x - w * 1.05, y0 + 0.4 * k, z + 0.08 * k]], w: 2.4, o, relleno: "#fff", oRelleno: 0.08, luz: 0.3 });
+};
