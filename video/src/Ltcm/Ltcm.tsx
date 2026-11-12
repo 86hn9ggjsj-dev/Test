@@ -67,7 +67,7 @@ const Campana: React.FC<{ x: number; y: number; w: number; h: number; t: number;
   );
 };
 // Pizarra de la sala: la proyecta y devuelve su caja en pantalla
-const PIZ = { c: [0.15, 0.05, -0.9] as V3, w: 1.5, h: 0.82 };
+const PIZ = { c: [0.12, -0.05, -0.9] as V3, w: 1.15, h: 0.75 };
 const cajaPizarra = (cam: Camara) => {
   const pr = proyector(cam);
   const a = pr([PIZ.c[0] - PIZ.w / 2 + 0.05, PIZ.c[1] + PIZ.h / 2 - 0.05, PIZ.c[2]]);
@@ -83,7 +83,7 @@ const sala = (tr: Trazo[], t: number) => {
   for (const x of [0.6, 1.15]) tr.push({ t: "l", a: [x, -0.62, -0.3], b: [x, -1, -0.3], w: 2, o: 0.7 });
   void t;
 };
-const camSala = (t: number, s: number, e: number, d0: number, d1: number) => orbita([0.15, -0.2, -0.4], L(t, s, e, d0, d1), L(t, s, e, -0.05, 0.05), 0.08, { apertura: 6, centroY: 960 });
+const camSala = (t: number, s: number, e: number, d0: number, d1: number) => orbita([0.1, -0.25, -0.4], L(t, s, e, d0, d1), L(t, s, e, -0.05, 0.05), 0.08, { apertura: 6, centroY: 940 });
 const FORMULAS = ["σ = √ Σ(x − μ)² / n", "VaR 99 % = 2,33 · σ", "P(pérdida grande) ≈ 0", "E[r] ≈ 40 %"];
 // Cúpulas de Moscú en alambre
 const cupulas = (tr: Trazo[], x: number, z: number, k = 1) => {
@@ -128,19 +128,19 @@ const Hook: React.FC<P> = ({ t, s, e }) => {
 // ------------------------------------------------------------------ 2. Uno: la sala de las fórmulas · +40 % · ×25 prestado
 const s1 = inicio("uno");
 const Uno: React.FC<P> = ({ t, s, e }) => {
-  const cam = camSala(t, s, e, 4.0, 3.7);
+  const cam = camSala(t, s, e, 4.3, 4.0);
   const tr: Trazo[] = [...polvo(0.1)];
   sala(tr, t);
   const caja = cajaPizarra(cam);
-  const lineas = Math.floor(L(t, EV.modelos - 0.6, EV.prestado - 0.3, 0, FORMULAS.length + 0.99, (u) => u));
+  const lineas = Math.floor(L(t, s + 0.2, EV.modelos + 0.4, 1, FORMULAS.length + 0.99, (u) => u));
   const c = cuerpoEn(t, [[s, { mDx: 0.48, mDy: 0.25, mira: 0.8, boca: 0.5, cejas: 0.3 }], [EV.ano - 0.3, { ...ENCOGE, boca: 0.9, mira: 0 }], [EV.modelos - 0.2, { mDx: 0.5, mDy: 0.3, mira: 0.8, boca: 0.4 }]], { mira: 0.8 }, s - 0.4);
-  const a = anclaje(cam, [-0.62, -1, 0.0], 0.44);
+  const a = anclaje(cam, [-0.28, -1, 0.25], 0.42);
   return (
     <>
       <Escena cam={cam} trazos={tr} />
-      <div style={{ position: "absolute", left: caja.x + 30, top: caja.y + 26, width: caja.w - 60, display: "flex", flexDirection: "column", gap: 18 }}>
+      <div style={{ position: "absolute", left: caja.x + 40, top: caja.y + 40, width: caja.w - 80, display: "flex", flexDirection: "column", gap: 26 }}>
         {FORMULAS.slice(0, lineas).map((f, i) => (
-          <span key={i} style={{ fontFamily: "monospace", fontSize: 40, color: i === 2 ? ROJO : "#fff", opacity: 0.92, whiteSpace: "nowrap" }}>{f}</span>
+          <span key={i} style={{ fontFamily: "monospace", fontSize: 48, color: i === 2 ? ROJO : "#fff", opacity: 0.92, whiteSpace: "nowrap" }}>{f}</span>
         ))}
       </div>
       <StickMundo a={a} c={c} t={t} />
@@ -234,7 +234,7 @@ const Tres: React.FC<P> = (p) => {
       </>
     );
   }
-  const cam = orbita([0, -0.3, -0.8], L(t, cBancos, e, 5.0, 4.6), L(t, cBancos, e, -0.06, 0.06), 0.14, { apertura: 6, centroY: 1060 });
+  const cam = orbita([0, -0.45, -0.8], L(t, cBancos, e, 5.0, 4.6), L(t, cBancos, e, -0.06, 0.06), 0.16, { apertura: 6, centroY: 880 });
   const tr: Trazo[] = [...polvo(0.12)];
   suelo(tr, t, -1.0, 0.14, "#fff", 0.2);
   rascacielos(tr, 0, -1.6, 0.5, 1.5, t, 1);
@@ -256,7 +256,7 @@ const Tres: React.FC<P> = (p) => {
         <Pildora t={t} t0={EV.reserva - 0.3} size={46}>RESERVA FEDERAL</Pildora>
         <Pildora t={t} t0={EV["14"] - 0.3} size={40}>REÚNE A 14 BANCOS</Pildora>
       </Arriba>
-      <Ficha t={t} t0={EV["3600"] - 0.3} texto="3.600 M $" color={ROJO} size={110} x={ANCHO / 2} y={1200} sub="DE RESCATE" />
+      <Ficha t={t} t0={EV["3600"] - 0.3} texto="3.600 M $" color={ROJO} size={96} x={760} y={680} sub="DE RESCATE" />
     </>
   );
 };
