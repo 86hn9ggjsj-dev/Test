@@ -47,7 +47,7 @@ const MANOS_CAJA = { mIx: -0.22, mIy: -0.2, mDx: 0.22, mDy: -0.2 };
 // Gráfico 2D de velas con entrada y stop (distancia en «céntimos»)
 const SERIE = [0.5, 0.56, 0.52, 0.6, 0.58, 0.64, 0.6, 0.66];
 const Grafico: React.FC<{ w: number; h: number; stop: number; t: number; tStop: number; etiqueta?: string; color?: string }> = ({ w, h, stop, t, tStop, etiqueta, color = ROJO }) => {
-  const yv = (v: number) => h * 0.92 - v * h * 0.9;
+  const yv = (v: number) => h * 0.1 + (0.75 - v) * h * 1.6;
   const paso = (w * 0.8) / SERIE.length;
   const entrada = SERIE[SERIE.length - 1];
   const yE = yv(entrada);
@@ -93,8 +93,8 @@ const Hook: React.FC<P> = ({ t, s, e }) => {
       <Escena cam={cam} trazos={tr} />
       <StickMundo a={a} c={c} t={t} gorra />
       <CajaMano c={c} a={a} n={100} />
-      <Ficha t={t} t0={EV["10"] - 0.3} texto="−10 €" color={ROJO} size={70} x={640} y={1240} />
-      <Ficha t={t} t0={EV["80"] - 0.3} texto="−80 €" color={ROJO} size={150} x={840} y={1240} />
+      <Ficha t={t} t0={EV["10"] - 0.3} texto="−10 €" color={ROJO} size={70} x={640} y={1060} />
+      <Ficha t={t} t0={EV["80"] - 0.3} texto="−80 €" color={ROJO} size={130} x={760} y={1260} />
     </>
   );
 };
@@ -115,12 +115,12 @@ const Uno: React.FC<P> = ({ t, s, e }) => {
         <Escena cam={cam} trazos={tr} />
       </AbsoluteFill>
       <Panel x={110} y={330} w={420} h={560} titulo="STOP CERCA" g={g1}>
-        <Grafico w={370} h={340} stop={0.08} t={t} tStop={EV.cerca} etiqueta="0,10 €" />
-        <div style={{ ...mono(40), fontWeight: 800, color: ROJO, textAlign: "center", marginTop: 26 }}>100 × 0,10 = −10 €</div>
+        <Grafico w={370} h={340} stop={0.06} t={t} tStop={EV.cerca} etiqueta="0,10 €" />
+        <div style={{ ...mono(31), fontWeight: 800, color: ROJO, textAlign: "center", marginTop: 26 }}>100 × 0,10 = −10 €</div>
       </Panel>
       <Panel x={550} y={330} w={420} h={560} titulo="STOP LEJOS" g={g2} color={ROJO}>
-        <Grafico w={370} h={340} stop={0.5} t={t} tStop={EV.lejos} etiqueta="0,80 €" />
-        <div style={{ ...mono(40), fontWeight: 800, color: ROJO, textAlign: "center", marginTop: 26 }}>100 × 0,80 = −80 €</div>
+        <Grafico w={370} h={340} stop={0.38} t={t} tStop={EV.lejos} etiqueta="0,80 €" />
+        <div style={{ ...mono(31), fontWeight: 800, color: ROJO, textAlign: "center", marginTop: 26 }}>100 × 0,80 = −80 €</div>
       </Panel>
       <StickMundo a={a} c={c} t={t} gorra />
       <CajaMano c={c} a={a} n={100} />
@@ -147,7 +147,7 @@ const Dos: React.FC<P> = ({ t, s, e }) => {
         <Pildora t={t} t0={EV.reves - 0.3} size={44} color={VERDE}>LUCÍA, AL REVÉS</Pildora>
         <Pildora t={t} t0={EV.reves + 0.5} size={36}>1º LO QUE ACEPTA PERDER · 2º EL STOP</Pildora>
       </Arriba>
-      <Ficha t={t} t0={EV["20"] - 0.3} texto="20 €" color={VERDE} size={120} x={300} y={1210} sub="LO QUE ACEPTA PERDER" />
+      <Ficha t={t} t0={EV["20"] - 0.3} texto="20 €" color={VERDE} size={120} x={760} y={1230} sub="LO QUE ACEPTA PERDER" />
     </>
   );
 };
@@ -165,7 +165,7 @@ const Sigueme: React.FC<P> = (p) => (
 
 // ------------------------------------------------------------------ 5. Tres: la pizarra con la fórmula y los dos ejemplos (siempre −20 €)
 const s3 = inicio("tres");
-const PIZ = { c: [0.12, 0.0, -0.9] as V3, w: 1.6, h: 0.95 };
+const PIZ = { c: [0.12, 0.0, -0.9] as V3, w: 1.25, h: 0.85 };
 const FORMULA = "TAMAÑO = RIESGO ÷ DISTANCIA AL STOP";
 const Fila: React.FC<{ t: number; t0: number; cuenta: string; n: number; tN: number; tFin: number }> = ({ t, t0, cuenta, n, tN, tFin }) => {
   const g = muelle(t, t0, 220, 14);
@@ -173,14 +173,14 @@ const Fila: React.FC<{ t: number; t0: number; cuenta: string; n: number; tN: num
   const ok = t > tFin - 0.2;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 18, opacity: Math.min(g * 1.5, 1), transform: `translateX(${(1 - Math.min(g, 1)) * -40}px)` }}>
-      <span style={{ fontFamily: "monospace", fontSize: 42, color: "#fff", whiteSpace: "nowrap" }}>{cuenta}</span>
-      <span style={{ fontFamily: SANS, fontWeight: 800, fontSize: 60, color: VERDE, opacity: L(t, tN - 0.2, tN + 0.1, 0, 1), whiteSpace: "nowrap" }}>{`= ${n}`}</span>
-      {ok && <span style={{ ...mono(36), fontWeight: 800, color: VERDE, marginLeft: 8, whiteSpace: "nowrap" }}>→ −20 € ✓</span>}
+      <span style={{ fontFamily: "monospace", fontSize: 36, color: "#fff", whiteSpace: "nowrap" }}>{cuenta}</span>
+      <span style={{ fontFamily: SANS, fontWeight: 800, fontSize: 52, color: VERDE, opacity: L(t, tN - 0.2, tN + 0.1, 0, 1), whiteSpace: "nowrap" }}>{`= ${n}`}</span>
+      {ok && <span style={{ ...mono(30), fontWeight: 800, color: VERDE, marginLeft: 4, whiteSpace: "nowrap" }}>→ −20 € ✓</span>}
     </div>
   );
 };
 const Tres: React.FC<P> = ({ t, s, e }) => {
-  const cam = orbita([0.12, -0.2, -0.4], L(t, s, e, 3.9, 3.6), L(t, s, e, -0.04, 0.04), 0.08, { apertura: 6, centroY: 960 });
+  const cam = orbita([0.12, -0.25, -0.4], L(t, s, e, 4.4, 4.1), L(t, s, e, -0.04, 0.04), 0.08, { apertura: 6, centroY: 940 });
   const tr: Trazo[] = [...polvo(0.1)];
   for (let x = -1.6; x <= 1.61; x += 0.32) tr.push({ t: "l", a: [x, -1, -0.95], b: [x, -1, 1], w: 1, o: 0.12 });
   tr.push({ t: "l", a: [-1.6, -1, -0.95], b: [1.6, -1, -0.95], w: 1.8, o: 0.6 });
@@ -190,17 +190,17 @@ const Tres: React.FC<P> = ({ t, s, e }) => {
   const b1 = pr([PIZ.c[0] + PIZ.w / 2 - 0.06, PIZ.c[1] - PIZ.h / 2 + 0.05, PIZ.c[2]]);
   const letras = Math.floor(L(t, EV.tamano - 0.2, EV.distancia + 0.6, 0, FORMULA.length, (u) => u));
   const c = cuerpoEn(t, [[s, { mDx: 0.5, mDy: 0.3, mira: 0.8, boca: 0.4 }], [EV.siempre - 0.3, { mDx: 0.3, mDy: 0.45, mIx: -0.3, mIy: 0.45, boca: 1, abre: 0.4, mira: 0 }]], { mira: 0.8 }, s - 0.4);
-  const a = anclaje(cam, [-0.72, -1, 0.1], 0.44);
+  const a = anclaje(cam, [-0.3, -1, 0.35], 0.42);
   return (
     <>
       <Escena cam={cam} trazos={tr} />
       <div style={{ position: "absolute", left: a1.x + 24, top: a1.y + 22, width: b1.x - a1.x - 48, display: "flex", flexDirection: "column", gap: 26 }}>
-        <span style={{ fontFamily: "monospace", fontWeight: 700, fontSize: 40, color: "#fff", whiteSpace: "nowrap", borderBottom: "3px solid rgba(255,255,255,0.4)", paddingBottom: 14 }}>{FORMULA.slice(0, letras)}</span>
+        <span style={{ fontFamily: "monospace", fontWeight: 700, fontSize: 31, color: "#fff", whiteSpace: "nowrap", borderBottom: "3px solid rgba(255,255,255,0.4)", paddingBottom: 14 }}>{FORMULA.slice(0, letras)}</span>
         <Fila t={t} t0={EV["20b"] - 0.3} cuenta="20 € ÷ 0,40 €" n={50} tN={EV["50"]} tFin={EV.siempre} />
         <Fila t={t} t0={EV["1"] - 0.5} cuenta="20 € ÷ 1,00 €" n={20} tN={EV["1"] + 0.6} tFin={EV.siempre} />
       </div>
-      <Caja x={a1.x + 120} y={b1.y + 120} n={50} size={170} color={VERDE} o={L(t, EV["50"] - 0.2, EV["50"] + 0.1, 0, 1)} />
-      <Caja x={a1.x + 320} y={b1.y + 130} n={20} size={110} color={VERDE} o={L(t, EV["1"] + 0.4, EV["1"] + 0.7, 0, 1)} />
+      <Caja x={a1.x + 420} y={b1.y + 130} n={50} size={170} color={VERDE} o={L(t, EV["50"] - 0.2, EV["50"] + 0.1, 0, 1)} />
+      <Caja x={a1.x + 620} y={b1.y + 140} n={20} size={110} color={VERDE} o={L(t, EV["1"] + 0.4, EV["1"] + 0.7, 0, 1)} />
       <StickMundo a={a} c={c} t={t} coleta />
       <Abajo top={1250}>
         <Pildora t={t} t0={EV.siempre - 0.3} size={48} color={VERDE}>SIEMPRE −20 €</Pildora>
