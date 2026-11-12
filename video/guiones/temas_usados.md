@@ -64,3 +64,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 11 nov | Tu peor operación es la de después de perder (venganza) | operar por venganza; 2 pérdidas seguidas y se acabó el día |
 | 11 nov | GameStop y Melvin Capital, −53 % en un mes (gamestop) | en corto la pérdida no tiene techo; stop obligatorio |
 | 11 nov | El diario de Lucía, 30 operaciones (diario) | apuntar hora, motivo y emoción; quitar lo que pierde |
+| 12 nov | Acertó 3 meses y se lo quedó el bróker (swap) | financiación nocturna; mirar el swap antes de mantener días |
+| 12 nov | LTCM, un fondo con dos Nobel, −4.600 M en 4 meses (ltcm) | lo «casi imposible» pasa; si pasa lo peor, ¿sigo vivo? |
+| 12 nov | 100 acciones siempre: −10 € o −80 € (tamano) | tamaño = riesgo ÷ distancia al stop |
