@@ -6,6 +6,10 @@ de en medio y la pregunta final de cada vídeo.
 OBLIGATORIO en todos los guiones: CTA de seguimiento a mitad del guion (bloque `sigueme`, «Sígueme, que…»), justo en
 el momento de suspense, antes del giro. Nunca al principio ni solo al final.
 
+CONTENIDO desde el 14 nov (petición del usuario): nada de «Marcos hizo esto» ni historias raras. Ayuda real para traders:
+psicología, matemáticas del fondeo (challenges, drawdown diario y total, objetivos), gestión del riesgo, esperanza
+matemática, sesgos. Directo al trader («tú»), con cuentas concretas y una regla que se pueda aplicar hoy.
+
 OBLIGATORIO desde el 11 nov: estructura 5-30-10 (ver formato_v2.md). 5 s de gancho (afirmación que incomode o promesa
 con prueba), ~30 s para UNA sola idea (con el «sígueme» a mitad) y los últimos ~10 s de conversión: «comenta BOT y te
 paso por privado la cuenta auditada de mi bot», sin afirmaciones sobre el bot.
@@ -68,6 +72,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 12 nov | LTCM, un fondo con dos Nobel, −4.600 M en 4 meses (ltcm) | lo «casi imposible» pasa; si pasa lo peor, ¿sigo vivo? |
 | 12 nov | 100 acciones siempre: −10 € o −80 € (tamano) | tamaño = riesgo ÷ distancia al stop |
 | 13 nov | Tu stop no te protege el fin de semana (finde) | hueco del lunes; los viernes, cerrar o tamaño que aguante un hueco |
-| 14 nov | Marcos operó con el dinero del alquiler (alquiler) | solo dinero que no vayas a necesitar; con miedo se opera fatal |
-| 14 nov | Navinder Sarao y el flash crash de 2010 (sarao) | un desplome de minutos sin noticia no es señal; esperar |
-| 14 nov | Cortos contra Tesla en 2020: −38.000 M (tesla) | que algo haya subido mucho no es motivo para venderlo |
+| 14 nov | Una operación que pierde puede ser buena (proceso) | puntuar cada operación por el plan, no por el dinero |
+| 14 nov | Cuántas operaciones necesitas para pasar el challenge (challenge) | 40 % y 1:2 con 1 % → ~50 operaciones; la prisa es el riesgo |
+| 14 nov | Al mercado le da igual a qué precio compraste (anclaje) | ¿la abrirías hoy a este precio? Si no, ciérrala |
