@@ -8,14 +8,14 @@ La regla: puntúa cada operación de cero a diez por si seguiste el plan. [short
 [warmly] Guárdalo para tu próxima racha mala.
 
 
-18:00 (prueba) · Quieres pasar el challenge de fondeo en una semana y por eso lo suspendes
+18:00 (prueba) · Si mides tus operaciones en euros, no sabes si eres buen trader
 
-[serious] Quieres pasar el challenge de fondeo en una semana. [short pause] Por eso lo suspendes.
-[curious] Haz las cuentas: aciertas el cuarenta por ciento, con ratio uno a dos, y arriesgas un uno por ciento.
-Cada operación te deja, de media, un cero coma dos por ciento. [short pause] Para el diez por ciento del objetivo necesitas unas cincuenta operaciones.
-[warmly] Sígueme, que aquí es donde casi todos la lían.
-[serious] Para hacerlo en diez, tendrías que arriesgar cinco veces más: un cinco por ciento por operación. [short pause] En muchos challenges, eso es el límite diario entero.
-La regla: en el challenge, la prisa es el riesgo.
+[serious] Si mides tus operaciones en euros, no sabes si eres buen trader.
+[curious] Mídelas en R. [short pause] R es lo que arriesgas en cada operación.
+Arriesgas cincuenta euros y ganas ciento cincuenta: eso es más tres R. [short pause] Te salta el stop: menos uno R.
+[warmly] Sígueme, que ahora viene la cuenta que importa.
+Suma tus últimas cincuenta operaciones en R y divide entre cincuenta. [short pause] Si sale positivo, tu sistema tiene ventaja. [serious] Si sale negativo, ningún tamaño lo arregla.
+La regla: primero, que ese número salga positivo. [short pause] Después, sube el tamaño.
 [warmly] Comenta BOT y te paso por privado la cuenta auditada de mi bot.
 
 
