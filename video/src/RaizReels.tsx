@@ -18,6 +18,7 @@ import { Diario, DIARIO_FPS, DIARIO_FRAMES } from "./Diario/Diario";
 import { Swap, SWAP_FPS, SWAP_FRAMES } from "./Swap/Swap";
 import { Ltcm, LTCM_FPS, LTCM_FRAMES } from "./Ltcm/Ltcm";
 import { Tamano, TAMANO_FPS, TAMANO_FRAMES } from "./Tamano/Tamano";
+import { Finde, FINDE_FPS, FINDE_FRAMES } from "./Finde/Finde";
 import { Spread, SPREAD_FPS, SPREAD_FRAMES } from "./Spread/Spread";
 import { Confirmacion, CONFIRMACION_FPS, CONFIRMACION_FRAMES } from "./Confirmacion/Confirmacion";
 import { Leeson, LEESON_FPS, LEESON_FRAMES } from "./Leeson/Leeson";
@@ -64,6 +65,7 @@ export const RaizReels: React.FC = () => (
     <Composition id="Swap" component={Swap} durationInFrames={SWAP_FRAMES} fps={SWAP_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Ltcm" component={Ltcm} durationInFrames={LTCM_FRAMES} fps={LTCM_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Tamano" component={Tamano} durationInFrames={TAMANO_FRAMES} fps={TAMANO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Finde" component={Finde} durationInFrames={FINDE_FRAMES} fps={FINDE_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Spread" component={Spread} durationInFrames={SPREAD_FRAMES} fps={SPREAD_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Confirmacion" component={Confirmacion} durationInFrames={CONFIRMACION_FRAMES} fps={CONFIRMACION_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Nfp" component={Nfp} durationInFrames={NFP_FRAMES} fps={NFP_FPS} width={ANCHO} height={ALTO} />

@@ -209,6 +209,9 @@ def generar(ff, nombre, titulo, guion, eventos, toques, campanas, intensidad, go
     json.dump({"titulo": titulo, "duracion": dur, "fps": 30, "palabras": palabras, "escenas": escenas,
                "eventos": {k: round(v, 3) for k, v in ev.items()}},
               open(GEN_SRC / f"{nombre}.json", "w"), ensure_ascii=False, indent=1)
+    # La voz intermedia (bruta y filtrada) no la usa Remotion: se borra para no llenar el disco ni el bundle
+    for tmp in (bruta, voz_wav):
+        tmp.unlink(missing_ok=True)
     print(f"duración {dur:.2f}s")
     for e in escenas:
         print(f"  {e['id']:<8} {e['s']:6.2f} - {e['e']:6.2f}")
