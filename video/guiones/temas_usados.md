@@ -68,3 +68,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 12 nov | LTCM, un fondo con dos Nobel, −4.600 M en 4 meses (ltcm) | lo «casi imposible» pasa; si pasa lo peor, ¿sigo vivo? |
 | 12 nov | 100 acciones siempre: −10 € o −80 € (tamano) | tamaño = riesgo ÷ distancia al stop |
 | 13 nov | Tu stop no te protege el fin de semana (finde) | hueco del lunes; los viernes, cerrar o tamaño que aguante un hueco |
+| 14 nov | Marcos operó con el dinero del alquiler (alquiler) | solo dinero que no vayas a necesitar; con miedo se opera fatal |
+| 14 nov | Navinder Sarao y el flash crash de 2010 (sarao) | un desplome de minutos sin noticia no es señal; esperar |
+| 14 nov | Cortos contra Tesla en 2020: −38.000 M (tesla) | que algo haya subido mucho no es motivo para venderlo |

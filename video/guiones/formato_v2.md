@@ -96,3 +96,15 @@ y cambio de escenario cada 5–8 s.
 - **Luz**: `Foco` (charco de luz suave bajo el personaje u objeto) en vez de decorado.
 - Gráficos 2D grandes y limpios (pocas velas, una línea) y tipografía grande para las cifras.
 - Empujes de cámara suaves (`empujes={0.035}`), temblor y fogonazos solo en el momento clave.
+
+## Formato v3 «dopamina» (propuesto el 13 nov: los reels no pasan de 1.000 visitas)
+
+Diagnóstico: con 40–45 s y un primer segundo poco visual, casi nadie llega al final y el algoritmo deja de enseñarlo.
+- **Mezcla diaria**: 2 cortos de alcance (15–25 s, una idea, «sígueme» a mitad, final «etiqueta / mándaselo» que se
+  comparte) + 1 historia de 30–35 s con el cierre «comenta BOT». El comentario fijado lleva el BOT en todos.
+- **Primer segundo**: algo moviéndose ya (contador, vela, billetes volando), una cifra o emoción enorme y un golpe de sonido.
+- **Ritmo**: un cambio visual cada 1–1,5 s (golpe de zoom, corte, cifra nueva); nada quieto más de 2 s.
+- **Recompensas**: fogonazo de color y golpe en cada cifra clave; contadores que corren; temblor en el impacto.
+- **Final en bucle**: el último plano enlaza con el primero para que se vuelva a ver.
+- **Audio**: al publicar, añadir un audio en tendencia de Instagram muy bajo (5–10 %) debajo de la voz.
+- **Medir**: tasa de salto (los que se van en los 3 primeros segundos), tiempo medio visto y envíos de cada reel.
