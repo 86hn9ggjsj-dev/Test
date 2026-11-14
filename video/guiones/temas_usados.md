@@ -7,8 +7,11 @@ OBLIGATORIO en todos los guiones: CTA de seguimiento a mitad del guion (bloque `
 el momento de suspense, antes del giro. Nunca al principio ni solo al final.
 
 CONTENIDO desde el 14 nov (petición del usuario): nada de «Marcos hizo esto» ni historias raras. Ayuda real para traders:
-psicología, matemáticas del trading (esperanza, R, rachas, drawdown), gestión del riesgo y sesgos. Fondeo: solo desde el
-ángulo del usuario («las fondeadas son un juego de ROI, no es trading»): cuotas frente a cobros, nunca promoción. Directo al trader («tú»), con cuentas concretas y una regla que se pueda aplicar hoy.
+psicología, matemáticas del trading (esperanza, R, rachas, drawdown), gestión del riesgo y sesgos. Fondeo (14 nov): se puede
+hablar de cuentas fondeadas, pero siendo REALISTAS: datos reales con fuente (FPFX Tech vía Finance Magnates, sept. 2024,
++300.000 cuentas de 10 empresas: aprueba el 14 % de los traders, cobra el 7 %, cobro medio = 4 % de la cuenta), lo bueno
+(solo arriesgas la cuota) y lo malo, el ángulo del usuario («es un juego de ROI»: cuotas frente a cobros). Nunca promoción
+ni el sueño de «fondéate y vive del trading». Directo al trader («tú»), con cuentas concretas y una regla que se pueda aplicar hoy.
 
 OBLIGATORIO desde el 11 nov: estructura 5-30-10 (ver formato_v2.md). 5 s de gancho (afirmación que incomode o promesa
 con prueba), ~30 s para UNA sola idea (con el «sígueme» a mitad) y los últimos ~10 s de conversión: «comenta BOT y te
@@ -73,5 +76,5 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 12 nov | 100 acciones siempre: −10 € o −80 € (tamano) | tamaño = riesgo ÷ distancia al stop |
 | 13 nov | Tu stop no te protege el fin de semana (finde) | hueco del lunes; los viernes, cerrar o tamaño que aguante un hueco |
 | 14 nov | Una operación que pierde puede ser buena (proceso) | puntuar cada operación por el plan, no por el dinero |
-| 14 nov | Las fondeadas no son trading: son un juego de ROI (roi) | lo pagado en challenges frente a lo cobrado = ROI real |
+| 14 nov | De cada 100 que pagan un challenge, solo 7 cobran (roi) | juego de ROI: lo pagado en challenges frente a lo cobrado |
 | 14 nov | Al mercado le da igual a qué precio compraste (anclaje) | ¿la abrirías hoy a este precio? Si no, ciérrala |
