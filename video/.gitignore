@@ -1,0 +1,6 @@
+node_modules/
+out/
+public/gen/
+src/gen/
+input/*.mp4
+input/*_voz.*
