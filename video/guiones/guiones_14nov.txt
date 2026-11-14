@@ -8,14 +8,14 @@ La regla: puntúa cada operación de cero a diez por si seguiste el plan. [short
 [warmly] Guárdalo para tu próxima racha mala.
 
 
-18:00 (prueba) · Si mides tus operaciones en euros, no sabes si eres buen trader
+18:00 (prueba) · Las cuentas fondeadas no son trading: son un juego de ROI
 
-[serious] Si mides tus operaciones en euros, no sabes si eres buen trader.
-[curious] Mídelas en R. [short pause] R es lo que arriesgas en cada operación.
-Arriesgas cincuenta euros y ganas ciento cincuenta: eso es más tres R. [short pause] Te salta el stop: menos uno R.
-[warmly] Sígueme, que ahora viene la cuenta que importa.
-Suma tus últimas cincuenta operaciones en R y divide entre cincuenta. [short pause] Si sale positivo, tu sistema tiene ventaja. [serious] Si sale negativo, ningún tamaño lo arregla.
-La regla: primero, que ese número salga positivo. [short pause] Después, sube el tamaño.
+[serious] Las cuentas fondeadas no son trading. [short pause] Son un juego de ROI.
+Pagas una cuota. Si suspendes, la pierdes. Si pasas, cobras parte de lo que ganes.
+[curious] Ejemplo: cuota de ciento cincuenta euros. Si pasas uno de cada cuatro, cada cuenta te cuesta seiscientos.
+[warmly] Sígueme, que aquí está la cuenta que nadie hace.
+[serious] Con una cuenta de diez mil y un ochenta por ciento para ti, tienes que ganar un siete coma cinco por ciento solo para recuperar esos seiscientos.
+La regla: apunta cuánto llevas pagado en challenges y cuánto has cobrado. [short pause] Ese es tu ROI real.
 [warmly] Comenta BOT y te paso por privado la cuenta auditada de mi bot.
 
 
