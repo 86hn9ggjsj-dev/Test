@@ -80,3 +80,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 14 nov | Una operación que pierde puede ser buena (proceso; al usuario no le gustó) | puntuar cada operación por el plan, no por el dinero |
 | 14 nov | De cada 100 que pagan un challenge, solo 7 cobran (roi) | juego de ROI: lo pagado en challenges frente a lo cobrado |
 | 14 nov | Al mercado le da igual a qué precio compraste (anclaje; al usuario no le gustó) | ¿la abrirías hoy a este precio? Si no, ciérrala |
+| 14 nov | Operar más te hace ganar menos, Barber y Odean 2000 (operarmas) | 11,4 % frente a 18,5 % al año; máximo de operaciones al día |
+| 14 nov | Un 5 % por operación en tu challenge te suspende tú solo (riesgochallenge) | 1 de 4 en las dos primeras; máximo un décimo de la pérdida permitida |
+| 14 nov | Tu día más peligroso es cuando ganas mucho (casa) | efecto dinero de la casa; objetivo del día = cerrar; si sigues, ×½ |

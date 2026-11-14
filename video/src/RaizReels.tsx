@@ -22,6 +22,9 @@ import { Finde, FINDE_FPS, FINDE_FRAMES } from "./Finde/Finde";
 import { Proceso, PROCESO_FPS, PROCESO_FRAMES } from "./Proceso/Proceso";
 import { Anclaje, ANCLAJE_FPS, ANCLAJE_FRAMES } from "./Anclaje/Anclaje";
 import { Roi, ROI_FPS, ROI_FRAMES } from "./Roi/Roi";
+import { Operarmas, OPERARMAS_FPS, OPERARMAS_FRAMES } from "./Operarmas/Operarmas";
+import { Casa, CASA_FPS, CASA_FRAMES } from "./Casa/Casa";
+import { Riesgochallenge, RIESGO_FPS, RIESGO_FRAMES } from "./Riesgochallenge/Riesgochallenge";
 import { Spread, SPREAD_FPS, SPREAD_FRAMES } from "./Spread/Spread";
 import { Confirmacion, CONFIRMACION_FPS, CONFIRMACION_FRAMES } from "./Confirmacion/Confirmacion";
 import { Leeson, LEESON_FPS, LEESON_FRAMES } from "./Leeson/Leeson";
@@ -72,6 +75,9 @@ export const RaizReels: React.FC = () => (
     <Composition id="Proceso" component={Proceso} durationInFrames={PROCESO_FRAMES} fps={PROCESO_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Anclaje" component={Anclaje} durationInFrames={ANCLAJE_FRAMES} fps={ANCLAJE_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Roi" component={Roi} durationInFrames={ROI_FRAMES} fps={ROI_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Operarmas" component={Operarmas} durationInFrames={OPERARMAS_FRAMES} fps={OPERARMAS_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Casa" component={Casa} durationInFrames={CASA_FRAMES} fps={CASA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Riesgochallenge" component={Riesgochallenge} durationInFrames={RIESGO_FRAMES} fps={RIESGO_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Spread" component={Spread} durationInFrames={SPREAD_FRAMES} fps={SPREAD_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Confirmacion" component={Confirmacion} durationInFrames={CONFIRMACION_FRAMES} fps={CONFIRMACION_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Nfp" component={Nfp} durationInFrames={NFP_FRAMES} fps={NFP_FPS} width={ANCHO} height={ALTO} />

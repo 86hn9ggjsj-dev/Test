@@ -192,7 +192,9 @@ export const Montaje: React.FC<{
   subs?: { y?: number; tamano?: number; ancho?: number };
   // v3 «dopamina»: golpe de zoom seco (y fogonazo de color en los bordes si lleva color) en cada cifra o palabra clave
   golpes?: [number, string?][];
-}> = ({ t, datos, audio, piezas, claves, fondo = "radial-gradient(ellipse 90% 70% at 50% 45%, #0b0b0c, #000)", transicion = "fundido", vineta = false, gancho, zoom = 1, empujes = 0, tinta = 1, bucle = false, subs = {}, golpes = [] }) => {
+  // capa por encima de las escenas (y por debajo del gancho y los subtítulos): transiciones que cruzan un corte
+  encima?: React.FC<{ t: number }>;
+}> = ({ t, datos, audio, piezas, claves, fondo = "radial-gradient(ellipse 90% 70% at 50% 45%, #0b0b0c, #000)", transicion = "fundido", vineta = false, gancho, zoom = 1, empujes = 0, tinta = 1, bucle = false, subs = {}, golpes = [], encima: Encima }) => {
   const cortes = useMemo(() => datos.escenas.map((x) => x.s), [datos]);
   // Comienzo de cada frase (tras punto, interrogación, dos puntos o puntos suspensivos, o al cambiar de escena)
   const frases = useMemo(() => {
@@ -247,6 +249,7 @@ export const Montaje: React.FC<{
         )}
       </Tinta.Provider>
       {vineta && <AbsoluteFill style={{ background: "radial-gradient(ellipse 75% 60% at 50% 45%, transparent 55%, rgba(0,0,0,0.6))", pointerEvents: "none" }} />}
+      {Encima && <Encima t={t} />}
       {fogonazo.map(({ c, k }, i) => (
         <AbsoluteFill key={i} style={{ background: `radial-gradient(ellipse 80% 65% at 50% 45%, transparent 45%, ${c})`, opacity: 0.5 * k, pointerEvents: "none" }} />
       ))}
