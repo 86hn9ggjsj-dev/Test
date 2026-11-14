@@ -18,7 +18,7 @@ GUION = [
     ('sigueme', ['Sígueme, que aquí está la cuenta que nadie hace.']),
     ('tres', ['Es un juego de ROI: si cada intento cuesta 100 euros, cada cuenta aprobada te sale por 700.']),
     ('giro', ['La regla: apunta lo que has pagado en challenges y lo que has cobrado. Ese es tu ROI real.']),
-    ('cierre', ['Comenta BOT y te paso por privado la cuenta auditada de mi bot.']),
+    ('cierre', ['Comenta cuántos challenges llevas pagados. Y cuántos has cobrado.']),
 ]
 GESTOS = {
     'hook': '[serious] De cada cien traders que pagan un challenge, [short pause] solo siete llegan a cobrar.',
@@ -27,7 +27,7 @@ GESTOS = {
     'sigueme': '[warmly] Sígueme, que aquí está la cuenta que nadie hace.',
     'tres': '[serious] Es un juego de ROI: si cada intento cuesta cien euros, cada cuenta aprobada te sale por setecientos.',
     'giro': 'La regla: apunta lo que has pagado en challenges y lo que has cobrado. [short pause] Ese es tu ROI real.',
-    'cierre': '[warmly] Comenta BOT y te paso por privado la cuenta auditada de mi bot.',
+    'cierre': '[warmly] Comenta cuántos challenges llevas pagados. [short pause] Y cuántos has cobrado.',
 }
 PANTALLAS = [
     ('hook', "", 'fotograma 0: 100 puntos que ya se están apagando en rojo hasta quedar 7 en verde; contador 100 → 7'),
@@ -36,5 +36,5 @@ PANTALLAS = [
     ('sigueme', "", '«sígueme» encima de la escena'),
     ('tres', "", 'siete tickets de 100 € que se apilan, 6 rojos y 1 verde: = 700 € por cuenta aprobada'),
     ('giro', "", 'libreta con dos columnas PAGADO / COBRADO y la resta = ROI'),
-    ('cierre', "", 'caja de comentario «BOT» → mensaje directo → tarjeta «CUENTA AUDITADA ✓»'),
+    ('cierre', "", 'caja de comentarios con «3 pagados · 0 cobrados»… (sin promo del bot: el bot opera capital real)'),
 ]

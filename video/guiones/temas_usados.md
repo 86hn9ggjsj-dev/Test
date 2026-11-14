@@ -11,7 +11,9 @@ psicología, matemáticas del trading (esperanza, R, rachas, drawdown), gestión
 hablar de cuentas fondeadas, pero siendo REALISTAS: datos reales con fuente (FPFX Tech vía Finance Magnates, sept. 2024,
 +300.000 cuentas de 10 empresas: aprueba el 14 % de los traders, cobra el 7 %, cobro medio = 4 % de la cuenta), lo bueno
 (solo arriesgas la cuota) y lo malo, el ángulo del usuario («es un juego de ROI»: cuotas frente a cobros). Nunca promoción
-ni el sueño de «fondéate y vive del trading». Directo al trader («tú»), con cuentas concretas y una regla que se pueda aplicar hoy.
+ni el sueño de «fondéate y vive del trading». En los vídeos de fondeo NUNCA «comenta BOT» ni nada del bot (el bot opera
+capital real: no pinta nada en un vídeo de fondeo): el cierre es un comentario o un envío («comenta cuánto arriesgas…»),
+y la descripción y el comentario fijado de ese vídeo tampoco llevan el BOT. Directo al trader («tú»), con cuentas concretas y una regla que se pueda aplicar hoy.
 
 OBLIGATORIO desde el 11 nov: estructura 5-30-10 (ver formato_v2.md). 5 s de gancho (afirmación que incomode o promesa
 con prueba), ~30 s para UNA sola idea (con el «sígueme» a mitad) y los últimos ~10 s de conversión: «comenta BOT y te
@@ -75,6 +77,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 12 nov | LTCM, un fondo con dos Nobel, −4.600 M en 4 meses (ltcm) | lo «casi imposible» pasa; si pasa lo peor, ¿sigo vivo? |
 | 12 nov | 100 acciones siempre: −10 € o −80 € (tamano) | tamaño = riesgo ÷ distancia al stop |
 | 13 nov | Tu stop no te protege el fin de semana (finde) | hueco del lunes; los viernes, cerrar o tamaño que aguante un hueco |
-| 14 nov | Una operación que pierde puede ser buena (proceso) | puntuar cada operación por el plan, no por el dinero |
+| 14 nov | Una operación que pierde puede ser buena (proceso; al usuario no le gustó) | puntuar cada operación por el plan, no por el dinero |
 | 14 nov | De cada 100 que pagan un challenge, solo 7 cobran (roi) | juego de ROI: lo pagado en challenges frente a lo cobrado |
-| 14 nov | Al mercado le da igual a qué precio compraste (anclaje) | ¿la abrirías hoy a este precio? Si no, ciérrala |
+| 14 nov | Al mercado le da igual a qué precio compraste (anclaje; al usuario no le gustó) | ¿la abrirías hoy a este precio? Si no, ciérrala |
