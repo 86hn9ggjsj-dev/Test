@@ -12,7 +12,7 @@ hablar de cuentas fondeadas, pero siendo REALISTAS: datos reales con fuente (FPF
 +300.000 cuentas de 10 empresas: aprueba el 14 % de los traders, cobra el 7 %, cobro medio = 4 % de la cuenta), lo bueno
 (solo arriesgas la cuota) y lo malo, el ángulo del usuario («es un juego de ROI»: cuotas frente a cobros). Nunca promoción
 ni el sueño de «fondéate y vive del trading». En los vídeos de fondeo NUNCA «comenta BOT» ni nada del bot (el bot opera
-capital real: no pinta nada en un vídeo de fondeo): el cierre es un comentario o un envío («comenta cuánto arriesgas…»),
+capital real: no pinta nada en un vídeo de fondeo): el cierre es la palabra RIESGO («comenta RIESGO y te explico por privado cómo calcular el tuyo según tu cuenta»),
 y la descripción y el comentario fijado de ese vídeo tampoco llevan el BOT. Directo al trader («tú»), con cuentas concretas y una regla que se pueda aplicar hoy.
 
 OBLIGATORIO desde el 11 nov: estructura 5-30-10 (ver formato_v2.md). 5 s de gancho (afirmación que incomode o promesa

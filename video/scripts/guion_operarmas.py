@@ -5,23 +5,23 @@ un 17,9 %; los que menos operaban, un 18,5 %. Antes de costes ganaban parecido: 
 operar de más, y los autores lo atribuyen al exceso de confianza. Regla: máximo de operaciones al día.
 """
 
-TITULO = 'Los que más operaban ganaron menos'
+TITULO = 'Operar más te hace ganar menos'
 GANCHO = {'lineas': ['Operar más', 'te hace *ganar_menos*'], 'color': 'ROJO'}
 GUION = [
-    ('hook', ['Los que más operaban ganaron un 11,4 % al año. Los que menos, un 18 y medio.']),
-    ('uno', ['Más de 60.000 familias, seis años, operaciones reales.']),
-    ('sigueme', ['Sígueme, que la razón te va a escocer.']),
-    ('dos', ['Antes de comisiones ganaban casi lo mismo. Lo perdían operando de más, porque se creían más listos que el mercado.']),
+    ('hook', ['Operar más te hace ganar menos. Y lo prueban 60.000 cuentas reales.']),
+    ('uno', ['Un estudio siguió a más de 60.000 familias durante seis años.', 'Las que casi no tocaban nada ganaron un 18 y medio por ciento al año.']),
+    ('sigueme', ['Sígueme, que ahora viene lo que les pasó a las que más operaban.']),
+    ('dos', ['Un 11,4. Siete puntos menos, cada año.', 'Y antes de comisiones ganaban casi lo mismo. Lo perdieron operando de más, porque se creían más listos que el mercado.']),
     ('giro', ['La regla: ponte un máximo de operaciones al día. Y cuando llegues, cierra.']),
-    ('cierre', ['Mándaselo al que hace 40 operaciones al día.']),
+    ('cierre', ['Si has llegado hasta aquí, eres de los que operan con cabeza. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.']),
 ]
 GESTOS = {
-    'hook': '[serious] Los que más operaban ganaron un once coma cuatro por ciento al año. [short pause] Los que menos, un dieciocho y medio.',
-    'uno': 'Más de sesenta mil familias, seis años, operaciones reales.',
-    'sigueme': '[warmly] Sígueme, que la razón te va a escocer.',
-    'dos': '[serious] Antes de comisiones ganaban casi lo mismo. [short pause] Lo perdían operando de más, porque se creían más listos que el mercado.',
+    'hook': '[serious] Operar más te hace ganar menos. [short pause] Y lo prueban sesenta mil cuentas reales.',
+    'uno': 'Un estudio siguió a más de sesenta mil familias durante seis años. [short pause] Las que casi no tocaban nada ganaron un dieciocho y medio por ciento al año.',
+    'sigueme': '[warmly] Sígueme, que ahora viene lo que les pasó a las que más operaban.',
+    'dos': '[serious] Un once coma cuatro. [short pause] Siete puntos menos, cada año. [short pause] Y antes de comisiones ganaban casi lo mismo. Lo perdieron operando de más, porque se creían más listos que el mercado.',
     'giro': 'La regla: ponte un máximo de operaciones al día. [short pause] Y cuando llegues, cierra.',
-    'cierre': '[mischievously] Mándaselo al que hace cuarenta operaciones al día.',
+    'cierre': '[warmly] Si has llegado hasta aquí, eres de los que operan con cabeza. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.',
 }
 PANTALLAS = [
     ('hook', "", 'fotograma 0: dos contadores en carrera, 11,4 % (rojo, con un dedo que no para de pulsar) frente a 18,5 % (verde, quieto)'),

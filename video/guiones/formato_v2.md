@@ -112,3 +112,24 @@ Diagnóstico: con 40–45 s y un primer segundo poco visual, casi nadie llega al
   dibujan, tickets, botones que se pulsan, iconos de guardar y enviar, ancla) y `golpes={[[t, color?], …]}` en el `Montaje`
   (golpe de zoom seco y fogonazo de color en los bordes en cada palabra clave). Golpe de sonido en la primera palabra
   (evento de la primera palabra en `golpes` del script de Python). Referencias: Proceso, Anclaje y Roi.
+
+## 14 nov: todo en 5-30-10 + dopamina de la referencia (el usuario: «tienen que generar dopamina y respeta lo del vídeo»)
+
+Los cortos de 15-25 s del v3 quedan descartados: TODOS los vídeos siguen la 5-30-10 de la referencia (~40-45 s,
+115-130 palabras): gancho ≤ 14 palabras (≤ 5 s), una sola idea con el «sígueme» a mitad y la regla, y los últimos ~10 s
+de conversión con palabra clave → mensaje directo («Si has llegado hasta aquí, … Comenta BOT y te explico por privado
+cómo lo hago yo, y te paso la cuenta auditada de mi bot»). En fondeo, la palabra es RIESGO (nada del bot).
+
+Recursos de dopamina sacados de la referencia (igexport-DcOvTIOx0Yr, 63 s), traducidos a nuestro estilo sin cara:
+- **Fotograma 0 raro** que obliga a mirar + una pregunta de curiosidad escrita («¿Qué coño está haciendo? 😅»): en la
+  referencia, un tío agachado encima de un Cybertruck. Para nosotros: algo imposible en plena acción (un móvil con el
+  bróker que cae hacia la cámara, una vela que rompe la pantalla…).
+- **Transición física** del gancho a la idea (el móvil que lanza y cae a la cámara → plano cenital).
+- **Pruebas que saltan como tarjetas**: miniaturas con cifras (vistas 3.281 → 1,2 M). Para nosotros: la ficha del
+  estudio (revista, año, nº de cuentas) y cada cifra en tarjeta.
+- **Cifras en fichas 3D grandes** («5», «30», «10») que entran de golpe con sonido.
+- **Barra de tiempo** roja-amarilla-verde con un marcador que avanza (dónde estás en la idea).
+- **Cambio de escenario cada ~5 s** (cortes en 9,7 · 14,5 · 17,7 · 23,4 · 29 · 35 · 41,7 · 45 · 56,8 s).
+- **Iconos que orbitan** alrededor de la idea (bombilla con iconos girando).
+- **Notificaciones apiladas** («Pago recibido +X €») como prueba de resultado.
+- **Cierre en el móvil**: el comentario con la palabra y el mensaje directo que llega.

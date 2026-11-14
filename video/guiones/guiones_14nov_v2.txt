@@ -1,60 +1,38 @@
-12:00 (corto) · Los que más operaban ganaron menos
+12:00 · Operar más te hace ganar menos
 
-[serious] Los que más operaban ganaron un once coma cuatro por ciento al año. [short pause] Los que menos, un dieciocho y medio.
-Más de sesenta mil familias, seis años, operaciones reales.
-[warmly] Sígueme, que la razón te va a escocer.
-[serious] Antes de comisiones ganaban casi lo mismo. [short pause] Lo perdían operando de más, porque se creían más listos que el mercado.
+[serious] Operar más te hace ganar menos. [short pause] Y lo prueban sesenta mil cuentas reales.
+Un estudio siguió a más de sesenta mil familias durante seis años. [short pause] Las que casi no tocaban nada ganaron un dieciocho y medio por ciento al año.
+[warmly] Sígueme, que ahora viene lo que les pasó a las que más operaban.
+[serious] Un once coma cuatro. [short pause] Siete puntos menos, cada año. [short pause] Y antes de comisiones ganaban casi lo mismo. Lo perdieron operando de más, porque se creían más listos que el mercado.
 La regla: ponte un máximo de operaciones al día. [short pause] Y cuando llegues, cierra.
-[mischievously] Mándaselo al que hace cuarenta operaciones al día.
+[warmly] Si has llegado hasta aquí, eres de los que operan con cabeza. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.
 
 
-18:00 (prueba, fondeo, sin bot) · Con un 5 % por operación, te suspendes tú solo
+18:00 (prueba, fondeo, sin bot: palabra RIESGO) · Si arriesgas un 5 % por operación en tu challenge, te suspendes tú solo
 
-[serious] Si en tu challenge arriesgas un cinco por ciento por operación, [short pause] te suspendes tú solo.
-Si la cuenta te deja perder un diez por ciento, con dos pérdidas seguidas estás fuera.
-[curious] Acertando la mitad, eso pasa una de cada cuatro veces. [short pause] En tus dos primeras operaciones.
-[warmly] Sígueme, que ahora viene la cuenta buena.
-[serious] Con un uno por ciento, para que te echen igual de rápido necesitas diez pérdidas seguidas. [short pause] Eso pasa una vez de cada mil.
-Vas más lento, sí. [short pause] Pero un challenge no lo gana el rápido: lo gana el que sigue vivo.
-[warmly] Comenta cuánto arriesgas tú por operación. Te leo.
-
-
-18:00 alternativa (fondeo, sin bot) · De cada 100 que pagan un challenge, solo 7 cobran
-
-[serious] De cada cien traders que pagan un challenge, [short pause] solo siete llegan a cobrar.
-Son datos de más de trescientas mil cuentas: aprueba uno de cada siete, [short pause] y cobra menos de la mitad.
-[warmly] Lo bueno: solo arriesgas la cuota, no tus ahorros.
-[warmly] Sígueme, que aquí está la cuenta que nadie hace.
-[serious] Es un juego de ROI: si cada intento cuesta cien euros, cada cuenta aprobada te sale por setecientos.
-La regla: apunta lo que has pagado en challenges y lo que has cobrado. [short pause] Ese es tu ROI real.
-[warmly] Comenta cuántos challenges llevas pagados. [short pause] Y cuántos has cobrado.
+[serious] Si arriesgas un cinco por ciento por operación en tu challenge, [short pause] te suspendes tú solo.
+Si tu cuenta te deja perder un diez por ciento, con dos pérdidas seguidas estás fuera. [curious] Acertando la mitad, eso te pasa una de cada cuatro veces en tus dos primeras operaciones.
+[warmly] Sígueme, que ahora viene la cuenta que casi nadie hace.
+[serious] Con un uno por ciento, para que te echen igual de rápido hacen falta diez seguidas: [short pause] una vez de cada mil. Vas más lento, pero un challenge lo gana el que sigue vivo.
+La regla: nunca arriesgues más de un décimo de lo que la cuenta te deja perder.
+[warmly] Si has llegado hasta aquí, vas en serio con tu challenge. Comenta RIESGO y te explico por privado cómo calcular el tuyo según tu cuenta.
 
 
-21:30 (corto) · Tu día más peligroso es cuando ganas mucho
+21:30 · Tu día más peligroso es cuando ganas mucho
 
 [serious] Tu día más peligroso no es cuando pierdes. [short pause] Es cuando ganas mucho.
-Ganas cuatrocientos euros por la mañana, [short pause] y sientes que ese dinero ya no es tuyo.
+Ganas cuatrocientos euros por la mañana, y tu cabeza deja de sentir ese dinero como tuyo. [short pause] Lo siente como dinero del casino. [mischievously] Y el dinero del casino se apuesta.
 [warmly] Sígueme, que esto te salva las semanas buenas.
-[curious] Se llama efecto dinero de la casa. [short pause] Doblas el tamaño. [serious] Y lo devuelves todo.
-La regla: si llegas a tu objetivo del día, cierras. [short pause] Y si sigues, con la mitad de tamaño.
-[warmly] Guárdalo para tu próximo día verde.
+[curious] Se llama efecto dinero de la casa, y está estudiado desde mil novecientos noventa. [serious] Doblas el tamaño. [short pause] Una operación mala. [short pause] Y devuelves los cuatrocientos, y algo más.
+La regla: si llegas a tu objetivo del día, cierras. [short pause] Y si sigues, con la mitad de tamaño, nunca el doble.
+[warmly] Si has llegado hasta aquí, te ha pasado alguna vez. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.
 
 
-reserva (corto) · Si mides tus operaciones en euros, no sabes si eres buen trader
+reserva · El 97 % de los que hicieron day trading más de 300 días perdió dinero
 
-[serious] Si mides tus operaciones en euros, no sabes si eres buen trader.
-[curious] Mídelas en R: lo que arriesgas. [short pause] Arriesgas cincuenta y ganas ciento cincuenta: más tres R. [short pause] Te salta el stop: menos uno R.
-[warmly] Sígueme, que ahora viene la cuenta que importa.
-[serious] Suma tus últimas cincuenta operaciones en R y divide entre cincuenta. [short pause] Si sale negativo, ningún tamaño lo arregla.
-[warmly] Guárdalo y hazlo esta noche.
-
-
-reserva (prueba con BOT) · El 97 % de los que hicieron day trading más de 300 días perdió dinero
-
-[serious] De los que hicieron day trading más de trescientos días, [short pause] el noventa y siete por ciento perdió dinero.
-No es una encuesta: son los datos reales de la bolsa de Brasil.
-[curious] Y solo uno de cada cien ganó más que el salario mínimo.
+[serious] Trescientos días haciendo day trading. [short pause] El noventa y siete por ciento perdió dinero.
+No es una encuesta: son los datos reales de la bolsa de Brasil, trader por trader. [curious] Y solo uno de cada cien ganó más que el salario mínimo.
 [warmly] Sígueme, que lo peor del estudio no es eso.
 [serious] Lo peor: los que siguieron más tiempo no mejoraron. [short pause] Repetir sin medir no te hace mejor.
 La regla: apunta todas tus operaciones. [short pause] Si en cien la suma da negativo, no es mala racha: aún no tienes ventaja.
-[warmly] Comenta BOT y te paso por privado la cuenta auditada de mi bot.
+[warmly] Si has llegado hasta aquí, quieres estar en el otro tres por ciento. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.

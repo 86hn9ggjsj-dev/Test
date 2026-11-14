@@ -7,24 +7,22 @@ Regla: apuntar todas las operaciones; si en cien la suma es negativa, no es mala
 """
 
 TITULO = 'El 97 % de los que hicieron day trading más de 300 días perdió dinero'
-GANCHO = {'lineas': ['Más de 300 días', 'de day trading:', 'el *97_%* perdió'], 'color': 'ROJO'}
+GANCHO = {'lineas': ['300 días de trading:', 'el *97_%* perdió'], 'color': 'ROJO'}
 GUION = [
-    ('hook', ['De los que hicieron day trading más de 300 días, el 97 % perdió dinero.']),
-    ('uno', ['No es una encuesta: son los datos reales de la bolsa de Brasil.']),
-    ('dos', ['Y solo uno de cada cien ganó más que el salario mínimo.']),
+    ('hook', ['300 días haciendo day trading. El 97 % perdió dinero.']),
+    ('uno', ['No es una encuesta: son los datos reales de la bolsa de Brasil, trader por trader.', 'Y solo uno de cada cien ganó más que el salario mínimo.']),
     ('sigueme', ['Sígueme, que lo peor del estudio no es eso.']),
-    ('tres', ['Lo peor: los que siguieron más tiempo no mejoraron. Repetir sin medir no te hace mejor.']),
+    ('dos', ['Lo peor: los que siguieron más tiempo no mejoraron. Repetir sin medir no te hace mejor.']),
     ('giro', ['La regla: apunta todas tus operaciones. Si en cien la suma da negativo, no es mala racha: aún no tienes ventaja.']),
-    ('cierre', ['Comenta BOT y te paso por privado la cuenta auditada de mi bot.']),
+    ('cierre', ['Si has llegado hasta aquí, quieres estar en el otro 3 %. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.']),
 ]
 GESTOS = {
-    'hook': '[serious] De los que hicieron day trading más de trescientos días, [short pause] el noventa y siete por ciento perdió dinero.',
-    'uno': 'No es una encuesta: son los datos reales de la bolsa de Brasil.',
-    'dos': '[curious] Y solo uno de cada cien ganó más que el salario mínimo.',
+    'hook': '[serious] Trescientos días haciendo day trading. [short pause] El noventa y siete por ciento perdió dinero.',
+    'uno': 'No es una encuesta: son los datos reales de la bolsa de Brasil, trader por trader. [curious] Y solo uno de cada cien ganó más que el salario mínimo.',
     'sigueme': '[warmly] Sígueme, que lo peor del estudio no es eso.',
-    'tres': '[serious] Lo peor: los que siguieron más tiempo no mejoraron. [short pause] Repetir sin medir no te hace mejor.',
+    'dos': '[serious] Lo peor: los que siguieron más tiempo no mejoraron. [short pause] Repetir sin medir no te hace mejor.',
     'giro': 'La regla: apunta todas tus operaciones. [short pause] Si en cien la suma da negativo, no es mala racha: aún no tienes ventaja.',
-    'cierre': '[warmly] Comenta BOT y te paso por privado la cuenta auditada de mi bot.',
+    'cierre': '[warmly] Si has llegado hasta aquí, quieres estar en el otro tres por ciento. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.',
 }
 PANTALLAS = [
     ('hook', "", 'fotograma 0: contador de días 1 → 300 con 100 pantallas de trader que se apagan en rojo hasta quedar 3'),
