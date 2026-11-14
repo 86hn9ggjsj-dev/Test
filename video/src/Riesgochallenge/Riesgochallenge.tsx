@@ -164,7 +164,7 @@ const Sigueme: React.FC<P> = (p) => (
       <Uno t={p.t} s={s1} e={fin("uno")} />
     </AbsoluteFill>
     <AbsoluteFill style={{ background: "rgba(0,0,0,0.6)" }} />
-    <CtaSeguir {...p} lema="" sinFondo />
+    <CtaSeguir {...p} lema="" sinFondo sinBot />
   </>
 );
 

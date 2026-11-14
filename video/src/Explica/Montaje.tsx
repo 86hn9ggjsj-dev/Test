@@ -88,11 +88,12 @@ export const Destello: React.FC<{ t: number; t0: number; o?: number }> = ({ t, t
 // El «sígueme» grande va siempre (es la única rotulación de arriba que se mantiene en los vídeos con solo subtítulos);
 // sinLema quita el lema pequeño de encima
 // sinFondo: sin el polvo de fondo, para ponerlo encima de una escena que sigue viva (el «sígueme» no corta la historia)
-export const CtaSeguir: React.FC<P & { lema: string; sinLema?: boolean; sinFondo?: boolean }> = ({ t, s, e, lema, sinLema = false, sinFondo = false }) => (
+// sinBot: sin la píldora de la cuenta auditada del bot (vídeos de fondeo: el bot opera capital real)
+export const CtaSeguir: React.FC<P & { lema: string; sinLema?: boolean; sinFondo?: boolean; sinBot?: boolean }> = ({ t, s, e, lema, sinLema = false, sinFondo = false, sinBot = false }) => (
   <>
     {!sinFondo && <Escena cam={orbita([0, 0, 0], 9, L(t, s, e, -0.3, 0.2), 0.2, { apertura: 40 })} trazos={polvo(0.35)} />}
     <BotonSeguir t={t} t0={s} />
-    <div style={{ position: "absolute", top: 660, left: 0, width: ANCHO, display: "flex", justifyContent: "center", opacity: L(t, s + 0.6, s + 0.9, 0, 1, salida) }}>
+    <div style={{ position: "absolute", top: 660, left: 0, width: ANCHO, display: sinBot ? "none" : "flex", justifyContent: "center", opacity: L(t, s + 0.6, s + 0.9, 0, 1, salida) }}>
       <span style={{ ...mono(30, 0.85), padding: "12px 24px", borderRadius: 999, border: "1.5px solid rgba(255,255,255,0.5)" }}>↗ CUENTA AUDITADA DEL BOT EN LA BIO</span>
     </div>
     {!sinLema && lema && <Kicker t={t} t0={s + 0.05} texto={lema} />}
