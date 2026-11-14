@@ -25,7 +25,7 @@ export const ORO = "#f2c96b";
 // Sombra en capas: un contorno oscuro casi imperceptible + sombra media + halo amplio, para leerse sobre fondos claros
 export const SOMBRA_PREMIUM = "0 0 2px rgba(0,0,0,0.9), 0 2px 6px rgba(0,0,0,0.75), 0 8px 30px rgba(0,0,0,0.6)";
 
-export const limpia = (w: string) => w.toLowerCase().replace(/[.,¿?¡!]/g, "");
+export const limpia = (w: string) => w.toLowerCase().replace(/[.,:;¿?¡!'"«»]/g, "");
 
 // Bloques de 1-3 palabras, una línea, cortando en puntuación, pausas y cambios de escena
 const agrupar = (palabras: Palabra[], cortes: number[], claves: Record<string, string>) => {

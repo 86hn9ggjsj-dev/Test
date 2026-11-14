@@ -190,7 +190,9 @@ export const Montaje: React.FC<{
   tinta?: number; // multiplica el grosor de los trazos 3D
   bucle?: boolean; // los últimos fotogramas funden con el primero para que enlace al repetirse
   subs?: { y?: number; tamano?: number; ancho?: number };
-}> = ({ t, datos, audio, piezas, claves, fondo = "radial-gradient(ellipse 90% 70% at 50% 45%, #0b0b0c, #000)", transicion = "fundido", vineta = false, gancho, zoom = 1, empujes = 0, tinta = 1, bucle = false, subs = {} }) => {
+  // v3 «dopamina»: golpe de zoom seco (y fogonazo de color en los bordes si lleva color) en cada cifra o palabra clave
+  golpes?: [number, string?][];
+}> = ({ t, datos, audio, piezas, claves, fondo = "radial-gradient(ellipse 90% 70% at 50% 45%, #0b0b0c, #000)", transicion = "fundido", vineta = false, gancho, zoom = 1, empujes = 0, tinta = 1, bucle = false, subs = {}, golpes = [] }) => {
   const cortes = useMemo(() => datos.escenas.map((x) => x.s), [datos]);
   // Comienzo de cada frase (tras punto, interrogación, dos puntos o puntos suspensivos, o al cambiar de escena)
   const frases = useMemo(() => {
@@ -207,7 +209,11 @@ export const Montaje: React.FC<{
   const u = Math.min(1, Math.max(0, (t - frases[k]) / 0.12));
   const mezcla = 1 - Math.pow(1 - u, 3);
   const empuje = k === 0 ? 0 : (k % 2) * mezcla + ((k - 1) % 2) * (1 - mezcla);
-  const escala = zoom * (1 + empujes * empuje);
+  // Golpe: sube en 0,05 s y cae en ~0,3 s
+  const fuerza = (g: number) => (t < g ? 0 : t - g < 0.05 ? (t - g) / 0.05 : Math.exp(-(t - g - 0.05) * 9));
+  const punch = Math.min(1.2, golpes.reduce((a, [g]) => a + fuerza(g), 0));
+  const fogonazo = golpes.filter(([g, c]) => c && t >= g && t - g < 0.6).map(([g, c]) => ({ c: c!, k: fuerza(g) }));
+  const escala = zoom * (1 + empujes * empuje) * (1 + 0.05 * punch);
   const lazo = bucle ? lerp(t, datos.duracion - 0.4, datos.duracion - 0.06, 0, 1, io) : 0;
   const Primera = piezas[datos.escenas[0].id];
   return (
@@ -241,6 +247,9 @@ export const Montaje: React.FC<{
         )}
       </Tinta.Provider>
       {vineta && <AbsoluteFill style={{ background: "radial-gradient(ellipse 75% 60% at 50% 45%, transparent 55%, rgba(0,0,0,0.6))", pointerEvents: "none" }} />}
+      {fogonazo.map(({ c, k }, i) => (
+        <AbsoluteFill key={i} style={{ background: `radial-gradient(ellipse 80% 65% at 50% 45%, transparent 45%, ${c})`, opacity: 0.5 * k, pointerEvents: "none" }} />
+      ))}
       {gancho && lazo < 0.5 && <Gancho t={t} g={gancho} />}
       {(!gancho || t >= gancho.hasta - 0.1) && lazo < 0.5 && <Subtitulos t={t} palabras={datos.palabras} cortes={cortes} claves={claves} duracion={datos.duracion} y={() => subs.y ?? 0.765} estilo="premium" dinamico tamano={subs.tamano} ancho={subs.ancho} />}
       <Progreso t={t} duracion={datos.duracion} />

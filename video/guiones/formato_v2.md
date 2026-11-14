@@ -108,3 +108,7 @@ Diagnóstico: con 40–45 s y un primer segundo poco visual, casi nadie llega al
 - **Final en bucle**: el último plano enlaza con el primero para que se vuelva a ver.
 - **Audio**: al publicar, añadir un audio en tendencia de Instagram muy bajo (5–10 %) debajo de la voz.
 - **Medir**: tasa de salto (los que se van en los 3 primeros segundos), tiempo medio visto y envíos de cada reel.
+- **Cómo se hace (desde el 14 nov)**: sin personajes; piezas en `src/Bot/v3.tsx` (cifras que corren, marcas ✓/✗ que se
+  dibujan, tickets, botones que se pulsan, iconos de guardar y enviar, ancla) y `golpes={[[t, color?], …]}` en el `Montaje`
+  (golpe de zoom seco y fogonazo de color en los bordes en cada palabra clave). Golpe de sonido en la primera palabra
+  (evento de la primera palabra en `golpes` del script de Python). Referencias: Proceso, Anclaje y Roi.

@@ -7,11 +7,11 @@ TITULO = 'Al mercado le da igual a qué precio compraste'
 GANCHO = {'lineas': ['Al mercado le da igual', 'a qué precio *compraste*'], 'color': 'ROJO'}
 GUION = [
     ('hook', ['Al mercado le da igual a qué precio compraste tú.']),
-    ('uno', ["Pero tú no cierras hasta 'recuperar lo que pagaste'. Y esperas. Y esperas."]),
+    ('uno', ['Pero tú no cierras hasta recuperar lo que pagaste. Y esperas. Y esperas.']),
     ('sigueme', ['Sígueme, que esta pregunta te va a ahorrar mucho dinero.']),
     ('dos', ['Se llama anclaje: tu cabeza usa tu precio de entrada como referencia, aunque ya no signifique nada.']),
     ('giro', ['La pregunta: si hoy no tuvieras esta operación, ¿la abrirías a este precio?', 'Si la respuesta es no, ciérrala.']),
-    ('cierre', ["Mándaselo al que lleva meses esperando a 'salir en tablas'."]),
+    ('cierre', ['Mándaselo al que lleva meses esperando a salir en tablas.']),
 ]
 GESTOS = {
     'hook': '[serious] Al mercado le da igual a qué precio compraste tú.',
