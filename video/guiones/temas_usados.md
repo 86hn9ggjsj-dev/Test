@@ -83,3 +83,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 14 nov | Operar más te hace ganar menos, Barber y Odean 2000 (operarmas) | 11,4 % frente a 18,5 % al año; máximo de operaciones al día |
 | 14 nov | Un 5 % por operación en tu challenge te suspende tú solo (riesgochallenge) | 1 de 4 en las dos primeras; máximo un décimo de la pérdida permitida |
 | 14 nov | Tu día más peligroso es cuando ganas mucho (casa) | efecto dinero de la casa; objetivo del día = cerrar; si sigues, ×½ |
+| 15 nov | Si mides en euros no sabes si eres buen trader (rmultiplo) | media en R de 50 operaciones; positiva antes de subir tamaño |
+| 15 nov | 300 días de day trading: el 97 % perdió, Brasil (brasil) | repetir sin medir no mejora; un stop para ti: fecha y cifra |
+| 15 nov | 10 días en 20 años valen la mitad, J.P. Morgan (mejoresdias) | 7 de 10 pegados a los peores; antes de vender por miedo, escribe cuándo vuelves |
