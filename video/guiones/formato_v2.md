@@ -133,3 +133,10 @@ Recursos de dopamina sacados de la referencia (igexport-DcOvTIOx0Yr, 63 s), trad
 - **Iconos que orbitan** alrededor de la idea (bombilla con iconos girando).
 - **Notificaciones apiladas** («Pago recibido +X €») como prueba de resultado.
 - **Cierre en el móvil**: el comentario con la palabra y el mensaje directo que llega.
+
+## 15 nov: stickmen sí, en algunos vídeos (no en todos), y no repetir
+
+El usuario: «puedes meter los stickmans que teníamos en algunos vídeos, no hace falta en todos» y «sobre todo no
+repitas». El stickman vuelve como «tú» (el trader que mira el vídeo), nunca como historias de «Marcos hizo esto».
+Ni temas ni reglas repetidas (mirar temas_usados.md, también la regla final de cada vídeo), y tampoco el mismo
+esquema visual en los tres del día: alternar recursos (móvil a cámara, stickman, decorado 3D, gráfico, tarjetas).
