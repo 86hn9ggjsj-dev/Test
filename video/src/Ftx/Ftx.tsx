@@ -134,8 +134,8 @@ const Caja: React.FC<{ x: number; y: number; titulo: string; color: string; g: n
     <span style={{ ...mono(34), fontWeight: 800, color, textAlign: "center", whiteSpace: "normal", lineHeight: 1.2 }}>{titulo}</span>
   </div>
 );
-const Mazo: React.FC<{ t: number; t0: number }> = ({ t, t0 }) => {
-  const g = muelle(t, t0 - 0.35, 160, 10);
+const Mazo: React.FC<{ t: number; t0: number; aparece: number }> = ({ t, t0, aparece }) => {
+  const g = muelle(t, aparece, 160, 10);
   const golpe = L(t, t0 - 0.35, t0, -50, 0, (u) => u * u);
   return (
     <svg width={420} height={360} viewBox="0 0 140 120" style={{ position: "absolute", left: 330, top: 520, opacity: min1(g * 2), overflow: "visible" }}>
@@ -168,7 +168,7 @@ const Dos: React.FC<P> = ({ t }) => {
       )}
       {juicio > 0.01 && (
         <AbsoluteFill style={{ opacity: juicio }}>
-          <Mazo t={t} t0={EV.condenado} />
+          <Mazo t={t} t0={EV.condenado} aparece={EV.fundador - 0.2} />
           <Ficha3D t={t} t0={EV["25"] - 0.05} texto="25 AÑOS" y={1060} size={170} color={ROJO} sub="DE CÁRCEL" />
         </AbsoluteFill>
       )}
