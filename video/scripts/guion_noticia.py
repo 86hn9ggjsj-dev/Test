@@ -10,17 +10,17 @@ TITULO = 'NVIDIA ganó más de lo esperado. Y su acción se hundió'
 GANCHO = {'lineas': ['Ganó más de lo esperado', 'y su acción *se_hundió*'], 'color': 'ROJO'}
 GUION = [
     ('hook', ['NVIDIA ganó más de lo que todos esperaban. Y su acción se hundió.']),
-    ('uno', ['Se esfumaron más de 200.000 millones de dólares de valor.', 'No es un error. El mercado no se mueve por si el dato es bueno o malo. Se mueve por la diferencia con lo que ya esperaba.']),
+    ('uno', ['Se esfumaron más de 200.000 millones de dólares de valor.', 'El mercado no se mueve por si el dato es bueno o malo. Se mueve por la diferencia con lo que ya esperaba.']),
     ('sigueme', ['Sígueme, que esto te ahorra muchos sustos.']),
-    ('dos', ['Si todos esperaban un dato muy bueno, ya compraron antes. Cuando sale, no queda nadie para comprar, y los que compraron venden.', 'Se llama comprar el rumor y vender la noticia.']),
+    ('dos', ['Si todos esperaban un dato muy bueno, ya compraron antes. Cuando sale, los que compraron venden.', 'Se llama comprar el rumor y vender la noticia.']),
     ('giro', ['La regla: antes de operar un dato, mira la previsión. Lo que mueve el precio es la sorpresa, no la noticia.']),
     ('cierre', ['Si has llegado hasta aquí, ya no te pillará por sorpresa. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.']),
 ]
 GESTOS = {
     'hook': '[serious] NVIDIA ganó más de lo que todos esperaban. [short pause] Y su acción se hundió.',
-    'uno': 'Se esfumaron más de doscientos mil millones de dólares de valor. [curious] No es un error. El mercado no se mueve por si el dato es bueno o malo. [serious] Se mueve por la diferencia con lo que ya esperaba.',
+    'uno': 'Se esfumaron más de doscientos mil millones de dólares de valor. [curious] El mercado no se mueve por si el dato es bueno o malo. [serious] Se mueve por la diferencia con lo que ya esperaba.',
     'sigueme': '[warmly] Sígueme, que esto te ahorra muchos sustos.',
-    'dos': 'Si todos esperaban un dato muy bueno, ya compraron antes. [short pause] Cuando sale, no queda nadie para comprar, [mischievously] y los que compraron venden. [curious] Se llama comprar el rumor y vender la noticia.',
+    'dos': 'Si todos esperaban un dato muy bueno, ya compraron antes. [short pause] Cuando sale, [mischievously] los que compraron venden. [curious] Se llama comprar el rumor y vender la noticia.',
     'giro': 'La regla: antes de operar un dato, mira la previsión. [short pause] Lo que mueve el precio es la sorpresa, no la noticia.',
     'cierre': '[warmly] Si has llegado hasta aquí, ya no te pillará por sorpresa. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.',
 }
