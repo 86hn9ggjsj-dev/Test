@@ -1,6 +1,6 @@
 # Temas ya usados en reels (no repetir)
 
-Antes de proponer guiones nuevos, comprobar esta lista. Variar también el formato del gancho, la frase del «sígueme»
+Antes de proponer guiones nuevos, comprobar esta lista (16 nov, el usuario: los del 15 nov «bastante pésimos»: menos estudios y porcentajes, más situaciones que el trader ha vivido o casos conocidos con una sola cifra). Variar también el formato del gancho, la frase del «sígueme»
 de en medio y la pregunta final de cada vídeo.
 
 OBLIGATORIO en todos los guiones: CTA de seguimiento a mitad del guion (bloque `sigueme`, «Sígueme, que…»), justo en
@@ -86,3 +86,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 15 nov | Si mides en euros no sabes si eres buen trader (rmultiplo) | media en R de 50 operaciones; positiva antes de subir tamaño |
 | 15 nov | 300 días de day trading: el 97 % perdió, Brasil (brasil) | repetir sin medir no mejora; un stop para ti: fecha y cifra |
 | 15 nov | 10 días en 20 años valen la mitad, J.P. Morgan (mejoresdias) | 7 de 10 pegados a los peores; antes de vender por miedo, escribe cuándo vuelves |
+| 16 nov | Mueves el stop a la entrada para no perder y por eso pierdes (breakeven) | no subir el stop a la entrada hasta ir 1 R a favor |
+| 16 nov | FTX: un millón fueron a sacar su dinero y no estaba (ftx) | el dinero no es tuyo hasta que lo sacas; regulado y solo lo justo |
+| 16 nov | NVIDIA ganó más de lo esperado y se hundió (noticia) | mueve la sorpresa frente a la previsión, no la noticia |

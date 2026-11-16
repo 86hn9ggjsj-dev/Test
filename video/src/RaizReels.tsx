@@ -28,6 +28,9 @@ import { Riesgochallenge, RIESGO_FPS, RIESGO_FRAMES } from "./Riesgochallenge/Ri
 import { Rmultiplo, RMULTIPLO_FPS, RMULTIPLO_FRAMES } from "./Rmultiplo/Rmultiplo";
 import { Brasil, BRASIL_FPS, BRASIL_FRAMES } from "./Brasil/Brasil";
 import { Mejoresdias, MEJORESDIAS_FPS, MEJORESDIAS_FRAMES } from "./Mejoresdias/Mejoresdias";
+import { Breakeven, BREAKEVEN_FPS, BREAKEVEN_FRAMES } from "./Breakeven/Breakeven";
+import { Ftx, FTX_FPS, FTX_FRAMES } from "./Ftx/Ftx";
+import { Noticia, NOTICIA_FPS, NOTICIA_FRAMES } from "./Noticia/Noticia";
 import { Spread, SPREAD_FPS, SPREAD_FRAMES } from "./Spread/Spread";
 import { Confirmacion, CONFIRMACION_FPS, CONFIRMACION_FRAMES } from "./Confirmacion/Confirmacion";
 import { Leeson, LEESON_FPS, LEESON_FRAMES } from "./Leeson/Leeson";
@@ -84,6 +87,9 @@ export const RaizReels: React.FC = () => (
     <Composition id="Rmultiplo" component={Rmultiplo} durationInFrames={RMULTIPLO_FRAMES} fps={RMULTIPLO_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Brasil" component={Brasil} durationInFrames={BRASIL_FRAMES} fps={BRASIL_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Mejoresdias" component={Mejoresdias} durationInFrames={MEJORESDIAS_FRAMES} fps={MEJORESDIAS_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Breakeven" component={Breakeven} durationInFrames={BREAKEVEN_FRAMES} fps={BREAKEVEN_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Ftx" component={Ftx} durationInFrames={FTX_FRAMES} fps={FTX_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Noticia" component={Noticia} durationInFrames={NOTICIA_FRAMES} fps={NOTICIA_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Spread" component={Spread} durationInFrames={SPREAD_FRAMES} fps={SPREAD_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Confirmacion" component={Confirmacion} durationInFrames={CONFIRMACION_FRAMES} fps={CONFIRMACION_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Nfp" component={Nfp} durationInFrames={NFP_FRAMES} fps={NFP_FPS} width={ANCHO} height={ALTO} />
