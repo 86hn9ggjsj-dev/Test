@@ -21,12 +21,17 @@ def generar_clave(longitud: int = LONGITUD) -> str:
             return clave
 
 
+def formatear(clave: str, grupo: int = 4) -> str:
+    """Separa la clave con guiones cada `grupo` caracteres (XXXX-XXXX-XXXX)."""
+    return "-".join(clave[i:i + grupo] for i in range(0, len(clave), grupo))
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generador de claves de 12 caracteres (A-Z, 0-9)")
+    parser = argparse.ArgumentParser(description="Generador de claves de 12 caracteres (A-Z, 0-9) con guiones cada 4")
     parser.add_argument("-n", "--cantidad", type=int, default=1, help="número de claves a generar")
     args = parser.parse_args()
     for _ in range(args.cantidad):
-        print(generar_clave())
+        print(formatear(generar_clave()))
 
 
 if __name__ == "__main__":
