@@ -89,3 +89,6 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 16 nov | Mueves el stop a la entrada para no perder y por eso pierdes (breakeven) | no subir el stop a la entrada hasta ir 1 R a favor |
 | 16 nov | FTX: un millón fueron a sacar su dinero y no estaba (ftx) | el dinero no es tuyo hasta que lo sacas; regulado y solo lo justo |
 | 16 nov | NVIDIA ganó más de lo esperado y se hundió (noticia) | mueve la sorpresa frente a la previsión, no la noticia |
+| 17 nov | Tu operación no tiene que tocar el stop para estar mal (tiempo) | stop por tiempo: al entrar, decide cuánto tiempo le das |
+| 17 nov | El petróleo a −37,63 $ el 20-4-2020 (petroleo) | saber qué compras: si no sabes qué pasa al vencer, no lo operes |
+| 17 nov | La noticia falsa de la SEC movió bitcoin 1.000 $ (sechack) | no operar titulares de redes: comprobarlo en la web oficial |

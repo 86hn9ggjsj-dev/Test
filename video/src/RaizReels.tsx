@@ -31,6 +31,9 @@ import { Mejoresdias, MEJORESDIAS_FPS, MEJORESDIAS_FRAMES } from "./Mejoresdias/
 import { Breakeven, BREAKEVEN_FPS, BREAKEVEN_FRAMES } from "./Breakeven/Breakeven";
 import { Ftx, FTX_FPS, FTX_FRAMES } from "./Ftx/Ftx";
 import { Noticia, NOTICIA_FPS, NOTICIA_FRAMES } from "./Noticia/Noticia";
+import { Tiempo, TIEMPO_FPS, TIEMPO_FRAMES } from "./Tiempo/Tiempo";
+import { Petroleo, PETROLEO_FPS, PETROLEO_FRAMES } from "./Petroleo/Petroleo";
+import { Sechack, SECHACK_FPS, SECHACK_FRAMES } from "./Sechack/Sechack";
 import { Spread, SPREAD_FPS, SPREAD_FRAMES } from "./Spread/Spread";
 import { Confirmacion, CONFIRMACION_FPS, CONFIRMACION_FRAMES } from "./Confirmacion/Confirmacion";
 import { Leeson, LEESON_FPS, LEESON_FRAMES } from "./Leeson/Leeson";
@@ -90,6 +93,9 @@ export const RaizReels: React.FC = () => (
     <Composition id="Breakeven" component={Breakeven} durationInFrames={BREAKEVEN_FRAMES} fps={BREAKEVEN_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Ftx" component={Ftx} durationInFrames={FTX_FRAMES} fps={FTX_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Noticia" component={Noticia} durationInFrames={NOTICIA_FRAMES} fps={NOTICIA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Tiempo" component={Tiempo} durationInFrames={TIEMPO_FRAMES} fps={TIEMPO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Petroleo" component={Petroleo} durationInFrames={PETROLEO_FRAMES} fps={PETROLEO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Sechack" component={Sechack} durationInFrames={SECHACK_FRAMES} fps={SECHACK_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Spread" component={Spread} durationInFrames={SPREAD_FRAMES} fps={SPREAD_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Confirmacion" component={Confirmacion} durationInFrames={CONFIRMACION_FRAMES} fps={CONFIRMACION_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Nfp" component={Nfp} durationInFrames={NFP_FRAMES} fps={NFP_FPS} width={ANCHO} height={ALTO} />
