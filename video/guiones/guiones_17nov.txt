@@ -1,11 +1,11 @@
-13:30 · Si tu stop siempre está a la misma distancia, el mercado te lo salta
+13:30 · Tu operación no tiene que tocar el stop para estar mal
 
-[serious] Si tu stop siempre está a la misma distancia, [short pause] el mercado te lo salta.
-El mes pasado, el precio se movía veinte puntos por vela. [short pause] Esta semana se mueve sesenta. [serious] Tu stop de veinte antes era un colchón. Ahora es ruido.
-[warmly] Sígueme, que esto se arregla con un número.
-[curious] Ese número se llama ATR: lo que se mueve de media cada vela. [short pause] Casi todas las plataformas lo tienen gratis.
-La regla: pon el stop a una vez y media el ATR, [short pause] y ajusta el tamaño para arriesgar lo mismo en euros.
-[warmly] Si has llegado hasta aquí, mira hoy el ATR de lo que operas. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.
+[serious] Tu operación no tiene que tocar el stop [short pause] para estar mal.
+Entras, y el precio no hace nada. [short pause] Una vela. Diez. Cien. [serious] Mientras, tu dinero está bloqueado, y tu cabeza también.
+[warmly] Sígueme, que esto casi nadie lo usa.
+Si entraste esperando un movimiento y no llega, tu idea ya ha fallado. [short pause] Aunque el stop siga lejos. [curious] Se llama stop por tiempo.
+La regla: al entrar, decide cuánto tiempo le das. [short pause] Si en ese tiempo no ha ido a tu favor, la cierras, gane o pierda poco.
+[warmly] Si has llegado hasta aquí, ya sabes qué operación vas a cerrar hoy. Comenta BOT y te explico por privado cómo lo hago yo, y te paso la cuenta auditada de mi bot.
 
 
 18:00 (prueba) · Un día, el petróleo valió menos que cero

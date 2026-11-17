@@ -1,6 +1,6 @@
 # Temas ya usados en reels (no repetir)
 
-Antes de proponer guiones nuevos, comprobar esta lista (16 nov, el usuario: los del 15 nov «bastante pésimos»: menos estudios y porcentajes, más situaciones que el trader ha vivido o casos conocidos con una sola cifra). Variar también el formato del gancho, la frase del «sígueme»
+Antes de proponer guiones nuevos, comprobar esta lista (16 nov, el usuario: los del 15 nov «bastante pésimos»: menos estudios y porcentajes, más situaciones que el trader ha vivido o casos conocidos con una sola cifra; 17 nov: nada de jerga técnica que no entienda cualquiera, «qué pollas es el ATR»). Variar también el formato del gancho, la frase del «sígueme»
 de en medio y la pregunta final de cada vídeo.
 
 OBLIGATORIO en todos los guiones: CTA de seguimiento a mitad del guion (bloque `sigueme`, «Sígueme, que…»), justo en
