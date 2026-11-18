@@ -1,0 +1,147 @@
+// Raíz solo con los reels de alcance del día: se renderiza con `npx remotion render src/reels.ts <Id> …` y no necesita
+// los tiempos (src/gen/*.json) de los videos anteriores, que dependen de sus locuciones originales.
+import { Composition } from "remotion";
+import { Aguanta, AGUANTA_FPS, AGUANTA_FRAMES } from "./Aguanta/Aguanta";
+import { Ahorro, AHORRO_FPS, AHORRO_FRAMES } from "./Ahorro/Ahorro";
+import { Fases, FASES_FPS, FASES_FRAMES } from "./Fases/Fases";
+import { Dedo, DEDO_FPS, DEDO_FRAMES } from "./Dedo/Dedo";
+import { Nfp, NFP_FPS, NFP_FRAMES } from "./Nfp/Nfp";
+import { Indicadores, INDICADORES_FPS, INDICADORES_FRAMES } from "./Indicadores/Indicadores";
+import { Livermore, LIVERMORE_FPS, LIVERMORE_FRAMES } from "./Livermore/Livermore";
+import { Fomo, FOMO_FPS, FOMO_FRAMES } from "./Fomo/Fomo";
+import { Demo, DEMO_FPS, DEMO_FRAMES } from "./Demo/Demo";
+import { Archegos, ARCHEGOS_FPS, ARCHEGOS_FRAMES } from "./Archegos/Archegos";
+import { Veces, VECES_FPS, VECES_FRAMES } from "./Veces/Veces";
+import { Venganza, VENGANZA_FPS, VENGANZA_FRAMES } from "./Venganza/Venganza";
+import { GameStop, GAMESTOP_FPS, GAMESTOP_FRAMES } from "./GameStop/GameStop";
+import { Diario, DIARIO_FPS, DIARIO_FRAMES } from "./Diario/Diario";
+import { Swap, SWAP_FPS, SWAP_FRAMES } from "./Swap/Swap";
+import { Ltcm, LTCM_FPS, LTCM_FRAMES } from "./Ltcm/Ltcm";
+import { Tamano, TAMANO_FPS, TAMANO_FRAMES } from "./Tamano/Tamano";
+import { Finde, FINDE_FPS, FINDE_FRAMES } from "./Finde/Finde";
+import { Proceso, PROCESO_FPS, PROCESO_FRAMES } from "./Proceso/Proceso";
+import { Anclaje, ANCLAJE_FPS, ANCLAJE_FRAMES } from "./Anclaje/Anclaje";
+import { Roi, ROI_FPS, ROI_FRAMES } from "./Roi/Roi";
+import { Operarmas, OPERARMAS_FPS, OPERARMAS_FRAMES } from "./Operarmas/Operarmas";
+import { Casa, CASA_FPS, CASA_FRAMES } from "./Casa/Casa";
+import { Riesgochallenge, RIESGO_FPS, RIESGO_FRAMES } from "./Riesgochallenge/Riesgochallenge";
+import { Rmultiplo, RMULTIPLO_FPS, RMULTIPLO_FRAMES } from "./Rmultiplo/Rmultiplo";
+import { Brasil, BRASIL_FPS, BRASIL_FRAMES } from "./Brasil/Brasil";
+import { Mejoresdias, MEJORESDIAS_FPS, MEJORESDIAS_FRAMES } from "./Mejoresdias/Mejoresdias";
+import { Breakeven, BREAKEVEN_FPS, BREAKEVEN_FRAMES } from "./Breakeven/Breakeven";
+import { Ftx, FTX_FPS, FTX_FRAMES } from "./Ftx/Ftx";
+import { Noticia, NOTICIA_FPS, NOTICIA_FRAMES } from "./Noticia/Noticia";
+import { Tiempo, TIEMPO_FPS, TIEMPO_FRAMES } from "./Tiempo/Tiempo";
+import { Petroleo, PETROLEO_FPS, PETROLEO_FRAMES } from "./Petroleo/Petroleo";
+import { Sechack, SECHACK_FPS, SECHACK_FRAMES } from "./Sechack/Sechack";
+import { Objetivo, OBJETIVO_FPS, OBJETIVO_FRAMES } from "./Objetivo/Objetivo";
+import { Buffett, BUFFETT_FPS, BUFFETT_FRAMES } from "./Buffett/Buffett";
+import { Ayer, AYER_FPS, AYER_FRAMES } from "./Ayer/Ayer";
+import { Barato, BARATO_FPS, BARATO_FRAMES } from "./Barato/Barato";
+import { Ackman, ACKMAN_FPS, ACKMAN_FRAMES } from "./Ackman/Ackman";
+import { Premortem, PREMORTEM_FPS, PREMORTEM_FRAMES } from "./Premortem/Premortem";
+import { Curso, CURSO_FPS, CURSO_FRAMES } from "./Curso/Curso";
+import { Luna, LUNA_FPS, LUNA_FRAMES } from "./Luna/Luna";
+import { Copiar, COPIAR_FPS, COPIAR_FRAMES } from "./Copiar/Copiar";
+import { Spread, SPREAD_FPS, SPREAD_FRAMES } from "./Spread/Spread";
+import { Confirmacion, CONFIRMACION_FPS, CONFIRMACION_FRAMES } from "./Confirmacion/Confirmacion";
+import { Leeson, LEESON_FPS, LEESON_FRAMES } from "./Leeson/Leeson";
+import { Knight, KNIGHT_FPS, KNIGHT_FRAMES } from "./Knight/Knight";
+import { Apostando, APOSTANDO_FPS, APOSTANDO_FRAMES } from "./Apostando/Apostando";
+import { Clip, CLIP_FPS, CLIP_FRAMES } from "./Stickman/Clip";
+import { Frases, FRASES_FPS, FRASES_FRAMES } from "./Frases/Frases";
+import { Franco, FRANCO_FPS, FRANCO_FRAMES } from "./Franco/Franco";
+import { KellyReel, KELLY_FPS, KELLY_FRAMES } from "./Kelly/Kelly";
+import { Ascensor, ASCENSOR_FPS, ASCENSOR_FRAMES } from "./Ascensor/Ascensor";
+import { Cerebro, CEREBRO_FPS, CEREBRO_FRAMES } from "./Cerebro/Cerebro";
+import { DopaminaReel, DOPAMINA_FPS, DOPAMINA_FRAMES } from "./Dopamina/Dopamina";
+import { Redondos, REDONDOS_FPS, REDONDOS_FRAMES } from "./Redondos/Redondos";
+import { Casino, CASINO_FPS, CASINO_FRAMES } from "./Casino/Casino";
+import { Correlacion, CORRELACION_FPS, CORRELACION_FRAMES } from "./Correlacion/Correlacion";
+import { Recuperar, RECUPERAR_FPS, RECUPERAR_FRAMES } from "./Recuperar/Recuperar";
+import { Vivir, VIVIR_FPS, VIVIR_FRAMES } from "./Vivir/Vivir";
+import { Instagram, INSTAGRAM_FPS, INSTAGRAM_FRAMES } from "./Instagram/Instagram";
+import { Costes, COSTES_FPS, COSTES_FRAMES } from "./Costes/Costes";
+import { Doblar, DOBLAR_FPS, DOBLAR_FRAMES } from "./Doblar/Doblar";
+import { Moneda, MONEDA_FPS, MONEDA_FRAMES } from "./Moneda/Moneda";
+import { MEDIA_FPS, MEDIA_FRAMES, MediaReel } from "./Media/Media";
+import { Miedo, MIEDO_FPS, MIEDO_FRAMES } from "./Miedo/Miedo";
+import { Nueve, NUEVE_FPS, NUEVE_FRAMES } from "./Nueve/Nueve";
+import { Promediar, PROMEDIAR_FPS, PROMEDIAR_FRAMES } from "./Promediar/Promediar";
+import { Rachas, RACHAS_FPS, RACHAS_FRAMES } from "./Rachas/Rachas";
+import { Regla72, REGLA72_FPS, REGLA72_FRAMES } from "./Regla72/Regla72";
+import { ALTO, ANCHO } from "./Viral/util";
+
+export const RaizReels: React.FC = () => (
+  <>
+    <Composition id="Aguanta" component={Aguanta} durationInFrames={AGUANTA_FRAMES} fps={AGUANTA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="StickmanClip" component={Clip} durationInFrames={CLIP_FRAMES} fps={CLIP_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Apostando" component={Apostando} durationInFrames={APOSTANDO_FRAMES} fps={APOSTANDO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Indicadores" component={Indicadores} durationInFrames={INDICADORES_FRAMES} fps={INDICADORES_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Livermore" component={Livermore} durationInFrames={LIVERMORE_FRAMES} fps={LIVERMORE_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Fomo" component={Fomo} durationInFrames={FOMO_FRAMES} fps={FOMO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Demo" component={Demo} durationInFrames={DEMO_FRAMES} fps={DEMO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Archegos" component={Archegos} durationInFrames={ARCHEGOS_FRAMES} fps={ARCHEGOS_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Veces" component={Veces} durationInFrames={VECES_FRAMES} fps={VECES_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Venganza" component={Venganza} durationInFrames={VENGANZA_FRAMES} fps={VENGANZA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="GameStop" component={GameStop} durationInFrames={GAMESTOP_FRAMES} fps={GAMESTOP_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Diario" component={Diario} durationInFrames={DIARIO_FRAMES} fps={DIARIO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Swap" component={Swap} durationInFrames={SWAP_FRAMES} fps={SWAP_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Ltcm" component={Ltcm} durationInFrames={LTCM_FRAMES} fps={LTCM_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Tamano" component={Tamano} durationInFrames={TAMANO_FRAMES} fps={TAMANO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Finde" component={Finde} durationInFrames={FINDE_FRAMES} fps={FINDE_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Proceso" component={Proceso} durationInFrames={PROCESO_FRAMES} fps={PROCESO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Anclaje" component={Anclaje} durationInFrames={ANCLAJE_FRAMES} fps={ANCLAJE_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Roi" component={Roi} durationInFrames={ROI_FRAMES} fps={ROI_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Operarmas" component={Operarmas} durationInFrames={OPERARMAS_FRAMES} fps={OPERARMAS_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Casa" component={Casa} durationInFrames={CASA_FRAMES} fps={CASA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Riesgochallenge" component={Riesgochallenge} durationInFrames={RIESGO_FRAMES} fps={RIESGO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Rmultiplo" component={Rmultiplo} durationInFrames={RMULTIPLO_FRAMES} fps={RMULTIPLO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Brasil" component={Brasil} durationInFrames={BRASIL_FRAMES} fps={BRASIL_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Mejoresdias" component={Mejoresdias} durationInFrames={MEJORESDIAS_FRAMES} fps={MEJORESDIAS_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Breakeven" component={Breakeven} durationInFrames={BREAKEVEN_FRAMES} fps={BREAKEVEN_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Ftx" component={Ftx} durationInFrames={FTX_FRAMES} fps={FTX_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Noticia" component={Noticia} durationInFrames={NOTICIA_FRAMES} fps={NOTICIA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Tiempo" component={Tiempo} durationInFrames={TIEMPO_FRAMES} fps={TIEMPO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Petroleo" component={Petroleo} durationInFrames={PETROLEO_FRAMES} fps={PETROLEO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Sechack" component={Sechack} durationInFrames={SECHACK_FRAMES} fps={SECHACK_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Objetivo" component={Objetivo} durationInFrames={OBJETIVO_FRAMES} fps={OBJETIVO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Buffett" component={Buffett} durationInFrames={BUFFETT_FRAMES} fps={BUFFETT_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Ayer" component={Ayer} durationInFrames={AYER_FRAMES} fps={AYER_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Barato" component={Barato} durationInFrames={BARATO_FRAMES} fps={BARATO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Ackman" component={Ackman} durationInFrames={ACKMAN_FRAMES} fps={ACKMAN_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Premortem" component={Premortem} durationInFrames={PREMORTEM_FRAMES} fps={PREMORTEM_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Curso" component={Curso} durationInFrames={CURSO_FRAMES} fps={CURSO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Luna" component={Luna} durationInFrames={LUNA_FRAMES} fps={LUNA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Copiar" component={Copiar} durationInFrames={COPIAR_FRAMES} fps={COPIAR_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Spread" component={Spread} durationInFrames={SPREAD_FRAMES} fps={SPREAD_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Confirmacion" component={Confirmacion} durationInFrames={CONFIRMACION_FRAMES} fps={CONFIRMACION_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Nfp" component={Nfp} durationInFrames={NFP_FRAMES} fps={NFP_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Leeson" component={Leeson} durationInFrames={LEESON_FRAMES} fps={LEESON_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Knight" component={Knight} durationInFrames={KNIGHT_FRAMES} fps={KNIGHT_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Dedo" component={Dedo} durationInFrames={DEDO_FRAMES} fps={DEDO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Fases" component={Fases} durationInFrames={FASES_FRAMES} fps={FASES_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Frases" component={Frases} durationInFrames={FRASES_FRAMES} fps={FRASES_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Franco" component={Franco} durationInFrames={FRANCO_FRAMES} fps={FRANCO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Kelly" component={KellyReel} durationInFrames={KELLY_FRAMES} fps={KELLY_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Ascensor" component={Ascensor} durationInFrames={ASCENSOR_FRAMES} fps={ASCENSOR_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Cerebro" component={Cerebro} durationInFrames={CEREBRO_FRAMES} fps={CEREBRO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Dopamina" component={DopaminaReel} durationInFrames={DOPAMINA_FRAMES} fps={DOPAMINA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Redondos" component={Redondos} durationInFrames={REDONDOS_FRAMES} fps={REDONDOS_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Casino" component={Casino} durationInFrames={CASINO_FRAMES} fps={CASINO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Correlacion" component={Correlacion} durationInFrames={CORRELACION_FRAMES} fps={CORRELACION_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Recuperar" component={Recuperar} durationInFrames={RECUPERAR_FRAMES} fps={RECUPERAR_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Vivir" component={Vivir} durationInFrames={VIVIR_FRAMES} fps={VIVIR_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Instagram" component={Instagram} durationInFrames={INSTAGRAM_FRAMES} fps={INSTAGRAM_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Costes" component={Costes} durationInFrames={COSTES_FRAMES} fps={COSTES_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Doblar" component={Doblar} durationInFrames={DOBLAR_FRAMES} fps={DOBLAR_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Moneda" component={Moneda} durationInFrames={MONEDA_FRAMES} fps={MONEDA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Ahorro" component={Ahorro} durationInFrames={AHORRO_FRAMES} fps={AHORRO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Promediar" component={Promediar} durationInFrames={PROMEDIAR_FRAMES} fps={PROMEDIAR_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Miedo" component={Miedo} durationInFrames={MIEDO_FRAMES} fps={MIEDO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Media" component={MediaReel} durationInFrames={MEDIA_FRAMES} fps={MEDIA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Nueve" component={Nueve} durationInFrames={NUEVE_FRAMES} fps={NUEVE_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Regla72" component={Regla72} durationInFrames={REGLA72_FRAMES} fps={REGLA72_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Rachas" component={Rachas} durationInFrames={RACHAS_FRAMES} fps={RACHAS_FPS} width={ANCHO} height={ALTO} />
+  </>
+);
