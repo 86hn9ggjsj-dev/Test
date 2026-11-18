@@ -126,7 +126,7 @@ const Uno: React.FC<P> = ({ t, s }) => {
       <div style={{ position: "absolute", left: X0 + 0.55 * (X1 - X0) - 150, width: 300, top: yv(40) - 120, textAlign: "center", fontFamily: SANS, fontWeight: 800, fontSize: 76, color: VERDE, opacity: L(t, EV.mes - 0.1, EV.mes + 0.2, 0, 1) }}>+40 %</div>
       <div style={{ position: "absolute", left: 600, top: 980, ...mono(36), fontWeight: 800, color: ROJO, opacity: banda * (1 - L(t, EV.sube - 0.3, EV.sube, 0, 1)) }}>MUCHO RIESGO</div>
       <Dado t={t} t0={EV.bien - 0.1} x={870} y={500} />
-      <div style={{ position: "absolute", left: 600, width: 420, top: 620, textAlign: "right", ...mono(30), fontWeight: 800, color: VERDE, opacity: L(t, EV.bien, EV.bien + 0.2, 0, 1) * (1 - L(t, EV.baja - 0.3, EV.baja, 0, 1)) }}>ESTA VEZ SALIÓ BIEN</div>
+      <div style={{ position: "absolute", left: 540, width: 400, top: 620, textAlign: "right", ...mono(30), fontWeight: 800, color: VERDE, opacity: L(t, EV.bien, EV.bien + 0.2, 0, 1) * (1 - L(t, EV.baja - 0.3, EV.baja, 0, 1)) }}>ESTA VEZ SALIÓ BIEN</div>
       <div style={{ position: "absolute", left: 0, width: ANCHO, top: 1230, textAlign: "center", ...mono(42), fontWeight: 800, color: ROJO, opacity: L(t, EV.rapido - 0.3, EV.rapido, 0, 1) }}>BAJA IGUAL DE RÁPIDO</div>
     </>
   );
