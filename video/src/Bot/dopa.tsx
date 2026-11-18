@@ -117,7 +117,7 @@ export const BarraTiempo: React.FC<{ t: number; t0: number; y?: number; fin?: nu
   return (
     <div style={{ position: "absolute", left: (ANCHO - W) / 2, top: y, width: W, opacity: min1(g * 1.5) * (1 - fuera), transform: `translateY(${(1 - min1(g)) * 60}px)` }}>
       {marca > 0.01 && (
-        <div style={{ position: "absolute", left: pos * W, top: -120, transform: `translateX(-50%) scale(${0.5 + 0.5 * min1(marca, 1.1)})`, ...mono(40), fontWeight: 800, color: VERDE, padding: "10px 22px", borderRadius: 14, border: `3px solid ${VERDE}`, background: "#000", opacity: min1(marca * 2) }}>{texto} ↓</div>
+        <div style={{ position: "absolute", left: pos * W, top: -120, transform: `translateX(calc(-100% + 46px)) scale(${0.5 + 0.5 * min1(marca, 1.1)})`, transformOrigin: "right center", ...mono(40), fontWeight: 800, color: VERDE, padding: "10px 22px", borderRadius: 14, border: `3px solid ${VERDE}`, background: "#000", opacity: min1(marca * 2) }}>{texto} ↓</div>
       )}
       <div style={{ position: "relative", height: 34, borderRadius: 17, overflow: "hidden", display: "flex", gap: 6 }}>
         {seg.map(([n, c], i) => {

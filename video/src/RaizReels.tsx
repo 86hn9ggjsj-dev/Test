@@ -34,6 +34,15 @@ import { Noticia, NOTICIA_FPS, NOTICIA_FRAMES } from "./Noticia/Noticia";
 import { Tiempo, TIEMPO_FPS, TIEMPO_FRAMES } from "./Tiempo/Tiempo";
 import { Petroleo, PETROLEO_FPS, PETROLEO_FRAMES } from "./Petroleo/Petroleo";
 import { Sechack, SECHACK_FPS, SECHACK_FRAMES } from "./Sechack/Sechack";
+import { Objetivo, OBJETIVO_FPS, OBJETIVO_FRAMES } from "./Objetivo/Objetivo";
+import { Buffett, BUFFETT_FPS, BUFFETT_FRAMES } from "./Buffett/Buffett";
+import { Ayer, AYER_FPS, AYER_FRAMES } from "./Ayer/Ayer";
+import { Barato, BARATO_FPS, BARATO_FRAMES } from "./Barato/Barato";
+import { Ackman, ACKMAN_FPS, ACKMAN_FRAMES } from "./Ackman/Ackman";
+import { Premortem, PREMORTEM_FPS, PREMORTEM_FRAMES } from "./Premortem/Premortem";
+import { Curso, CURSO_FPS, CURSO_FRAMES } from "./Curso/Curso";
+import { Luna, LUNA_FPS, LUNA_FRAMES } from "./Luna/Luna";
+import { Copiar, COPIAR_FPS, COPIAR_FRAMES } from "./Copiar/Copiar";
 import { Spread, SPREAD_FPS, SPREAD_FRAMES } from "./Spread/Spread";
 import { Confirmacion, CONFIRMACION_FPS, CONFIRMACION_FRAMES } from "./Confirmacion/Confirmacion";
 import { Leeson, LEESON_FPS, LEESON_FRAMES } from "./Leeson/Leeson";
@@ -96,6 +105,15 @@ export const RaizReels: React.FC = () => (
     <Composition id="Tiempo" component={Tiempo} durationInFrames={TIEMPO_FRAMES} fps={TIEMPO_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Petroleo" component={Petroleo} durationInFrames={PETROLEO_FRAMES} fps={PETROLEO_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Sechack" component={Sechack} durationInFrames={SECHACK_FRAMES} fps={SECHACK_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Objetivo" component={Objetivo} durationInFrames={OBJETIVO_FRAMES} fps={OBJETIVO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Buffett" component={Buffett} durationInFrames={BUFFETT_FRAMES} fps={BUFFETT_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Ayer" component={Ayer} durationInFrames={AYER_FRAMES} fps={AYER_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Barato" component={Barato} durationInFrames={BARATO_FRAMES} fps={BARATO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Ackman" component={Ackman} durationInFrames={ACKMAN_FRAMES} fps={ACKMAN_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Premortem" component={Premortem} durationInFrames={PREMORTEM_FRAMES} fps={PREMORTEM_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Curso" component={Curso} durationInFrames={CURSO_FRAMES} fps={CURSO_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Luna" component={Luna} durationInFrames={LUNA_FRAMES} fps={LUNA_FPS} width={ANCHO} height={ALTO} />
+    <Composition id="Copiar" component={Copiar} durationInFrames={COPIAR_FRAMES} fps={COPIAR_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Spread" component={Spread} durationInFrames={SPREAD_FRAMES} fps={SPREAD_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Confirmacion" component={Confirmacion} durationInFrames={CONFIRMACION_FRAMES} fps={CONFIRMACION_FPS} width={ANCHO} height={ALTO} />
     <Composition id="Nfp" component={Nfp} durationInFrames={NFP_FRAMES} fps={NFP_FPS} width={ANCHO} height={ALTO} />

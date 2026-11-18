@@ -92,3 +92,12 @@ fijado («Comenta BOT…») y en la píldora «cuenta auditada del bot en la bio
 | 17 nov | Tu operación no tiene que tocar el stop para estar mal (tiempo) | stop por tiempo: al entrar, decide cuánto tiempo le das |
 | 17 nov | El petróleo a −37,63 $ el 20-4-2020 (petroleo) | saber qué compras: si no sabes qué pasa al vencer, no lo operes |
 | 17 nov | La noticia falsa de la SEC movió bitcoin 1.000 $ (sechack) | no operar titulares de redes: comprobarlo en la web oficial |
+| 18 nov | Llegó a tu objetivo y lo moviste más arriba (objetivo) | en el objetivo, cerrar la mitad y el stop de la otra mitad a la entrada |
+| 18 nov | La apuesta de Buffett: el índice +125,8 % frente a ~36 % de cinco fondos, 2008-2017 (buffett) | compararte cada mes con el índice; si en un año no le ganas, trabajas gratis |
+| 18 nov | En el gráfico de ayer todo era obvio: sesgo retrospectivo (ayer) | tapar la derecha del gráfico, decidir y apuntarlo, y luego destapar |
+| 19 nov | «Ya ha caído un 50 %, no puede bajar más» (barato) | haber caído no es razón para comprar: solo tu señal y siempre con stop |
+| 19 nov | Ackman: 27 M $ en protección, 2.600 M $ en marzo de 2020 (ackman) | cubrirse antes, barato y por un riesgo concreto; si ya pierdes, cierra |
+| 19 nov | Premortem: imagina que ya ha salido mal (premortem) | escribir «ha salido mal porque…»; si no se te ocurre nada, bajar el tamaño |
+| 20 nov | Pagaste 2.000 € por un curso: coste hundido (curso) | escribir por qué sigues con una estrategia; si es «la pagué», dejarla |
+| 20 nov | Terra Luna, ~20 % al año sin riesgo, mayo de 2022 (luna) | si algo paga mucho sin riesgo, preguntar de dónde sale el dinero |
+| 20 nov | Copias al que más ganó el mes pasado (copiar) | antes de copiar: cuánto tiempo lleva y su peor caída, ¿la aguantarías? |
